@@ -32,8 +32,8 @@ import java.util.List;
  */
 @Service
 public class NoticeServiceImpl extends ServiceImpl<NoticeMapper, NoticeEntity> implements NoticeService {
-    @Autowired
-    private AuthorityFeign authorityFeign;
+//    @Autowired
+//    AuthorityFeign authorityFeign;
 
     /**
      * 公告mapper
@@ -48,7 +48,7 @@ public class NoticeServiceImpl extends ServiceImpl<NoticeMapper, NoticeEntity> i
             throw new BaseException("发布人的用户id不能为空");
         }
         //查看该用户是否有发公告权限(等应用生成后提供)
-        ResponseEntityWrapper responseEntityWrapper = authorityFeign.authority("appId",noticeBody.getIssueUserId());
+//        ResponseEntityWrapper responseEntityWrapper = authorityFeign.authority("appId",noticeBody.getIssueUserId());
         //判断返回的结果是否为管理员，如果是管理员方可进入下一步
 
 
@@ -70,13 +70,11 @@ public class NoticeServiceImpl extends ServiceImpl<NoticeMapper, NoticeEntity> i
         String[] userIdArray = noticeBody.getUserIds().split(",");
         NoticeEntity notice = new NoticeEntity();
         BeanUtils.copyProperties(noticeBody,notice);
-        notice.preInsert();
         boolean result = notice.insert();
         List<NoticeUserEntity> longList = new LinkedList<>();
         for (String userId : userIdArray){
             Long a = Long.parseLong(userId);
             NoticeUserEntity noticeUserEntity = new NoticeUserEntity();
-            noticeUserEntity.preInsert();
             noticeUserEntity.setNoticeId(notice.getId());
             noticeUserEntity.setUserId(a);
             noticeUserEntity.setState(NoticeConstant.NOTICE_NOT_READ);

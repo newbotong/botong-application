@@ -1,10 +1,6 @@
 package com.yunjing.notice.service;
 
 import com.baomidou.mybatisplus.service.IService;
-import com.yunjing.mommon.global.exception.BaseException;
-import com.yunjing.notice.body.FavouriteBody;
-import com.yunjing.notice.body.NoticeBody;
-import com.yunjing.notice.entity.NoticeEntity;
 import com.yunjing.notice.entity.NoticeUserEntity;
 
 /**

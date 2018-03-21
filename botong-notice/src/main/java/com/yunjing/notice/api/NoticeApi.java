@@ -1,10 +1,8 @@
 package com.yunjing.notice.api;
 
 import com.yunjing.mommon.global.exception.BaseException;
-import com.yunjing.notice.body.FavouriteBody;
 import com.yunjing.notice.body.NoticeBody;
 import com.yunjing.notice.service.NoticeService;
-import com.yunjing.notice.service.NoticeUserService;
 import com.yunjing.mommon.base.BaseController;
 import com.yunjing.mommon.wrapper.ResponseEntityWrapper;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -46,7 +44,7 @@ public class NoticeApi extends BaseController {
      * @return
      */
     @PostMapping("/updateNoticeState")
-    public ResponseEntityWrapper updateNoticeState(@RequestBody FavouriteBody body) {
+    public ResponseEntityWrapper updateNoticeState(@RequestBody NoticeBody body) {
 
         return success();
     }
@@ -54,7 +52,7 @@ public class NoticeApi extends BaseController {
      * 删除公告接口
      */
     @PostMapping("/deleteNotice")
-    public ResponseEntityWrapper deleteNotice(@RequestBody FavouriteBody body) {
+    public ResponseEntityWrapper deleteNotice(@RequestBody NoticeBody body) {
 
         return success();
     }
@@ -64,7 +62,7 @@ public class NoticeApi extends BaseController {
      *
      */
     @PostMapping("/selectNoticePage")
-    public ResponseEntityWrapper selectNoticePage(@RequestBody FavouriteBody body) {
+    public ResponseEntityWrapper selectNoticePage(@RequestBody NoticeBody body) {
 
         return success();
     }
@@ -73,7 +71,7 @@ public class NoticeApi extends BaseController {
      * 根据公告id查询公告详情接口
      */
     @PostMapping("/selectNoticeDetail")
-    public ResponseEntityWrapper selectNoticeDetail(@RequestBody FavouriteBody body) {
+    public ResponseEntityWrapper selectNoticeDetail(@RequestBody NoticeBody body) {
 
         return success();
     }
@@ -81,7 +79,7 @@ public class NoticeApi extends BaseController {
      * 根据公告id查询公告详情接口
      */
     @PostMapping("/selectNoticeUser")
-    public ResponseEntityWrapper selectNoticeUser(@RequestBody FavouriteBody body) {
+    public ResponseEntityWrapper selectNoticeUser(@RequestBody NoticeBody body) {
 
         return success();
     }

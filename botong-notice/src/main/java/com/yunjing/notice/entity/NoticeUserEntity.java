@@ -3,7 +3,6 @@ package com.yunjing.notice.entity;
 import com.baomidou.mybatisplus.annotations.TableField;
 import com.baomidou.mybatisplus.annotations.TableName;
 import com.common.mybatis.model.BaseModel;
-import com.yunjing.notice.common.BaseEntity;
 import lombok.Data;
 
 import java.io.Serializable;
@@ -16,7 +15,7 @@ import java.io.Serializable;
  */
 @Data
 @TableName("notice_user")
-public class NoticeUserEntity extends BaseEntity<NoticeUserEntity> {
+public class NoticeUserEntity extends BaseModel<NoticeUserEntity> {
     private static final long serialVersionUID = 1L;
 
     /**
