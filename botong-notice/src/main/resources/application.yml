@@ -1,0 +1,43 @@
+### 设置服务端口和Tomcat编码格式
+server:
+  port: 26120
+  tomcat:
+    uri-encoding: UTF-8
+
+### 设置服务名称
+spring:
+  application:
+    name: botong-notice
+  sleuth:
+    sampler:
+      percentage: 1
+  rabbitmq:
+      host: 192.168.10.47
+      port: 10222
+      username: yunjing216
+      password: yunjing216
+  datasource:
+    url: jdbc:mysql://192.168.10.46:10150/botong-notice?autoReconnect=true&useUnicode=true&characterEncoding:UTF-8&zeroDateTimeBehavior=convertToNull&useSSL=false
+    username: root
+    password: YunJing168
+    driver-class-name: com.mysql.jdbc.Driver
+    initialize: true
+    continue-on-error: true
+
+### 注册eureka
+#eureka:
+#  client:
+#    register-with-eureka: true
+#    fetch-registry: true
+#    serviceUrl:
+#      defaultZone: http://127.0.0.1:8181/eureka/
+
+##配置mybatis-plus
+mybatis-plus:
+  mapper-locations: classpath:mapper/*Mapper.xml
+  typeAliasesPackage: com.yunjing.notice.entity
+  global-config:
+    meta-object-handler: com.common.mybatis.config.FiledAnnotationMetaObjectHandler
+    logic-delete-value: 1
+    logic-not-delete-value: 0
+    sql-injector: com.baomidou.mybatisplus.mapper.LogicSqlInjector
