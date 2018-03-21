@@ -1,0 +1,29 @@
+buildscript {
+
+    repositories {
+        mavenCentral()
+    }
+}
+
+group 'com.yunjing.botong'
+version '1.0-SNAPSHOT'
+
+
+apply from: "../common_service.gradle"
+apply from: "../build.gradle"
+
+sourceCompatibility = 1.8
+
+repositories {
+    mavenCentral()
+}
+
+dependencies {
+    compile('com.yunjing.botong:commons:2.0.0-SNAPSHOT') {
+        changing = true //实时更新jar包
+    }
+    compile('com.yunjing.botong:commons-mybatisplus:2.0.0-SNAPSHOT') {
+        changing = true //实时更新jar包
+    }
+    testCompile group: 'junit', name: 'junit', version: '4.12'
+}
