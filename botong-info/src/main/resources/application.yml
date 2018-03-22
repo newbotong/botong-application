@@ -1,13 +1,13 @@
 ### 设置服务端口和Tomcat编码格式
 server:
-  port: 26120
+  port: 26130
   tomcat:
     uri-encoding: UTF-8
 
 ### 设置服务名称
 spring:
   application:
-    name: botong-notice
+    name: botong-info
   sleuth:
     sampler:
       percentage: 1
@@ -17,7 +17,7 @@ spring:
       username: yunjing216
       password: yunjing216
   datasource:
-    url: jdbc:mysql://192.168.10.46:10150/botong-notice?autoReconnect=true&useUnicode=true&characterEncoding:UTF-8&zeroDateTimeBehavior=convertToNull&useSSL=false
+    url: jdbc:mysql://192.168.10.46:10150/botong-info?autoReconnect=true&useUnicode=true&characterEncoding:UTF-8&zeroDateTimeBehavior=convertToNull&useSSL=false
     username: root
     password: YunJing168
     driver-class-name: com.mysql.jdbc.Driver
