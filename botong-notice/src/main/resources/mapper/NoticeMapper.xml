@@ -1,17 +1,32 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
 
-<mapper namespace="com.yunjing.notice.mapper.NoticeUserMapper">
+<mapper namespace="com.yunjing.notice.mapper.NoticeMapper">
 
-	<!-- 可根据自己的需求，是否要使用 -->
-    <resultMap type="com.yunjing.notice.entity.NoticeEntity" id="favouriteMap">
-        <result property="id" column="id"/>
-        <result property="userId" column="user_id"/>
-        <result property="origin" column="origin"/>
-        <result property="createTime" column="create_time"/>
-        <result property="updateTime" column="update_time"/>
-        <result property="isDelete" column="is_delete"/>
+
+    <!--分页查询公告-->
+    <resultMap id="NoticePage" type="com.yunjing.notice.body.NoticePageBody">
+        <id property="id" column="id"></id>
+        <result property="title" column="title" jdbcType="VARCHAR"></result>
+        <result property="createTime" column="create_time"></result>
+        <result property="author" column="author" jdbcType="VARCHAR"></result>
+        <result property="cover" column="cover" jdbcType="VARCHAR"></result>
+        <result property="readNumber" column="read_num" ></result>
+        <result property="notReadNumber" column="not_read_num" ></result>
     </resultMap>
-
-
+    <select id="selectNoticePage" resultMap="NoticePage" parameterType="java.util.Map">
+        SELECT n.id,n.title,n.create_time,n.author,n.cover,n.read_num,n.not_read_num
+        FROM notice_user nu
+        LEFT JOIN notice n
+        ON nu.notice_id = n.id
+        WHERE n.logic_delete = 0 AND
+              nu.logic_delete = 0
+              <if test="userId != null">
+                  AND nu.user_id = #{userId}
+              </if>
+              <if test="state != null">
+                  AND nu.state = #{state}
+              </if>
+        ORDER BY n.create_time DESC
+    </select>
 </mapper>
