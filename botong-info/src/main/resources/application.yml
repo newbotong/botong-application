@@ -4,6 +4,14 @@ server:
   tomcat:
     uri-encoding: UTF-8
 
+### 注册中心eureka
+eureka:
+  client:
+    register-with-eureka: true
+    fetch-registry: true
+    serviceUrl:
+      defaultZone: http://${eureka.server}:${eureka.port}/eureka/
+
 ### 设置服务名称
 spring:
   application:
@@ -12,34 +20,28 @@ spring:
     sampler:
       percentage: 1
   rabbitmq:
-      host: 192.168.10.47
-      port: 10222
-      username: yunjing216
-      password: yunjing216
+      host: ${rabbitmq.server}
+      port: ${rabbitmq.port}
+      username: ${rabbitmq.username}
+      password: ${rabbitmq.password}
   datasource:
-    url: jdbc:mysql://192.168.10.46:10150/botong-info?autoReconnect=true&useUnicode=true&characterEncoding:UTF-8&zeroDateTimeBehavior=convertToNull&useSSL=false
-    username: root
-    password: YunJing168
+    url: ${spring.datasource.mysql.url}
+    username: ${spring.datasource.mysql.username}
+    password: ${spring.datasource.mysql.password}
     driver-class-name: com.mysql.jdbc.Driver
     initialize: true
     continue-on-error: true
 
-##配置注册中心
-eureka:
-  client:
-    serviceUrl:
-      defaultZone: http://192.168.10.233:10100/eureka/
-  instance:
-    lease-expiration-duration-in-seconds: 30
-    lease-renewal-interval-in-seconds: 10
-    preferIpAddress: true
-
 ##配置mybatis-plus
 mybatis-plus:
   mapper-locations: classpath:mapper/*Mapper.xml
-  typeAliasesPackage: com.yunjing.notice.entity
+  typeAliasesPackage: com.yunjing.info.model
   global-config:
     meta-object-handler: com.common.mybatis.config.FiledAnnotationMetaObjectHandler
     logic-delete-value: 1
     logic-not-delete-value: 0
     sql-injector: com.baomidou.mybatisplus.mapper.LogicSqlInjector
+
+# 写入文件日志
+logging:
+  file: ${user.dir}/logs/${spring.application.name}.log

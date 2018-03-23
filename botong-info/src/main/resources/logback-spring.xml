@@ -1,9 +1,9 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!--该日志将日志级别不同的log信息保存到不同的文件中 -->
-<configuration scan="true" scanPeriod="60 seconds">
+<configuration>
+    <include resource="org/springframework/boot/logging/logback/defaults.xml"/>
     <include resource="org/springframework/boot/logging/logback/base.xml"/>
-    <logger name="com.yunjing.passport.mapper" level="DEBUG" />
-    <jmxConfigurator/>
+    <logger name="com.yunjing.info.mapper" level="DEBUG"/>
 
     <springProperty scope="context" name="appName" source="spring.application.name" />
     <springProperty scope="context" name="ip" source="spring.cloud.client.ipAddress" />
@@ -87,7 +87,7 @@
                         <!--"pid": "${PID:-}",-->
                         <!--"thread": "%thread",-->
                         <!--"class": "%logger{40}",-->
-                        <!--"rest": "%message"-->
+                        <!--"rest": "%body"-->
                         <!--}-->
                     <!--</pattern>-->
                 <!--</pattern>-->
@@ -99,8 +99,6 @@
     <root level="INFO">
         <!--<appender-ref ref="console"/>-->
         <!--<appender-ref ref="logstash"/>-->
-        <appender-ref ref="CONSOLE"/>
+        <!--<appender-ref ref="logstash" />-->
     </root>
-
 </configuration>
-
