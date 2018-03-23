@@ -18,7 +18,7 @@ public class NoticeBody implements Serializable {
     /**
      * 发布人用户id
      */
-    private String issueUserId;
+    private Long issueUserId;
 
     /**
      * 封面图地址
@@ -36,9 +36,9 @@ public class NoticeBody implements Serializable {
     private String pictureName;
 
     /**
-     * 多个用户Id,用逗号隔开
+     * 多个用户属性,用逗号隔开
      */
-    private String userIds;
+    private String userInfo;
 
     /**
      * 保密状态 0为保密 1为不保密
@@ -48,7 +48,7 @@ public class NoticeBody implements Serializable {
     /**
      * Dang的状态 0为Dang 1为非Dang
      */
-    private String dangState;
+    private Integer dangState;
 
     /**
      * 公告标题
@@ -64,5 +64,15 @@ public class NoticeBody implements Serializable {
      * 公告作者
      */
     private String author;
+
+    /**
+     * 发布人的头像地址
+     */
+    private String img;
+
+    /**
+     * 发布人的名称
+     */
+    private String name;
 
 }

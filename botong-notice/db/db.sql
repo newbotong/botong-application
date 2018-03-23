@@ -9,6 +9,8 @@ CREATE TABLE `notice` (
   `cover` varchar(32) DEFAULT NULL COMMENT '公告封面图',
   `picture` varchar(32) DEFAULT NULL COMMENT '图片地址',
   `author` varchar(32) DEFAULT NULL COMMENT '作者',
+  `read_num` int(11) DEFAULT '0' COMMENT '阅读人数',
+  `not_read_num` int(11) DEFAULT '0' COMMENT '未读数',
   `logic_delete` tinyint(1) DEFAULT '0' COMMENT '逻辑删除0正常 1删除',
   `create_time` bigint(20) DEFAULT NULL COMMENT '创建时间',
   `update_time` bigint(20) DEFAULT NULL COMMENT '更新日期',
@@ -30,5 +32,18 @@ CREATE TABLE `notice_user` (
   `update_time` bigint(20) DEFAULT NULL COMMENT '更新日期',
   `create_time` bigint(20) DEFAULT NULL COMMENT '创建日期',
   PRIMARY KEY (`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+
+DROP TABLE
+IF EXISTS userInfo;
+
+CREATE TABLE `userInfo` (
+  `id` bigint(22) NOT NULL COMMENT '用户id',
+  `img` varchar(255) DEFAULT NULL COMMENT '用户头像地址',
+  `name` varchar(32) DEFAULT NULL COMMENT '用户名称',
+  `logic_delete` tinyint(1) DEFAULT '0' COMMENT '逻辑删除 0正常 1删除',
+  `update_time` bigint(22) DEFAULT NULL COMMENT '更新时间',
+  `create_time` bigint(22) DEFAULT NULL COMMENT '创建日期'
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
