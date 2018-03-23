@@ -10,5 +10,5 @@ import org.apache.ibatis.annotations.Param;
  * @date 2017/12/21
  */
 public interface ProcessMapper extends IBaseMapper<SetsProcess> {
-    void deleteProcessUser(@Param("oid") String oid, @Param("uid") String uid);
+    void deleteProcessUser(@Param("oid") Long oid, @Param("uid") Long uid);
 }

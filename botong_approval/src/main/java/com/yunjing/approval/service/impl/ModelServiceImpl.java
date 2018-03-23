@@ -4,13 +4,14 @@ import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 import com.baomidou.mybatisplus.mapper.Condition;
 import com.common.mybatis.service.impl.BaseServiceImpl;
-import com.yunjing.approval.dao.mapper.ConditionMapper;
 import com.yunjing.approval.dao.mapper.ModelLMapper;
 import com.yunjing.approval.model.entity.ModelCategory;
 import com.yunjing.approval.model.entity.ModelL;
 import com.yunjing.approval.model.vo.ModelListVO;
 import com.yunjing.approval.model.vo.ModelVO;
-import com.yunjing.approval.service.*;
+import com.yunjing.approval.service.ICopyService;
+import com.yunjing.approval.service.IModelCategoryService;
+import com.yunjing.approval.service.IModelService;
 import com.yunjing.mommon.global.exception.BaseException;
 import com.yunjing.mommon.global.exception.MessageNotExitException;
 import com.yunjing.mommon.global.exception.UpdateMessageFailureException;
@@ -41,19 +42,19 @@ public class ModelServiceImpl extends BaseServiceImpl<ModelLMapper, ModelL> impl
 
     @Override
     @Transactional(propagation = Propagation.REQUIRED, rollbackFor = Exception.class)
-    public List<ModelListVO> findModelList(String orgId) {
+    public List<ModelListVO> findModelList(Long orgId) {
         List<ModelVO> modelVOList = modelLMapper.selectModelListByOrgId(orgId);
         List<ModelListVO> modelListVOList = new ArrayList<>();
         List<ModelCategory> list = modelCategoryService.selectList(Condition.create().where("org_id={0}", orgId));
         if (!list.isEmpty()) {
             for (ModelCategory modelCategory : list) {
                 ModelListVO modelListVO = new ModelListVO();
-                modelListVO.setCategoryId(modelCategory.getCategoryId());
+                modelListVO.setCategoryId(modelCategory.getId());
                 modelListVO.setCategroyName(modelCategory.getCategoryName());
                 modelListVO.setSort(modelCategory.getSort());
                 modelListVO.setUpdateTime(modelCategory.getUpdateTime());
-                if (modelCategory.getCategoryId() != null) {
-                    List<ModelVO> modelVOS = modelVOList.stream().filter(modelVO1 -> modelCategory.getCategoryId().equals(modelVO1.getCategoryId())).collect(Collectors.toList());
+                if (modelCategory.getId() != null) {
+                    List<ModelVO> modelVOS = modelVOList.stream().filter(modelVO1 -> modelCategory.getId().equals(modelVO1.getCategoryId())).collect(Collectors.toList());
                     modelListVO.setModelVOList(modelVOS);
                     modelListVO.setModelCount(modelVOS.size());
                 }
@@ -79,7 +80,7 @@ public class ModelServiceImpl extends BaseServiceImpl<ModelLMapper, ModelL> impl
 
     @Override
     @Transactional(propagation = Propagation.REQUIRED, rollbackFor = Exception.class)
-    public boolean sortedModel(String categoryId, String sortArray) throws Exception {
+    public boolean sortedModel(Long categoryId, String sortArray) throws Exception {
         boolean isUpdated = false;
         Map<String, Integer> modelSortMap = null;
         try {
@@ -99,7 +100,7 @@ public class ModelServiceImpl extends BaseServiceImpl<ModelLMapper, ModelL> impl
         List<ModelL> modelList = this.selectList(Condition.create().where("category_id = {0}", categoryId));
         if (modelList != null && !modelList.isEmpty()) {
             for (ModelL model : modelList) {
-                Integer sort = modelSortMap.get(model.getModelId());
+                Integer sort = modelSortMap.get(model.getId());
                 model.setSort(sort);
             }
             isUpdated = this.updateBatchById(modelList);
@@ -115,10 +116,10 @@ public class ModelServiceImpl extends BaseServiceImpl<ModelLMapper, ModelL> impl
 
     @Override
     @Transactional(propagation = Propagation.REQUIRED, rollbackFor = Exception.class)
-    public boolean moveModel(Long categoryId, String modelId) throws Exception {
+    public boolean moveModel(Long categoryId, Long modelId) throws Exception {
 
         ModelL modelL = this.selectById(modelId);
-        if(modelL == null){
+        if (modelL == null) {
             throw new MessageNotExitException("模型不存在");
         }
         modelL.setCategoryId(categoryId);
@@ -128,7 +129,7 @@ public class ModelServiceImpl extends BaseServiceImpl<ModelLMapper, ModelL> impl
 
     @Override
     @Transactional(propagation = Propagation.REQUIRED, rollbackFor = Exception.class)
-    public List<ModelVO> findModelListByOrgId(String orgId) {
+    public List<ModelVO> findModelListByOrgId(Long orgId) {
         List<ModelVO> modelVOList = modelLMapper.selectModelListByOrgId(orgId);
         for (ModelVO modelVO : modelVOList) {
             // 获取每个审批项的抄送人数量
@@ -140,7 +141,7 @@ public class ModelServiceImpl extends BaseServiceImpl<ModelLMapper, ModelL> impl
 
     @Override
     @Transactional(propagation = Propagation.REQUIRED, rollbackFor = Exception.class)
-    public boolean updateVisibleRange(String modelId, String deptIds, String userIds) throws Exception {
+    public boolean updateVisibleRange(Long modelId, String deptIds, String userIds) throws Exception {
         // TODO 调用rpc接口处理可见范围权限业务
 
         ModelL modelL = this.selectById(modelId);
@@ -150,7 +151,7 @@ public class ModelServiceImpl extends BaseServiceImpl<ModelLMapper, ModelL> impl
 
     @Override
     @Transactional(propagation = Propagation.REQUIRED, rollbackFor = Exception.class)
-    public boolean updateIsDisabled(String modelId, Integer isDisabled) throws Exception {
+    public boolean updateIsDisabled(Long modelId, Integer isDisabled) throws Exception {
         ModelL modelL = this.selectById(modelId);
         if (modelL == null) {
             throw new BaseException("该模型不存在");

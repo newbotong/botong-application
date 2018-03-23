@@ -2,8 +2,7 @@ package com.yunjing.approval.service.impl;
 
 import com.baomidou.mybatisplus.mapper.EntityWrapper;
 import com.baomidou.mybatisplus.mapper.Wrapper;
-import com.baomidou.mybatisplus.service.impl.ServiceImpl;
-import com.yunjing.approval.common.UUIDUtil;
+import com.common.mybatis.service.impl.BaseServiceImpl;
 import com.yunjing.approval.dao.mapper.ConditionMapper;
 import com.yunjing.approval.model.entity.ModelItem;
 import com.yunjing.approval.model.entity.ModelL;
@@ -16,6 +15,7 @@ import com.yunjing.approval.service.IModelItemService;
 import com.yunjing.approval.service.IModelService;
 import com.yunjing.approval.service.IProcessService;
 import com.yunjing.mommon.global.exception.BaseException;
+import com.yunjing.mommon.utils.IDUtils;
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.lang.ArrayUtils;
 import org.apache.commons.lang.StringUtils;
@@ -33,7 +33,7 @@ import java.util.List;
  */
 @Service
 @Transactional(propagation = Propagation.REQUIRED, rollbackFor = Exception.class)
-public class ConditionServiceImpl extends ServiceImpl<ConditionMapper, SetsCondition> implements IConditionService {
+public class ConditionServiceImpl extends BaseServiceImpl<ConditionMapper, SetsCondition> implements IConditionService {
 
     @Autowired
     private IProcessService processService;
@@ -48,22 +48,15 @@ public class ConditionServiceImpl extends ServiceImpl<ConditionMapper, SetsCondi
     private ConditionMapper conditionMapper;
 
     @Override
-    public boolean delete(String modelId, String conditions) throws Exception {
-        if (StringUtils.isBlank(modelId)) {
-            throw new BaseException("模型主键不存在");
-        }
+    public boolean delete(Long modelId, Long conditionId) throws Exception {
 
-        if (StringUtils.isBlank(conditions)) {
-            throw new BaseException("条件主键不存在");
-        }
-
-        processService.delete(modelId, conditions);
+        processService.delete(modelId, conditionId);
         Wrapper<SetsCondition> wrapper = new EntityWrapper<>();
         wrapper.eq("model", modelId);
-        if (StringUtils.isBlank(conditions)) {
+        if (null == conditionId) {
             wrapper.and("conditions=''").or("conditions is null");
         } else {
-            wrapper.and("conditions={0}", conditions);
+            wrapper.and("conditions={0}", conditionId);
         }
         this.delete(wrapper);
 
@@ -71,8 +64,8 @@ public class ConditionServiceImpl extends ServiceImpl<ConditionMapper, SetsCondi
     }
 
     @Override
-    public List<SetConditionVO> getConditionList(String modelId) throws Exception {
-        if (StringUtils.isBlank(modelId)) {
+    public List<SetConditionVO> getConditionList(Long modelId) throws Exception {
+        if (null == modelId) {
             throw new BaseException("模型主键不存在");
         }
 
@@ -85,12 +78,12 @@ public class ConditionServiceImpl extends ServiceImpl<ConditionMapper, SetsCondi
         List<SetConditionVO> list = new ArrayList<>();
         for (SetsCondition setsCondition : listCondition) {
             SetConditionVO setConditionVO = new SetConditionVO();
-            List<UserVO> userVoList = processService.getProcess(modelId, setsCondition.getConditions());
-            setConditionVO.setConditions(setsCondition.getConditions());
+            List<UserVO> userVoList = processService.getProcess(modelId, setsCondition.getId());
+            setConditionVO.setConditionId(setsCondition.getId());
             setConditionVO.setCdn(setsCondition.getCdn());
             setConditionVO.setContent(setsCondition.getContent());
             setConditionVO.setEnabled(setsCondition.getEnabled());
-            setConditionVO.setModel(setsCondition.getModel());
+            setConditionVO.setModelId(setsCondition.getModelId());
             setConditionVO.setSort(setsCondition.getSort());
             setConditionVO.setUserVo(userVoList);
             list.add(setConditionVO);
@@ -99,10 +92,7 @@ public class ConditionServiceImpl extends ServiceImpl<ConditionMapper, SetsCondi
     }
 
     @Override
-    public List<ModelItemVO> getJudgeList(String modelId) throws Exception {
-        if (StringUtils.isBlank(modelId)) {
-            throw new BaseException("模型主键不存在");
-        }
+    public List<ModelItemVO> getJudgeList(Long modelId) throws Exception {
         ModelL model = modelService.selectById(modelId);
         if (model == null) {
             throw new BaseException("模型不存");
@@ -132,10 +122,7 @@ public class ConditionServiceImpl extends ServiceImpl<ConditionMapper, SetsCondi
     }
 
     @Override
-    public List<SetConditionVO> save(String modelId, String field, String numbers) throws Exception {
-        if (StringUtils.isBlank(modelId)) {
-            throw new BaseException("模型主键不存在");
-        }
+    public List<SetConditionVO> save(Long modelId, String field, String numbers) throws Exception {
 
         if (StringUtils.isBlank(field)) {
             throw new BaseException("字段不存在");
@@ -157,7 +144,7 @@ public class ConditionServiceImpl extends ServiceImpl<ConditionMapper, SetsCondi
 
         ModelItem item = modelItemService.selectOne(wrapper);
 
-        if (item == null || StringUtils.isBlank(item.getModelItemId())) {
+        if (item == null || null == item.getId()) {
             throw new BaseException("字段类型错误");
         }
 
@@ -198,8 +185,8 @@ public class ConditionServiceImpl extends ServiceImpl<ConditionMapper, SetsCondi
                 }
 
                 SetsCondition entity = new SetsCondition();
-                entity.setConditions(UUIDUtil.get());
-                entity.setModel(modelId);
+                entity.setId(IDUtils.getID());
+                entity.setModelId(modelId);
 
                 entity.setContent(label + flag + opt);
                 entity.setCdn(field + flag + opt);
@@ -244,8 +231,8 @@ public class ConditionServiceImpl extends ServiceImpl<ConditionMapper, SetsCondi
                 }
 
                 SetsCondition entity = new SetsCondition();
-                entity.setConditions(UUIDUtil.get());
-                entity.setModel(modelId);
+                entity.setId(IDUtils.getID());
+                entity.setModelId(modelId);
 
                 entity.setContent(content);
                 entity.setCdn(cdn);
@@ -258,8 +245,8 @@ public class ConditionServiceImpl extends ServiceImpl<ConditionMapper, SetsCondi
 
                 if (i == vals.length - 1) {
                     SetsCondition e = new SetsCondition();
-                    e.setConditions(UUIDUtil.get());
-                    e.setModel(modelId);
+                    e.setId(IDUtils.getID());
+                    e.setModelId(modelId);
 
                     flag = " ＞ ";
 

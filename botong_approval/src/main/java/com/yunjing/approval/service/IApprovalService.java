@@ -46,7 +46,7 @@ public interface IApprovalService extends IBaseService<Approval> {
      * @return 分页列表
      * @throws Exception 异常
      */
-    ApprovalPageVO page(Page<Approval> page, String oid, String mid, Integer state, String title, String createTimeStart, String createTimeEnd, String finishTimeStart, String finishTimeEnd) throws Exception;
+    ApprovalPageVO page(Page<Approval> page, Long oid, Long mid, Integer state, String title, String createTimeStart, String createTimeEnd, String finishTimeStart, String finishTimeEnd) throws Exception;
 
     /**
      * 删除审批数据
@@ -55,7 +55,7 @@ public interface IApprovalService extends IBaseService<Approval> {
      * @return
      * @throws Exception
      */
-    boolean delete(String approvalId) throws Exception;
+    boolean delete(Long approvalId) throws Exception;
 
     /**
      * 审批数据导出
@@ -72,6 +72,6 @@ public interface IApprovalService extends IBaseService<Approval> {
      * @return
      * @throws Exception
      */
-    BaseExModel createApprovalExcel(String orgId, String userId, String modelId, Integer state, String title, String createTimeStart,
+    BaseExModel createApprovalExcel(Long orgId, Long userId, Long modelId, Integer state, String title, String createTimeStart,
                                     String createTimeEnd, String finishTimeStart, String finishTimeEnd) throws Exception;
 }

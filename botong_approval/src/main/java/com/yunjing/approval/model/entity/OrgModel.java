@@ -1,14 +1,12 @@
 package com.yunjing.approval.model.entity;
 
-import com.baomidou.mybatisplus.activerecord.Model;
 import com.baomidou.mybatisplus.annotations.TableField;
-import com.baomidou.mybatisplus.annotations.TableId;
+import com.baomidou.mybatisplus.annotations.TableLogic;
 import com.baomidou.mybatisplus.annotations.TableName;
-import com.baomidou.mybatisplus.enums.IdType;
+import com.common.mybatis.model.BaseModel;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 
-import java.io.Serializable;
 import java.sql.Timestamp;
 
 /**
@@ -19,42 +17,37 @@ import java.sql.Timestamp;
  */
 @Data
 @TableName("org_model")
-@EqualsAndHashCode(callSuper=true)
-public class OrgModel extends Model<OrgModel> {
+@EqualsAndHashCode(callSuper = true)
+public class OrgModel extends BaseModel<OrgModel> {
 
-	/**
-	 * 企业模型主键
-	 */
-	@TableId(value = "orgmodel_id", type = IdType.UUID)
-	private String orgModelId;
+    /**
+     * 企业(组织)主键
+     */
+    @TableField("org_id")
+    private Long orgId;
 
-	/**
-	 * 企业(组织)主键
-	 */
-	@TableField("org_id")
-	private String orgId;
+    /**
+     * 模型主键
+     */
+    @TableField("model_id")
+    private Long modelId;
 
-	/**
-	 * 模型主键
-	 */
-	@TableField("model_id")
-	private String modelId;
+    /**
+     * 类型 1:日志 2:审批
+     */
+    @TableField("data_type")
+    private Integer dataType;
 
-	/**
-	 * 类型 1:日志 2:审批
-	 */
-	@TableField("data_type")
-	private Integer dataType;
+    /**
+     * 创建时间
+     */
+    @TableField("create_time")
+    private Long createTime;
 
-	/**
-	 * 创建时间
-	 */
-	@TableField("create_time")
-	private Timestamp createTime;
-
-
-	@Override
-	protected Serializable pkVal() {
-		return this.orgModelId;
-	}
+    /**
+     * 是否删除 0：未删除；1：已删除
+     */
+    @TableLogic
+    @TableField("is_delete")
+    private Integer isDelete;
 }

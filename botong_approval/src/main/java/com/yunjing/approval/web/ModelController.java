@@ -26,7 +26,7 @@ public class ModelController extends BaseController {
      * @return
      */
     @GetMapping("/list")
-    public ResponseEntityWrapper getList(@RequestParam("oid") String oid) throws Exception {
+    public ResponseEntityWrapper getList(@RequestParam("oid") Long oid) throws Exception {
 
         return success(modelService.findModelList(oid));
     }
@@ -39,7 +39,7 @@ public class ModelController extends BaseController {
      * @return
      */
     @PostMapping("/sort")
-    public ResponseEntityWrapper sort(@RequestParam("categoryId") String categoryId, @RequestParam("sortArray") String sortArray) throws Exception {
+    public ResponseEntityWrapper sort(@RequestParam("categoryId") Long categoryId, @RequestParam("sortArray") String sortArray) throws Exception {
 
         return success(modelService.sortedModel(categoryId, sortArray));
     }
@@ -52,7 +52,7 @@ public class ModelController extends BaseController {
      * @return
      */
     @PostMapping("/move_to")
-    public ResponseEntityWrapper moveTo(@RequestParam("categoryId") Long categoryId, @RequestParam("modelId") String modelId) throws Exception {
+    public ResponseEntityWrapper moveTo(@RequestParam("categoryId") Long categoryId, @RequestParam("modelId") Long modelId) throws Exception {
 
         return success(modelService.moveModel(categoryId, modelId));
     }
@@ -65,7 +65,7 @@ public class ModelController extends BaseController {
      * @return
      */
     @PostMapping("/is_disabled")
-    public ResponseEntityWrapper updateIsDisabled(@RequestParam("modelId") String modelId,
+    public ResponseEntityWrapper updateIsDisabled(@RequestParam("modelId") Long modelId,
                                                   @RequestParam("isDisabled") Integer isDisabled) throws Exception {
 
         return success(modelService.updateIsDisabled(modelId, isDisabled));
@@ -80,7 +80,7 @@ public class ModelController extends BaseController {
      * @return
      */
     @PostMapping("/update_visible_range")
-    public ResponseEntityWrapper updateVisibleRange(@RequestParam("modelId") String modelId,
+    public ResponseEntityWrapper updateVisibleRange(@RequestParam("modelId") Long modelId,
                                                   @RequestParam("deptIds") String deptIds,
                                                     @RequestParam("userIds") String userIds) throws Exception {
 

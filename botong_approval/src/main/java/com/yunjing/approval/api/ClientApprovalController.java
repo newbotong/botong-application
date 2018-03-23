@@ -2,9 +2,8 @@ package com.yunjing.approval.api;
 
 import com.common.mybatis.page.Page;
 import com.yunjing.approval.common.DateUtil;
-import com.yunjing.approval.model.vo.ClientModelVO;
-import com.yunjing.approval.model.vo.ClientApprovalVO;
-import com.yunjing.approval.service.IApprovalWebService;
+import com.yunjing.approval.model.vo.*;
+import com.yunjing.approval.service.IApprovalApiService;
 import com.yunjing.approval.service.IModelItemService;
 import com.yunjing.mommon.base.BaseController;
 import com.yunjing.mommon.utils.IDUtils;
@@ -27,7 +26,7 @@ import java.util.List;
 public class ClientApprovalController extends BaseController {
 
     @Autowired
-    private IApprovalWebService approvalWebService;
+    private IApprovalApiService approvalApiService;
 
     @Autowired
     private IModelItemService modelItemService;
@@ -39,13 +38,20 @@ public class ClientApprovalController extends BaseController {
      * @return
      */
     @GetMapping("/index")
-    public ResponseEntityWrapper index(@RequestParam("oid") String oid) throws Exception {
-        List<ClientModelVO> list = approvalWebService.getList(oid);
+    public ResponseEntityWrapper index(@RequestParam("oid") Long oid) throws Exception {
+        List<ClientModelVO> list = approvalApiService.getList(oid);
         return success(list);
     }
 
+    /**
+     * 获取审批模型详情
+     *
+     * @param modelId 模型主键
+     * @return
+     * @throws Exception
+     */
     @GetMapping("/model_item_detail")
-    public ResponseEntityWrapper getItem(@RequestParam("modelId") String modelId) throws Exception {
+    public ResponseEntityWrapper getItem(@RequestParam("modelId") Long modelId) throws Exception {
         return success(modelItemService.getModelItem(modelId));
     }
 
@@ -62,13 +68,12 @@ public class ClientApprovalController extends BaseController {
      */
     @GetMapping("/waited_approval")
     public ResponseEntityWrapper waitedApproval(@ModelAttribute(value = "page") Page page,
-                                                @RequestParam("oid") String oid,
-                                                @RequestParam("uid") String uid,
+                                                @RequestParam("oid") Long oid,
+                                                @RequestParam("uid") Long uid,
                                                 @RequestParam(value = "state", defaultValue = "0") Integer state, String searchKey) {
 
-        Page<ClientApprovalVO> approvalData = createApprovalData(page, 0);
 
-        return success(approvalData);
+        return success(createApprovalData(page, 0));
     }
 
     /**
@@ -82,12 +87,11 @@ public class ClientApprovalController extends BaseController {
      */
     @GetMapping("/completed_approval")
     public ResponseEntityWrapper completedApproval(@ModelAttribute(value = "page") Page page,
-                                                   @RequestParam("oid") String oid,
-                                                   @RequestParam("uid") String uid,
+                                                   @RequestParam("oid") Long oid,
+                                                   @RequestParam("uid") Long uid,
                                                    String searchKey) {
 
-        Page<ClientApprovalVO> approvalData = createApprovalData(page, 1);
-        return success(approvalData);
+        return success(createApprovalData(page, 1));
     }
 
     /**
@@ -101,12 +105,11 @@ public class ClientApprovalController extends BaseController {
      */
     @GetMapping("/launched_approval")
     public ResponseEntityWrapper launchedApproval(@ModelAttribute(value = "page") Page page,
-                                                  @RequestParam("oid") String oid,
-                                                  @RequestParam("uid") String uid,
+                                                  @RequestParam("oid") Long oid,
+                                                  @RequestParam("uid") Long uid,
                                                   String searchKey) {
 
-        Page<ClientApprovalVO> approvalData = createApprovalData(page, 2);
-        return success(approvalData);
+        return success(createApprovalData(page, 2));
     }
 
     /**
@@ -121,30 +124,85 @@ public class ClientApprovalController extends BaseController {
      */
     @GetMapping("/copied_approval")
     public ResponseEntityWrapper copiedApproval(@ModelAttribute(value = "page") Page page,
-                                                @RequestParam("oid") String oid,
-                                                @RequestParam("uid") String uid,
+                                                @RequestParam("oid") Long oid,
+                                                @RequestParam("uid") Long uid,
                                                 @RequestParam(value = "state", defaultValue = "0") Integer state, String searchKey) {
 
-        return success();
+        return success(createApprovalData(page, 2));
     }
 
     /**
      * 审批详情
      *
-     * @param page      @param page 分页对象  current 当前页码, size 页大小
-     * @param oid       企业主键
-     * @param uid       用户主键
-     * @param state     审批状态
-     * @param searchKey 搜索标题
+     * @param oid        企业主键
+     * @param uid        用户主键
+     * @param approvalId 审批主键
      * @return
      */
     @GetMapping("/approval_detail")
-    public ResponseEntityWrapper approvalDetail(@ModelAttribute(value = "page") Page page,
-                                                @RequestParam("oid") String oid,
-                                                @RequestParam("uid") String uid,
-                                                @RequestParam(value = "state", defaultValue = "0") Integer state, String searchKey) {
-
-        return success();
+    public ResponseEntityWrapper approvalDetail(@RequestParam("oid") Long oid,
+                                                @RequestParam("uid") Long uid,
+                                                @RequestParam("approvalId") Long approvalId) {
+        ClientApprovalDetailVO detailVO = new ClientApprovalDetailVO();
+        detailVO.setName("刘小鹏");
+        detailVO.setAvatar("https://image.botong.tech/tech/temp/7adf9998e93b4096ae537c4ea60678f7.jpg");
+        detailVO.setDeptName("开发部");
+        detailVO.setPosition("java工程师");
+        detailVO.setState(0);
+        detailVO.setModelName("请假");
+        List<InputDetailVO> inputDetailVOS = new ArrayList<>();
+        InputDetailVO input = new InputDetailVO();
+        InputDetailVO input2 = new InputDetailVO();
+        InputDetailVO input3 = new InputDetailVO();
+        InputDetailVO input4 = new InputDetailVO();
+        input.setInputName("请假类型");
+        input2.setInputName("请假天数（天）");
+        input3.setInputName("请假事由");
+        input4.setInputName("结束时间");
+        input.setInputValue("调休");
+        input2.setInputValue("1");
+        input3.setInputValue("回家有事情要处理");
+        input4.setInputValue("1521716404522");
+        inputDetailVOS.add(input);
+        inputDetailVOS.add(input2);
+        inputDetailVOS.add(input3);
+        inputDetailVOS.add(input4);
+        detailVO.setInputDetailList(inputDetailVOS);
+        List<ApprovalUserVO> approvalUserVOS = new ArrayList<>();
+        ApprovalUserVO approvalUserVO = new ApprovalUserVO();
+        approvalUserVO.setName("刘小鹏");
+        approvalUserVO.setColor("#774718");
+        approvalUserVO.setAvatar("");
+        approvalUserVO.setAvatarName("小鹏");
+        approvalUserVO.setResult(1);
+        approvalUserVO.setState(1);
+        approvalUserVO.setApprovalTime(1521716404522L);
+        ApprovalUserVO approvalUserVO2 = new ApprovalUserVO();
+        approvalUserVO2.setName("李朋军");
+        approvalUserVO2.setColor("");
+        approvalUserVO2.setAvatar("https://image.botong.tech/tech/temp/7adf9998e93b4096ae537c4ea60678f7.jpg");
+        approvalUserVO2.setAvatarName("");
+        approvalUserVO2.setResult(1);
+        approvalUserVO2.setState(1);
+        approvalUserVO2.setApprovalTime(1521716404522L);
+        approvalUserVOS.add(approvalUserVO);
+        approvalUserVOS.add(approvalUserVO2);
+        detailVO.setApprovalUserList(approvalUserVOS);
+        List<CopyUserVO> copyUserVOS = new ArrayList<>();
+        CopyUserVO copyUserVO = new CopyUserVO();
+        copyUserVO.setName("魏一恒");
+        copyUserVO.setColor("#774718");
+        copyUserVO.setAvatar("");
+        copyUserVO.setAvatarName("一恒");
+        CopyUserVO copyUserVO2 = new CopyUserVO();
+        copyUserVO2.setName("刘小鹏");
+        copyUserVO2.setColor("");
+        copyUserVO2.setAvatar("https://image.botong.tech/tech/temp/7adf9998e93b4096ae537c4ea60678f7.jpg");
+        copyUserVO2.setAvatarName("");
+        copyUserVOS.add(copyUserVO);
+        copyUserVOS.add(copyUserVO2);
+        detailVO.setCopyUserList(copyUserVOS);
+        return success(detailVO);
     }
 
     public static void main(String[] args) {

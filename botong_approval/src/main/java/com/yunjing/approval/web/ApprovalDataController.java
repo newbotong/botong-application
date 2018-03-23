@@ -34,7 +34,7 @@ public class ApprovalDataController extends BaseController {
      * @return 分页列表
      */
     @PostMapping("/list")
-    public ResponseEntityWrapper page(@ModelAttribute(value = "page") Page<Approval> page, @RequestParam("oid") String oid, String mid, Integer state, String title, String createTimeStart, String createTimeEnd, String finishTimeStart, String finishTimeEnd) throws Exception {
+    public ResponseEntityWrapper page(@ModelAttribute(value = "page") Page<Approval> page, @RequestParam("oid") Long oid, Long mid, Integer state, String title, String createTimeStart, String createTimeEnd, String finishTimeStart, String finishTimeEnd) throws Exception {
         return success(approvalService.page(page, oid, mid, state, title, createTimeStart, createTimeEnd, finishTimeStart, finishTimeEnd));
     }
 
@@ -45,7 +45,7 @@ public class ApprovalDataController extends BaseController {
      * @return
      */
     @PostMapping("/delete")
-    public ResponseEntityWrapper deleteApproval(@RequestParam("approvalId") String approvalId) throws Exception {
+    public ResponseEntityWrapper deleteApproval(@RequestParam("approvalId") Long approvalId) throws Exception {
 
         return success(approvalService.delete(approvalId));
     }

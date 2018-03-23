@@ -4,7 +4,6 @@ import com.alibaba.fastjson.JSONObject;
 import com.baomidou.mybatisplus.mapper.EntityWrapper;
 import com.baomidou.mybatisplus.mapper.Wrapper;
 import com.common.mybatis.service.impl.BaseServiceImpl;
-import com.yunjing.approval.common.UUIDUtil;
 import com.yunjing.approval.dao.mapper.ConditionMapper;
 import com.yunjing.approval.dao.mapper.ModelItemMapper;
 import com.yunjing.approval.dao.mapper.ModelLMapper;
@@ -19,6 +18,7 @@ import com.yunjing.approval.service.IModelItemService;
 import com.yunjing.approval.service.IModelService;
 import com.yunjing.approval.service.IOrgModelService;
 import com.yunjing.mommon.global.exception.BaseException;
+import com.yunjing.mommon.utils.IDUtils;
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.lang.ArrayUtils;
 import org.apache.commons.lang.StringUtils;
@@ -64,8 +64,8 @@ public class ModelItemServiceImpl extends BaseServiceImpl<ModelItemMapper, Model
 
     @Override
     @Transactional(propagation = Propagation.REQUIRED, rollbackFor = Exception.class)
-    public ClientModelItemVO getModelItem(String modelId) throws Exception {
-        if (StringUtils.isBlank(modelId)) {
+    public ClientModelItemVO getModelItem(Long modelId) throws Exception {
+        if (null == modelId) {
             throw new BaseException("模型主键不存在");
         }
 
@@ -83,7 +83,7 @@ public class ModelItemServiceImpl extends BaseServiceImpl<ModelItemMapper, Model
         }
         ModelVO modelVO = this.getModelVO(modelL, itemList);
         ClientModelItemVO clientModelItemVO = new ClientModelItemVO(modelVO);
-        clientModelItemVO.setDeptId("f292ff52e53e4cdc9547184a209ecf88");
+        clientModelItemVO.setDeptId(null);
         clientModelItemVO.setDeptName("互联网时代");
         return clientModelItemVO;
 
@@ -93,9 +93,9 @@ public class ModelItemServiceImpl extends BaseServiceImpl<ModelItemMapper, Model
         ModelVO vo = new ModelVO(modelL);
         List<ModelItemVO> items = new ArrayList<>(itemList.size());
         itemList.forEach(item -> {
-            if (StringUtils.isBlank(item.getIsChild())) {
+            if (null == item.getIsChild()) {
                 ModelItemVO itemVO = new ModelItemVO(item);
-                List<ModelItem> childList = itemList.parallelStream().filter(modelItem -> item.getModelItemId().equals(modelItem.getIsChild())).sorted(comparing(ModelItem::getPriority)).collect(Collectors.toList());
+                List<ModelItem> childList = itemList.parallelStream().filter(modelItem -> item.getId().equals(modelItem.getIsChild())).sorted(comparing(ModelItem::getPriority)).collect(Collectors.toList());
                 if (CollectionUtils.isNotEmpty(childList)) {
                     List<ModelItemVO> child = new ArrayList<>(childList.size());
                     childList.forEach(c -> child.add(new ModelItemVO(c)));
@@ -112,14 +112,7 @@ public class ModelItemServiceImpl extends BaseServiceImpl<ModelItemMapper, Model
 
     @Override
     @Transactional(propagation = Propagation.REQUIRED, rollbackFor = Exception.class)
-    public ModelVO saveModelItem(String orgId, String userId, String json) throws Exception {
-        if (StringUtils.isBlank(orgId)) {
-            throw new BaseException("企业不存在");
-        }
-
-        if (StringUtils.isBlank(userId)) {
-            throw new BaseException("用户不存在");
-        }
+    public ModelVO saveModelItem(Long orgId, Long userId, String json) throws Exception {
 
         if (StringUtils.isBlank(json)) {
             throw new BaseException("模型数据不存在");
@@ -142,12 +135,12 @@ public class ModelItemServiceImpl extends BaseServiceImpl<ModelItemMapper, Model
             throw new BaseException("字段数据不存在");
         }
 
-        String modelId = vo.getModelId();
+        Long modelId = vo.getModelId();
         int version = 1;
 
         ModelL entity = new ModelL();
         boolean isNew = false;
-        if (StringUtils.isNotBlank(vo.getModelId())) {
+        if (null != vo.getModelId()) {
             entity = modelService.selectById(modelId);
             if (entity == null) {
                 throw new BaseException("模型信息不存在");
@@ -155,8 +148,8 @@ public class ModelItemServiceImpl extends BaseServiceImpl<ModelItemMapper, Model
             version = entity.getModelVersion() + 1;
         } else {
             isNew = true;
-            modelId = UUIDUtil.get();
-            entity.setModelId(modelId);
+            modelId = IDUtils.getID();
+            entity.setId(modelId);
             entity.setLogo("https://web.botong.tech/resource/img/public.png");
 
             Integer max = modelLMapper.getMaxSort(orgId);
@@ -192,11 +185,11 @@ public class ModelItemServiceImpl extends BaseServiceImpl<ModelItemMapper, Model
             if (isNew) {
                 Timestamp now = new Timestamp(System.currentTimeMillis());
                 OrgModel orgModel = new OrgModel();
-                orgModel.setOrgModelId(UUIDUtil.get());
+                orgModel.setId(IDUtils.getID());
                 orgModel.setOrgId(orgId);
-                orgModel.setModelId(entity.getModelId());
+                orgModel.setModelId(entity.getId());
                 orgModel.setDataType(2);
-                orgModel.setCreateTime(now);
+                orgModel.setCreateTime(now.getTime());
                 result = orgModelService.insert(orgModel);
                 if (!result) {
                     throw new BaseException("模型关系插入失败");
@@ -221,7 +214,7 @@ public class ModelItemServiceImpl extends BaseServiceImpl<ModelItemMapper, Model
      * @return 字段结婚
      * @throws Exception 异常
      */
-    private List<ModelItem> getModelItemList(List<ModelItemVO> itemVOS, String modelId, int version, boolean flag, ModelItem parent) throws Exception {
+    private List<ModelItem> getModelItemList(List<ModelItemVO> itemVOS, Long modelId, int version, boolean flag, ModelItem parent) throws Exception {
         List<ModelItem> entityList = new ArrayList<>();
         int i = 1;
         for (ModelItemVO itemVO : itemVOS) {
@@ -232,8 +225,8 @@ public class ModelItemServiceImpl extends BaseServiceImpl<ModelItemMapper, Model
 
             ModelItem item = new ModelItem();
 
-            String modelItemId = UUIDUtil.get();
-            item.setModelItemId(modelItemId);
+            Long modelItemId = IDUtils.getID();
+            item.setId(modelItemId);
             item.setModelId(modelId);
 
             // 字段
@@ -343,7 +336,7 @@ public class ModelItemServiceImpl extends BaseServiceImpl<ModelItemMapper, Model
 
             // 子字段
             if (flag) {
-                item.setIsChild(parent.getModelItemId());
+                item.setIsChild(parent.getId());
             }
             entityList.add(item);
 

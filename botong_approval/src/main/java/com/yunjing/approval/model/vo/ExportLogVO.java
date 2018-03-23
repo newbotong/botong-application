@@ -25,7 +25,7 @@ public class ExportLogVO {
     /**
      * 记录时间
      */
-    private Timestamp createTime;
+    private Long createTime;
 
     /**
      * 审批类型

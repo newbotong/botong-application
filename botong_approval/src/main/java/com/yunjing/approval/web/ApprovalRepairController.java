@@ -29,7 +29,7 @@ public class ApprovalRepairController extends BaseController {
      * @throws Exception 异常
      */
     @PostMapping("/title")
-    public ResponseEntityWrapper title(String oid) throws Exception {
+    public ResponseEntityWrapper title(Long oid) throws Exception {
         return success(approvalRepairService.repairTitle(oid));
     }
 
@@ -41,7 +41,7 @@ public class ApprovalRepairController extends BaseController {
      * @throws Exception 异常
      */
     @PostMapping("/finish")
-    public ResponseEntityWrapper finish(String oid) throws Exception {
+    public ResponseEntityWrapper finish(Long oid) throws Exception {
         return success(approvalRepairService.repairFinishTime(oid));
     }
 }

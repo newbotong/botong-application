@@ -1,29 +1,20 @@
 package com.yunjing.approval.model.entity;
 
-import com.baomidou.mybatisplus.activerecord.Model;
 import com.baomidou.mybatisplus.annotations.TableField;
-import com.baomidou.mybatisplus.annotations.TableId;
+import com.baomidou.mybatisplus.annotations.TableLogic;
 import com.baomidou.mybatisplus.annotations.TableName;
+import com.common.mybatis.model.BaseModel;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 
-import java.io.Serializable;
-
 /**
- *
  * @author 刘小鹏
- * @date 2018/01/15
+ * @date 2018/03/23
  */
 @Data
 @TableName("approval_attr")
 @EqualsAndHashCode(callSuper = true)
-public class ApprovalAttr extends Model<ApprovalAttr>{
-
-    /**
-     * 属性主键
-     */
-    @TableId("attr_id")
-    private String attrId;
+public class ApprovalAttr extends BaseModel<ApprovalAttr> {
 
     /**
      * 审批主键
@@ -61,8 +52,11 @@ public class ApprovalAttr extends Model<ApprovalAttr>{
     @TableField("attr_type")
     private Integer attrType;
 
-    @Override
-    protected Serializable pkVal() {
-        return this.attrId;
-    }
+    /**
+     * 是否删除 0：未删除；1：已删除
+     */
+    @TableLogic
+    @TableField("is_delete")
+    private Integer isDelete;
+
 }

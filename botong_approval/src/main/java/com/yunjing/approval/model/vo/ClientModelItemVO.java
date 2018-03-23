@@ -26,7 +26,7 @@ public class ClientModelItemVO {
     /**
      * 模型主键
      */
-    private String modelId;
+    private Long modelId;
 
     /**
      * 模型名称
@@ -41,7 +41,7 @@ public class ClientModelItemVO {
     /**
      * 部门主键
      */
-    private String deptId;
+    private Long deptId;
 
     /**
      * 部门名称

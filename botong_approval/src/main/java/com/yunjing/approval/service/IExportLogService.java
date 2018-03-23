@@ -20,5 +20,5 @@ public interface IExportLogService extends IBaseService<ExportLog> {
      * @param orgId 企业主键
      * @return
      */
-    LogPageVO findExportLogPage(Page page, String orgId);
+    LogPageVO findExportLogPage(Page page, Long orgId);
 }

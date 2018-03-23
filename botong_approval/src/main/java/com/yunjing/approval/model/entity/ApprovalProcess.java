@@ -1,30 +1,22 @@
 package com.yunjing.approval.model.entity;
 
-import com.baomidou.mybatisplus.activerecord.Model;
 import com.baomidou.mybatisplus.annotations.TableField;
-import com.baomidou.mybatisplus.annotations.TableId;
+import com.baomidou.mybatisplus.annotations.TableLogic;
 import com.baomidou.mybatisplus.annotations.TableName;
-import com.baomidou.mybatisplus.enums.IdType;
+import com.common.mybatis.model.BaseModel;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 
-import java.io.Serializable;
 import java.sql.Timestamp;
 
 /**
- * @author roc
- * @date 2018/1/15
+ * @author 刘小鹏
+ * @date 2018/03/23
  */
 @Data
 @TableName("approval_process")
 @EqualsAndHashCode(callSuper = true)
-public class ApprovalProcess extends Model<ApprovalProcess> {
-
-    /**
-     * 流程主键
-     */
-    @TableId(value = "process_id", type = IdType.UUID)
-    private String processId;
+public class ApprovalProcess extends BaseModel<ApprovalProcess> {
 
     /**
      * 审批主键
@@ -62,8 +54,10 @@ public class ApprovalProcess extends Model<ApprovalProcess> {
     @TableField("reason")
     private String reason;
 
-    @Override
-    protected Serializable pkVal() {
-        return this.processId;
-    }
+    /**
+     * 是否删除 0：未删除；1：已删除
+     */
+    @TableLogic
+    @TableField("is_delete")
+    private Integer isDelete;
 }

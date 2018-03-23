@@ -21,12 +21,12 @@ public interface ModelLMapper extends IBaseMapper<ModelL> {
      * @param orgId 企业Id
      * @return
      */
-    List<ModelVO> selectModelListByOrgId(@Param("orgId") String orgId);
+    List<ModelVO> selectModelListByOrgId(@Param("orgId") Long orgId);
 
     /**
      * 获取审批模板最大排序值
      * @param orgId 企业Id
      * @return 最大值
      */
-    Integer getMaxSort(@Param("orgId") String orgId);
+    Integer getMaxSort(@Param("orgId") Long orgId);
 }

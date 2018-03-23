@@ -2,6 +2,7 @@ package com.yunjing.approval.service;
 
 import com.baomidou.mybatisplus.plugins.Page;
 import com.yunjing.approval.model.vo.ApprovalContent;
+import com.yunjing.approval.model.vo.ClientApprovalVO;
 import com.yunjing.approval.model.vo.ClientModelVO;
 
 import java.util.List;
@@ -10,7 +11,7 @@ import java.util.List;
  * @author liuxiaopeng
  * @date 2018/02/28
  */
-public interface IApprovalWebService {
+public interface IApprovalApiService {
 
     /**
      * 审批首页
@@ -18,7 +19,7 @@ public interface IApprovalWebService {
      * @param orgId 企业主键
      * @return
      */
-    List<ClientModelVO> getList(String orgId);
+    List<ClientModelVO> getList(Long orgId);
 
     /**
      * 获取待审批列表
@@ -30,5 +31,5 @@ public interface IApprovalWebService {
      * @param searchKey 搜索标题
      * @return
      */
-    Page<ApprovalContent> getMyApprovalList(Page page, String orgId, String userId, Integer state, String searchKey);
+    Page<ClientApprovalVO> getWaited(Page page, Long orgId, Long userId, Integer state, String searchKey);
 }

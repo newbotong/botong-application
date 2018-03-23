@@ -1,12 +1,9 @@
 package com.yunjing.approval.service.impl;
 
-import com.alibaba.fastjson.JSONObject;
-import com.alibaba.fastjson.TypeReference;
 import com.baomidou.mybatisplus.mapper.Condition;
 import com.baomidou.mybatisplus.mapper.EntityWrapper;
 import com.baomidou.mybatisplus.mapper.Wrapper;
-import com.baomidou.mybatisplus.service.impl.ServiceImpl;
-import com.yunjing.approval.common.UUIDUtil;
+import com.common.mybatis.service.impl.BaseServiceImpl;
 import com.yunjing.approval.dao.cache.UserRedisService;
 import com.yunjing.approval.dao.mapper.CopyMapper;
 import com.yunjing.approval.model.entity.Copy;
@@ -16,6 +13,7 @@ import com.yunjing.approval.model.vo.UserVO;
 import com.yunjing.approval.service.ICopyService;
 import com.yunjing.approval.service.IOrgModelService;
 import com.yunjing.mommon.global.exception.BaseException;
+import com.yunjing.mommon.utils.IDUtils;
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.lang.ArrayUtils;
 import org.apache.commons.lang.StringUtils;
@@ -34,8 +32,8 @@ import java.util.Map;
  * @date 2017/12/21
  */
 @Service
-@Transactional(propagation= Propagation.REQUIRED,rollbackFor = Exception.class)
-public class CopyServiceImpl extends ServiceImpl<CopyMapper, Copy> implements ICopyService {
+@Transactional(propagation = Propagation.REQUIRED, rollbackFor = Exception.class)
+public class CopyServiceImpl extends BaseServiceImpl<CopyMapper, Copy> implements ICopyService {
 
     @Autowired
     private CopyMapper copyMapper;
@@ -58,8 +56,8 @@ public class CopyServiceImpl extends ServiceImpl<CopyMapper, Copy> implements IC
      * @throws Exception
      */
     @Override
-    public List<UserVO> get(String modelId) throws Exception {
-        if (StringUtils.isBlank(modelId)) {
+    public List<UserVO> get(Long modelId) throws Exception {
+        if (null == modelId) {
             throw new BaseException("模型主键不存在");
         }
 
@@ -72,8 +70,8 @@ public class CopyServiceImpl extends ServiceImpl<CopyMapper, Copy> implements IC
             throw new BaseException("模型映射不存在");
         }
 
-        String oid = entity.getOrgId();
-        if (StringUtils.isBlank(oid)) {
+        Long oid = entity.getOrgId();
+        if (null == oid) {
             throw new BaseException("模型所属企业不存在");
         }
 
@@ -87,7 +85,7 @@ public class CopyServiceImpl extends ServiceImpl<CopyMapper, Copy> implements IC
         List<String> userIdList = new ArrayList<>(copys.size());
 
         for (Copy c : copys) {
-            if(StringUtils.isBlank(c.getUserId())){
+            if (StringUtils.isBlank(c.getUserId())) {
                 continue;
             }
 
@@ -101,7 +99,7 @@ public class CopyServiceImpl extends ServiceImpl<CopyMapper, Copy> implements IC
         Map<String, UserOrgVO> userOrgVOMap = new HashMap<>(userIdList.size());
 
 
-        if(CollectionUtils.isNotEmpty(userIdList)) {
+        if (CollectionUtils.isNotEmpty(userIdList)) {
             List<UserVO> users = userRedisService.getByUserIdList(userIdList);
 
             if (CollectionUtils.isEmpty(users)) {
@@ -144,20 +142,20 @@ public class CopyServiceImpl extends ServiceImpl<CopyMapper, Copy> implements IC
             UserVO vo = new UserVO();
             String userId = c.getUserId();
 
-            if(StringUtils.isBlank(userId)){
+            if (StringUtils.isBlank(userId)) {
                 continue;
             }
 
-            if(c.getType() == 0){
+            if (c.getType() == 0) {
                 vo = userVOMap.get(userId);
                 UserOrgVO uo = userOrgVOMap.get(userId);
-                if(uo != null){
+                if (uo != null) {
                     String name = uo.getName();
-                    if(StringUtils.isNotBlank(name) && !vo.getUserNick().equals(name)) {
+                    if (StringUtils.isNotBlank(name) && !vo.getUserNick().equals(name)) {
                         vo.setUserNick(name);
                     }
                 }
-            }else{
+            } else {
                 vo.setUserId(userId);
             }
 
@@ -176,9 +174,9 @@ public class CopyServiceImpl extends ServiceImpl<CopyMapper, Copy> implements IC
      * @throws Exception
      */
     @Override
-    public boolean save(String modelId, String userIds) throws Exception {
+    public boolean save(Long modelId, String userIds) throws Exception {
 
-        if (StringUtils.isBlank(modelId)) {
+        if (null == modelId) {
             throw new BaseException("模型主键不存在");
         }
 
@@ -194,20 +192,20 @@ public class CopyServiceImpl extends ServiceImpl<CopyMapper, Copy> implements IC
         }
 
         List<Copy> list = new ArrayList<>(ids.length);
-        for(int i= 0; i< ids.length; i++){
+        for (int i = 0; i < ids.length; i++) {
             String id = ids[i];
 
-            if(StringUtils.isBlank(id)){
+            if (StringUtils.isBlank(id)) {
                 continue;
             }
 
             Copy entity = new Copy();
-            if(id.contains("admin_")){
+            if (id.contains("admin_")) {
                 entity.setType(1);
-            }else{
+            } else {
                 entity.setType(0);
             }
-            entity.setCopyId(UUIDUtil.get());
+            entity.setId(IDUtils.getID());
             entity.setModelId(modelId);
             entity.setUserId(id);
             entity.setSort(i);
@@ -225,7 +223,7 @@ public class CopyServiceImpl extends ServiceImpl<CopyMapper, Copy> implements IC
     }
 
     @Override
-    public void deleteCopyUser(String oid, String uid) {
+    public void deleteCopyUser(Long oid, Long uid) {
         copyMapper.deleteCopyUser(oid, uid);
     }
 }

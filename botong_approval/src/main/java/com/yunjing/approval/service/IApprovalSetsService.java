@@ -18,7 +18,7 @@ public interface IApprovalSetsService extends IBaseService<ApprovalSets> {
      * @return
      * @throws Exception
      */
-    ApprovalSetVO getApprovalSet(String modelId) throws Exception;
+    ApprovalSetVO getApprovalSet(Long modelId) throws Exception;
 
     /**
      * 保存审批设置信息
@@ -28,6 +28,6 @@ public interface IApprovalSetsService extends IBaseService<ApprovalSets> {
      * @return
      * @throws Exception
      */
-    boolean saveApprovalSets(String modelId, Integer setting) throws Exception;
+    boolean saveApprovalSets(Long modelId, Integer setting) throws Exception;
 
 }

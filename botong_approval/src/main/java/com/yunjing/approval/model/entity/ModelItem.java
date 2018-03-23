@@ -1,16 +1,12 @@
 package com.yunjing.approval.model.entity;
 
 
-import com.baomidou.mybatisplus.activerecord.Model;
 import com.baomidou.mybatisplus.annotations.TableField;
-import com.baomidou.mybatisplus.annotations.TableId;
+import com.baomidou.mybatisplus.annotations.TableLogic;
 import com.baomidou.mybatisplus.annotations.TableName;
-import com.baomidou.mybatisplus.enums.IdType;
 import com.common.mybatis.model.BaseModel;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
-
-import java.io.Serializable;
 
 /**
  * 模型下的具体项目
@@ -21,19 +17,13 @@ import java.io.Serializable;
 @Data
 @TableName("model_item")
 @EqualsAndHashCode(callSuper = true)
-public class ModelItem extends Model<ModelItem> {
-
-    /**
-     * 主键
-     */
-    @TableId(value = "modelitem_id", type = IdType.UUID)
-    private String modelItemId;
+public class ModelItem extends BaseModel<ModelItem> {
 
     /**
      * 模型主键
      */
     @TableField("model_id")
-    private String modelId;
+    private Long modelId;
 
     /**
      * 字段
@@ -117,7 +107,7 @@ public class ModelItem extends Model<ModelItem> {
      * 是否为子项
      */
     @TableField("is_child")
-    private String isChild;
+    private Long isChild;
 
     /**
      * 版本
@@ -126,13 +116,9 @@ public class ModelItem extends Model<ModelItem> {
     private Integer itemVersion;
 
     /**
-     * 是否删除
+     * 是否删除 0：未删除；1：已删除
      */
+    @TableLogic
     @TableField("is_delete")
     private Integer isDelete;
-
-    @Override
-    protected Serializable pkVal() {
-        return this.modelItemId;
-    }
 }

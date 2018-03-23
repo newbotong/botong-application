@@ -33,7 +33,7 @@ public class ExportController extends BaseController {
      * @return
      */
     @PostMapping("/log")
-    public ResponseEntityWrapper getExportLog(@ModelAttribute(value = "page") Page page, @RequestParam("oid") String oid) {
+    public ResponseEntityWrapper getExportLog(@ModelAttribute(value = "page") Page page, @RequestParam("oid") Long oid) {
 
         return success(exportLogService.findExportLogPage(page, oid));
     }
@@ -54,7 +54,7 @@ public class ExportController extends BaseController {
      * @throws Exception
      */
     @GetMapping("/export")
-    public ResponseEntityWrapper exportData(@RequestParam("oid") String oid, @RequestParam("uid") String uid, String mid, Integer state, String title, String createTimeStart,
+    public ResponseEntityWrapper exportData(@RequestParam("oid") Long oid, @RequestParam("uid") Long uid, Long mid, Integer state, String title, String createTimeStart,
                              String createTimeEnd, String finishTimeStart, String finishTimeEnd, HttpServletResponse response) throws Exception {
         boolean exportFlag = false;
         BaseExModel excel = approvalService.createApprovalExcel(oid,uid, mid, state, title, createTimeStart, createTimeEnd, finishTimeStart, finishTimeEnd);

@@ -9,11 +9,11 @@ import com.yunjing.approval.dao.mapper.ModelLMapper;
 import com.yunjing.approval.model.entity.ApprovalProcess;
 import com.yunjing.approval.model.entity.ModelL;
 import com.yunjing.approval.model.vo.ApprovalContent;
+import com.yunjing.approval.model.vo.ClientApprovalVO;
 import com.yunjing.approval.model.vo.ClientModelVO;
 import com.yunjing.approval.model.vo.ModelVO;
-import com.yunjing.approval.service.IApprovalWebService;
+import com.yunjing.approval.service.IApprovalApiService;
 import com.yunjing.approval.service.IModelService;
-import com.yunjing.mommon.utils.ListUtils;
 import org.apache.commons.lang.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.expression.ParseException;
@@ -30,8 +30,8 @@ import java.util.List;
  * @date 2018/02/28
  */
 @Service
-@Transactional(propagation = Propagation.REQUIRED, rollbackFor = Exception.class)
-public class ApprovalWebServiceImpl implements IApprovalWebService {
+
+public class ApprovalApiServiceImpl implements IApprovalApiService {
 
     @Autowired
     private IModelService modelService;
@@ -45,7 +45,8 @@ public class ApprovalWebServiceImpl implements IApprovalWebService {
     private ApprovalProcessMapper approvalProcessMapper;
 
     @Override
-    public List<ClientModelVO> getList(String orgId) {
+    @Transactional(propagation = Propagation.REQUIRED, rollbackFor = Exception.class)
+    public List<ClientModelVO> getList(Long orgId) {
         List<ModelVO> modelVOS = modelLMapper.selectModelListByOrgId(orgId);
         List<ClientModelVO> list = new ArrayList<>();
         for (ModelVO modelVO : modelVOS) {
@@ -56,7 +57,8 @@ public class ApprovalWebServiceImpl implements IApprovalWebService {
     }
 
     @Override
-    public Page<ApprovalContent> getMyApprovalList(Page page, String orgId, String userId, Integer state, String searchKey) {
+    @Transactional(propagation = Propagation.REQUIRED, rollbackFor = Exception.class)
+    public Page<ClientApprovalVO> getWaited(Page page, Long orgId, Long userId, Integer state, String searchKey) {
         int current = page.getCurrent();
         int size = page.getSize();
         int index = (current - 1) * size;
@@ -98,7 +100,7 @@ public class ApprovalWebServiceImpl implements IApprovalWebService {
 //                approvalContents.add(selectApprovalContent(approce));
 //            }
         }
-        return approvalContentPage;
+        return null;
     }
 
     /**

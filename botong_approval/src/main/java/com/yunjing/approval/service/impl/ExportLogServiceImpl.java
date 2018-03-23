@@ -2,7 +2,7 @@ package com.yunjing.approval.service.impl;
 
 import com.baomidou.mybatisplus.mapper.Condition;
 import com.baomidou.mybatisplus.plugins.Page;
-import com.baomidou.mybatisplus.service.impl.ServiceImpl;
+import com.common.mybatis.service.impl.BaseServiceImpl;
 import com.yunjing.approval.dao.cache.UserRedisService;
 import com.yunjing.approval.dao.mapper.ExportLogMapper;
 import com.yunjing.approval.model.entity.ExportLog;
@@ -25,7 +25,7 @@ import java.util.stream.Collectors;
  * @date 2018/01/15
  */
 @Service
-public class ExportLogServiceImpl extends ServiceImpl<ExportLogMapper, ExportLog> implements IExportLogService {
+public class ExportLogServiceImpl extends BaseServiceImpl<ExportLogMapper, ExportLog> implements IExportLogService {
 
     @Autowired
     private UserRedisService userRedisService;
@@ -33,7 +33,7 @@ public class ExportLogServiceImpl extends ServiceImpl<ExportLogMapper, ExportLog
     private IModelService modelService;
 
     @Override
-    public LogPageVO findExportLogPage(Page page, String orgId) {
+    public LogPageVO findExportLogPage(Page page, Long orgId) {
         LogPageVO logPage = new LogPageVO();
         Page<ExportLog> page1 = this.selectPage(page, Condition.create().where("org_id={0}", orgId).orderBy("create_time", false));
         List<ExportLog> records = page1.getRecords();
@@ -45,20 +45,20 @@ public class ExportLogServiceImpl extends ServiceImpl<ExportLogMapper, ExportLog
             ExportLogVO exportLogVO = new ExportLogVO();
             exportLogVO.setFileName(exportLog.getFileName());
             exportLogVO.setCreateTime(exportLog.getCreateTime());
-            UserVO user = userRedisService.getByUserId(exportLog.getUserId());
+            UserVO user = userRedisService.getByUserId(exportLog.getUserId().toString());
             exportLogVO.setName(user.getUserNick());
             if (exportLog.getModelId().contains(",")) {
                 mName = "";
                 // 多个审批类型导出记录的处理
                 List<String> modelIds = Arrays.asList(exportLog.getModelId().split(","));
-                modelIds.stream().forEach(modelId ->{
+                modelIds.stream().forEach(modelId -> {
                     Set<ModelVO> modelVOS = modelListByOrgId.stream().filter(modelVO -> modelVO.getModelId().equals(modelId)).collect(Collectors.toSet());
                     modelList.addAll(modelVOS);
                 });
                 for (ModelVO m : modelList) {
                     mName += m.getModelName() + "|";
                 }
-                exportLogVO.setApprovalType(mName.substring(0,mName.length()-1));
+                exportLogVO.setApprovalType(mName.substring(0, mName.length() - 1));
             } else {
                 // 单个审批类型导出记录的处理
                 List<ModelVO> models = modelListByOrgId.stream().filter(modelVO -> modelVO.getModelId().equals(exportLog.getModelId())).collect(Collectors.toList());

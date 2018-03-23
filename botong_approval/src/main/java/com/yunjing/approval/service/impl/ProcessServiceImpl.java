@@ -2,8 +2,7 @@ package com.yunjing.approval.service.impl;
 
 import com.baomidou.mybatisplus.mapper.Condition;
 import com.baomidou.mybatisplus.mapper.Wrapper;
-import com.baomidou.mybatisplus.service.impl.ServiceImpl;
-import com.yunjing.approval.common.UUIDUtil;
+import com.common.mybatis.service.impl.BaseServiceImpl;
 import com.yunjing.approval.dao.cache.UserRedisService;
 import com.yunjing.approval.dao.mapper.ProcessMapper;
 import com.yunjing.approval.model.entity.ApprovalSets;
@@ -14,7 +13,7 @@ import com.yunjing.approval.service.IOrgModelService;
 import com.yunjing.approval.service.IProcessService;
 import com.yunjing.approval.util.ApproConstants;
 import com.yunjing.mommon.global.exception.BaseException;
-import org.apache.commons.lang.StringUtils;
+import com.yunjing.mommon.utils.IDUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Propagation;
@@ -29,7 +28,7 @@ import java.util.List;
  */
 @Service
 @Transactional(propagation = Propagation.REQUIRED, rollbackFor = Exception.class)
-public class ProcessServiceImpl extends ServiceImpl<ProcessMapper, SetsProcess> implements IProcessService {
+public class ProcessServiceImpl extends BaseServiceImpl<ProcessMapper, SetsProcess> implements IProcessService {
 
     @Autowired
     private UserRedisService userRedisService;
@@ -44,15 +43,15 @@ public class ProcessServiceImpl extends ServiceImpl<ProcessMapper, SetsProcess> 
     private ProcessMapper processMapper;
 
     @Override
-    public boolean delete(String modelId, String conditions) throws Exception {
+    public boolean delete(Long modelId, Long conditions) throws Exception {
 
-        if (StringUtils.isBlank(modelId)) {
+        if (null == modelId) {
             throw new BaseException("模型主键不存在");
         }
 
         Wrapper<SetsProcess> wrapper;
 
-        if (StringUtils.isBlank(conditions)) {
+        if (null == conditions) {
             wrapper = Condition.create().where("model={0}", modelId).and("conditions=''").or("conditions is null");
         } else {
             wrapper = Condition.create().where("model={0}", modelId).and("conditions={0}", conditions);
@@ -64,10 +63,10 @@ public class ProcessServiceImpl extends ServiceImpl<ProcessMapper, SetsProcess> 
     }
 
     @Override
-    public List<UserVO> getProcess(String modelId, String conditions) throws Exception {
+    public List<UserVO> getProcess(Long modelId, Long conditions) throws Exception {
         List<UserVO> users = new ArrayList<>();
         List<SetsProcess> list;
-        if (StringUtils.isBlank(conditions)) {
+        if (null == conditions) {
             list = this.selectList(Condition.create().where("model={0}", modelId).and("(conditions is null or conditions='')").orderBy(true, "sort", true));
         } else {
             list = this.selectList(Condition.create().where("model={0}", modelId).and("conditions={0}", conditions).orderBy(true, "sort", true));
@@ -98,19 +97,19 @@ public class ProcessServiceImpl extends ServiceImpl<ProcessMapper, SetsProcess> 
     }
 
     @Override
-    public boolean updateProcess(String modelId, String conditionId, String userArray) throws Exception {
+    public boolean updateProcess(Long modelId, Long conditionId, String userArray) throws Exception {
         String[] userIds = userArray.split(",");
         int setting = ApproConstants.SET_TYPE_0;
-        if (StringUtils.isNotBlank(conditionId)) {
+        if (null != conditionId) {
             setting = ApproConstants.SET_TYPE_1;
         }
-        if (StringUtils.isBlank(conditionId)) {
-            conditionId = "";
+        if (null == conditionId) {
+            conditionId = null;
         }
         ApprovalSets approvalSets = approvalSetsService.selectOne(Condition.create().where("model_id={0}", modelId));
         if (approvalSets == null) {
             approvalSets = new ApprovalSets();
-            approvalSets.setModelId(modelId);
+            approvalSets.setId(modelId);
         }
         approvalSets.setSetting(setting);
         boolean insertOrUpdate = approvalSetsService.insertOrUpdate(approvalSets);
@@ -124,9 +123,9 @@ public class ProcessServiceImpl extends ServiceImpl<ProcessMapper, SetsProcess> 
         List<SetsProcess> list = new ArrayList<>();
         for (int i = 0; i < userIds.length; i++) {
             SetsProcess process = new SetsProcess();
-            process.setProcess(UUIDUtil.get());
-            process.setModel(modelId);
-            process.setConditions(conditionId);
+            process.setId(IDUtils.getID());
+            process.setModelId(modelId);
+            process.setConditionId(conditionId);
             process.setApprover(userIds[i]);
             process.setSort(i + 1);
             list.add(process);
@@ -139,7 +138,7 @@ public class ProcessServiceImpl extends ServiceImpl<ProcessMapper, SetsProcess> 
     }
 
     @Override
-    public void deleteProcessUser(String oid, String uid) {
+    public void deleteProcessUser(Long oid, Long uid) {
         processMapper.deleteProcessUser(oid, uid);
     }
 }

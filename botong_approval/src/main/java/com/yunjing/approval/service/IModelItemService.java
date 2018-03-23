@@ -19,7 +19,7 @@ public interface IModelItemService extends IBaseService<ModelItem> {
      * @return 模型视图
      * @throws Exception 异常
      */
-    ClientModelItemVO getModelItem(String modelId) throws Exception;
+    ClientModelItemVO getModelItem(Long modelId) throws Exception;
 
     /**
      * 保存模型
@@ -30,5 +30,5 @@ public interface IModelItemService extends IBaseService<ModelItem> {
      * @return 模型视图
      * @throws Exception 异常
      */
-    ModelVO saveModelItem(String orgId, String userId, String json) throws Exception;
+    ModelVO saveModelItem(Long orgId, Long userId, String json) throws Exception;
 }

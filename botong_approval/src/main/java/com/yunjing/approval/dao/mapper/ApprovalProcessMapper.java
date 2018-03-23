@@ -24,6 +24,6 @@ public interface ApprovalProcessMapper extends IBaseMapper<ApprovalProcess> {
      * @param flag      搜索关键字是不是日期
      * @return
      */
-    List<ApprovalContent> getMyApprovalList(@Param("index") Integer index, @Param("size") Integer pageSize, @Param("orgId") String orgId,
-                                            @Param("userId") String userId, @Param("searchKey") String searchKey, @Param("flag") Boolean flag);
+    List<ApprovalContent> getMyApprovalList(@Param("index") Integer index, @Param("size") Integer pageSize, @Param("orgId") Long orgId,
+                                            @Param("userId") Long userId, @Param("searchKey") String searchKey, @Param("flag") Boolean flag);
 }

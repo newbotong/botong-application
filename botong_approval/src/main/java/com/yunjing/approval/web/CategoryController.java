@@ -27,7 +27,7 @@ public class CategoryController extends BaseController {
      * @return
      */
     @PostMapping("/create_or_rename")
-    public ResponseEntityWrapper createOrEdit(@RequestParam("oid") String oid, Long categoryId, @RequestParam("categoryName") String categoryName) throws Exception {
+    public ResponseEntityWrapper createOrEdit(@RequestParam("oid") Long oid, Long categoryId, @RequestParam("categoryName") String categoryName) throws Exception {
 
         return success(modelCategoryService.createOrEditCategory(oid, categoryId, categoryName));
     }
@@ -39,7 +39,7 @@ public class CategoryController extends BaseController {
      * @return
      */
     @PostMapping("/delete")
-    public ResponseEntityWrapper delete(@RequestParam("oid") String oid, @RequestParam("categoryId") Long categoryId) throws Exception {
+    public ResponseEntityWrapper delete(@RequestParam("oid") Long oid, @RequestParam("categoryId") Long categoryId) throws Exception {
 
         return success(modelCategoryService.deleteCategory(oid, categoryId));
     }
@@ -51,7 +51,7 @@ public class CategoryController extends BaseController {
      * @return
      */
     @GetMapping("/list")
-    public ResponseEntityWrapper getCategoryList(@RequestParam("oid") String oid) throws Exception {
+    public ResponseEntityWrapper getCategoryList(@RequestParam("oid") Long oid) throws Exception {
 
         return success(modelCategoryService.getCategoryList(oid));
     }
@@ -64,7 +64,7 @@ public class CategoryController extends BaseController {
      * @return
      */
     @PostMapping("/sort")
-    public ResponseEntityWrapper sort(@RequestParam("oid") String oid, @RequestParam("sortArray") String sortArray) throws Exception {
+    public ResponseEntityWrapper sort(@RequestParam("oid") Long oid, @RequestParam("sortArray") String sortArray) throws Exception {
 
         return success(modelCategoryService.sortedCategory(oid, sortArray));
     }

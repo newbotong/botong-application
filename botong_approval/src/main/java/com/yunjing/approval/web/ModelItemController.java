@@ -19,12 +19,12 @@ public class ModelItemController extends BaseController{
     private IModelItemService modelItemService;
 
     @GetMapping("/get")
-    public ResponseEntityWrapper getItem(@RequestParam("modelId") String modelId) throws Exception {
+    public ResponseEntityWrapper getItem(@RequestParam("modelId") Long modelId) throws Exception {
         return success(modelItemService.getModelItem(modelId));
     }
 
     @PostMapping("/save")
-    public ResponseEntityWrapper saveItem(@RequestParam("oid") String orgId, @RequestParam("uid") String userId, @RequestParam("json") String json) throws Exception {
+    public ResponseEntityWrapper saveItem(@RequestParam("oid") Long orgId, @RequestParam("uid") Long userId, @RequestParam("json") String json) throws Exception {
         return success(modelItemService.saveModelItem(orgId, userId, json));
     }
 }

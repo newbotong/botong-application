@@ -20,7 +20,7 @@ public interface IModelService extends IBaseService<ModelL> {
      * @param orgId 企业主键
      * @return
      */
-    List<ModelListVO> findModelList(String orgId);
+    List<ModelListVO> findModelList(Long orgId);
 
     /**
      * 审批模板排序
@@ -30,7 +30,7 @@ public interface IModelService extends IBaseService<ModelL> {
      * @return
      * @throws Exception 异常
      */
-    boolean sortedModel(String categoryId, String sortArray) throws Exception;
+    boolean sortedModel(Long categoryId, String sortArray) throws Exception;
 
     /**
      * 移动审批模板
@@ -40,7 +40,7 @@ public interface IModelService extends IBaseService<ModelL> {
      * @return
      * @throws Exception 异常
      */
-    boolean moveModel(Long categoryId, String modelId) throws Exception;
+    boolean moveModel(Long categoryId, Long modelId) throws Exception;
 
     /**
      * 查询企业下的初始化模板
@@ -48,7 +48,7 @@ public interface IModelService extends IBaseService<ModelL> {
      * @param orgId 企业主键
      * @return
      */
-    List<ModelVO> findModelListByOrgId(String orgId);
+    List<ModelVO> findModelListByOrgId(Long orgId);
 
     /**
      * 设置是否停用模型
@@ -59,7 +59,7 @@ public interface IModelService extends IBaseService<ModelL> {
      * @return
      * @throws Exception
      */
-    boolean updateVisibleRange(String modelId, String deptIds, String userIds) throws Exception;
+    boolean updateVisibleRange(Long modelId, String deptIds, String userIds) throws Exception;
 
     /**
      * 修改可见范围
@@ -69,7 +69,7 @@ public interface IModelService extends IBaseService<ModelL> {
      * @return
      * @throws Exception
      */
-    boolean updateIsDisabled(String modelId, Integer isDisabled) throws Exception;
+    boolean updateIsDisabled(Long modelId, Integer isDisabled) throws Exception;
 
 
 }

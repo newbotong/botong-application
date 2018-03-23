@@ -1,6 +1,6 @@
 package com.yunjing.approval.service.impl;
 
-import com.baomidou.mybatisplus.service.impl.ServiceImpl;
+import com.common.mybatis.service.impl.BaseServiceImpl;
 import com.yunjing.approval.dao.mapper.ApprovalProcessMapper;
 import com.yunjing.approval.model.entity.ApprovalProcess;
 import com.yunjing.approval.service.IApprovalProcessService;
@@ -14,6 +14,6 @@ import org.springframework.transaction.annotation.Transactional;
  */
 @Service
 @Transactional(propagation = Propagation.REQUIRED, rollbackFor = Exception.class)
-public class ApprovalProcessServiceImpl extends ServiceImpl<ApprovalProcessMapper, ApprovalProcess> implements IApprovalProcessService {
+public class ApprovalProcessServiceImpl extends BaseServiceImpl<ApprovalProcessMapper, ApprovalProcess> implements IApprovalProcessService {
 
 }

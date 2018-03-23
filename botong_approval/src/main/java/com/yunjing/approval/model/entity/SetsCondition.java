@@ -1,13 +1,11 @@
 package com.yunjing.approval.model.entity;
 
-import com.baomidou.mybatisplus.activerecord.Model;
 import com.baomidou.mybatisplus.annotations.TableField;
-import com.baomidou.mybatisplus.annotations.TableId;
+import com.baomidou.mybatisplus.annotations.TableLogic;
 import com.baomidou.mybatisplus.annotations.TableName;
+import com.common.mybatis.model.BaseModel;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
-
-import java.io.Serializable;
 
 /**
  * @author lxp
@@ -16,19 +14,13 @@ import java.io.Serializable;
 @Data
 @TableName("approval_sets_condition")
 @EqualsAndHashCode(callSuper = true)
-public class SetsCondition extends Model<SetsCondition> {
-
-    /**
-     * 条件主键
-     */
-    @TableId("conditions")
-    private String conditions;
+public class SetsCondition extends BaseModel<SetsCondition> {
 
     /**
      * 模型主键
      */
     @TableField("model")
-    private String model;
+    private Long modelId;
 
     /**
      * 条件描述
@@ -54,8 +46,10 @@ public class SetsCondition extends Model<SetsCondition> {
     @TableField("sort")
     private int sort;
 
-    @Override
-    protected Serializable pkVal() {
-        return this.conditions;
-    }
+    /**
+     * 是否删除 0：未删除；1：已删除
+     */
+    @TableLogic
+    @TableField("is_delete")
+    private Integer isDelete;
 }

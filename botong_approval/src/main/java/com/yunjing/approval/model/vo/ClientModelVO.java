@@ -26,7 +26,7 @@ public class ClientModelVO {
     /**
      * 模型主键
      */
-    private String modelId;
+    private Long modelId;
 
     /**
      * 模型名称

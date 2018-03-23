@@ -1,7 +1,7 @@
 package com.yunjing.approval.service.impl;
 
 import com.baomidou.mybatisplus.mapper.Condition;
-import com.baomidou.mybatisplus.service.impl.ServiceImpl;
+import com.common.mybatis.service.impl.BaseServiceImpl;
 import com.yunjing.approval.dao.cache.UserRedisService;
 import com.yunjing.approval.dao.mapper.ApprovalMapper;
 import com.yunjing.approval.model.entity.Approval;
@@ -27,7 +27,7 @@ import java.util.List;
  */
 @Service
 @Transactional(propagation = Propagation.REQUIRED, rollbackFor = Exception.class)
-public class ApprovalRepairServiceImpl extends ServiceImpl<ApprovalMapper, Approval> implements IApprovalRepairService {
+public class ApprovalRepairServiceImpl extends BaseServiceImpl<ApprovalMapper, Approval> implements IApprovalRepairService {
 
     @Autowired
     private UserRedisService userRedisService;
@@ -39,10 +39,10 @@ public class ApprovalRepairServiceImpl extends ServiceImpl<ApprovalMapper, Appro
     private IApprovalProcessService approvalProcessService;
 
     @Override
-    public List<Approval> repairTitle(String oid) throws Exception {
+    public List<Approval> repairTitle(Long oid) throws Exception {
         Condition condition = Condition.create();
 
-        if (StringUtils.isNotBlank(oid)) {
+        if (null != oid) {
             condition.eq("org_id", oid);
         }
 
@@ -94,10 +94,10 @@ public class ApprovalRepairServiceImpl extends ServiceImpl<ApprovalMapper, Appro
     }
 
     @Override
-    public List<Approval> repairFinishTime(String oid) {
+    public List<Approval> repairFinishTime(Long oid) {
         Condition condition = Condition.create();
 
-        if (StringUtils.isNotBlank(oid)) {
+        if (null != oid) {
             condition.eq("org_id", oid);
         }
 
@@ -111,7 +111,7 @@ public class ApprovalRepairServiceImpl extends ServiceImpl<ApprovalMapper, Appro
                     continue;
                 }
 
-                List<ApprovalProcess> processList = approvalProcessService.selectList(Condition.create().eq("approval_id", approval.getApprovalId()).orderBy("seq", true));
+                List<ApprovalProcess> processList = approvalProcessService.selectList(Condition.create().eq("approval_id", approval.getId()).orderBy("seq", true));
                 if (CollectionUtils.isEmpty(processList)) {
                     continue;
                 }
@@ -120,7 +120,7 @@ public class ApprovalRepairServiceImpl extends ServiceImpl<ApprovalMapper, Appro
                     continue;
                 }
 
-                approval.setFinishTime(process.getProcessTime());
+                approval.setFinishTime(process.getProcessTime().getTime());
                 entityList.add(approval);
             }
 

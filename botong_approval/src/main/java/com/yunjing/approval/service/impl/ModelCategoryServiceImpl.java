@@ -3,10 +3,8 @@ package com.yunjing.approval.service.impl;
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 import com.baomidou.mybatisplus.mapper.Condition;
-import com.baomidou.mybatisplus.mapper.EntityWrapper;
 import com.common.mybatis.service.impl.BaseServiceImpl;
 import com.yunjing.approval.common.DateUtil;
-import com.yunjing.approval.common.UUIDUtil;
 import com.yunjing.approval.dao.mapper.ModelCategoryMapper;
 import com.yunjing.approval.model.entity.ModelCategory;
 import com.yunjing.approval.model.entity.ModelL;
@@ -19,8 +17,6 @@ import com.yunjing.mommon.global.exception.BaseException;
 import com.yunjing.mommon.global.exception.MessageNotExitException;
 import com.yunjing.mommon.global.exception.UpdateMessageFailureException;
 import com.yunjing.mommon.utils.IDUtils;
-import org.apache.commons.lang.StringUtils;
-import org.apache.commons.lang.time.DateUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -38,16 +34,16 @@ public class ModelCategoryServiceImpl extends BaseServiceImpl<ModelCategoryMappe
     private IModelService modelService;
 
     @Override
-    public boolean createOrEditCategory(String orgId, Long categoryId, String categoryName) {
+    public boolean createOrEditCategory(Long orgId, Long categoryId, String categoryName) {
         ModelCategory modelCategory = new ModelCategory();
         if (categoryId == null) {
-            modelCategory.setCategoryId(IDUtils.getID());
+            modelCategory.setId(IDUtils.getID());
             modelCategory.setCreateTime(DateUtil.getCurrentTime().getTime());
         } else {
             modelCategory = this.selectById(categoryId);
             if (modelCategory == null) {
                 modelCategory = new ModelCategory();
-                modelCategory.setCategoryId(IDUtils.getID());
+                modelCategory.setId(IDUtils.getID());
                 modelCategory.setCreateTime(DateUtil.getCurrentTime().getTime());
             }
         }
@@ -60,7 +56,7 @@ public class ModelCategoryServiceImpl extends BaseServiceImpl<ModelCategoryMappe
     }
 
     @Override
-    public boolean deleteCategory(String orgId, Long categoryId) {
+    public boolean deleteCategory(Long orgId, Long categoryId) {
         boolean flag = false;
         List<ModelVO> modelList = modelService.findModelListByOrgId(orgId);
         List<ModelVO> modelVOList = modelList.stream().filter(modelVO -> categoryId.equals(modelVO.getCategoryId())).collect(Collectors.toList());
@@ -68,14 +64,14 @@ public class ModelCategoryServiceImpl extends BaseServiceImpl<ModelCategoryMappe
             flag = this.delete(Condition.create().where("category_id={0}", categoryId));
         } else {
             // 如果删除的分组中有审批模型，则把这些审批模型的所属分组批量改为其他分组
-            List<String> modelIds = new ArrayList<>();
+            List<Long> modelIds = new ArrayList<>();
             for (ModelVO modelVO : modelVOList) {
                 modelIds.add(modelVO.getModelId());
             }
             List<ModelL> modelLS = modelService.selectBatchIds(modelIds);
             ModelCategory modelCategory = this.selectOne(Condition.create().where("category_name={0}", "其他"));
             for (ModelL modelL : modelLS) {
-                modelL.setCategoryId(modelCategory.getCategoryId());
+                modelL.setCategoryId(modelCategory.getId());
             }
             boolean isUpdated = modelService.updateBatchById(modelLS);
             if (isUpdated) {
@@ -86,7 +82,7 @@ public class ModelCategoryServiceImpl extends BaseServiceImpl<ModelCategoryMappe
     }
 
     @Override
-    public boolean sortedCategory(String orgId, String sortArray) throws BaseException {
+    public boolean sortedCategory(Long orgId, String sortArray) throws BaseException {
         boolean isUpdated = false;
         try {
             // 解析排序数据
@@ -101,7 +97,7 @@ public class ModelCategoryServiceImpl extends BaseServiceImpl<ModelCategoryMappe
             List<ModelCategory> modelCategoryList = this.selectList(Condition.create().where("org_id = {0}", orgId));
             if (modelCategoryList != null && !modelCategoryList.isEmpty()) {
                 for (ModelCategory modelCategory : modelCategoryList) {
-                    Integer sort = categorySortMap.get(modelCategory.getCategoryId());
+                    Integer sort = categorySortMap.get(modelCategory.getId());
                     modelCategory.setSort(sort);
                 }
                 isUpdated = this.updateBatchById(modelCategoryList);
@@ -118,7 +114,7 @@ public class ModelCategoryServiceImpl extends BaseServiceImpl<ModelCategoryMappe
     }
 
     @Override
-    public List<ModelCategoryVO> getCategoryList(String orgId) {
+    public List<ModelCategoryVO> getCategoryList(Long orgId) {
         List<ModelCategoryVO> modelCategoryVOList = new ArrayList<>();
         List<ModelListVO> modelList = modelService.findModelList(orgId);
         for (ModelListVO modelListVO : modelList) {

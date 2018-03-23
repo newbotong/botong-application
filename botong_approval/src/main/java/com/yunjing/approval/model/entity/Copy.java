@@ -1,34 +1,26 @@
 package com.yunjing.approval.model.entity;
 
-import com.baomidou.mybatisplus.activerecord.Model;
 import com.baomidou.mybatisplus.annotations.TableField;
-import com.baomidou.mybatisplus.annotations.TableId;
+import com.baomidou.mybatisplus.annotations.TableLogic;
 import com.baomidou.mybatisplus.annotations.TableName;
+import com.common.mybatis.model.BaseModel;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 
-import java.io.Serializable;
-
 /**
- * @author roc
- * @date 2017/12/21
+ * @author 刘小鹏
+ * @date 2018/03/23
  */
 @Data
 @TableName("approval_copy")
 @EqualsAndHashCode(callSuper=true)
-public class Copy extends Model<Copy> {
-
-    /**
-     * 抄送人主键
-     */
-    @TableId("copy_id")
-    private String copyId;
+public class Copy extends BaseModel<Copy> {
 
     /**
      * 模型主键
      */
     @TableField("model_id")
-    private String modelId;
+    private Long modelId;
 
     /**
      * 用户主键
@@ -48,8 +40,11 @@ public class Copy extends Model<Copy> {
     @TableField("sort")
     private int sort;
 
-    @Override
-    protected Serializable pkVal() {
-        return this.copyId;
-    }
+    /**
+     * 是否删除 0：未删除；1：已删除
+     */
+    @TableLogic
+    @TableField("is_delete")
+    private Integer isDelete;
+
 }

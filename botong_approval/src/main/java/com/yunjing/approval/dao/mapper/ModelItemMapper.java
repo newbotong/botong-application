@@ -20,6 +20,6 @@ public interface ModelItemMapper extends IBaseMapper<ModelItem> {
      * @param orgId 企业主键
      * @return
      */
-    List<ModelItem> selectAll(String orgId);
+    List<ModelItem> selectAll(Long orgId);
 
 }

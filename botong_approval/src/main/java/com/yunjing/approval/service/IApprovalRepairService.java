@@ -19,7 +19,7 @@ public interface IApprovalRepairService extends IBaseService<Approval> {
      * @return 审批列表
      * @throws Exception 异常
      */
-    List<Approval> repairTitle(String oid) throws Exception;
+    List<Approval> repairTitle(Long oid) throws Exception;
 
     /**
      * 修复审批完成时间数据
@@ -28,5 +28,5 @@ public interface IApprovalRepairService extends IBaseService<Approval> {
      * @return 审批列表
      * @throws Exception 异常
      */
-    List<Approval> repairFinishTime(String oid);
+    List<Approval> repairFinishTime(Long oid);
 }

@@ -1,30 +1,22 @@
 package com.yunjing.approval.model.entity;
 
-import com.baomidou.mybatisplus.activerecord.Model;
 import com.baomidou.mybatisplus.annotations.TableField;
-import com.baomidou.mybatisplus.annotations.TableId;
+import com.baomidou.mybatisplus.annotations.TableLogic;
 import com.baomidou.mybatisplus.annotations.TableName;
-import com.baomidou.mybatisplus.enums.IdType;
+import com.common.mybatis.model.BaseModel;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 
-import java.io.Serializable;
 import java.sql.Timestamp;
 
 /**
  * @author 刘小鹏
- * @date 2017/11/29
+ * @date 2018/03/23
  */
 @Data
 @TableName("approval")
 @EqualsAndHashCode(callSuper = true)
-public class Approval extends Model<Approval> {
-
-    /**
-     * 审批ID
-     */
-    @TableId(value = "approval_id", type = IdType.UUID)
-    private String approvalId;
+public class Approval extends BaseModel<Approval> {
 
     /**
      * 用户ID
@@ -48,13 +40,13 @@ public class Approval extends Model<Approval> {
      * 创建时间
      */
     @TableField("create_time")
-    private Timestamp createTime;
+    private Long createTime;
 
     /**
      * 完成时间
      */
     @TableField("finish_time")
-    private Timestamp finishTime;
+    private Long finishTime;
 
     /**
      * 状态 0:审批中 1:审批完成 2:已撤回
@@ -74,15 +66,17 @@ public class Approval extends Model<Approval> {
     @TableField("org_id")
     private String orgId;
 
-
     /**
      * 模型版本
      */
     @TableField("model_version")
     private Integer modelVersion;
 
-    @Override
-    protected Serializable pkVal() {
-        return this.approvalId;
-    }
+    /**
+     * 是否删除 0：未删除；1：已删除
+     */
+    @TableLogic
+    @TableField("is_delete")
+    private Integer isDelete;
+
 }
