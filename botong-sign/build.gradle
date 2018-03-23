@@ -1,0 +1,29 @@
+buildscript {
+	repositories {
+		mavenCentral()
+	}
+	dependencies {
+		classpath("org.springframework.boot:spring-boot-gradle-plugin:${springBootVersion}")
+	}
+}
+apply from: "../common_service.gradle"
+apply plugin: 'java'
+apply plugin: 'eclipse'
+apply plugin: 'org.springframework.boot'
+apply plugin: 'io.spring.dependency-management'
+
+group = 'com.yunjing.sign'
+version = '0.0.1-SNAPSHOT'
+sourceCompatibility = 1.8
+
+repositories {
+	mavenCentral()
+}
+
+
+dependencies {
+	compile('com.yunjing.botong:commons:2.0.0-SNAPSHOT')
+	compile('com.yunjing.botong:commons-mybatisplus:2.0.0-SNAPSHOT')
+	compile('com.yunjing.botong:commons-redis:2.0.0-SNAPSHOT')
+
+}
