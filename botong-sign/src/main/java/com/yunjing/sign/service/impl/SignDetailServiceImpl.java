@@ -4,9 +4,11 @@ import com.alibaba.fastjson.JSONObject;
 import com.baomidou.mybatisplus.mapper.EntityWrapper;
 import com.baomidou.mybatisplus.service.impl.ServiceImpl;
 import com.yunjing.mommon.Enum.DateStyle;
+import com.yunjing.mommon.global.exception.UpdateMessageFailureException;
 import com.yunjing.mommon.utils.BeanUtils;
 import com.yunjing.mommon.utils.DateUtil;
 import com.yunjing.mommon.utils.IDUtils;
+import com.yunjing.sign.beans.model.SignConfigModel;
 import com.yunjing.sign.beans.model.SignDetail;
 import com.yunjing.sign.beans.model.SignDetailImg;
 import com.yunjing.sign.beans.param.SignDetailParam;
@@ -52,6 +54,21 @@ public class SignDetailServiceImpl extends ServiceImpl<SignDetailMapper, SignDet
     @Transactional(rollbackFor = Exception.class)
     public boolean toSign(SignDetailParam signDetailParam) {
         SignDetail signDetail = BeanUtils.map(signDetailParam, SignDetail.class);
+        SignConfigModel signConfigModel = new SignConfigModel().selectOne(new EntityWrapper<SignConfigModel>().eq("org_id", signDetailParam.getOrgId()).eq("is_delete", 0));
+        if (signConfigModel != null) {
+            if (signConfigModel.getTimeStatus() == 1) {
+                Date nowStart = DateUtil.stringToDate(DateUtil.converTime(new Date()));
+                Date nowEnd = DateUtil.addDay(nowStart, 1);
+                int count = new SignDetail().selectCount(new EntityWrapper<SignDetail>().eq("org_id", signDetailParam.getOrgId()).eq("user_id", signDetailParam.getUserId()).lt("create_time", nowEnd.getTime()).ge("create_time", nowStart.getTime()));
+                Date nowStart1 = DateUtil.StringToDate(DateUtil.converTime(new Date()) + " " + signConfigModel.getEndTime(), DateStyle.YYYY_MM_DD_HH_MM);
+                if (count >= 1) {
+                    if(nowStart1.getTime() >  System.currentTimeMillis()) {
+                        throw new UpdateMessageFailureException(600, "时间未到，不能打卡");
+                    }
+                }
+            }
+        }
+
         boolean result = signDetail.insert();
         if (StringUtils.isNotBlank(signDetailParam.getImgUrls())) {
             SignDetailImg detailImg;

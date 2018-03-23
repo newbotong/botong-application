@@ -4,6 +4,8 @@ import com.baomidou.mybatisplus.annotations.TableField;
 import com.baomidou.mybatisplus.activerecord.Model;
 import com.baomidou.mybatisplus.annotations.TableName;
 import com.common.mybatis.model.BaseModel;
+import lombok.Data;
+import lombok.EqualsAndHashCode;
 
 /**
  * <p>
@@ -13,6 +15,8 @@ import com.common.mybatis.model.BaseModel;
  * @author jingwj
  * @since 2018-03-21
  */
+@Data
+@EqualsAndHashCode(callSuper=true)
 @TableName("sign_detail_daily")
 public class SignDetailDaily extends BaseModel<SignDetailDaily> {
 
