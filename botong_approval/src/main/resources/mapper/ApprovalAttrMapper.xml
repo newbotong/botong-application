@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.yunjing.approval.dao.mapper.ApprovalAttrMapper">
+
+    <select id="selectAttrByOrgId" resultType="com.yunjing.approval.model.entity.ApprovalAttr">
+        select attr.attr_id as attrId,attr.attr_name as attrName,attr.attr_parent as attrParent,attr.attr_value as attrValue,
+        attr.attr_num as attrNum,attr.attr_type as attrType,attr.approval_id as approvalId
+        from approval_attr attr
+        join approval app on app.approval_id = attr.approval_id
+        where app.org_id = #{ orgId }
+    </select>
+</mapper>

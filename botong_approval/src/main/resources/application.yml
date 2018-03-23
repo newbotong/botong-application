@@ -1,0 +1,66 @@
+### 设置服务端口和Tomcat编码格式
+server:
+  port: 26110
+  tomcat:
+    uri-encoding: UTF-8
+
+### 设置服务名称
+spring:
+  application:
+    name: botong-approval
+  sleuth:
+    sampler:
+      percentage: 1
+  rabbitmq:
+      host: 192.168.10.47
+      port: 10222
+      username: yunjing216
+      password: yunjing216
+  datasource:
+    url: jdbc:mysql://192.168.10.46:10150/botong_approval?autoReconnect=true&useUnicode=true&characterEncoding:UTF-8&zeroDateTimeBehavior=convertToNull&useSSL=false
+    username: root
+    password: YunJing168
+    driver-class-name: com.mysql.jdbc.Driver
+    initialize: true
+    continue-on-error: true
+  ##Redis配置
+  # Redis数据库索引（默认为0）
+
+  redis:
+    database: 1
+  # Redis服务器地址
+    host: 192.168.10.48
+  # Redis服务器连接端口
+    port: 10350
+  # Redis服务器连接密码（默认为空）
+    password:
+    # 连接超时时间（毫秒）
+    timeout: 0
+  # 连接池最大连接数（使用负值表示没有限制）
+    pool:
+      max-active: 8
+  # 连接池最大阻塞等待时间（使用负值表示没有限制）
+      max-wait: -1
+  # 连接池中的最大空闲连接
+      max-idle: 8
+  # 连接池中的最小空闲连接
+      min-idle: 0
+
+### 注册eureka
+eureka:
+  client:
+    register-with-eureka: true
+    fetch-registry: true
+    serviceUrl:
+      defaultZone: http://127.0.0.1:8762/eureka/
+
+
+##配置mybatis-plus
+mybatis-plus:
+  mapper-locations: classpath:mapper/*Mapper.xml
+  typeAliasesPackage: com.yunjing.approval.model.entity
+  global-config:
+    meta-object-handler: com.common.mybatis.config.FiledAnnotationMetaObjectHandler
+    logic-delete-value: 1
+    logic-not-delete-value: 0
+    sql-injector: com.baomidou.mybatisplus.mapper.LogicSqlInjector
