@@ -1,6 +1,7 @@
 package com.yunjing.notice.entity;
 
 import com.baomidou.mybatisplus.annotations.TableField;
+import com.baomidou.mybatisplus.annotations.TableLogic;
 import com.baomidou.mybatisplus.annotations.TableName;
 import com.common.mybatis.model.BaseModel;
 import lombok.Data;
@@ -71,4 +72,23 @@ public class NoticeEntity extends BaseModel<NoticeEntity> {
      */
     @TableField("picture_name")
     private String pictureName;
+
+    /**
+     * 逻辑删除 0正常  1删除
+     */
+    @TableLogic
+    @TableField("logic_delete")
+    private Integer logicDelete;
+
+    /**
+     * 已读人数
+     */
+    @TableField("read_num")
+    private Integer readNum;
+
+    /**
+     * 未读人数
+     */
+    @TableField("not_read_num")
+    private Integer notReadNum;
 }
