@@ -1,6 +1,5 @@
-package com.yunjing.approval.model.vo;
+package com.yunjing.approval.model.dto;
 
-import com.yunjing.approval.model.dto.ApprovalContentVO;
 import lombok.Data;
 
 /**
@@ -10,21 +9,7 @@ import lombok.Data;
  * @date 2018/02/22
  */
 @Data
-public class ClientApprovalVO {
-
-    public ClientApprovalVO(){}
-
-    public ClientApprovalVO(ApprovalContentVO contentVO){
-        this.modelId = contentVO.getModelId();
-        this.modelName = contentVO.getModelName();
-        this.message = contentVO.getMessage();
-        this.userAvatar = contentVO.getUserAvatar();
-        this.userNick = contentVO.getUserNick();
-        this.color = contentVO.getColor();
-        this.state = contentVO.getState();
-        this.createTime = contentVO.getCreateTime();
-        this.approvalId = contentVO.getApprovalId();
-    }
+public class ApprovalContentVO {
 
     /**
      * 审批主键
@@ -79,6 +64,11 @@ public class ClientApprovalVO {
      * 审批人主键
      */
     private Long userId;
+
+    /**
+     * 用户手机号
+     */
+    private String mobile;
 
     /**
      * 审批结果信息

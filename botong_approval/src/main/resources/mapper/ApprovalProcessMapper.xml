@@ -2,18 +2,22 @@
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
 <mapper namespace="com.yunjing.approval.dao.mapper.ApprovalProcessMapper">
 
-    <resultMap id="MyApprovalMap" type="com.yunjing.approval.model.vo.ApprovalContent">
+    <resultMap id="ApprovalMap" type="com.yunjing.approval.model.dto.ApprovalContentVO">
         <result column="approval_id" property="approvalId"/>
         <result column="model_id" property="modelId"/>
+        <result column="model_name" property="modelName"/>
         <result column="state" property="state"/>
         <result column="create_time" property="createTime"/>
         <result column="user_id" property="userId"/>
+        <result column="reason" property="message"/>
     </resultMap>
-    <select id="getMyApprovalList" resultMap="MyApprovalMap">
-      SELECT ap.process_id, ap.approval_id, ap.user_id, ap.state, ap.seq, ap.process_time, ap.reason,a.model_id,a.create_time
-      FROM approval_process ap,approval a
+    <select id="getWaitedMeApprovalList" resultMap="ApprovalMap">
+      SELECT ap.id, ap.approval_id, ap.user_id, ap.state, ap.seq, ap.process_time, ap.reason, a.model_id, a.create_time,m.model_name
+      FROM approval_process ap
+      JOIN approval a ON ap.approval_id = a.id
+      JOIN model m  ON m.id = a.model_id
       <where>
-          ap. approval_id = a.approval_id AND ap.state = 0
+          ap. approval_id = a.id AND ap.state = 0
           <if test="userId != null and userId != ''">
               and ap.user_id = #{userId}
           </if>
@@ -25,6 +29,6 @@
           </if>
       </where>
       ORDER BY ap.process_time DESC
-      limit #{index},#{param.size}
+      limit #{index},#{size}
     </select>
 </mapper>

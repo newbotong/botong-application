@@ -62,7 +62,6 @@ public class ClientApprovalController extends BaseController {
      * @param page      @param page 分页对象  current 当前页码, size 页大小
      * @param oid       企业主键
      * @param uid       用户主键
-     * @param state     审批状态
      * @param searchKey 搜索标题
      * @return
      */
@@ -70,9 +69,9 @@ public class ClientApprovalController extends BaseController {
     public ResponseEntityWrapper waitedApproval(@ModelAttribute(value = "page") Page page,
                                                 @RequestParam("oid") Long oid,
                                                 @RequestParam("uid") Long uid,
-                                                @RequestParam(value = "state", defaultValue = "0") Integer state, String searchKey) {
+                                                String searchKey) {
 
-
+        approvalApiService.getWaited(page, oid, uid, searchKey);
         return success(createApprovalData(page, 0));
     }
 

@@ -1,8 +1,8 @@
 package com.yunjing.approval.dao.mapper;
 
 import com.common.mybatis.mapper.IBaseMapper;
+import com.yunjing.approval.model.dto.ApprovalContentVO;
 import com.yunjing.approval.model.entity.ApprovalProcess;
-import com.yunjing.approval.model.vo.ApprovalContent;
 import org.apache.ibatis.annotations.Param;
 
 import java.util.List;
@@ -24,6 +24,6 @@ public interface ApprovalProcessMapper extends IBaseMapper<ApprovalProcess> {
      * @param flag      搜索关键字是不是日期
      * @return
      */
-    List<ApprovalContent> getMyApprovalList(@Param("index") Integer index, @Param("size") Integer pageSize, @Param("orgId") Long orgId,
-                                            @Param("userId") Long userId, @Param("searchKey") String searchKey, @Param("flag") Boolean flag);
+    List<ApprovalContentVO> getWaitedMeApprovalList(@Param("index") Integer index, @Param("size") Integer pageSize, @Param("orgId") Long orgId,
+                                                    @Param("userId") Long userId, @Param("searchKey") String searchKey, @Param("flag") Boolean flag);
 }
