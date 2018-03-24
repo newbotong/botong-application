@@ -82,7 +82,7 @@ public class ModelServiceImpl extends BaseServiceImpl<ModelLMapper, ModelL> impl
     @Transactional(propagation = Propagation.REQUIRED, rollbackFor = Exception.class)
     public boolean sortedModel(Long categoryId, String sortArray) throws Exception {
         boolean isUpdated = false;
-        Map<String, Integer> modelSortMap = null;
+        Map<Long, Integer> modelSortMap = null;
         try {
             // 解析排序数据
             JSONArray sortJSONArray = JSONArray.parseArray(sortArray);
@@ -90,7 +90,7 @@ public class ModelServiceImpl extends BaseServiceImpl<ModelLMapper, ModelL> impl
             modelSortMap = new HashMap<>(sortJSONArray.size());
             for (int i = 0; i < sortJSONArray.size(); i++) {
                 JSONObject sortJSON = sortJSONArray.getJSONObject(i);
-                modelSortMap.put(sortJSON.getString("modelId"), sortJSON.getInteger("sort"));
+                modelSortMap.put(sortJSON.getLong("modelId"), sortJSON.getInteger("sort"));
             }
         } catch (Exception e) {
             throw new BaseException("解析分组排序数据错误");
@@ -108,7 +108,7 @@ public class ModelServiceImpl extends BaseServiceImpl<ModelLMapper, ModelL> impl
                 throw new UpdateMessageFailureException("更新部门排序信息失败");
             }
         } else {
-            throw new MessageNotExitException("当前企业下不存在分组");
+            throw new MessageNotExitException("当前分组下不存在审批模版");
         }
 
         return isUpdated;
@@ -123,7 +123,7 @@ public class ModelServiceImpl extends BaseServiceImpl<ModelLMapper, ModelL> impl
             throw new MessageNotExitException("模型不存在");
         }
         modelL.setCategoryId(categoryId);
-        boolean updated = this.update(modelL, Condition.create().where("model_id={0}", modelId));
+        boolean updated = this.update(modelL, Condition.create().where("id={0}", modelId));
         return updated;
     }
 

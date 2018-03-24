@@ -61,7 +61,7 @@ public class ModelCategoryServiceImpl extends BaseServiceImpl<ModelCategoryMappe
         List<ModelVO> modelList = modelService.findModelListByOrgId(orgId);
         List<ModelVO> modelVOList = modelList.stream().filter(modelVO -> categoryId.equals(modelVO.getCategoryId())).collect(Collectors.toList());
         if (modelVOList.isEmpty()) {
-            flag = this.delete(Condition.create().where("category_id={0}", categoryId));
+            flag = this.delete(Condition.create().where("id={0}", categoryId));
         } else {
             // 如果删除的分组中有审批模型，则把这些审批模型的所属分组批量改为其他分组
             List<Long> modelIds = new ArrayList<>();
@@ -75,7 +75,7 @@ public class ModelCategoryServiceImpl extends BaseServiceImpl<ModelCategoryMappe
             }
             boolean isUpdated = modelService.updateBatchById(modelLS);
             if (isUpdated) {
-                flag = this.delete(Condition.create().where("category_id={0}", categoryId));
+                flag = this.delete(Condition.create().where("id={0}", categoryId));
             }
         }
         return flag;
