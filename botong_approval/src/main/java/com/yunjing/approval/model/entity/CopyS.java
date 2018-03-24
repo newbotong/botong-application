@@ -38,12 +38,6 @@ public class CopyS extends BaseModel<CopyS> {
     private String copySType;
 
     /**
-     * 抄送时间
-     */
-    @TableField("copys_time")
-    private Timestamp copySTime;
-
-    /**
      * 是否删除 0：未删除；1：已删除
      */
     @TableLogic

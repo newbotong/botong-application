@@ -71,8 +71,7 @@ public class ClientApprovalController extends BaseController {
                                                 @RequestParam("uid") Long uid,
                                                 String searchKey) {
 
-        approvalApiService.getWaited(page, oid, uid, searchKey);
-        return success(createApprovalData(page, 0));
+        return success(approvalApiService.getWaited(page, oid, uid, searchKey));
     }
 
     /**
@@ -89,8 +88,7 @@ public class ClientApprovalController extends BaseController {
                                                    @RequestParam("oid") Long oid,
                                                    @RequestParam("uid") Long uid,
                                                    String searchKey) {
-
-        return success(createApprovalData(page, 1));
+        return success(approvalApiService.getCompleted(page, oid, uid, searchKey));
     }
 
     /**
@@ -108,7 +106,7 @@ public class ClientApprovalController extends BaseController {
                                                   @RequestParam("uid") Long uid,
                                                   String searchKey) {
 
-        return success(createApprovalData(page, 2));
+        return success(approvalApiService.getLaunched(page, oid, uid, searchKey));
     }
 
     /**
@@ -127,7 +125,7 @@ public class ClientApprovalController extends BaseController {
                                                 @RequestParam("uid") Long uid,
                                                 @RequestParam(value = "state", defaultValue = "0") Integer state, String searchKey) {
 
-        return success(createApprovalData(page, 2));
+        return success(approvalApiService.getCopied(page, oid, uid, searchKey));
     }
 
     /**

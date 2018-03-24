@@ -33,8 +33,8 @@ public class ApprovalProcess extends BaseModel<ApprovalProcess> {
     /**
      * 状态 0:未处理 1:同意 2:拒绝 3:转交 4.撤回
      */
-    @TableField("state")
-    private Integer state;
+    @TableField("process_state")
+    private Integer processState;
 
     /**
      * 排序

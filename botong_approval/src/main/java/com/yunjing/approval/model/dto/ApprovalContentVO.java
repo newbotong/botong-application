@@ -46,7 +46,12 @@ public class ApprovalContentVO {
     private Integer result;
 
     /**
-     * 审批人头像
+     * 审批流程中的状态 0:未处理 1:同意 2:拒绝 3:转交 4.撤回
+     */
+    private Integer processState;
+
+    /**
+     * 审批人or抄送人头像
      */
     private String userAvatar;
 
@@ -56,17 +61,17 @@ public class ApprovalContentVO {
     private String color;
 
     /**
-     * 审批人姓名
+     * 审批人or抄送人
      */
     private String userNick;
 
     /**
-     * 审批人主键
+     * 审批人or抄送人主键
      */
     private Long userId;
 
     /**
-     * 用户手机号
+     * 手机号
      */
     private String mobile;
 
@@ -79,5 +84,10 @@ public class ApprovalContentVO {
      * 审批创建时间
      */
     private Long createTime;
+
+    /**
+     * 审批抄送时间
+     */
+    private Long copysTime;
 
 }
