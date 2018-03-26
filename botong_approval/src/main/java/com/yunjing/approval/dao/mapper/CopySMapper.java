@@ -2,8 +2,9 @@ package com.yunjing.approval.dao.mapper;
 
 
 import com.common.mybatis.mapper.IBaseMapper;
-import com.yunjing.approval.model.dto.ApprovalContentVO;
+import com.yunjing.approval.model.dto.ApprovalContentDTO;
 import com.yunjing.approval.model.entity.CopyS;
+import com.yunjing.approval.model.vo.CopyUserVO;
 import org.apache.ibatis.annotations.Param;
 
 import java.util.List;
@@ -27,7 +28,9 @@ public interface CopySMapper extends IBaseMapper<CopyS> {
      * @param flag      搜索关键字是不是日期
      * @return
      */
-    List<ApprovalContentVO> getCopiedApprovalList(@Param("index") Integer index, @Param("size") Integer pageSize, @Param("orgId") Long orgId,
-                                                     @Param("userId") Long userId, @Param("searchKey") String searchKey, @Param("flag") Boolean flag);
+    List<ApprovalContentDTO> getCopiedApprovalList(@Param("index") Integer index, @Param("size") Integer pageSize, @Param("orgId") Long orgId,
+                                                   @Param("userId") Long userId, @Param("searchKey") String searchKey, @Param("flag") Boolean flag);
 
+
+    List<CopyUserVO> getCopyUserList(Long approvalId);
 }

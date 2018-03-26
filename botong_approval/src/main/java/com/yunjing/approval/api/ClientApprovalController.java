@@ -2,6 +2,7 @@ package com.yunjing.approval.api;
 
 import com.common.mybatis.page.Page;
 import com.yunjing.approval.common.DateUtil;
+import com.yunjing.approval.model.dto.InputDetailDTO;
 import com.yunjing.approval.model.vo.*;
 import com.yunjing.approval.service.IApprovalApiService;
 import com.yunjing.approval.service.IModelItemService;
@@ -140,18 +141,19 @@ public class ClientApprovalController extends BaseController {
     public ResponseEntityWrapper approvalDetail(@RequestParam("oid") Long oid,
                                                 @RequestParam("uid") Long uid,
                                                 @RequestParam("approvalId") Long approvalId) {
-        ClientApprovalDetailVO detailVO = new ClientApprovalDetailVO();
+
+       /* ClientApprovalDetailVO detailVO = new ClientApprovalDetailVO();
         detailVO.setName("刘小鹏");
         detailVO.setAvatar("https://image.botong.tech/tech/temp/7adf9998e93b4096ae537c4ea60678f7.jpg");
         detailVO.setDeptName("开发部");
         detailVO.setPosition("java工程师");
         detailVO.setState(0);
         detailVO.setModelName("请假");
-        List<InputDetailVO> inputDetailVOS = new ArrayList<>();
-        InputDetailVO input = new InputDetailVO();
-        InputDetailVO input2 = new InputDetailVO();
-        InputDetailVO input3 = new InputDetailVO();
-        InputDetailVO input4 = new InputDetailVO();
+        List<InputDetailDTO> inputDetailDTOS = new ArrayList<>();
+        InputDetailDTO input = new InputDetailDTO();
+        InputDetailDTO input2 = new InputDetailDTO();
+        InputDetailDTO input3 = new InputDetailDTO();
+        InputDetailDTO input4 = new InputDetailDTO();
         input.setInputName("请假类型");
         input2.setInputName("请假天数（天）");
         input3.setInputName("请假事由");
@@ -160,11 +162,11 @@ public class ClientApprovalController extends BaseController {
         input2.setInputValue("1");
         input3.setInputValue("回家有事情要处理");
         input4.setInputValue("1521716404522");
-        inputDetailVOS.add(input);
-        inputDetailVOS.add(input2);
-        inputDetailVOS.add(input3);
-        inputDetailVOS.add(input4);
-        detailVO.setInputDetailList(inputDetailVOS);
+        inputDetailDTOS.add(input);
+        inputDetailDTOS.add(input2);
+        inputDetailDTOS.add(input3);
+        inputDetailDTOS.add(input4);
+        detailVO.setInputDetailList(inputDetailDTOS);
         List<ApprovalUserVO> approvalUserVOS = new ArrayList<>();
         ApprovalUserVO approvalUserVO = new ApprovalUserVO();
         approvalUserVO.setName("刘小鹏");
@@ -198,8 +200,9 @@ public class ClientApprovalController extends BaseController {
         copyUserVO2.setAvatarName("");
         copyUserVOS.add(copyUserVO);
         copyUserVOS.add(copyUserVO2);
-        detailVO.setCopyUserList(copyUserVOS);
-        return success(detailVO);
+        detailVO.setCopyUserList(copyUserVOS);*/
+
+        return success(approvalApiService.getApprovalDetail(oid, uid, approvalId));
     }
 
     public static void main(String[] args) {

@@ -2,7 +2,10 @@ package com.yunjing.approval.dao.mapper;
 
 
 import com.common.mybatis.mapper.IBaseMapper;
+import com.yunjing.approval.model.dto.ApprovalDetailDTO;
 import com.yunjing.approval.model.entity.Approval;
+
+import java.util.List;
 
 /**
  * 审批mapper
@@ -11,5 +14,21 @@ import com.yunjing.approval.model.entity.Approval;
  * @date 2017/11/29
  */
 public interface ApprovalMapper extends IBaseMapper<Approval> {
+
+    /**
+     * 查询审批详情
+     *
+     * @param approvalId 审批主键
+     * @return
+     */
+    List<ApprovalDetailDTO> getApprovalDetail(Long approvalId);
+
+    /**
+     * 查询审批信息
+     *
+     * @param approvalId 审批主键
+     * @return
+     */
+    ApprovalDetailDTO getApprovalById(Long approvalId);
 
 }
