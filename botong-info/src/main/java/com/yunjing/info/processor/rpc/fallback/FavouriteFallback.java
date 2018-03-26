@@ -1,6 +1,7 @@
 package com.yunjing.info.processor.rpc.fallback;
 
 import com.yunjing.info.processor.rpc.servcie.FavouriteService;
+import com.yunjing.info.processor.rpc.vo.InformationVo;
 import com.yunjing.mommon.wrapper.ResponseEntityWrapper;
 import org.springframework.stereotype.Component;
 
@@ -22,7 +23,7 @@ public class FavouriteFallback implements FavouriteService {
     }
 
     @Override
-    public ResponseEntityWrapper update(String favouriteInfo) {
+    public ResponseEntityWrapper update(InformationVo information) {
         return null;
     }
 }

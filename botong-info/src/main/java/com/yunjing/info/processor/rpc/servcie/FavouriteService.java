@@ -1,5 +1,6 @@
 package com.yunjing.info.processor.rpc.servcie;
 
+import com.yunjing.info.processor.rpc.vo.InformationVo;
 import com.yunjing.mommon.wrapper.ResponseEntityWrapper;
 
 /**
@@ -25,7 +26,8 @@ public interface FavouriteService {
     /**
      * 资讯修改，同步更新收藏内容
      *
+     * @param information 资讯内容
      * @return
      */
-    ResponseEntityWrapper update(String favouriteInfo);
+    ResponseEntityWrapper update(InformationVo information);
 }
