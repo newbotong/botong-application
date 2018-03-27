@@ -1,6 +1,8 @@
 package com.yunjing.approval.service.impl;
 
+import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONArray;
+import com.alibaba.fastjson.JSONObject;
 import com.baomidou.mybatisplus.mapper.Condition;
 import com.baomidou.mybatisplus.mapper.EntityWrapper;
 import com.baomidou.mybatisplus.mapper.Wrapper;
@@ -18,7 +20,9 @@ import com.yunjing.approval.excel.*;
 import com.yunjing.approval.model.entity.*;
 import com.yunjing.approval.model.vo.*;
 import com.yunjing.approval.service.*;
+import com.yunjing.approval.util.EmojiFilterUtils;
 import com.yunjing.mommon.global.exception.BaseException;
+import com.yunjing.mommon.global.exception.InsertMessageFailureException;
 import com.yunjing.mommon.utils.IDUtils;
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.collections.MapUtils;
@@ -30,6 +34,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.sql.Timestamp;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -71,52 +76,105 @@ public class ApprovalServiceImpl extends BaseServiceImpl<ApprovalMapper, Approva
     private ApproveAttrMapper approveAttrMapper;
     @Autowired
     private ApprovalRedisService approvalRedisService;
+    @Autowired
+    private IApprovalUserService approvalUserService;
 
-    private Wrapper<Approval> getWrapper(Long oid, Long mid, Integer state, String title, String createTimeStart, String createTimeEnd, String finishTimeStart, String finishTimeEnd) throws BaseException {
-        Wrapper<Approval> wrapper = new EntityWrapper<>();
-        if (null == oid) {
-            throw new BaseException("主键不存在");
+    @Override
+    public boolean submitApproval(Long oid, Long uid, Long modelId, String jsonData, String sendUserIds, String sendCopyIds) throws Exception {
+        ModelL modelL = modelService.selectById(modelId);
+        Approval approval = new Approval();
+        approval.setId(IDUtils.getID());
+        approval.setOrgId(oid);
+        approval.setUserId(uid);
+        approval.setCreateTime(DateUtil.getCurrentTime().getTime());
+        approval.setState(0);
+        approval.setModelVersion(modelL.getModelVersion());
+        // 处理审批标题
+        String title = "不存在的";
+        if (uid == null) {
+            title += "用户";
+        } else {
+            ApprovalUser user = approvalUserService.selectOne(Condition.create().where("id={0}", uid));
+            String nick = user.getName();
+            String name = modelL.getModelName();
+
+            if (StringUtils.isBlank(nick)) {
+                title += "用户昵称";
+            } else if (StringUtils.isBlank(name)) {
+                title += "模型名称";
+            } else {
+                title = user.getName() + "的" + modelL.getModelName();
+            }
         }
+        approval.setTitle(title);
+        Set<ApprovalAttr> attrSet = new HashSet<>();
+        // 解析并保存审批信息
+        JSONArray jsonArray = JSON.parseArray(jsonData);
+        Iterator<Object> it = jsonArray.iterator();
+        while (it.hasNext()) {
+            ApprovalAttr attr = new ApprovalAttr();
+            attr.setApprovalId(approval.getId());
+            JSONObject obj = (JSONObject) it.next();
+            int type = obj.getIntValue("type");
+            String name = obj.getString("field");
+            attr.setAttrName(name);
+            attr.setAttrType(type);
+            String value;
+            if (type == 10 || type == 11) {
+                JSONArray array = obj.getJSONArray("value");
+                value = array.toJSONString();
+                attr.setAttrValue(EmojiFilterUtils.filterEmoji(value));
+            } else {
+                value = obj.getString("value");
+                attr.setAttrValue(EmojiFilterUtils.filterEmoji(value));
+                if (type == 7) {
+                    JSONArray array = obj.getJSONArray("detail");
+                    Iterator<Object> details = array.iterator();
+                    Set<ApprovalAttr> attrs = new HashSet<>();
+                    while (details.hasNext()) {
+                        ApprovalAttr entity = new ApprovalAttr();
+                        entity.setApprovalId(approval.getId());
+                        entity.setAttrParent(attr.getId());
+                        JSONObject detail = (JSONObject) details.next();
 
-        wrapper.eq("org_id", oid);
+                        int detailType = detail.getIntValue("type");
+                        String detailName = detail.getString("field");
+                        entity.setAttrName(detailName);
+                        entity.setAttrType(detailType);
+                        String detailValue;
+                        if (detailType == 10 || detailType == 11) {
+                            JSONArray detailArray = detail.getJSONArray("value");
+                            detailValue = detailArray.toJSONString();
+                        } else {
+                            detailValue = detail.getString("value");
+                        }
+                        entity.setAttrValue(EmojiFilterUtils.filterEmoji(detailValue));
 
-        if (null != mid) {
-            wrapper.in("model_id", mid.toString());
+                        int detailNum = detail.getIntValue("num");
+                        entity.setAttrNum(detailNum);
+
+                        attrs.add(entity);
+                    }
+                    List<ApprovalAttr> attrList = new ArrayList<>(attrs);
+                    boolean b = approvalAttrService.insertBatch(attrList);
+                    if (!b) {
+                        throw new InsertMessageFailureException("批量插入审批明细数据失败");
+                    }
+                }
+            }
+            attrSet.add(attr);
         }
-
-        if (state != null) {
-            wrapper.eq("state", state);
+        List<ApprovalAttr> attrsList = new ArrayList<>(attrSet);
+        boolean isInserted = approvalAttrService.insertBatch(attrsList);
+        if (!isInserted) {
+            throw new InsertMessageFailureException("批量插入审批信息数据失败");
         }
+        // 保存接收人
+        saveApprovalUser(sendUserIds, approval);
+        // 保存抄送人
+        saveCopyUser(sendCopyIds, approval);
 
-        if (StringUtils.isNotBlank(title)) {
-            wrapper.like("title", title);
-        }
-
-        if (StringUtils.isNotBlank(createTimeStart)) {
-            wrapper.ge("DATE_FORMAT(create_time,'%Y-%m-%d')", createTimeStart);
-        }
-
-        if (StringUtils.isNotBlank(createTimeEnd)) {
-            wrapper.le("DATE_FORMAT(create_time,'%Y-%m-%d')", createTimeEnd);
-        }
-
-        if (StringUtils.isNotBlank(finishTimeStart)) {
-            wrapper.ge("DATE_FORMAT(finish_time,'%Y-%m-%d')", finishTimeStart);
-        }
-
-        if (StringUtils.isNotBlank(finishTimeEnd)) {
-            wrapper.le("DATE_FORMAT(finish_time,'%Y-%m-%d')", finishTimeEnd);
-        }
-        wrapper.orderBy("create_time", false);
-        return wrapper;
-    }
-
-    private List<Approval> getList(Long oid, Long mid, Integer state, String title, String createTimeStart, String createTimeEnd, String finishTimeStart, String finishTimeEnd) throws BaseException {
-        return this.selectList(getWrapper(oid, mid, state, title, createTimeStart, createTimeEnd, finishTimeStart, finishTimeEnd).orderBy("model_id", true));
-    }
-
-    private Page<Approval> getPage(Page<Approval> page, Long oid, Long mid, Integer state, String title, String createTimeStart, String createTimeEnd, String finishTimeStart, String finishTimeEnd) throws BaseException {
-        return this.selectPage(page, getWrapper(oid, mid, state, title, createTimeStart, createTimeEnd, finishTimeStart, finishTimeEnd));
+        return isInserted;
     }
 
     @Override
@@ -136,27 +194,27 @@ public class ApprovalServiceImpl extends BaseServiceImpl<ApprovalMapper, Approva
             throw new BaseException("审批流程信息不存在");
         }
 
-        Set<String> userIdSet = approvalProcessList.stream().map(ApprovalProcess::getUserId).collect(Collectors.toSet());
+        Set<Long> userIdSet = approvalProcessList.stream().map(ApprovalProcess::getUserId).collect(Collectors.toSet());
 
         if (CollectionUtils.isEmpty(userIdSet)) {
             throw new BaseException("审批人信息不存在");
         }
 
-        List<String> userIds = new ArrayList<>(userIdSet.size());
+        List<Long> userIds = new ArrayList<>(userIdSet.size());
         userIds.addAll(userIdSet);
-        List<UserVO> users = userRedisService.getByUserIdList(userIds);
+        List<ApprovalUser> users = approvalUserService.selectBatchIds(userIds);
 
         if (CollectionUtils.isEmpty(users)) {
             throw new BaseException("获取审批人信息不存在");
         }
 
         // key = id, value = nick
-        Map<String, String> userMap = users.stream().collect(Collectors.toMap(UserVO::getUserId, UserVO::getUserNick));
+        Map<Long, String> userMap = users.stream().collect(Collectors.toMap(ApprovalUser::getId, ApprovalUser::getName));
 
         List<ApprovalVO> records = new ArrayList<>(approvalList.size());
         approvalList.forEach(approval -> {
             ApprovalVO approvalVO = new ApprovalVO(approval);
-            List<String> uIds = approvalProcessList.parallelStream().filter(process -> approval.getId().equals(process.getApprovalId()))
+            List<Long> uIds = approvalProcessList.parallelStream().filter(process -> approval.getId().equals(process.getApprovalId()))
                     .sorted(comparing(ApprovalProcess::getSeq)).map(ApprovalProcess::getUserId).collect(Collectors.toList());
             List<String> nicks = new ArrayList<>(uIds.size());
             uIds.forEach(uid -> nicks.add(userMap.get(uid)));
@@ -204,9 +262,9 @@ public class ApprovalServiceImpl extends BaseServiceImpl<ApprovalMapper, Approva
         List<ModelItem> modelItemList = modelItemMapper.selectAll(orgId);
 
         // 工作表名称处理
-        List<String> modelIdList = exportData.parallelStream().map(ApprovalExcelVO::getModelId).collect(Collectors.toSet()).stream().collect(Collectors.toList());
+        List<Long> modelIdList = exportData.parallelStream().map(ApprovalExcelVO::getModelId).collect(Collectors.toSet()).stream().collect(Collectors.toList());
         if (null != modelId) {
-            modelIdList.add(modelId.toString());
+            modelIdList.add(modelId);
         }
         List<ModelL> modelLS;
         if (CollectionUtils.isNotEmpty(modelIdList)) {
@@ -330,27 +388,27 @@ public class ApprovalServiceImpl extends BaseServiceImpl<ApprovalMapper, Approva
             logger.error("审批流程信息不存在");
             throw new BaseException("审批流程信息不存在");
         }
-        Set<String> userIdSet = approvalProcessList.stream().map(ApprovalProcess::getUserId).collect(Collectors.toSet());
+        Set<Long> userIdSet = approvalProcessList.stream().map(ApprovalProcess::getUserId).collect(Collectors.toSet());
         if (CollectionUtils.isEmpty(userIdSet)) {
             logger.error("审批人信息不存在");
             throw new BaseException("审批人信息不存在");
         }
-        List<String> userIds = new ArrayList<>(userIdSet.size());
+        List<Long> userIds = new ArrayList<>(userIdSet.size());
         userIds.addAll(userIdSet);
-        List<UserVO> users = userRedisService.getByUserIdList(userIds);
+        List<ApprovalUser> users = approvalUserService.selectBatchIds(userIds);
         if (CollectionUtils.isEmpty(users)) {
             logger.error("获取审批人信息不存在");
 //            throw new BaseException("获取审批人信息不存在");
         }
         // 封装审批人主键与昵称 （key = id, value = nick）
-        Map<String, String> userMap = users.stream().collect(Collectors.toMap(UserVO::getUserId, UserVO::getUserNick));
+        Map<Long, String> userMap = users.stream().collect(Collectors.toMap(ApprovalUser::getId, ApprovalUser::getName));
         // 审批状态
         String status = "";
         // 审批结果
         String result = "";
         String timeConsuming = "";
 
-        List<String> userIdList = approvalList.stream().map(Approval::getUserId).collect(Collectors.toList());
+        List<Long> userIdList = approvalList.stream().map(Approval::getUserId).collect(Collectors.toList());
         List<DeptVO> deptNameList = new ArrayList<>();
         if (userIdList != null && !userIdList.isEmpty()) {
             String[] userIdArray = userIdList.toArray(new String[userIdList.size()]);
@@ -370,8 +428,8 @@ public class ApprovalServiceImpl extends BaseServiceImpl<ApprovalMapper, Approva
         // 获取该企业下所有的审批属性信息
         List<ApprovalAttr> approvalAttrList = null;
         // 从redis缓存中批量获取用户信息
-        List<String> uIdList = approvalList.parallelStream().map(Approval::getUserId).collect(Collectors.toList());
-        List<UserVO> userVOS = userRedisService.getByUserIdList(uIdList);
+        List<Long> uIdList = approvalList.parallelStream().map(Approval::getUserId).collect(Collectors.toList());
+        List<UserVO> userVOS = userRedisService.getByUserIdList(null);
         // 查询编辑审批表单后填写的所有审批信息数据
         List<ApproveAttr> approveAttrList = approveAttrMapper.selectList(Condition.create().where("org_id={0}", orgId));
         for (Approval approval : approvalList) {
@@ -402,16 +460,16 @@ public class ApprovalServiceImpl extends BaseServiceImpl<ApprovalMapper, Approva
                 excelVO.setResult(result);
                 result = "";
                 // 审批发起时间
-                excelVO.setCreateTime(null != approval.getCreateTime() ? String.valueOf(approval.getCreateTime()) : "");
+                excelVO.setCreateTime(null != approval.getCreateTime() ? approval.getCreateTime() : null);
                 // 审批结束时间
-                excelVO.setFinishTime(null != approval.getFinishTime() ? String.valueOf(approval.getFinishTime()) : "");
+                excelVO.setFinishTime(null != approval.getFinishTime() ? approval.getFinishTime() : null);
                 List<UserVO> userVO1 = userVOS.parallelStream().filter(userVO -> userVO.getUserId().equals(approval.getUserId())).collect(Collectors.toList());
                 if (!userVO1.isEmpty()) {
                     // 发起人姓名
                     excelVO.setUserName(userVO1.get(0).getUserNick());
                 }
                 // 审批人
-                List<String> uIds = approvalProcessList.parallelStream().filter(process -> approval.getId().equals(process.getApprovalId()))
+                List<Long> uIds = approvalProcessList.parallelStream().filter(process -> approval.getId().equals(process.getApprovalId()))
                         .sorted(comparing(ApprovalProcess::getSeq)).map(ApprovalProcess::getUserId).collect(Collectors.toList());
                 List<String> nicks = new ArrayList<>(uIds.size());
                 uIds.forEach(uid -> nicks.add(userMap.get(uid)));
@@ -644,7 +702,7 @@ public class ApprovalServiceImpl extends BaseServiceImpl<ApprovalMapper, Approva
             throw new BaseException("该用户不存在");
         }
         String modelIds;
-        Set<String> set = new HashSet<>();
+        Set<Long> set = new HashSet<>();
         ExportLog exportLog = new ExportLog();
         if (exportData.isEmpty()) {
             exportLog.setModelId("");
@@ -652,8 +710,8 @@ public class ApprovalServiceImpl extends BaseServiceImpl<ApprovalMapper, Approva
         exportData.forEach(approvalExcelVO -> set.add(approvalExcelVO.getModelId()));
         if (StringUtils.isBlank(modelId.toString()) && set.size() > 1) {
             modelIds = "";
-            for (String m : set) {
-                modelIds = new StringBuilder().append(modelIds) + m + ",";
+            for (Long m : set) {
+//                modelIds = new StringBuilder().append(modelIds) + m + ",";
             }
             exportLog.setModelId(modelIds);
         } else if (StringUtils.isBlank(modelId.toString()) && set.size() == 1) {
@@ -675,4 +733,136 @@ public class ApprovalServiceImpl extends BaseServiceImpl<ApprovalMapper, Approva
         return true;
     }
 
+    private Wrapper<Approval> getWrapper(Long oid, Long mid, Integer state, String title, String createTimeStart, String createTimeEnd, String finishTimeStart, String finishTimeEnd) throws BaseException {
+        Wrapper<Approval> wrapper = new EntityWrapper<>();
+        if (null == oid) {
+            throw new BaseException("主键不存在");
+        }
+
+        wrapper.eq("org_id", oid);
+
+        if (null != mid) {
+            wrapper.in("model_id", mid.toString());
+        }
+
+        if (state != null) {
+            wrapper.eq("state", state);
+        }
+
+        if (StringUtils.isNotBlank(title)) {
+            wrapper.like("title", title);
+        }
+
+        if (StringUtils.isNotBlank(createTimeStart)) {
+            wrapper.ge("DATE_FORMAT(create_time,'%Y-%m-%d')", createTimeStart);
+        }
+
+        if (StringUtils.isNotBlank(createTimeEnd)) {
+            wrapper.le("DATE_FORMAT(create_time,'%Y-%m-%d')", createTimeEnd);
+        }
+
+        if (StringUtils.isNotBlank(finishTimeStart)) {
+            wrapper.ge("DATE_FORMAT(finish_time,'%Y-%m-%d')", finishTimeStart);
+        }
+
+        if (StringUtils.isNotBlank(finishTimeEnd)) {
+            wrapper.le("DATE_FORMAT(finish_time,'%Y-%m-%d')", finishTimeEnd);
+        }
+        wrapper.orderBy("create_time", false);
+        return wrapper;
+    }
+
+    private List<Approval> getList(Long oid, Long mid, Integer state, String title, String createTimeStart, String createTimeEnd, String finishTimeStart, String finishTimeEnd) throws BaseException {
+        return this.selectList(getWrapper(oid, mid, state, title, createTimeStart, createTimeEnd, finishTimeStart, finishTimeEnd).orderBy("model_id", true));
+    }
+
+    private Page<Approval> getPage(Page<Approval> page, Long oid, Long mid, Integer state, String title, String createTimeStart, String createTimeEnd, String finishTimeStart, String finishTimeEnd) throws BaseException {
+        return this.selectPage(page, getWrapper(oid, mid, state, title, createTimeStart, createTimeEnd, finishTimeStart, finishTimeEnd));
+    }
+
+    /**
+     * 保存审批人信息
+     *
+     * @param sendUserIds 审批人主键
+     * @param approval    审批对象
+     * @return
+     */
+    private boolean saveApprovalUser(String sendUserIds, Approval approval) throws BaseException {
+        boolean flag = false;
+        if (sendUserIds != null) {
+            // 去除可能的重复数据
+            Set<Long> strSet = new HashSet<>();
+            String[] userIds = sendUserIds.split(",");
+            for (String str : userIds) {
+                strSet.add(Long.valueOf(str));
+            }
+            Long[] ids = new Long[strSet.size()];
+            int n = 0;
+            for (Long string : strSet) {
+                ids[n] = string;
+                n++;
+            }
+            List<ApprovalUser> users = approvalUserService.selectBatchIds(Arrays.asList(ids));
+            Set<ApprovalProcess> approvalProcesses = new HashSet<>();
+            for (int j = 0; j < userIds.length; j++) {
+                for (ApprovalUser user : users) {
+                    if (userIds[j].equals(user.getId())) {
+                        ApprovalProcess approvalProcess = new ApprovalProcess();
+                        approvalProcess.setApprovalId(approval.getId());
+                        approvalProcess.setProcessTime(DateUtil.getCurrentTime().getTime());
+                        approvalProcess.setProcessState(0);
+                        approvalProcess.setSeq(j + 1);
+                        approvalProcess.setUserId(user.getId());
+                        approvalProcesses.add(approvalProcess);
+                    }
+                }
+            }
+            flag = approvalProcessService.insertBatch(new ArrayList<>(approvalProcesses));
+            if (!flag) {
+                throw new InsertMessageFailureException("批量保存审批人失败");
+            }
+        }
+        return flag;
+    }
+
+    /**
+     * 保存抄送人
+     *
+     * @param sendCopyIds 抄送人主键
+     * @param approval    审批对象
+     * @return
+     */
+    private boolean saveCopyUser(String sendCopyIds, Approval approval) throws BaseException {
+        boolean flag = false;
+        if (sendCopyIds != null) {
+            // 去除可能的重复数据
+            Set<Long> strSet = new HashSet<>();
+            String[] userIds = sendCopyIds.split(",");
+            for (String str : userIds) {
+                strSet.add(Long.valueOf(str));
+            }
+            Long[] ids = new Long[strSet.size()];
+            int n = 0;
+            for (Long string : strSet) {
+                ids[n] = string;
+                n++;
+            }
+            List<ApprovalUser> users = approvalUserService.selectBatchIds(Arrays.asList(ids));
+            Set<CopyS> copyS = new HashSet<>();
+            for (ApprovalUser user : users) {
+                CopyS copyS1 = new CopyS();
+                copyS1.setApprovalId(approval.getId());
+                copyS1.setUserId(user.getId());
+                copyS1.setId(IDUtils.getID());
+                copyS1.setCopySType(0);
+                copyS1.setCreateTime(DateUtil.getCurrentTime().getTime());
+                copyS.add(copyS1);
+            }
+            flag = copySService.insertBatch(new ArrayList<>(copyS));
+            if (!flag) {
+                throw new InsertMessageFailureException("批量保存抄送人失败");
+            }
+        }
+        return flag;
+    }
 }

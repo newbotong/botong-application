@@ -10,4 +10,5 @@ import com.yunjing.approval.model.entity.ApprovalAttr;
  */
 public interface IApprovalAttrService extends IBaseService<ApprovalAttr> {
 
+
 }

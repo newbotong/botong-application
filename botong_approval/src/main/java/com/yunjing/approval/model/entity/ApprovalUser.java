@@ -1,5 +1,6 @@
 package com.yunjing.approval.model.entity;
 
+
 import com.baomidou.mybatisplus.annotations.TableField;
 import com.baomidou.mybatisplus.annotations.TableLogic;
 import com.baomidou.mybatisplus.annotations.TableName;
@@ -12,45 +13,45 @@ import lombok.EqualsAndHashCode;
  * @date 2018/03/23
  */
 @Data
-@TableName("approval_attr")
+@TableName("approval_user")
 @EqualsAndHashCode(callSuper = true)
-public class ApprovalAttr extends BaseModel<ApprovalAttr> {
+public class ApprovalUser extends BaseModel<ApprovalUser>{
 
     /**
-     * 审批主键
+     * 用户名
      */
-    @TableField("approval_id")
-    private Long approvalId;
+    @TableField("name")
+    private String name;
 
     /**
-     * 属性名称
+     * 用户头像
      */
-    @TableField("attr_name")
-    private String attrName;
+    @TableField("avatar")
+    private String avatar;
 
     /**
-     * 属性值
+     * 用户手机号
      */
-    @TableField("attr_value")
-    private String attrValue;
+    @TableField("mobile")
+    private String mobile;
 
     /**
-     * 父级主键
+     * 部门主键
      */
-    @TableField("attr_parent")
-    private Long attrParent;
+    @TableField("dept_id")
+    private String deptId;
 
     /**
-     * 明细内的索引号, 从1开始
+     * 部门
      */
-    @TableField("attr_num")
-    private Integer attrNum;
+    @TableField("dept_name")
+    private String deptName;
 
     /**
-     * 属性类型
+     * 职位
      */
-    @TableField("attr_type")
-    private Integer attrType;
+    @TableField("position")
+    private String position;
 
     /**
      * 是否删除 0：未删除；1：已删除
@@ -58,5 +59,4 @@ public class ApprovalAttr extends BaseModel<ApprovalAttr> {
     @TableLogic
     @TableField("is_delete")
     private Integer isDelete;
-
 }

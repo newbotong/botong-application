@@ -14,6 +14,20 @@ import com.yunjing.approval.model.vo.ApprovalPageVO;
 public interface IApprovalService extends IBaseService<Approval> {
 
     /**
+     * 提交审批信息
+     *
+     * @param oid         企业主键
+     * @param uid         用户主键
+     * @param modelId     模型主键
+     * @param jsonData    要提交的审批数据
+     * @param sendUserIds 要推送的审批人主键，多个以英文，隔开
+     * @param sendCopyIds 要推送的抄送人主键，多个以英文，隔开
+     * @return
+     * @throws Exception
+     */
+    boolean submitApproval(Long oid, Long uid, Long modelId, String jsonData, String sendUserIds, String sendCopyIds) throws Exception;
+
+    /**
      * 获取审批数据列表
      *
      * @param page            分页对象  current 页码, size页大小

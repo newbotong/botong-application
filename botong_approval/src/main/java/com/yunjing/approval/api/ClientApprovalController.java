@@ -51,7 +51,7 @@ public class ClientApprovalController extends BaseController {
      * @return
      * @throws Exception
      */
-    @GetMapping("/model_item_detail")
+    @GetMapping("/model-item-detail")
     public ResponseEntityWrapper getItem(@RequestParam("modelId") Long modelId) throws Exception {
         return success(modelItemService.getModelItem(modelId));
     }
@@ -66,7 +66,7 @@ public class ClientApprovalController extends BaseController {
      * @param searchKey 搜索标题
      * @return
      */
-    @GetMapping("/waited_approval")
+    @GetMapping("/waited-approval")
     public ResponseEntityWrapper waitedApproval(@ModelAttribute(value = "page") Page page,
                                                 @RequestParam("oid") Long oid,
                                                 @RequestParam("uid") Long uid,
@@ -84,7 +84,7 @@ public class ClientApprovalController extends BaseController {
      * @param searchKey 搜索标题
      * @return
      */
-    @GetMapping("/completed_approval")
+    @GetMapping("/completed-approval")
     public ResponseEntityWrapper completedApproval(@ModelAttribute(value = "page") Page page,
                                                    @RequestParam("oid") Long oid,
                                                    @RequestParam("uid") Long uid,
@@ -101,7 +101,7 @@ public class ClientApprovalController extends BaseController {
      * @param searchKey 搜索标题
      * @return
      */
-    @GetMapping("/launched_approval")
+    @GetMapping("/launched-approval")
     public ResponseEntityWrapper launchedApproval(@ModelAttribute(value = "page") Page page,
                                                   @RequestParam("oid") Long oid,
                                                   @RequestParam("uid") Long uid,
@@ -120,7 +120,7 @@ public class ClientApprovalController extends BaseController {
      * @param searchKey 搜索标题
      * @return
      */
-    @GetMapping("/copied_approval")
+    @GetMapping("/copied-approval")
     public ResponseEntityWrapper copiedApproval(@ModelAttribute(value = "page") Page page,
                                                 @RequestParam("oid") Long oid,
                                                 @RequestParam("uid") Long uid,
@@ -137,7 +137,7 @@ public class ClientApprovalController extends BaseController {
      * @param approvalId 审批主键
      * @return
      */
-    @GetMapping("/approval_detail")
+    @GetMapping("/approval-detail")
     public ResponseEntityWrapper approvalDetail(@RequestParam("oid") Long oid,
                                                 @RequestParam("uid") Long uid,
                                                 @RequestParam("approvalId") Long approvalId) {

@@ -54,10 +54,10 @@ public class ApprovalRepairServiceImpl extends BaseServiceImpl<ApprovalMapper, A
                     continue;
                 }
 
-                String uid = approval.getUserId();
-                String mid = approval.getModelId();
+                Long uid = approval.getUserId();
+                Long mid = approval.getModelId();
 
-                UserVO userVO = userRedisService.getByUserId(uid);
+                UserVO userVO = userRedisService.getByUserId(uid.toString());
 
                 ModelL modelL = modelService.selectById(mid);
 
@@ -76,7 +76,7 @@ public class ApprovalRepairServiceImpl extends BaseServiceImpl<ApprovalMapper, A
                     } else if (StringUtils.isBlank(name)) {
                         title += "模型名称";
                     } else {
-                        title = nick + "的" + name;
+//                        title = nick + "的" + name;
                     }
                 }
 
@@ -120,7 +120,7 @@ public class ApprovalRepairServiceImpl extends BaseServiceImpl<ApprovalMapper, A
                     continue;
                 }
 
-                approval.setFinishTime(process.getProcessTime().getTime());
+                approval.setFinishTime(process.getProcessTime());
                 entityList.add(approval);
             }
 

@@ -23,19 +23,19 @@ public class CopyS extends BaseModel<CopyS> {
      * 用户主键
      */
     @TableField("user_id")
-    private String userId;
+    private Long userId;
 
     /**
      * 审批主键
      */
     @TableField("approval_id")
-    private String approvalId;
+    private Long approvalId;
 
     /**
      * 类型
      */
     @TableField("copys_type")
-    private String copySType;
+    private Integer copySType;
 
     /**
      * 是否删除 0：未删除；1：已删除
