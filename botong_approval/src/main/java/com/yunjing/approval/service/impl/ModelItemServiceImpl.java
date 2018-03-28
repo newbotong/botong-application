@@ -2,8 +2,6 @@ package com.yunjing.approval.service.impl;
 
 import com.alibaba.fastjson.JSONObject;
 import com.baomidou.mybatisplus.mapper.Condition;
-import com.baomidou.mybatisplus.mapper.EntityWrapper;
-import com.baomidou.mybatisplus.mapper.Wrapper;
 import com.common.mybatis.service.impl.BaseServiceImpl;
 import com.yunjing.approval.dao.mapper.ConditionMapper;
 import com.yunjing.approval.dao.mapper.ModelItemMapper;
@@ -81,7 +79,15 @@ public class ModelItemServiceImpl extends BaseServiceImpl<ModelItemMapper, Model
             }
             ModelItemVO modelItemVO = new ModelItemVO(modelItem);
             if (modelItem.getDataType() == 7) {
-                modelItemVO.setModelItems(itemList);
+                modelItemVO.setModelItemId(modelItem.getId());
+                modelItemVO.setLabel(modelItem.getItemLabel());
+                modelItemVO.setLabels(modelItem.getItemLabels());
+                modelItemVO.setField(modelItem.getField());
+                modelItemVO.setIsDisplay(modelItem.getIsDisplay());
+                modelItemVO.setIsRequired(modelItem.getIsRequired());
+                modelItemVO.setHelp(modelItem.getHelp());
+                List<ModelItem> modelItems = this.selectList(Condition.create().where("is_child={0}", modelItem.getId()).orderBy("priority"));
+                modelItemVO.setModelItems(modelItems);
             }
             modelItemVOS.add(modelItemVO);
 

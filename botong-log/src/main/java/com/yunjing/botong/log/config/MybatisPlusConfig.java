@@ -9,6 +9,6 @@ import org.springframework.context.annotation.Configuration;
  * @date 2018/3/26 10:28
  */
 @Configuration
-@MapperScan("com.yunjing.botong.log.mapper*")
-public class MybatisConfig extends BaseMybatisPlusConfig {
+@MapperScan("com.yunjing.botong.log.mapper")
+public class MybatisPlusConfig extends BaseMybatisPlusConfig {
 }

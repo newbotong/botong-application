@@ -69,9 +69,10 @@
         <result column="process_time" property="approvalTime"/>
         <result column="reason" property="content"/>
         <result column="id" property="userId"/>
+        <result column="is_activated" property="isActivated"/>
     </resultMap>
     <select id="getApprovalUserList" resultMap="ApprovalUserMap">
-        SELECT ap.approval_id, ap.user_id, ap.process_state, ap.seq, ap.process_time,ap.reason, au.id,au.name,au.avatar,au.mobile
+        SELECT ap.approval_id, ap.user_id, ap.process_state, ap.seq, ap.process_time,ap.reason, au.id,au.name,au.avatar,au.mobile,au.is_activated
         FROM approval_process ap
         LEFT JOIN approval_user au ON ap.user_id = au.id
         WHERE ap.approval_id = #{approvalId}

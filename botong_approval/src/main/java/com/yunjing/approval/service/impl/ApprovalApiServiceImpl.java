@@ -2,8 +2,6 @@ package com.yunjing.approval.service.impl;
 
 import com.baomidou.mybatisplus.mapper.Condition;
 import com.common.mybatis.page.Page;
-import com.yunjing.approval.common.Colors;
-import com.yunjing.approval.dao.cache.UserRedisService;
 import com.yunjing.approval.dao.mapper.ApprovalMapper;
 import com.yunjing.approval.dao.mapper.ApprovalProcessMapper;
 import com.yunjing.approval.dao.mapper.CopySMapper;
@@ -18,7 +16,7 @@ import com.yunjing.approval.model.vo.*;
 import com.yunjing.approval.service.IApprovalApiService;
 import com.yunjing.approval.service.IApprovalUserService;
 import com.yunjing.approval.service.IModelService;
-import com.yunjing.mommon.global.exception.BaseException;
+import com.yunjing.approval.util.Colors;
 import org.apache.commons.lang.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
