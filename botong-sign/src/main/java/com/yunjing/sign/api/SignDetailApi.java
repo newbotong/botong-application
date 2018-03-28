@@ -6,6 +6,7 @@ import com.yunjing.mommon.wrapper.ResponseEntityWrapper;
 import com.yunjing.sign.beans.param.SignDetailParam;
 import com.yunjing.sign.beans.param.UserAndDeptParam;
 import com.yunjing.sign.beans.vo.MySignVO;
+import com.yunjing.sign.beans.vo.SignDetailVO;
 import com.yunjing.sign.beans.vo.SignListVO;
 import com.yunjing.sign.dao.mapper.SignDetailDailyMapper;
 import com.yunjing.sign.dao.mapper.SignDetailMapper;
@@ -45,7 +46,7 @@ public class SignDetailApi extends BaseController {
     public ResponseEntityWrapper toSign(@RequestBody SignDetailParam signDetailParam){
         // 基础校验
         BeanFieldValidator.getInstance().validate(signDetailParam);
-        boolean isAdd = iSignDetailService.toSign(signDetailParam);
+        SignDetailVO isAdd = iSignDetailService.toSign(signDetailParam);
         return success(isAdd);
     }
 

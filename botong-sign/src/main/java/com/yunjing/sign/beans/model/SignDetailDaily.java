@@ -26,12 +26,12 @@ public class SignDetailDaily extends BaseModel<SignDetailDaily> {
      * 机构id
      */
 	@TableField("org_id")
-	private String orgId;
+	private Long orgId;
     /**
      * 机构id
      */
 	@TableField("user_id")
-	private String userId;
+	private Long userId;
     /**
      * 签到地址标头
      */

@@ -61,24 +61,12 @@ public class SignDetailServiceImpl extends ServiceImpl<SignDetailMapper, SignDet
      */
     @Override
     @Transactional(rollbackFor = Exception.class)
-    public boolean toSign(SignDetailParam signDetailParam) {
+    public SignDetailVO toSign(SignDetailParam signDetailParam) {
+        SignDetailVO result = new SignDetailVO();
         SignDetail signDetail = BeanUtils.map(signDetailParam, SignDetail.class);
-        SignConfigModel signConfigModel = new SignConfigModel().selectOne(new EntityWrapper<SignConfigModel>().eq("org_id", signDetailParam.getOrgId()).eq("is_delete", 0));
-        if (signConfigModel != null) {
-            if (signConfigModel.getTimeStatus() == 1) {
-                Date nowStart = DateUtil.stringToDate(DateUtil.converTime(new Date()));
-                Date nowEnd = DateUtil.addDay(nowStart, 1);
-                int count = new SignDetail().selectCount(new EntityWrapper<SignDetail>().eq("org_id", signDetailParam.getOrgId()).eq("user_id", signDetailParam.getUserId()).lt("create_time", nowEnd.getTime()).ge("create_time", nowStart.getTime()));
-                Date nowStart1 = DateUtil.StringToDate(DateUtil.converTime(new Date()) + " " + signConfigModel.getEndTime(), DateStyle.YYYY_MM_DD_HH_MM);
-                if (count >= 1) {
-                    if(nowStart1.getTime() >  System.currentTimeMillis()) {
-                        throw new UpdateMessageFailureException(600, "时间未到，不能打卡");
-                    }
-                }
-            }
-        }
-
-        boolean result = signDetail.insert();
+        signDetail.insert();
+        result.setUserId(signDetail.getUserId());
+        result.setSignDate(signDetail.getCreateTime());
         if (StringUtils.isNotBlank(signDetailParam.getImgUrls())) {
             SignDetailImg detailImg;
             int i = 1;

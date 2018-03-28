@@ -25,7 +25,7 @@ public class SignUserInfoVO {
     /**
      * 头像
      */
-    private String userIcon;
+    private String profile;
 
     /**
      * 部门

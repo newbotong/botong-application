@@ -26,7 +26,7 @@ public interface ISignDetailService extends IService<SignDetail> {
      * @param signDetailParam 签到对象
      * @return                成功与否
      */
-    boolean toSign(SignDetailParam signDetailParam);
+    SignDetailVO toSign(SignDetailParam signDetailParam);
 
     /**
      * 查询当日签到次数

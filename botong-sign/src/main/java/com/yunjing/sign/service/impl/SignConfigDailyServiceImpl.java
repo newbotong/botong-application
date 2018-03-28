@@ -34,8 +34,14 @@ public class SignConfigDailyServiceImpl extends ServiceImpl<SignConfigDailyMappe
     @Transactional(rollbackFor = Exception.class)
     public boolean setSignConfig(SignConfigParam signConfigParam) {
         SignConfigDaily signConfig = BeanUtils.map(signConfigParam, SignConfigDaily.class);
-        signConfig.setId(IDUtils.getID());
-        boolean result = signConfig.insert();
+        SignConfigDaily signConfigModel = new SignConfigDaily().selectOne(new EntityWrapper<SignConfigDaily>().eq("org_id", signConfigParam.getOrgId()));
+        boolean result = false;
+        if (signConfigModel != null) {
+            signConfig.setId(signConfigModel.getId());
+            result = signConfig.updateById();
+        } else {
+            result = signConfig.insert();
+        }
         return result;
     }
 

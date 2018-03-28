@@ -6,6 +6,7 @@ import com.yunjing.sign.beans.model.SignDetailDaily;
 import com.yunjing.sign.beans.param.SignDetailParam;
 import com.yunjing.sign.beans.param.UserAndDeptParam;
 import com.yunjing.sign.beans.vo.MySignVO;
+import com.yunjing.sign.beans.vo.SignDetailVO;
 import com.yunjing.sign.beans.vo.SignListVO;
 import com.yunjing.sign.beans.vo.UserMonthListVO;
 import com.yunjing.sign.dao.SignBaseMapper;
@@ -25,7 +26,7 @@ public interface ISignDetailDailyService extends IService<SignDetailDaily> {
      * @param signDetailParam 签到对象
      * @return                成功与否
      */
-    boolean toSign(SignDetailParam signDetailParam);
+    SignDetailVO toSign(SignDetailParam signDetailParam);
 
     /**
      * 查询当日签到次数

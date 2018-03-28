@@ -64,23 +64,22 @@ public class SignDetailDailyServiceImpl extends ServiceImpl<SignDetailDailyMappe
      */
     @Override
     @Transactional(rollbackFor = Exception.class)
-    public boolean toSign(SignDetailParam signDetailParam) {
+    public SignDetailVO toSign(SignDetailParam signDetailParam) {
+        SignDetailVO result = new SignDetailVO();
         SignConfigDaily signConfigModel = new SignConfigDaily().selectOne(new EntityWrapper<SignConfigDaily>().eq("org_id", signDetailParam.getOrgId()).eq("is_delete", 0));
         if (signConfigModel != null) {
             if (signConfigModel.getTimeStatus() == 1) {
-                Date nowStart = DateUtil.stringToDate(DateUtil.converTime(new Date()));
-                Date nowEnd = DateUtil.addDay(nowStart, 1);
-                int count = new SignDetailDaily().selectCount(new EntityWrapper<SignDetailDaily>().eq("org_id", signDetailParam.getOrgId()).eq("user_id", signDetailParam.getUserId()).lt("create_time", nowEnd.getTime()).ge("create_time", nowStart.getTime()));
-                Date nowStart1 = DateUtil.StringToDate(DateUtil.converTime(new Date()) + " " + signConfigModel.getEndTime(), DateStyle.YYYY_MM_DD_HH_MM);
-                if (count >= 1) {
-                    if(nowStart1.getTime() >  System.currentTimeMillis()) {
-                        throw new UpdateMessageFailureException(600, "时间未到，不能打卡");
-                    }
+                Date start = DateUtil.StringToDate(DateUtil.getDate(new Date()) + SignConstant.SEPARATE_STR_SPACE + signConfigModel.getStartTime(), DateStyle.YYYY_MM_DD_HH_MM);
+                Date end = DateUtil.StringToDate(DateUtil.getDate(new Date())  + SignConstant.SEPARATE_STR_SPACE + signConfigModel.getEndTime(), DateStyle.YYYY_MM_DD_HH_MM);
+                if (DateUtil.compareDate(new Date(), start) > 0 && DateUtil.compareDate(new Date(), end) < 0) {
+                    throw new UpdateMessageFailureException(600, "时间未到，不能打卡");
                 }
             }
         }
         SignDetailDaily signDetail = BeanUtils.map(signDetailParam, SignDetailDaily.class);
-        boolean result = signDetail.insert();
+        result.setUserId(signDetail.getUserId());
+        signDetail.insert();
+        result.setSignDate(signDetail.getCreateTime());
         if (StringUtils.isNotBlank(signDetailParam.getImgUrls())) {
             SignDetailImgDaily detailImg;
             int i = 1;
