@@ -48,4 +48,10 @@ public class ClientModelItemVO {
      */
     private String deptName;
 
+    /**
+     * 审批流程设置  0:不分条件设置审批人 1:分条件设置审批人
+     */
+    private Integer set;
+
+
 }

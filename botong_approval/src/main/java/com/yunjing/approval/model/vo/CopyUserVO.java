@@ -11,6 +11,11 @@ import lombok.Data;
 public class CopyUserVO {
 
     /**
+     * 抄送人主键
+     */
+    private Long userId;
+
+    /**
      * 抄送人姓名
      */
     private String name;
@@ -29,4 +34,14 @@ public class CopyUserVO {
      * 头像中的名字
      */
     private String avatarName;
+
+    /**
+     * 手机号
+     */
+    private String mobile;
+
+    /**
+     * 是否激活
+     */
+    private Integer isActivated;
 }

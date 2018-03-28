@@ -1,15 +1,15 @@
 package com.yunjing.approval.processor.task.async;
 
 import com.alibaba.fastjson.JSONObject;
-import com.baomidou.mybatisplus.mapper.Condition;
 import com.yunjing.approval.dao.mapper.ApprovalProcessMapper;
 import com.yunjing.approval.dao.mapper.CopySMapper;
 import com.yunjing.approval.model.entity.Approval;
 import com.yunjing.approval.model.entity.ApprovalUser;
-import com.yunjing.approval.model.entity.CopyS;
 import com.yunjing.approval.model.entity.PushLog;
 import com.yunjing.approval.model.vo.ApprovalUserVO;
 import com.yunjing.approval.model.vo.CopyUserVO;
+import com.yunjing.approval.param.PushParam;
+import com.yunjing.approval.processor.feign.PushFeign;
 import com.yunjing.approval.service.IApprovalService;
 import com.yunjing.approval.service.IApprovalUserService;
 import com.yunjing.approval.service.ICopySService;
@@ -47,6 +47,8 @@ public class ApprovalPushTask extends BaseTask {
     private CopySMapper copySMapper;
     @Autowired
     private IPushLogService pushLogService;
+    @Autowired
+    private PushFeign pushFeign;
 
     /**
      * 审批主键
@@ -109,8 +111,7 @@ public class ApprovalPushTask extends BaseTask {
      */
     public void submitApproval(Long approvalId, Long orgId, Long userId) {
         Approval approval = approvalService.selectById(approvalId);
-        // 发送推送
-//        Push push = new Push();
+        ApprovalUser user = approvalUserService.selectById(userId);
         if (orgId != null && userId != null) {
             String message = "您收到一条审批消息";
             Map<String, Object> map = new HashMap<>(16);
@@ -144,7 +145,14 @@ public class ApprovalPushTask extends BaseTask {
                                 if (!insert) {
                                     throw new InsertMessageFailureException("保存推送审批记录失败");
                                 }
-//                               push.simplePush(1, user.getMobile(), phones, 1, message, systemMessage);
+                                // 审批推送入参
+                                PushParam pushParam = new PushParam();
+                                pushParam.setMsg(systemMessage);
+                                pushParam.setAlias(phones);
+                                pushParam.setRegistrationId(user.getMobile());
+                                pushParam.setNotificationTitle(message);
+                                // 推送审批
+                                pushFeign.pushAllTargetByUser(pushParam);
                                 break;
                             }
                         }
@@ -152,8 +160,7 @@ public class ApprovalPushTask extends BaseTask {
                 } else {
 
                     PushLog pushLog = new PushLog();
-                    ApprovalUser approvalUser = approvalUserService.selectById(userId);
-                    phones[0] = approvalUser.getMobile();
+                    phones[0] = user.getMobile();
                     pushLog.setDatatype(30);
                     pushLog.setCopyNum(0);
                     pushLog.setInfoId(approval.getId());
@@ -161,12 +168,18 @@ public class ApprovalPushTask extends BaseTask {
                     pushLog.setOrgId(orgId);
                     pushLog.setCreateTime(DateUtil.getCurrentTime().getTime());
                     pushLog.setMessage("您收到一条审批消息");
-//                    push.simplePush(1, user.getUserMobile(), phones, 1, message, systemMessage);
+                    // 审批推送入参
+                    PushParam pushParam = new PushParam();
+                    pushParam.setMsg(message);
+                    pushParam.setAlias(phones);
+                    pushParam.setRegistrationId(user.getMobile());
+                    pushParam.setNotificationTitle(message);
+                    // 推送审批
+                    pushFeign.pushAllTargetByUser(pushParam);
                     boolean insert = pushLogService.insert(pushLog);
                     if (!insert) {
                         throw new InsertMessageFailureException("保存推送审批记录失败");
                     }
-                    List<CopyS> approvCopys = copySService.selectList(Condition.create().where("approval_id={0}", approvalId));
                     List<CopyUserVO> copyUserList = copySMapper.getCopyUserList(approvalId);
                     Integer flag = 0;
                     if (approval.getResult() == 1) {
@@ -174,8 +187,8 @@ public class ApprovalPushTask extends BaseTask {
                         System.out.println("========" + "第" + flag + "次进来");
                         int n = 1;
                         int i = 0;
-                        List<String> userPhones = new ArrayList<String>();
-                        List<String> phoes = new ArrayList<String>();
+                        List<String> userPhones = new ArrayList<>();
+                        List<String> phoneList = new ArrayList<>();
                         for (CopyUserVO copyVO : copyUserList) {
                             PushLog pushLog1 = new PushLog();
                             // 判断用户是否在平台登陆过
@@ -188,8 +201,8 @@ public class ApprovalPushTask extends BaseTask {
                                 pushLog1.setCopyNum(1);
                                 pushLog1.setCreateTime(DateUtil.getCurrentTime().getTime());
                                 pushLog1.setMessage("您收到一条审批消息");
-                                System.out.println("抄送人ID================" + copyVO.getUserId());
-                                System.out.println("审批ID================" + approvalId);
+                                logger.debug("抄送人ID================" + copyVO.getUserId());
+                                logger.debug("审批ID================" + approvalId);
                                 pushLogService.insert(pushLog1);
                             }
                             if (n == 100) {
@@ -197,16 +210,30 @@ public class ApprovalPushTask extends BaseTask {
                                     phones[j] = userPhones.get(j);
                                 }
                                 userPhones.removeAll(userPhones);
-                                String[] photos = phoes.toArray(new String[phoes.size()]);
-//                                push.simplePush(1, copyVO.getMobile(), photos, 1, message, systemMessage);
+                                String[] photos = phoneList.toArray(new String[phoneList.size()]);
+                                // 审批推送入参
+                                PushParam pushParam2 = new PushParam();
+                                pushParam2.setMsg(systemMessage);
+                                pushParam2.setAlias(photos);
+                                pushParam2.setRegistrationId(user.getMobile());
+                                pushParam2.setNotificationTitle(message);
+                                // 推送审批
+                                pushFeign.pushAllTargetByUser(pushParam2);
                                 n = 1;
-                            } else if (i == approvCopys.size() - 1 && n < 100) {
+                            } else if (i == copyUserList.size() - 1 && n < 100) {
                                 for (int j = 0; j < userPhones.size(); j++) {
-                                    phoes.add(userPhones.get(j));
+                                    phoneList.add(userPhones.get(j));
                                 }
                                 userPhones.removeAll(userPhones);
-                                String[] photos = phoes.toArray(new String[phoes.size()]);
-//                                push.simplePush(1, copyVO.getMobile(), photos, 1, message, systemMessage);
+                                String[] photos = phoneList.toArray(new String[phoneList.size()]);
+                                // 审批推送入参
+                                PushParam pushParam2 = new PushParam();
+                                pushParam2.setMsg(systemMessage);
+                                pushParam2.setAlias(photos);
+                                pushParam2.setRegistrationId(user.getMobile());
+                                pushParam2.setNotificationTitle(message);
+                                // 推送审批
+                                pushFeign.pushAllTargetByUser(pushParam2);
                             }
                             n++;
                             i++;

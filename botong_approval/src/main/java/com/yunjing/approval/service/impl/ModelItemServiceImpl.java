@@ -9,6 +9,7 @@ import com.yunjing.approval.dao.mapper.ModelLMapper;
 import com.yunjing.approval.model.entity.ModelItem;
 import com.yunjing.approval.model.entity.ModelL;
 import com.yunjing.approval.model.entity.OrgModel;
+import com.yunjing.approval.model.vo.ApprovalSetVO;
 import com.yunjing.approval.model.vo.ClientModelItemVO;
 import com.yunjing.approval.model.vo.ModelItemVO;
 import com.yunjing.approval.model.vo.ModelVO;
@@ -48,13 +49,12 @@ public class ModelItemServiceImpl extends BaseServiceImpl<ModelItemMapper, Model
     private IOrgModelService orgModelService;
 
     @Autowired
-    private IApprovalSetsService approvalSetsService;
-
-    @Autowired
     private ConditionMapper conditionMapper;
 
     @Autowired
     private ModelLMapper modelLMapper;
+    @Autowired
+    private IApprovalSetsService approvalSetsService;
 
     /**
      * 1-多行输入框 2-数字输入框 3-单选框 4-日期 5-日期区间 6-单行输入框 7-明细 8-说明文字 9-金额 10- 图片 11-附件
@@ -95,8 +95,14 @@ public class ModelItemServiceImpl extends BaseServiceImpl<ModelItemMapper, Model
 
         modelVO.setModelItems(modelItemVOS);
         ClientModelItemVO clientModelItemVO = new ClientModelItemVO(modelVO);
+
+        // 获取审批流程设置类型，set=0:不分条件设置审批人 set=1:分条件设置审批人
+        ApprovalSetVO approvalSet = approvalSetsService.getApprovalSet(modelId);
+        clientModelItemVO.setSet(approvalSet.getSetting());
+
         clientModelItemVO.setDeptId(6383142972988329992L);
         clientModelItemVO.setDeptName("互联网时代");
+
         return clientModelItemVO;
 
     }

@@ -2,6 +2,7 @@ package com.yunjing.approval.api;
 
 import com.yunjing.approval.service.IApprovalApiService;
 import com.yunjing.approval.service.IApprovalService;
+import com.yunjing.approval.service.IApprovalUserService;
 import com.yunjing.approval.service.IModelItemService;
 import com.yunjing.mommon.base.BaseController;
 import com.yunjing.mommon.wrapper.ResponseEntityWrapper;
@@ -16,7 +17,7 @@ import org.springframework.web.bind.annotation.*;
  * @date 2018/03/22
  */
 @RestController
-@RequestMapping("/approval")
+@RequestMapping(value = "/approval")
 public class ClientApprovalOperationController extends BaseController {
 
     @Autowired
@@ -25,7 +26,17 @@ public class ClientApprovalOperationController extends BaseController {
     @Autowired
     private IModelItemService modelItemService;
     @Autowired
+    private IApprovalUserService approvalUserService;
+    @Autowired
     private IApprovalService approvalService;
+
+    @PostMapping("/get-member-list")
+    public ResponseEntityWrapper getMember(@RequestParam("oid") String oid,
+                                           @RequestParam("uid") String uid) throws Exception {
+
+        return success(approvalUserService.addUser(oid, uid));
+    }
+
 
     /**
      * 提交审批信息
@@ -66,7 +77,7 @@ public class ClientApprovalOperationController extends BaseController {
                                        @RequestParam("approvalId") Long approvalId,
                                        @RequestParam("state") Integer state,
                                        @RequestParam("remark") String remark) throws Exception {
-        return success();
+        return success(approvalApiService.agreeApproval(oid,uid,approvalId,state,remark));
     }
 
     /**
@@ -86,7 +97,7 @@ public class ClientApprovalOperationController extends BaseController {
                                         @RequestParam("approvalId") Long approvalId,
                                         @RequestParam("state") Integer state,
                                         @RequestParam("remark") String remark) throws Exception {
-        return success();
+        return success(approvalApiService.refuseApproval(oid,uid,approvalId,state,remark));
     }
 
     /**
@@ -106,7 +117,7 @@ public class ClientApprovalOperationController extends BaseController {
                                         @RequestParam("approvalId") Long approvalId,
                                         @RequestParam("state") Integer state,
                                         @RequestParam("remark") String remark) throws Exception {
-        return success();
+        return success(approvalApiService.revokeApproval(oid,uid,approvalId,state,remark));
     }
 
     /**
@@ -126,6 +137,6 @@ public class ClientApprovalOperationController extends BaseController {
                                           @RequestParam("approvalId") Long approvalId,
                                           @RequestParam("state") Integer state,
                                           @RequestParam("remark") String remark) throws Exception {
-        return success();
+        return success(approvalApiService.transferApproval(oid,uid,approvalId,state,remark));
     }
 }

@@ -19,14 +19,15 @@ public class ModelItemVO {
         this.type = item.getDataType();
         this.field = item.getField();
         this.label = item.getItemLabel();
+        this.labels = item.getItemLabels();
         this.option = item.getOptValue();
         this.priority = item.getPriority();
         this.help = item.getHelp();
         this.unit = item.getUnit();
         this.format = item.getDateFormat();
-        this.display = item.getIsDisplay();
-        this.required = item.getIsRequired();
-        this.judge = item.getIsJudge();
+        this.isDisplay = item.getIsDisplay();
+        this.isRequired = item.getIsRequired();
+        this.isJudge = item.getIsJudge();
     }
 
     /**
@@ -43,6 +44,10 @@ public class ModelItemVO {
      * 显示名称
      */
     private String label;
+    /**
+     * 显示名称
+     */
+    private String labels;
 
     /**
      * 可选项
@@ -72,20 +77,29 @@ public class ModelItemVO {
     /**
      * 是否显示
      */
-    private Integer display;
+    private Integer isDisplay;
 
     /**
      * 是否必填
      */
-    private Integer required;
+    private Integer isRequired;
 
     /**
      * 是否为审批条件
      */
-    private Integer judge;
+    private Integer isJudge;
+
+    /**
+     * 模型项主键
+     */
+    private Long modelItemId;
 
     /**
      * 子项
      */
     private List<ModelItemVO> child;
+    /**
+     * 子项
+     */
+    private List<ModelItem> modelItems;
 }

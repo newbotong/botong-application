@@ -26,13 +26,13 @@ public class ApprovalUserServiceImpl extends BaseServiceImpl<ApprovalUserMapper,
     private OrgUserFeign orgUserFeign;
 
     @Override
-    public boolean addUser(Long orgId) throws BaseException {
-        ResponseEntityWrapper orgUser = orgUserFeign.getOrgUser(orgId);
+    public boolean addUser(String orgId,String userId) throws BaseException {
+        ResponseEntityWrapper orgUser = orgUserFeign.getMemberList(orgId,userId);
         if (orgUser.getStatusCode() == StatusCode.SUCCESS.getStatusCode()) {
             Object data = orgUser.getData();
             // TODO rpc调用企业服务获取用户信息
             List<ApprovalUser> approvalUserList = new ArrayList<>();
-            boolean b = this.insertBatch(approvalUserList);
+            boolean b = insertBatch(approvalUserList);
             if(!b){
                 throw new BaseException("批量插入企业用户失败");
             }

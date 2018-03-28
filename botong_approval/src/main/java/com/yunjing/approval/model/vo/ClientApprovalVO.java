@@ -1,6 +1,6 @@
 package com.yunjing.approval.model.vo;
 
-import com.yunjing.approval.model.dto.ApprovalContentVO;
+import com.yunjing.approval.model.dto.ApprovalContentDTO;
 import lombok.Data;
 
 /**
@@ -14,16 +14,19 @@ public class ClientApprovalVO {
 
     public ClientApprovalVO(){}
 
-    public ClientApprovalVO(ApprovalContentVO contentVO){
-        this.modelId = contentVO.getModelId();
-        this.modelName = contentVO.getModelName();
-        this.message = contentVO.getMessage();
-        this.userAvatar = contentVO.getUserAvatar();
-        this.userNick = contentVO.getUserNick();
-        this.color = contentVO.getColor();
-        this.state = contentVO.getState();
-        this.createTime = contentVO.getCreateTime();
-        this.approvalId = contentVO.getApprovalId();
+    public ClientApprovalVO(ApprovalContentDTO contentDTO){
+        this.modelId = contentDTO.getModelId();
+        this.modelName = contentDTO.getModelName();
+        this.message = contentDTO.getMessage();
+        this.userAvatar = contentDTO.getUserAvatar();
+        this.userNick = contentDTO.getUserNick();
+        this.color = contentDTO.getColor();
+        this.state = contentDTO.getState();
+        this.result = contentDTO.getResult();
+        this.logo = contentDTO.getLogo();
+        this.title = contentDTO.getTitle();
+        this.createTime = contentDTO.getCreateTime();
+        this.approvalId = contentDTO.getApprovalId();
     }
 
     /**

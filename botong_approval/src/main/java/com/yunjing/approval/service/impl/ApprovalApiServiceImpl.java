@@ -10,13 +10,14 @@ import com.yunjing.approval.model.dto.ApprovalContentDTO;
 import com.yunjing.approval.model.dto.ApprovalDetailDTO;
 import com.yunjing.approval.model.dto.InputDetailDTO;
 import com.yunjing.approval.model.dto.InternalDetailDTO;
-import com.yunjing.approval.model.entity.ApprovalUser;
-import com.yunjing.approval.model.entity.ModelL;
+import com.yunjing.approval.model.entity.*;
 import com.yunjing.approval.model.vo.*;
-import com.yunjing.approval.service.IApprovalApiService;
-import com.yunjing.approval.service.IApprovalUserService;
-import com.yunjing.approval.service.IModelService;
+import com.yunjing.approval.processor.task.async.ApprovalPushTask;
+import com.yunjing.approval.service.*;
 import com.yunjing.approval.util.Colors;
+import com.yunjing.approval.util.DateUtil;
+import com.yunjing.approval.util.EmojiFilterUtils;
+import com.yunjing.mommon.global.exception.UpdateMessageFailureException;
 import org.apache.commons.lang.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -45,9 +46,17 @@ public class ApprovalApiServiceImpl implements IApprovalApiService {
     @Autowired
     private ApprovalProcessMapper approvalProcessMapper;
     @Autowired
+    private IApprovalProcessService approvalProcessService;
+    @Autowired
     private CopySMapper copysMapper;
     @Autowired
+    private ICopySService copySService;
+    @Autowired
     private ApprovalMapper approvalMapper;
+    @Autowired
+    private IApprovalService approvalService;
+    @Autowired
+    private ApprovalPushTask approvalPushTask;
 
     @Override
     @Transactional(propagation = Propagation.REQUIRED, rollbackFor = Exception.class)
@@ -219,6 +228,94 @@ public class ApprovalApiServiceImpl implements IApprovalApiService {
         // 注入抄送人信息
         clientApprovalDetailVO.setCopyUserList(copyUserList);
         return clientApprovalDetailVO;
+    }
+
+    @Override
+    public boolean agreeApproval(Long orgId, Long userId, Long approvalId, Integer state, String remark) {
+        boolean flag = false;
+        List<ApprovalProcess> processList = approvalProcessService.selectList(Condition.create().where("approval_id={0}", approvalId));
+        if (processList != null && !processList.isEmpty()) {
+            for (ApprovalProcess process : processList) {
+                if (process.getProcessState() == 0) {
+                    if (process.getUserId().equals(userId)) {
+                        process.setProcessState(state);
+                        String remarks = EmojiFilterUtils.filterEmoji(remark);
+                        process.setReason(remarks);
+                        process.setProcessTime(DateUtil.getCurrentTime().getTime());
+                        boolean update = approvalProcessService.update(process, Condition.create().where("approval_id={0}", approvalId));
+                        if (!update) {
+                            throw new UpdateMessageFailureException("同意审批--更新审批流程信息失败");
+                        }
+                    }
+                    break;
+                }
+            }
+            Approval approval = approvalService.selectById(approvalId);
+            if (approval != null) {
+                // 2表示撤回
+                int revoke = 2;
+                if (state != revoke) {
+                    int num = processList.get(processList.size() - 1).getProcessState();
+                    switch (num) {
+                        case 1:
+                            // 状态 0:审批中 1:审批完成 2:已撤回
+                            approval.setState(1);
+                            // 结果 1:已同意 2:已拒绝 4:已撤销
+                            approval.setResult(1);
+                            break;
+                        case 2:
+                            approval.setState(1);
+                            approval.setResult(2);
+                            break;
+                        case 4:
+                            approval.setState(2);
+                            approval.setResult(4);
+                    }
+                } else if (state == revoke) {
+                    approval.setState(1);
+                    approval.setResult(2);
+                }
+                if (approval.getResult() != null) {
+                    // 保存审批完成时间
+                    approval.setFinishTime(DateUtil.getCurrentTime().getTime());
+                    List<CopyS> copySList = copySService.selectList(Condition.create().where("approval_id={0}", approvalId));
+                    // 更新抄送信息
+                    if (approval.getResult() == 1 && !copySList.isEmpty()) {
+                        for (CopyS copyS : copySList) {
+                            copyS.setCopySType(1);
+                            copyS.setCreateTime(DateUtil.getCurrentTime().getTime());
+                        }
+                        boolean batchById = copySService.updateBatchById(copySList);
+                        if (!batchById){
+                            throw new UpdateMessageFailureException("同意审批操作中--更新抄送信息失败");
+                        }
+                    }
+                }
+
+            }
+            flag = approvalService.updateById(approval);
+            if(!flag){
+                throw new UpdateMessageFailureException("同意审批操作中--更新审批信息失败");
+            }
+        }
+        //异步推送给下一个审批人
+        approvalPushTask.init(approvalId, orgId, userId).run();
+        return flag;
+    }
+
+    @Override
+    public boolean refuseApproval(Long orgId, Long userId, Long approvalId, Integer state, String remark) {
+        return false;
+    }
+
+    @Override
+    public boolean revokeApproval(Long orgId, Long userId, Long approvalId, Integer state, String remark) {
+        return false;
+    }
+
+    @Override
+    public boolean transferApproval(Long orgId, Long userId, Long approvalId, Integer state, String remark) {
+        return false;
     }
 
 

@@ -52,7 +52,7 @@ eureka:
     register-with-eureka: true
     fetch-registry: true
     serviceUrl:
-      defaultZone: http://127.0.0.1:8762/eureka/
+      defaultZone: http://192.168.10.233:10100//eureka/
 
 
 ##配置mybatis-plus

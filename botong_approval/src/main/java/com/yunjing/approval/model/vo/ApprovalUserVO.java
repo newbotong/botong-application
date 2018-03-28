@@ -10,7 +10,11 @@ import lombok.Data;
 public class ApprovalUserVO {
 
     /**
-     * 抄送人姓名
+     * 审批人主键
+     */
+    private Long userId;
+    /**
+     * 审批人姓名
      */
     private String name;
 
@@ -20,7 +24,7 @@ public class ApprovalUserVO {
     private String color;
 
     /**
-     * 抄送人头像
+     * 审批人头像
      */
     private String avatar;
 
@@ -28,6 +32,11 @@ public class ApprovalUserVO {
      * 头像中的名字
      */
     private String avatarName;
+
+    /**
+     * 是否激活
+     */
+    private Integer isActivated;
 
     /**
      * 审批状态
@@ -43,4 +52,38 @@ public class ApprovalUserVO {
      * 审批时间
      */
     private Long approvalTime;
+
+    /**
+     * 顺序
+     */
+    private Integer sort;
+
+    /**
+     * 备注信息
+     */
+    private String message;
+
+    /**
+     * 手机号
+     */
+    private String mobile;
+
+    /**
+     * 流程状态
+     */
+    private Integer processState;
+
+    /**
+     * 内容
+     */
+    private String content;
+
+    /**
+     * dang提醒
+     */
+    private Integer dangType;
+    /**
+     * 撤销状态
+     */
+    private Integer revokeState;
 }

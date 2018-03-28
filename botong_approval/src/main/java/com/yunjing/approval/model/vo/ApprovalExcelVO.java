@@ -18,7 +18,7 @@ public class ApprovalExcelVO {
     /**
      * 模型主键
      */
-    private String modelId;
+    private Long modelId;
     /**
      * 审批标题
      */
@@ -34,11 +34,11 @@ public class ApprovalExcelVO {
     /**
      * 审批发起时间
      */
-    private String createTime;
+    private Long createTime;
     /**
      * 审批结束时间
      */
-    private String finishTime;
+    private Long finishTime;
     /**
      * 发起人姓名
      */

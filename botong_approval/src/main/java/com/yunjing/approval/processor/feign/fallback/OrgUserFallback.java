@@ -15,7 +15,7 @@ import org.springframework.stereotype.Component;
 public class OrgUserFallback implements OrgUserFeign {
 
     @Override
-    public ResponseEntityWrapper getOrgUser(Long oid) {
+    public ResponseEntityWrapper getMemberList(String companyId,String passportIds) {
         return ResponseEntityWrapper.error(StatusCode.INTERNET_IO_ERROR);
     }
 }

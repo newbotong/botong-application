@@ -74,4 +74,54 @@ public interface IApprovalApiService {
      * @return
      */
     ClientApprovalDetailVO getApprovalDetail(Long orgId, Long userId, Long approvalId);
+
+    /**
+     * 审批同意操作
+     *
+     * @param orgId      企业主键
+     * @param userId     用户主键
+     * @param approvalId 审批主键
+     * @param state      审批状态
+     * @param remark     备注信息
+     * @return
+     */
+    boolean agreeApproval(Long orgId, Long userId, Long approvalId, Integer state, String remark);
+
+    /**
+     * 审批拒绝操作
+     *
+     * @param orgId      企业主键
+     * @param userId     用户主键
+     * @param approvalId 审批主键
+     * @param state      审批状态
+     * @param remark     备注信息
+     * @return
+     */
+    boolean refuseApproval(Long orgId, Long userId, Long approvalId, Integer state, String remark);
+
+    /**
+     * 审批撤销操作
+     *
+     * @param orgId      企业主键
+     * @param userId     用户主键
+     * @param approvalId 审批主键
+     * @param state      审批状态
+     * @param remark     备注信息
+     * @return
+     * @throws Exception
+     */
+    boolean revokeApproval(Long orgId, Long userId, Long approvalId, Integer state, String remark);
+
+    /**
+     * 审批转让操作
+     *
+     * @param orgId      企业主键
+     * @param userId     用户主键
+     * @param approvalId 审批主键
+     * @param state      审批状态
+     * @param remark     备注信息
+     * @return
+     * @throws Exception
+     */
+    boolean transferApproval(Long orgId, Long userId, Long approvalId, Integer state, String remark);
 }
