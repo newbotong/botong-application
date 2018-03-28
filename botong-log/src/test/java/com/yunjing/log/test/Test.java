@@ -18,7 +18,7 @@ public class Test {
     public void test(){
 
         RemindVo remindVo = new RemindVo();
-        remindVo.setUserId(IDUtils.getID());
+        remindVo.setMemberId(IDUtils.getID());
         remindVo.setRemindSwitch(1);
         // 日 01:30，周 1-7，月 7号，一次发送：2018-03-23
         remindVo.setCycle("16:30");

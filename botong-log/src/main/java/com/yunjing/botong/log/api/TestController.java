@@ -1,4 +1,4 @@
-package com.yunjing.botong.log.controller;
+package com.yunjing.botong.log.api;
 
 import com.yunjing.botong.log.processor.mq.producer.RemindMessageProducer;
 import com.yunjing.message.model.Message;
