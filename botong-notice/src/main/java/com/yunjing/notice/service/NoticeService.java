@@ -3,15 +3,13 @@ package com.yunjing.notice.service;
 import com.baomidou.mybatisplus.plugins.Page;
 import com.baomidou.mybatisplus.service.IService;
 import com.yunjing.mommon.global.exception.BaseException;
-import com.yunjing.notice.body.NoticeBody;
-import com.yunjing.notice.body.NoticeDetailBody;
-import com.yunjing.notice.body.NoticePageBody;
-import com.yunjing.notice.body.UserInfoBody;
+import com.yunjing.notice.body.*;
 import com.yunjing.notice.entity.NoticeEntity;
 import com.yunjing.notice.entity.NoticeUserEntity;
 import org.yaml.snakeyaml.events.Event;
 
 import java.util.List;
+import java.util.Map;
 
 /**
  * 公告
@@ -41,10 +39,10 @@ public interface NoticeService extends IService<NoticeEntity> {
 
     /**
      * 逻辑删除公告
-     * @param id             公告id
+     * @param ids             多个公告id
      * @throws BaseException
      */
-    void deleteNotice(Long id) throws BaseException;
+    void deleteNotice(String ids) throws BaseException;
 
     /**
      *
@@ -56,7 +54,7 @@ public interface NoticeService extends IService<NoticeEntity> {
      * @return
      * @throws BaseException
      */
-    Page<NoticePageBody> selectNoticePage(Long userId, Integer state, Integer pageNo,Integer pageSize) throws BaseException;
+    Map<String,Object> selectNoticePage(Long userId, Integer state, Integer pageNo, Integer pageSize) throws BaseException;
 
 
     /**
@@ -66,7 +64,7 @@ public interface NoticeService extends IService<NoticeEntity> {
      * @return
      * @throws BaseException
      */
-    List<UserInfoBody> selectNoticeUser(Long id,Integer state) throws BaseException;
+    Page<UserInfoBody> selectNoticeUser(Long id,Integer state,Integer pageNo,Integer pageSize) throws BaseException;
 
     /**
      * 根据公告id查询公告详情接口
@@ -74,7 +72,12 @@ public interface NoticeService extends IService<NoticeEntity> {
      * @return
      * @throws BaseException
      */
-    NoticeDetailBody selectNoticeDetail(Long id) throws BaseException;
+    NoticeDetailBody selectNoticeDetail(Long id,Long userId) throws BaseException;
 
+    /**
+     * web端公告id查询公告详情接口
+     * @param id 公告id
+     */
+    NoticeDetailCBody selectCNoticeDetail(Long id) throws BaseException;
 }
 

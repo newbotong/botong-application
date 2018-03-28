@@ -27,10 +27,6 @@ public class NoticePageBody implements Serializable{
      */
     private String author;
     /**
-     * 是否可删除 0不可删除 1可删除
-     */
-    private Integer whetherDelete;
-    /**
      * 封页图
      */
     private String cover;

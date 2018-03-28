@@ -6,8 +6,8 @@ CREATE TABLE `notice` (
   `issue_user_id` bigint(32) DEFAULT NULL COMMENT '发布人用户id',
   `title` varchar(32) DEFAULT NULL COMMENT '公告标题（5-10字）',
   `content` varchar(255) DEFAULT NULL COMMENT '公告内容(200字)',
-  `cover` varchar(32) DEFAULT NULL COMMENT '公告封面图',
-  `picture` varchar(32) DEFAULT NULL COMMENT '图片地址',
+  `cover` varchar(255) DEFAULT NULL COMMENT '公告封面图',
+  `picture` varchar(255) DEFAULT NULL COMMENT '图片地址',
   `author` varchar(32) DEFAULT NULL COMMENT '作者',
   `read_num` int(11) DEFAULT '0' COMMENT '阅读人数',
   `not_read_num` int(11) DEFAULT '0' COMMENT '未读数',
@@ -16,7 +16,7 @@ CREATE TABLE `notice` (
   `update_time` bigint(20) DEFAULT NULL COMMENT '更新日期',
   `secrecy_state` tinyint(1) DEFAULT '1' COMMENT '保密状态 0为保密 1为不保密',
   `dang_state` tinyint(1) DEFAULT '1' COMMENT 'Dang的状态 0为Dang 1为非Dang',
-  `picture_name` varchar(200) DEFAULT NULL COMMENT '图片名称，多个名称逗号隔开',
+  `picture_name` varchar(255) DEFAULT NULL COMMENT '图片名称，多个名称逗号隔开',
   PRIMARY KEY (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
@@ -42,8 +42,11 @@ CREATE TABLE `userInfo` (
   `id` bigint(22) NOT NULL COMMENT '用户id',
   `img` varchar(255) DEFAULT NULL COMMENT '用户头像地址',
   `name` varchar(32) DEFAULT NULL COMMENT '用户名称',
+  `phone` bigint(11) DEFAULT NULL COMMENT '手机号',
   `logic_delete` tinyint(1) DEFAULT '0' COMMENT '逻辑删除 0正常 1删除',
   `update_time` bigint(22) DEFAULT NULL COMMENT '更新时间',
-  `create_time` bigint(22) DEFAULT NULL COMMENT '创建日期'
+  `create_time` bigint(22) DEFAULT NULL COMMENT '创建日期',
+  PRIMARY KEY (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
 

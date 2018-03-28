@@ -13,9 +13,15 @@ import org.springframework.stereotype.Component;
  **/
 @Component
 public class AuthorityFallback implements AuthorityFeign{
-
+    /**
+     * 是否有权限发送公告
+     *
+     * @param appId    应用编号
+     * @param memberId 企业成员编号
+     * @return ResponseEntityWrapper
+     */
     @Override
-    public ResponseEntityWrapper authority(Long appId, Long issueUserId) {
-        return ResponseEntityWrapper.error(StatusCode.INTERNET_IO_ERROR);
+    public ResponseEntityWrapper authority(String appId, Long memberId) {
+        return ResponseEntityWrapper.error(StatusCode.HTTP_RESPONSE_ERROR);
     }
 }

@@ -1,6 +1,7 @@
 package com.yunjing.notice.mapper;
 
 import com.baomidou.mybatisplus.mapper.BaseMapper;
+import com.baomidou.mybatisplus.plugins.Page;
 import com.yunjing.notice.body.UserInfoBody;
 import com.yunjing.notice.entity.UserInfoEntity;
 import org.springframework.stereotype.Repository;
@@ -18,12 +19,12 @@ public interface UserInfoMapper extends BaseMapper<UserInfoEntity> {
      * 查询用户id
      * @return
      */
-    List<String> selectUserIds();
+    List<Long> selectUserIds();
 
     /**
      * 查询用户属性
      * @param map
      * @return
      */
-    List<UserInfoBody> selectUser(Map<String,Object> map);
+    List<UserInfoBody> selectUser(Map<String,Object> map, Page<UserInfoBody> page);
 }
