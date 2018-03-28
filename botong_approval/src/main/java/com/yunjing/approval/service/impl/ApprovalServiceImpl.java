@@ -8,18 +8,17 @@ import com.baomidou.mybatisplus.mapper.EntityWrapper;
 import com.baomidou.mybatisplus.mapper.Wrapper;
 import com.baomidou.mybatisplus.plugins.Page;
 import com.common.mybatis.service.impl.BaseServiceImpl;
-import com.yunjing.approval.common.DateUtil;
+import com.ctc.wstx.util.DataUtil;
 import com.yunjing.approval.dao.cache.ApprovalRedisService;
 import com.yunjing.approval.dao.cache.OrgReadisService;
 import com.yunjing.approval.dao.cache.UserRedisService;
-import com.yunjing.approval.dao.mapper.ApprovalAttrMapper;
-import com.yunjing.approval.dao.mapper.ApprovalMapper;
-import com.yunjing.approval.dao.mapper.ApproveAttrMapper;
-import com.yunjing.approval.dao.mapper.ModelItemMapper;
+import com.yunjing.approval.dao.mapper.*;
 import com.yunjing.approval.excel.*;
 import com.yunjing.approval.model.entity.*;
 import com.yunjing.approval.model.vo.*;
+import com.yunjing.approval.processor.task.async.ApprovalPushTask;
 import com.yunjing.approval.service.*;
+import com.yunjing.approval.util.DateUtil;
 import com.yunjing.approval.util.EmojiFilterUtils;
 import com.yunjing.mommon.global.exception.BaseException;
 import com.yunjing.mommon.global.exception.InsertMessageFailureException;
@@ -34,7 +33,6 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.sql.Timestamp;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -52,15 +50,17 @@ public class ApprovalServiceImpl extends BaseServiceImpl<ApprovalMapper, Approva
     @Autowired
     private IApprovalProcessService approvalProcessService;
     @Autowired
+    private ApprovalProcessMapper approvalProcessMapper;
+    @Autowired
     private IApprovalAttrService approvalAttrService;
     @Autowired
     private ICopySService copySService;
     @Autowired
+    private CopySMapper copySMapper;
+    @Autowired
     private IApprovalService approvalService;
     @Autowired
     private UserRedisService userRedisService;
-    //    @Autowired
-//    private DeptUserDao deptUserDao;
     @Autowired
     private IExportLogService exportLogService;
 
@@ -71,19 +71,20 @@ public class ApprovalServiceImpl extends BaseServiceImpl<ApprovalMapper, Approva
     @Autowired
     private OrgReadisService orgReadisService;
     @Autowired
-    private ApprovalAttrMapper approvalAttrMapper;
-    @Autowired
     private ApproveAttrMapper approveAttrMapper;
     @Autowired
     private ApprovalRedisService approvalRedisService;
     @Autowired
     private IApprovalUserService approvalUserService;
+    @Autowired
+    private ApprovalPushTask approvalPushTask;
 
     @Override
-    public boolean submitApproval(Long oid, Long uid, Long modelId, String jsonData, String sendUserIds, String sendCopyIds) throws Exception {
+    public boolean submit(Long oid, Long uid, Long modelId, String jsonData, String sendUserIds, String sendCopyIds) throws Exception {
         ModelL modelL = modelService.selectById(modelId);
         Approval approval = new Approval();
         approval.setId(IDUtils.getID());
+        approval.setModelId(modelId);
         approval.setOrgId(oid);
         approval.setUserId(uid);
         approval.setCreateTime(DateUtil.getCurrentTime().getTime());
@@ -107,12 +108,19 @@ public class ApprovalServiceImpl extends BaseServiceImpl<ApprovalMapper, Approva
             }
         }
         approval.setTitle(title);
+
+        // 保存审批
+        boolean insert = this.insert(approval);
+        if (!insert) {
+            throw new InsertMessageFailureException("保存审批信息失败");
+        }
         Set<ApprovalAttr> attrSet = new HashSet<>();
         // 解析并保存审批信息
         JSONArray jsonArray = JSON.parseArray(jsonData);
         Iterator<Object> it = jsonArray.iterator();
         while (it.hasNext()) {
             ApprovalAttr attr = new ApprovalAttr();
+            attr.setId(IDUtils.getID());
             attr.setApprovalId(approval.getId());
             JSONObject obj = (JSONObject) it.next();
             int type = obj.getIntValue("type");
@@ -120,6 +128,7 @@ public class ApprovalServiceImpl extends BaseServiceImpl<ApprovalMapper, Approva
             attr.setAttrName(name);
             attr.setAttrType(type);
             String value;
+            // 类型是10-图片, 11-附件的情况
             if (type == 10 || type == 11) {
                 JSONArray array = obj.getJSONArray("value");
                 value = array.toJSONString();
@@ -128,11 +137,13 @@ public class ApprovalServiceImpl extends BaseServiceImpl<ApprovalMapper, Approva
                 value = obj.getString("value");
                 attr.setAttrValue(EmojiFilterUtils.filterEmoji(value));
                 if (type == 7) {
-                    JSONArray array = obj.getJSONArray("detail");
+                    // 明细类型
+                    JSONArray array = obj.getJSONArray("content");
                     Iterator<Object> details = array.iterator();
                     Set<ApprovalAttr> attrs = new HashSet<>();
                     while (details.hasNext()) {
                         ApprovalAttr entity = new ApprovalAttr();
+                        entity.setId(IDUtils.getID());
                         entity.setApprovalId(approval.getId());
                         entity.setAttrParent(attr.getId());
                         JSONObject detail = (JSONObject) details.next();
@@ -142,6 +153,7 @@ public class ApprovalServiceImpl extends BaseServiceImpl<ApprovalMapper, Approva
                         entity.setAttrName(detailName);
                         entity.setAttrType(detailType);
                         String detailValue;
+                        // 明细中类型是10-图片, 11-附件的情况
                         if (detailType == 10 || detailType == 11) {
                             JSONArray detailArray = detail.getJSONArray("value");
                             detailValue = detailArray.toJSONString();
@@ -173,6 +185,9 @@ public class ApprovalServiceImpl extends BaseServiceImpl<ApprovalMapper, Approva
         saveApprovalUser(sendUserIds, approval);
         // 保存抄送人
         saveCopyUser(sendCopyIds, approval);
+
+        //推送审批
+        approvalPushTask.init(approval.getId(), oid, uid).run();
 
         return isInserted;
     }
@@ -802,12 +817,13 @@ public class ApprovalServiceImpl extends BaseServiceImpl<ApprovalMapper, Approva
                 ids[n] = string;
                 n++;
             }
-            List<ApprovalUser> users = approvalUserService.selectBatchIds(Arrays.asList(ids));
+            List<ApprovalUser> users = approvalUserService.selectList(Condition.create().in("id", ids));
             Set<ApprovalProcess> approvalProcesses = new HashSet<>();
             for (int j = 0; j < userIds.length; j++) {
                 for (ApprovalUser user : users) {
-                    if (userIds[j].equals(user.getId())) {
+                    if (Long.valueOf(userIds[j]).equals(user.getId())) {
                         ApprovalProcess approvalProcess = new ApprovalProcess();
+                        approvalProcess.setId(IDUtils.getID());
                         approvalProcess.setApprovalId(approval.getId());
                         approvalProcess.setProcessTime(DateUtil.getCurrentTime().getTime());
                         approvalProcess.setProcessState(0);
@@ -847,7 +863,7 @@ public class ApprovalServiceImpl extends BaseServiceImpl<ApprovalMapper, Approva
                 ids[n] = string;
                 n++;
             }
-            List<ApprovalUser> users = approvalUserService.selectBatchIds(Arrays.asList(ids));
+            List<ApprovalUser> users = approvalUserService.selectList(Condition.create().in("id", ids));
             Set<CopyS> copyS = new HashSet<>();
             for (ApprovalUser user : users) {
                 CopyS copyS1 = new CopyS();
@@ -865,4 +881,6 @@ public class ApprovalServiceImpl extends BaseServiceImpl<ApprovalMapper, Approva
         }
         return flag;
     }
+
+
 }

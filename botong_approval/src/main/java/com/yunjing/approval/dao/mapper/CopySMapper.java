@@ -31,6 +31,10 @@ public interface CopySMapper extends IBaseMapper<CopyS> {
     List<ApprovalContentDTO> getCopiedApprovalList(@Param("index") Integer index, @Param("size") Integer pageSize, @Param("orgId") Long orgId,
                                                    @Param("userId") Long userId, @Param("searchKey") String searchKey, @Param("flag") Boolean flag);
 
-
+    /**
+     * 查询抄送人列表
+     * @param approvalId 审批主键
+     * @return
+     */
     List<CopyUserVO> getCopyUserList(Long approvalId);
 }

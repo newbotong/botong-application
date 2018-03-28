@@ -1,4 +1,4 @@
-package com.yunjing.approval.common;
+package com.yunjing.approval.util;
 
 import java.sql.Timestamp;
 import java.text.DateFormat;

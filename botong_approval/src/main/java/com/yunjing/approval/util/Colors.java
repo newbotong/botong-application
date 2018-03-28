@@ -1,8 +1,8 @@
-package com.yunjing.approval.common;
-
-import java.util.Random;
+package com.yunjing.approval.util;
 
 import org.apache.http.util.TextUtils;
+
+import java.util.Random;
 
 public class Colors {
 

@@ -25,7 +25,7 @@ public interface IApprovalService extends IBaseService<Approval> {
      * @return
      * @throws Exception
      */
-    boolean submitApproval(Long oid, Long uid, Long modelId, String jsonData, String sendUserIds, String sendCopyIds) throws Exception;
+    boolean submit(Long oid, Long uid, Long modelId, String jsonData, String sendUserIds, String sendCopyIds) throws Exception;
 
     /**
      * 获取审批数据列表

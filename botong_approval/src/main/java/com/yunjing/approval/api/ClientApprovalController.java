@@ -1,11 +1,10 @@
 package com.yunjing.approval.api;
 
 import com.common.mybatis.page.Page;
-import com.yunjing.approval.common.DateUtil;
-import com.yunjing.approval.model.dto.InputDetailDTO;
 import com.yunjing.approval.model.vo.*;
 import com.yunjing.approval.service.IApprovalApiService;
 import com.yunjing.approval.service.IModelItemService;
+import com.yunjing.approval.util.DateUtil;
 import com.yunjing.mommon.base.BaseController;
 import com.yunjing.mommon.utils.IDUtils;
 import com.yunjing.mommon.wrapper.ResponseEntityWrapper;
@@ -23,7 +22,7 @@ import java.util.List;
  * @date 2018/03/22
  */
 @RestController
-@RequestMapping("/api/approval")
+@RequestMapping("/approval")
 public class ClientApprovalController extends BaseController {
 
     @Autowired
