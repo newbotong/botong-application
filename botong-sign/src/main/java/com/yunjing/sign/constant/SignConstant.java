@@ -13,5 +13,11 @@ public class SignConstant implements Serializable {
 
     public final static String  SEPARATE_STR = ",";
 
+    public final static String  CODE_STR = "code";
+    public final static String  MSG_STR = "msg";
+    public final static String  DATA_STR = "data";
+
+    public final static String  CODE_SCCUESS = "200";
+
 
 }

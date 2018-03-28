@@ -2,7 +2,6 @@ package com.yunjing.sign.processor.feign;
 
 import com.yunjing.mommon.wrapper.PageWrapper;
 import com.yunjing.mommon.wrapper.ResponseEntityWrapper;
-import com.yunjing.mommon.wrapper.RpcResponseWrapper;
 import com.yunjing.sign.beans.vo.SignUserInfoVO;
 import com.yunjing.sign.processor.feign.fallback.UserRemoteServiceFallback;
 import org.springframework.cloud.netflix.feign.FeignClient;

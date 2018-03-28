@@ -10,10 +10,12 @@ import com.yunjing.sign.dao.mapper.SignDetailMapper;
 import com.yunjing.sign.excel.BaseExModel;
 import com.yunjing.sign.service.ISignDetailDailyService;
 import com.yunjing.sign.service.ISignDetailService;
+import org.apache.poi.ss.usermodel.Workbook;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
 import javax.servlet.http.HttpServletResponse;
+import java.io.IOException;
 import java.io.OutputStream;
 
 /**
@@ -57,12 +59,12 @@ public class SignDailyDetailController extends BaseController {
      */
     @GetMapping("/export")
     public ResponseEntityWrapper export(HttpServletResponse response, String userIds, String deptIds, String signDate) throws Exception {
-        UserAndDeptParam userAndDeptParam = new UserAndDeptParam();
-        userAndDeptParam.setDeptIds(deptIds);
-        userAndDeptParam.setUserIds(userIds);
-        userAndDeptParam.setSignDate(signDate);
+        UserAndDeptParam userAndDeptParamT = new UserAndDeptParam();
+        userAndDeptParamT.setDeptIds(deptIds);
+        userAndDeptParamT.setUserIds(userIds);
+        userAndDeptParamT.setSignDate(signDate);
         boolean exportFlag = false;
-        BaseExModel excel = iSignDetailDailyService.createTempExcel(userAndDeptParam);
+        BaseExModel excel = iSignDetailDailyService.createTempExcel(userAndDeptParamT);
         String fileName = excel.getFileName();
         //设置响应类型，告知浏览器输出的是图片
         response.setContentType("application/vnd.ms-excel;charset=utf-8");
@@ -80,20 +82,24 @@ public class SignDailyDetailController extends BaseController {
 
     private ResponseEntityWrapper success(HttpServletResponse response, BaseExModel excel, boolean resultFlag) throws Exception {
         OutputStream out = response.getOutputStream();
+        Workbook workbook = null;
         try {
-            excel.createWorkbook().write(out);
+            workbook = excel.createWorkbook();
+            workbook.write(out);
             resultFlag = true;
         } catch (Exception e) {
             e.printStackTrace();
         } finally {
             try {
+                workbook.close();
                 out.flush();
                 out.close();
             } catch (Exception e2) {
                 e2.printStackTrace();
             }
-            return success(resultFlag);
+
         }
+        return null;
     }
 
 }

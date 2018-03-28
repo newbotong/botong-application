@@ -2,7 +2,6 @@ package com.yunjing.sign.processor.feign.fallback;
 
 import com.yunjing.mommon.constant.StatusCode;
 import com.yunjing.mommon.wrapper.ResponseEntityWrapper;
-import com.yunjing.mommon.wrapper.RpcResponseWrapper;
 import org.springframework.stereotype.Component;
 import org.springframework.web.bind.annotation.RequestParam;
 
