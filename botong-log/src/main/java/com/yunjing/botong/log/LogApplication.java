@@ -1,4 +1,4 @@
-package com.yunjing.org.structure;
+package com.yunjing.botong.log;
 
 import com.yunjing.mommon.base.BaseApplication;
 import org.springframework.boot.SpringApplication;

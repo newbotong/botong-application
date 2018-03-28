@@ -1,5 +1,5 @@
 server:
-  port: 24110
+  port: 26100
   tomcat:
     uri-encoding: UTF-8
 
