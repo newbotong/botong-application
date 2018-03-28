@@ -1,0 +1,54 @@
+server:
+  port: 24110
+  tomcat:
+    uri-encoding: UTF-8
+
+## 注册eureka
+eureka:
+  client:
+    register-with-eureka: true
+    fetch-registry: true
+    serviceUrl:
+      defaultZone: ${eureka.url}
+
+### 设置服务名称
+spring:
+  application:
+    name: botong-log
+  sleuth:
+    sampler:
+      percentage: 1
+  datasource:
+    url: ${mysql.url}
+    username: ${mysql.username}
+    password: ${mysql.password}
+    driver-class-name: com.mysql.jdbc.Driver
+    initialize: true
+    continue-on-error: true
+  rabbitmq:
+    host: ${rabbitmq.server}
+    port: ${rabbitmq.port}
+    username: ${rabbitmq.username}
+    password: ${rabbitmq.password}
+  redis:
+    host: ${redis.host}
+    port: ${redis.port}
+    database: ${redis.dbindex}
+    password: ${redis.password}
+  data:
+    mongodb:
+      host: ${mongo.host}
+      port: ${mongo.port}
+      database: ${mongo.db}
+
+##配置mybatis-plus
+mybatis-plus:
+  mapper-locations: classpath:mapper/*Mapper.xml
+  typeAliasesPackage: com.yunjing.botong.log.entity
+  configuration:
+    map-underscore-to-camel-case: true
+  global-config:
+    meta-object-handler: com.common.mybatis.config.FiledAnnotationMetaObjectHandler
+    logic-delete-value: 1
+    logic-not-delete-value: 0
+    sql-injector: com.baomidou.mybatisplus.mapper.LogicSqlInjector

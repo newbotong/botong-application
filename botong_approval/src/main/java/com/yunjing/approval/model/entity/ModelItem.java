@@ -36,6 +36,11 @@ public class ModelItem extends BaseModel<ModelItem> {
      */
     @TableField("item_label")
     private String itemLabel;
+    /**
+     * 第二名称
+     */
+    @TableField("item_labels")
+    private String itemLabels;
 
     /**
      * 排序顺序
@@ -107,7 +112,7 @@ public class ModelItem extends BaseModel<ModelItem> {
      * 是否为子项
      */
     @TableField("is_child")
-    private Long isChild;
+    private Long    isChild;
 
     /**
      * 版本

@@ -1,6 +1,7 @@
 package com.yunjing.approval.service.impl;
 
 import com.alibaba.fastjson.JSONObject;
+import com.baomidou.mybatisplus.mapper.Condition;
 import com.baomidou.mybatisplus.mapper.EntityWrapper;
 import com.baomidou.mybatisplus.mapper.Wrapper;
 import com.common.mybatis.service.impl.BaseServiceImpl;
@@ -65,25 +66,30 @@ public class ModelItemServiceImpl extends BaseServiceImpl<ModelItemMapper, Model
     @Override
     @Transactional(propagation = Propagation.REQUIRED, rollbackFor = Exception.class)
     public ClientModelItemVO getModelItem(Long modelId) throws Exception {
-        if (null == modelId) {
-            throw new BaseException("模型主键不存在");
-        }
-
         ModelL modelL = modelService.selectById(modelId);
-        if (modelL == null) {
-            throw new BaseException("模型信息不存在");
+        List<ModelItem> itemList = this.selectList(Condition.create().where("model_id={0}", modelId).and("item_version={0}", modelL.getModelVersion()).orderBy("priority"));
+        ModelVO modelVO = new ModelVO();
+        modelVO.setModelId(modelId);
+        modelVO.setModelName(modelL.getModelName());
+        List<ModelItemVO> modelItemVOS = new ArrayList<>();
+        for (ModelItem modelItem : itemList) {
+            if (null != modelItem.getIsChild()) {
+                continue;
+            }
+            if (modelItem.getIsDisplay() != 1) {
+                continue;
+            }
+            ModelItemVO modelItemVO = new ModelItemVO(modelItem);
+            if (modelItem.getDataType() == 7) {
+                modelItemVO.setModelItems(itemList);
+            }
+            modelItemVOS.add(modelItemVO);
+
         }
 
-        Wrapper<ModelItem> wrapper = new EntityWrapper<>();
-        wrapper.eq("model_id", modelId).eq("item_version", modelL.getModelVersion()).orderBy("priority");
-        List<ModelItem> itemList = this.selectList(wrapper);
-
-        if (CollectionUtils.isEmpty(itemList)) {
-            throw new BaseException("字段信息不存在");
-        }
-        ModelVO modelVO = this.getModelVO(modelL, itemList);
+        modelVO.setModelItems(modelItemVOS);
         ClientModelItemVO clientModelItemVO = new ClientModelItemVO(modelVO);
-        clientModelItemVO.setDeptId(null);
+        clientModelItemVO.setDeptId(6383142972988329992L);
         clientModelItemVO.setDeptName("互联网时代");
         return clientModelItemVO;
 
@@ -101,7 +107,6 @@ public class ModelItemServiceImpl extends BaseServiceImpl<ModelItemMapper, Model
                     childList.forEach(c -> child.add(new ModelItemVO(c)));
                     itemVO.setChild(child);
                 }
-
                 items.add(itemVO);
             }
         });
@@ -293,7 +298,7 @@ public class ModelItemServiceImpl extends BaseServiceImpl<ModelItemMapper, Model
             item.setIsCustom(1);
 
             // 是否显示 0:不显示 1:显示
-            Integer isDisplay = itemVO.getDisplay();
+            Integer isDisplay = itemVO.getIsDisplay();
             if (isDisplay == null) {
                 isDisplay = 1;
             } else {
@@ -306,7 +311,7 @@ public class ModelItemServiceImpl extends BaseServiceImpl<ModelItemMapper, Model
             item.setIsDisplay(isDisplay);
 
             // 是否必填
-            Integer isRequired = itemVO.getRequired();
+            Integer isRequired = itemVO.getIsRequired();
             if (isRequired != null && isRequired == 1) {
                 isRequired = 1;
             } else {
@@ -317,7 +322,7 @@ public class ModelItemServiceImpl extends BaseServiceImpl<ModelItemMapper, Model
             // 是否为判断条件
             if (!flag) {
                 if (type == 2 || type == 3) {
-                    Integer isJudge = itemVO.getJudge();
+                    Integer isJudge = itemVO.getIsJudge();
                     if (isJudge != null && isJudge == 1) {
                         isJudge = 1;
                     } else {

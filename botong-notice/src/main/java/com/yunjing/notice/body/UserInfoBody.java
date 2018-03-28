@@ -22,4 +22,9 @@ public class UserInfoBody implements Serializable{
      * 用户名称
      */
     private String name;
+
+    /**
+     * 用户手机号码
+     */
+    private Long phone;
 }

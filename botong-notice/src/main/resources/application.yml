@@ -43,3 +43,11 @@ mybatis-plus:
     logic-delete-value: 1
     logic-not-delete-value: 0
     sql-injector: com.baomidou.mybatisplus.mapper.LogicSqlInjector
+#Notice-AppId
+notice:
+     appId: be61789d315b11e89a1c0242ac110004
+
+##过滤返回null或空字段
+#spring:
+#  jackson:
+#    default-property-inclusion: non_empty

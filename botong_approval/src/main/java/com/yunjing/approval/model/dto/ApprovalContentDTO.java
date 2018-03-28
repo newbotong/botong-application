@@ -9,7 +9,7 @@ import lombok.Data;
  * @date 2018/02/22
  */
 @Data
-public class ApprovalContentVO {
+public class ApprovalContentDTO {
 
     /**
      * 审批主键

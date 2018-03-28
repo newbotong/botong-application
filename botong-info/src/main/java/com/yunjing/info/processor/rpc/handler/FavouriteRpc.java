@@ -2,8 +2,10 @@ package com.yunjing.info.processor.rpc.handler;
 
 import com.yunjing.info.processor.rpc.fallback.FavouriteFallback;
 import com.yunjing.info.processor.rpc.servcie.FavouriteService;
+import com.yunjing.info.processor.rpc.vo.InformationVo;
 import com.yunjing.mommon.wrapper.ResponseEntityWrapper;
 import org.springframework.cloud.netflix.feign.FeignClient;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestParam;
 
 /**
@@ -29,12 +31,12 @@ public interface FavouriteRpc extends FavouriteService {
 
     /**
      * 资讯修改，同步更新收藏内容
-     *
+     * <p>
      * 参数为 InformationVo 序列化json对象
      *
-     * @param favouriteInfo
+     * @param information
      * @return
      */
     @Override
-    ResponseEntityWrapper update(String favouriteInfo);
+    ResponseEntityWrapper update(@RequestBody InformationVo information);
 }

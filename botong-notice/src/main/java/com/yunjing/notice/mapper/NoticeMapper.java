@@ -26,4 +26,12 @@ public interface NoticeMapper extends BaseMapper<NoticeEntity> {
      */
     List<NoticePageBody> selectNoticePage(Map<String,Object>map, Page<NoticePageBody> page);
 
+    /**
+     * 分页查询（客户端管理员）
+     * @param map  map入参
+     * @param page 分页
+     * @return
+     */
+    List<NoticePageBody> selectMangerNoticePage(Map<String,Object>map, Page<NoticePageBody> page);
+
 }

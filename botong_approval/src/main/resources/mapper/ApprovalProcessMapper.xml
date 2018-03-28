@@ -2,7 +2,7 @@
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
 <mapper namespace="com.yunjing.approval.dao.mapper.ApprovalProcessMapper">
 
-    <resultMap id="ApprovalMap" type="com.yunjing.approval.model.dto.ApprovalContentVO">
+    <resultMap id="ApprovalMap" type="com.yunjing.approval.model.dto.ApprovalContentDTO">
         <result column="approval_id" property="approvalId"/>
         <result column="model_id" property="modelId"/>
         <result column="model_name" property="modelName"/>
@@ -62,5 +62,18 @@
         </where>
         ORDER BY a.create_time DESC
         limit #{index},#{size}
+    </select>
+
+    <resultMap id="ApprovalUserMap" type="com.yunjing.approval.model.vo.ApprovalUserVO">
+        <result column="process_state" property="processState"/>
+        <result column="process_time" property="approvalTime"/>
+        <result column="reason" property="content"/>
+        <result column="id" property="userId"/>
+    </resultMap>
+    <select id="getApprovalUserList" resultMap="ApprovalUserMap">
+        SELECT ap.approval_id, ap.user_id, ap.process_state, ap.seq, ap.process_time,ap.reason, au.id,au.name,au.avatar,au.mobile
+        FROM approval_process ap
+        LEFT JOIN approval_user au ON ap.user_id = au.id
+        WHERE ap.approval_id = #{approvalId}
     </select>
 </mapper>

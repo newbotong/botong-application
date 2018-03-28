@@ -13,23 +13,19 @@ import com.yunjing.approval.model.vo.ApprovalPageVO;
  */
 public interface IApprovalService extends IBaseService<Approval> {
 
-//    /**
-//     * 获取审批数据列表
-//     *
-//     * @param page  分页对象  current 页码, size页大小
-//     * @param oid   企业主键
-//     * @param mid   模型主键, 审批类型, 可空(全部)
-//     * @param state 审批状态  0:审批中 1:审批完成 2:已撤回, 可空(全部)
-//     * @param title 审批标题
-//     * @param createTimeStart   发起时间_开始
-//     * @param createTimeEnd     发起时间_结束
-//     * @param finishTimeStart   完成时间_开始
-//     * @param finishTimeEnd     完成时间_结束
-//     * @return 分页列表
-//     * @throws Exception 异常
-//     */
-//    List<Approval> list(Page page, String oid, String mid, Integer state, String title, String createTimeStart, String createTimeEnd, String finishTimeStart, String finishTimeEnd) throws Exception;
-
+    /**
+     * 提交审批信息
+     *
+     * @param oid         企业主键
+     * @param uid         用户主键
+     * @param modelId     模型主键
+     * @param jsonData    要提交的审批数据
+     * @param sendUserIds 要推送的审批人主键，多个以英文，隔开
+     * @param sendCopyIds 要推送的抄送人主键，多个以英文，隔开
+     * @return
+     * @throws Exception
+     */
+    boolean submitApproval(Long oid, Long uid, Long modelId, String jsonData, String sendUserIds, String sendCopyIds) throws Exception;
 
     /**
      * 获取审批数据列表

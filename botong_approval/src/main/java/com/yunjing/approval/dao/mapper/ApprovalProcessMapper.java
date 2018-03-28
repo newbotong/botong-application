@@ -1,8 +1,9 @@
 package com.yunjing.approval.dao.mapper;
 
 import com.common.mybatis.mapper.IBaseMapper;
-import com.yunjing.approval.model.dto.ApprovalContentVO;
+import com.yunjing.approval.model.dto.ApprovalContentDTO;
 import com.yunjing.approval.model.entity.ApprovalProcess;
+import com.yunjing.approval.model.vo.ApprovalUserVO;
 import org.apache.ibatis.annotations.Param;
 
 import java.util.List;
@@ -24,8 +25,9 @@ public interface ApprovalProcessMapper extends IBaseMapper<ApprovalProcess> {
      * @param flag      搜索关键字是不是日期
      * @return
      */
-    List<ApprovalContentVO> getWaitedMeApprovalList(@Param("index") Integer index, @Param("size") Integer pageSize, @Param("orgId") Long orgId,
-                                                    @Param("userId") Long userId, @Param("searchKey") String searchKey, @Param("flag") Boolean flag);
+    List<ApprovalContentDTO> getWaitedMeApprovalList(@Param("index") Integer index, @Param("size") Integer pageSize, @Param("orgId") Long orgId,
+                                                     @Param("userId") Long userId, @Param("searchKey") String searchKey, @Param("flag") Boolean flag);
+
     /**
      * 查询-已审批
      *
@@ -37,8 +39,8 @@ public interface ApprovalProcessMapper extends IBaseMapper<ApprovalProcess> {
      * @param flag      搜索关键字是不是日期
      * @return
      */
-    List<ApprovalContentVO> getCompletedApprovalList(@Param("index") Integer index, @Param("size") Integer pageSize, @Param("orgId") Long orgId,
-                                                    @Param("userId") Long userId, @Param("searchKey") String searchKey, @Param("flag") Boolean flag);
+    List<ApprovalContentDTO> getCompletedApprovalList(@Param("index") Integer index, @Param("size") Integer pageSize, @Param("orgId") Long orgId,
+                                                      @Param("userId") Long userId, @Param("searchKey") String searchKey, @Param("flag") Boolean flag);
 
     /**
      * 查询-我发起的审批
@@ -51,8 +53,15 @@ public interface ApprovalProcessMapper extends IBaseMapper<ApprovalProcess> {
      * @param flag      搜索关键字是不是日期
      * @return
      */
-    List<ApprovalContentVO> getLaunchedApprovalList(@Param("index") Integer index, @Param("size") Integer pageSize, @Param("orgId") Long orgId,
-                                                    @Param("userId") Long userId, @Param("searchKey") String searchKey, @Param("flag") Boolean flag);
+    List<ApprovalContentDTO> getLaunchedApprovalList(@Param("index") Integer index, @Param("size") Integer pageSize, @Param("orgId") Long orgId,
+                                                     @Param("userId") Long userId, @Param("searchKey") String searchKey, @Param("flag") Boolean flag);
 
 
+    /**
+     * 查询审批流程中信息和审批人信息
+     *
+     * @param approvalId 审批主键
+     * @return
+     */
+    List<ApprovalUserVO> getApprovalUserList(Long approvalId);
 }

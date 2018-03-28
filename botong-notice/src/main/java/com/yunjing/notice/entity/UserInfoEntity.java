@@ -22,6 +22,13 @@ public class UserInfoEntity extends BaseModel<UserInfoEntity> {
      */
     @TableField("name")
     private String name;
+
+    /**
+     * 用户手机号码
+     */
+    @TableField("phone")
+    private Long phone;
+
     /**
      * 逻辑删除 0正常 1删除
      */

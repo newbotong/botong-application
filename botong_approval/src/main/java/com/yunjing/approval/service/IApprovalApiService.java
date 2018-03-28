@@ -1,6 +1,7 @@
 package com.yunjing.approval.service;
 
 import com.common.mybatis.page.Page;
+import com.yunjing.approval.model.vo.ClientApprovalDetailVO;
 import com.yunjing.approval.model.vo.ClientApprovalVO;
 import com.yunjing.approval.model.vo.ClientModelVO;
 
@@ -63,4 +64,14 @@ public interface IApprovalApiService {
      * @return
      */
     Page<ClientApprovalVO> getCopied(Page page, Long orgId, Long userId, String searchKey);
+
+    /**
+     * 获取审批详情
+     *
+     * @param orgId      企业主键
+     * @param userId     用户主键
+     * @param approvalId 审批主键
+     * @return
+     */
+    ClientApprovalDetailVO getApprovalDetail(Long orgId, Long userId, Long approvalId);
 }
