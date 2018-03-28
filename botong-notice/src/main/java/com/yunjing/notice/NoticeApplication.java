@@ -18,6 +18,7 @@ import org.springframework.context.annotation.Configuration;
 @Configuration
 @SpringBootApplication
 @EnableFeignClients
+
 public class NoticeApplication {
 
     public static void main(String... args) {
