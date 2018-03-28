@@ -1,11 +1,15 @@
 package com.yunjing.sign.service;
 
 import com.baomidou.mybatisplus.service.IService;
+import com.yunjing.mommon.wrapper.PageWrapper;
 import com.yunjing.sign.beans.model.SignDetailDaily;
 import com.yunjing.sign.beans.param.SignDetailParam;
 import com.yunjing.sign.beans.param.UserAndDeptParam;
 import com.yunjing.sign.beans.vo.MySignVO;
 import com.yunjing.sign.beans.vo.SignListVO;
+import com.yunjing.sign.beans.vo.UserMonthListVO;
+import com.yunjing.sign.dao.SignBaseMapper;
+import com.yunjing.sign.excel.BaseExModel;
 
 /**
  * <p>
@@ -46,4 +50,19 @@ public interface ISignDetailDailyService extends IService<SignDetailDaily> {
      * @return
      */
     MySignVO queryMonthInfo(SignDetailParam signDetailParam);
+
+    /**
+     * 获取导出模板
+     * @param userAndDeptParam
+     * @return
+     */
+    BaseExModel createTempExcel(UserAndDeptParam userAndDeptParam);
+
+    /**
+     * 按月统计指定部门和人员的考勤信息
+     *
+     * @param userAndDeptParam  部门和人员
+     * @return
+     */
+    PageWrapper<UserMonthListVO> staticsMonthInfo(UserAndDeptParam userAndDeptParam);
 }

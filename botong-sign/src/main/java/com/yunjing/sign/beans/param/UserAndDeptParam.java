@@ -16,6 +16,9 @@ public class UserAndDeptParam {
      */
     private String userIds;
 
+    private Integer pageNo;
+    private Integer pageSize;
+
     /**
      * 部门id 逗号间隔
      */

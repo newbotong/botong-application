@@ -21,7 +21,7 @@ import javax.ws.rs.GET;
  * @since 2018-03-21
  */
 @RestController
-@RequestMapping("/api/sign/out")
+@RequestMapping("/sign/out")
 public class SignConfigApi extends BaseController {
 
     @Autowired
@@ -46,7 +46,7 @@ public class SignConfigApi extends BaseController {
      * @param orgId     组织Id
      * @return
      */
-    @GetMapping("/getSetting")
+    @GetMapping("/get-setting")
     public ResponseEntityWrapper getSetting(@RequestParam String orgId){
         // 基础校验
         BeanFieldValidator.getInstance().validate(orgId);

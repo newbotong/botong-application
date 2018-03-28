@@ -3,6 +3,7 @@ package com.yunjing.sign;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.EnableAutoConfiguration;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
+import org.springframework.cloud.netflix.eureka.EnableEurekaClient;
 import org.springframework.cloud.netflix.feign.EnableFeignClients;
 
 
@@ -13,8 +14,8 @@ import org.springframework.cloud.netflix.feign.EnableFeignClients;
  * @date 2018/3/20 9:48
  */
 @SpringBootApplication
-@EnableAutoConfiguration
 @EnableFeignClients
+@EnableEurekaClient
 public class SignApplication {
 
 	public static void main(String[] args) {

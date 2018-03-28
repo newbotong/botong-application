@@ -7,11 +7,15 @@ import com.yunjing.sign.beans.param.SignDetailParam;
 import com.yunjing.sign.beans.param.UserAndDeptParam;
 import com.yunjing.sign.beans.vo.MySignVO;
 import com.yunjing.sign.beans.vo.SignListVO;
+import com.yunjing.sign.excel.BaseExModel;
 import com.yunjing.sign.service.ISignConfigDailyService;
 import com.yunjing.sign.service.ISignDetailDailyService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.*;
+
+import javax.servlet.http.HttpServletResponse;
+import java.io.OutputStream;
 
 /**
  * <p>
@@ -22,7 +26,7 @@ import org.springframework.web.bind.annotation.*;
  * @since 2018-03-21
  */
 @RestController
-@RequestMapping("/api/signDetail/")
+@RequestMapping("/sign/detail-daily/")
 public class SignDetailDailyApi extends BaseController {
 
     @Autowired
@@ -33,7 +37,7 @@ public class SignDetailDailyApi extends BaseController {
      * @param signDetailParam
      * @return
      */
-    @PostMapping("/toSign")
+    @PostMapping("/sign")
     public ResponseEntityWrapper toSign(@RequestBody SignDetailParam signDetailParam){
         // 基础校验
         BeanFieldValidator.getInstance().validate(signDetailParam);
@@ -47,7 +51,7 @@ public class SignDetailDailyApi extends BaseController {
      * @param orgId
      * @return
      */
-    @GetMapping("/getSignCount")
+    @GetMapping("/get-count")
     public ResponseEntityWrapper getSignCount(@RequestParam String userId, @RequestParam String orgId){
         // 基础校验
         int count = iSignDetailDailyService.getSignCount(userId, orgId);
@@ -59,7 +63,7 @@ public class SignDetailDailyApi extends BaseController {
      * @param userAndDeptParam
      * @return
      */
-    @PostMapping("/signCount")
+    @PostMapping("/sign-count")
     public ResponseEntityWrapper signGroup(@RequestBody UserAndDeptParam userAndDeptParam){
         // 基础校验
         BeanFieldValidator.getInstance().validate(userAndDeptParam);
@@ -72,12 +76,11 @@ public class SignDetailDailyApi extends BaseController {
      * @param signDetailParam
      * @return
      */
-    @PostMapping("/queryMonthInfo")
+    @PostMapping("/query-month")
     public ResponseEntityWrapper queryMonthInfo(@RequestBody SignDetailParam signDetailParam){
         // 基础校验
         BeanFieldValidator.getInstance().validate(signDetailParam);
         MySignVO vo = iSignDetailDailyService.queryMonthInfo(signDetailParam);
         return success(vo);
     }
-	
 }

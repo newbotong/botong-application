@@ -15,17 +15,29 @@ public class SignUserInfoVO {
     /**
      * 组织id
      */
-    private Long userId;
+    private Long id;
 
     /**
      * 姓名
      */
-    private String userName;
+    private String name;
 
     /**
      * 头像
      */
     private String userIcon;
+
+    /**
+     * 部门
+     */
+    private String[] deptNames;
+
+
+
+    /**
+     * 职位
+     */
+    private String position;
 
     /**
      * 签到状态

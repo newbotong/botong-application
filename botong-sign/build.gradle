@@ -25,5 +25,6 @@ dependencies {
 	compile('com.yunjing.botong:commons:2.0.0-SNAPSHOT')
 	compile('com.yunjing.botong:commons-mybatisplus:2.0.0-SNAPSHOT')
 	compile('com.yunjing.botong:commons-redis:2.0.0-SNAPSHOT')
-
+	compile('org.apache.poi:poi:3.14')
+	compile('org.apache.poi:poi-ooxml:3.14')
 }

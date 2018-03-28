@@ -19,7 +19,7 @@ import org.springframework.web.bind.annotation.*;
  * @since 2018-03-21
  */
 @RestController
-@RequestMapping("/api/sign")
+@RequestMapping("/sign/daily")
 public class SignConfigDailyApi extends BaseController {
 
     @Autowired
@@ -44,7 +44,7 @@ public class SignConfigDailyApi extends BaseController {
      * @param orgId     组织Id
      * @return
      */
-    @GetMapping("/getSetting")
+    @GetMapping("/get-setting")
     public ResponseEntityWrapper getSetting(@RequestParam String orgId){
         // 基础校验
         BeanFieldValidator.getInstance().validate(orgId);

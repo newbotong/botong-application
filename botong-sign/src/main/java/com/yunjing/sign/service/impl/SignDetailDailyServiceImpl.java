@@ -6,6 +6,8 @@ import com.yunjing.mommon.Enum.DateStyle;
 import com.yunjing.mommon.global.exception.UpdateMessageFailureException;
 import com.yunjing.mommon.utils.BeanUtils;
 import com.yunjing.mommon.utils.DateUtil;
+import com.yunjing.mommon.wrapper.PageWrapper;
+import com.yunjing.mommon.wrapper.ResponseEntityWrapper;
 import com.yunjing.sign.beans.model.SignConfigDaily;
 import com.yunjing.sign.beans.model.SignDetailDaily;
 import com.yunjing.sign.beans.model.SignDetailImgDaily;
@@ -14,9 +16,16 @@ import com.yunjing.sign.beans.param.SignMapperParam;
 import com.yunjing.sign.beans.param.UserAndDeptParam;
 import com.yunjing.sign.beans.vo.*;
 import com.yunjing.sign.constant.SignConstant;
+import com.yunjing.sign.dao.SignBaseMapper;
 import com.yunjing.sign.dao.mapper.SignDetailDailyMapper;
+import com.yunjing.sign.excel.BaseExModel;
+import com.yunjing.sign.excel.ExcelModel;
+import com.yunjing.sign.excel.SignExConsts;
+import com.yunjing.sign.excel.SignExModel;
+import com.yunjing.sign.processor.feign.UserRemoteService;
 import com.yunjing.sign.service.ISignDetailDailyService;
 import com.yunjing.sign.service.ISignDetailImgDailyService;
+import com.yunjing.sign.service.ISignDetailService;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -39,7 +48,13 @@ public class SignDetailDailyServiceImpl extends ServiceImpl<SignDetailDailyMappe
     private ISignDetailImgDailyService iSignDetailImgDailyService;
 
     @Autowired
+    private ISignDetailService iSignDetailService;
+
+    @Autowired
     private SignDetailDailyMapper signDetailDailyMapper;
+
+    @Autowired
+    private UserRemoteService userRemoteService;
 
     /**
      * 签到
@@ -106,38 +121,7 @@ public class SignDetailDailyServiceImpl extends ServiceImpl<SignDetailDailyMappe
      */
     @Override
     public SignListVO getCountInfo(UserAndDeptParam userAndDeptParam) {
-        List userList = new ArrayList();
-        Map<Long, SignUserInfoVO> map = new HashMap<>();
-        List<Long>  ids = new ArrayList<>();
-        for(Object o : userList) {
-            SignUserInfoVO obj = (SignUserInfoVO) o;
-            map.put(obj.getUserId(), obj);
-            ids.add(obj.getUserId());
-        }
-        String userIds = StringUtils.join(ids, ",");
-        long startDate = DateUtil.stringToDate(userAndDeptParam.getSignDate()).getTime();
-        long endDate = DateUtil.addDay(DateUtil.stringToDate(userAndDeptParam.getSignDate()), 1).getTime();
-        SignMapperParam signMapperParam = new SignMapperParam();
-        signMapperParam.setUserIds(userIds);
-        signMapperParam.setStartDate(startDate);
-        signMapperParam.setEndDate(endDate);
-        List<SignUserInfoVO> userIdList = signDetailDailyMapper.getCountInfo(signMapperParam);
-        List<SignUserInfoVO> signList = new ArrayList<>();
-        List<SignUserInfoVO> unSignList = new ArrayList<>();
-
-        for(SignUserInfoVO vo : userIdList) {
-            map.get(vo.getUserId()).setSignState(1);
-            signList.add(map.get(vo.getUserId()));
-        }
-        for (Long key : map.keySet()) {
-            if (map.get(key).getSignState() != 1) {
-                unSignList.add(map.get(key));
-            }
-        }
-        SignListVO result = new SignListVO();
-        result.setSignList(signList);
-        result.setUnSignList(unSignList);
-        return result;
+        return iSignDetailService.getCountInfo(userAndDeptParam, signDetailDailyMapper);
     }
 
     /**
@@ -148,39 +132,63 @@ public class SignDetailDailyServiceImpl extends ServiceImpl<SignDetailDailyMappe
      */
     @Override
     public MySignVO queryMonthInfo(SignDetailParam signDetailParam) {
-        SignMapperParam signMapperParam = new SignMapperParam();
-        signMapperParam.setUserId(signDetailParam.getUserId());
-        Date startD = DateUtil.StringToDate(signDetailParam.getSignDate(), DateStyle.YYYY_MM);
-        Long startDate = startD.getTime();
-        long endDate = DateUtil.getLastDayOfMonth(startD).getTime();
-        signMapperParam.setStartDate(startDate);
-        signMapperParam.setEndDate(endDate);
-        List<SignDetailVO> signList = signDetailDailyMapper.queryMonthInfo(signMapperParam);
-        MySignVO result = new MySignVO();
-        result.setUserId(signDetailParam.getUserId());
-        result.setSignCount(signList.size());
-        Map<String, List<SignDetailVO>> map = new LinkedHashMap<>();
-        String dateKey;
-        List<SignDetailVO> signDetailVOS;
-        for (SignDetailVO vo : signList) {
-            dateKey = DateUtil.DateToString(DateUtil.convertLongToDate(vo.getSignDate()),DateStyle.YYYY_MM_DD);
-            if (map.get(dateKey) != null) {
-                map.get(dateKey).add(vo);
-            } else {
-                signDetailVOS = new ArrayList<SignDetailVO>();
-                signDetailVOS.add(vo);
-                map.put(dateKey, signDetailVOS);
-            }
+        return iSignDetailService.queryMonthInfo(signDetailParam, signDetailDailyMapper);
+    }
+
+    /**
+     * 获取导出模板
+     *
+     * @param userAndDeptParam
+     * @return
+     */
+    @Override
+    public BaseExModel createTempExcel(UserAndDeptParam userAndDeptParam) {
+        Date startD = DateUtil.StringToDate(userAndDeptParam.getSignDate() + "-01", DateStyle.YYYY_MM_DD);
+        Date endDate = DateUtil.getLastDayOfMonth(startD);
+        List<SignExcelVO> exportData = iSignDetailService.getSignInList(userAndDeptParam, signDetailDailyMapper);
+        SignExModel signExModel = new SignExModel();
+
+        List<ExcelModel> excelModelList = new ArrayList<>();
+        ExcelModel excelModel = new ExcelModel();
+        // 注入工作表名称
+        excelModel.setSheetName("日常签到数据报表");
+
+        excelModel.setNotice("日常"+ SignExConsts.NOTICE);
+        // 注入文件名
+        StringBuffer fileName = new StringBuffer().append("日常").append(SignExConsts.SHEET_NAME).append(SignExConsts.SEPARATOR_POINT).append(SignExConsts.Type_xls);
+        excelModel.setFileName(fileName.toString());
+
+        // 注入表头
+        String statisticDate = "统计日期：";
+        statisticDate = statisticDate + DateUtil.getDate(startD) + " —— " + DateUtil.getDate(endDate) + "       ";
+        String TABLE_HEADER = "报表生成日期："+ DateUtil.getDate(new Date());
+        excelModel.setTableHeader(statisticDate + TABLE_HEADER);
+
+        // 注入数据项名称
+        List<SignTemplVO> signTemplVOList = new ArrayList<>();
+        for (int i = 1; i < 7; i++) {
+            SignTemplVO signTemplVO = new SignTemplVO();
+            signTemplVO.setCKey("图" + i);
+            signTemplVOList.add(signTemplVO);
         }
-        SignDateVO dateVO;
-        List<SignDateVO> dateList = new ArrayList<>();
-        for (String key : map.keySet()) {
-            dateVO = new SignDateVO();
-            dateVO.setSignDate(key);
-            dateVO.setDetailList(map.get(key));
-            dateList.add(dateVO);
-        }
-        result.setSignList(dateList);
-        return result;
+        excelModel.setTitles(signTemplVOList);
+
+        // 注入审批数据
+        excelModel.setSignList(exportData);
+        excelModelList.add(excelModel);
+        signExModel.setExcelModelList(excelModelList);
+        signExModel.setFileName(fileName.toString());
+        return signExModel;
+    }
+
+    /**
+     * 按月统计指定部门和人员的考勤信息
+     *
+     * @param userAndDeptParam 部门和人员
+     * @return
+     */
+    @Override
+    public PageWrapper<UserMonthListVO> staticsMonthInfo(UserAndDeptParam userAndDeptParam) {
+        return iSignDetailService.staticsMonthInfo(userAndDeptParam, signDetailDailyMapper);
     }
 }
