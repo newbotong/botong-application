@@ -19,6 +19,6 @@ public interface InformFeign {
      * @param pushParam  入参
      * @return
      */
-    @PostMapping("/thirdparty/rpc/push/pushAllTargetByUser")
+    @PostMapping("/rpc/push/push-all-target-user")
     ResponseEntityWrapper pushAllTargetByUser(@RequestBody PushBody pushParam);
 }
