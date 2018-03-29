@@ -40,4 +40,5 @@
         n.issue_user_id = #{userId}
         ORDER BY n.create_time DESC
     </select>
+
 </mapper>

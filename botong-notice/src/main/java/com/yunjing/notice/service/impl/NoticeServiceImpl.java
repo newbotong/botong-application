@@ -209,19 +209,32 @@ public class NoticeServiceImpl extends ServiceImpl<NoticeMapper, NoticeEntity> i
         //发送DangRpc
         if (notice.getDangState() == 0) {
             DangParam dangParam = new DangParam();
+            dangParam.setUserId(notice.getIssueUserId());
+            dangParam.setBizId( notice.getId());
+            dangParam.setBizType(1);
+            dangParam.setReceiveBody(JSONObject.toJSONString(receiveBodyList));
+            dangParam.setDangType(1);
+            dangParam.setRemindType(1);
+            dangParam.setSendType(1);
+            dangParam.setSendTime(System.currentTimeMillis());
+            dangParam.setSendContent(notice.getTitle());
+            dangParam.setVoiceTimeLength(0);
+            dangParam.setSendTelephone(noticeBody.getPhone());
             if (!StringUtils.isAnyBlank(noticeBody.getPicture(),noticeBody.getPictureName(),noticeBody.getSize())) {
-//                dangFeign.sendDang(notice.getIssueUserId(), 1, notice.getId(),
-//                        JSONObject.toJSONString(receiveBodyList), 1, 1, 1, System.currentTimeMillis(), notice.getTitle(), 0,
-//                        noticeBody.getPhone(), 1, 1,noticeBody.getPictureName(), noticeBody.getPicture(), noticeBody.getSize());
-
-
-//                dangParam.setUserId();
+                dangParam.setIsAccessory(1);
+                dangParam.setAccessoryType(1);
+                dangParam.setAccessoryName(noticeBody.getPictureName());
+                dangParam.setAccessoryUrl(noticeBody.getPicture());
+                dangParam.setAccessorySize(noticeBody.getSize());
+                dangFeign.sendDang(dangParam);
             }else {
-//                dangFeign.sendDang(notice.getIssueUserId(), 1, notice.getId(),
-//                        JSONObject.toJSONString(receiveBodyList), 1, 1, 1, System.currentTimeMillis(), notice.getTitle(), 0,
-//                        noticeBody.getPhone(), 0, 0, "","", "");
+                dangParam.setIsAccessory(0);
+                dangParam.setAccessoryType(0);
+                dangParam.setAccessoryName("");
+                dangParam.setAccessoryUrl("");
+                dangParam.setAccessorySize("");
+                dangFeign.sendDang(dangParam);
             }
-            dangFeign.sendDang(dangParam);
         }
     }
 
@@ -324,33 +337,37 @@ public class NoticeServiceImpl extends ServiceImpl<NoticeMapper, NoticeEntity> i
      */
     @Override
     public Map<String, Object> selectNoticePage(Long userId, Integer state, Integer pageNo, Integer pageSize) throws BaseException {
-        Map<String, Object> maps = new HashMap<String, Object>(3);
-        if (null == state) {
-            throw new BaseException("状态不能为空");
-        }
-//        ResponseEntityWrapper responseEntityWrapper = authorityFeign.authority(appId, userId);
-//        Boolean results = JSONObject.parseObject(responseEntityWrapper.getData().toString(), Boolean.class);
-
-        Boolean results = true;
-        //判断是否为管理员
-        maps.put("admin", results);
         Page<NoticePageBody> page = new Page<>(pageNo, pageSize);
         Map<String, Object> map = new HashMap<>(4);
-        map.put("userId", userId);
-        List<NoticePageBody> noticePageBodyList = new ArrayList<>();
-        if (state == 0 || state == 1) {
-            map.put("state", state);
-            noticePageBodyList = noticeMapper.selectNoticePage(map, page);
-        }
-        if (results == true) {
-            int i = 2;
-            if (state == i) {
-                noticePageBodyList = noticeMapper.selectMangerNoticePage(map, page);
+        Map<String, Object> maps = new HashMap<String, Object>(3);
+        if (null == state) {
+            List<NoticePageBody> noticePageBodyList = noticeMapper.selectNoticePage(map,page);
+            page.setRecords(noticePageBodyList);
+            maps.put("page", page);
+            return maps;
+        } else {
+//        ResponseEntityWrapper responseEntityWrapper = authorityFeign.authority(appId, userId);
+//        Boolean results = JSONObject.parseObject(responseEntityWrapper.getData().toString(), Boolean.class);
+            //后面需要删除
+            Boolean results = true;
+            //判断是否为管理员
+            maps.put("admin", results);
+            map.put("userId", userId);
+            List<NoticePageBody> noticePageBodyList = new ArrayList<>();
+            if (state == 0 || state == 1) {
+                map.put("state", state);
+                noticePageBodyList = noticeMapper.selectNoticePage(map, page);
             }
+            if (results == true) {
+                int i = 2;
+                if (state == i) {
+                    noticePageBodyList = noticeMapper.selectMangerNoticePage(map, page);
+                }
+            }
+            page.setRecords(noticePageBodyList);
+            maps.put("page", page);
+            return maps;
         }
-        page.setRecords(noticePageBodyList);
-        maps.put("page",page);
-        return maps;
     }
 
     /**

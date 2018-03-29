@@ -5,7 +5,7 @@ CREATE TABLE `notice` (
   `id` bigint(20) NOT NULL COMMENT '公告id',
   `issue_user_id` bigint(32) DEFAULT NULL COMMENT '发布人用户id',
   `title` varchar(32) DEFAULT NULL COMMENT '公告标题（5-10字）',
-  `content` varchar(255) DEFAULT NULL COMMENT '公告内容(200字)',
+  `content` longtext COMMENT '公告内容(2000字)',
   `cover` varchar(255) DEFAULT NULL COMMENT '公告封面图',
   `picture` varchar(255) DEFAULT NULL COMMENT '图片地址',
   `author` varchar(32) DEFAULT NULL COMMENT '作者',
