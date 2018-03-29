@@ -30,6 +30,9 @@
             <if test="filterParam.result != null">
                 and a.result = #{filterParam.result}
             </if>
+            <if test="filterParam.modelId != null">
+                and a.model_id = #{filterParam.modelId}
+            </if>
             <if test="filterParam.time != null">
                 and (DATE_FORMAT(a.create_time, '%Y-%m-%d') = #{filterParam.time} )
             </if>
@@ -58,6 +61,9 @@
             <if test="filterParam.result != null">
                 and a.result = #{filterParam.result}
             </if>
+            <if test="filterParam.modelId != null">
+                and a.model_id = #{filterParam.modelId}
+            </if>
             <if test="filterParam.time != null">
                 and (DATE_FORMAT(a.create_time, '%Y-%m-%d') = #{filterParam.time} )
             </if>
@@ -79,6 +85,9 @@
             </if>
             <if test="filterParam.result != null">
                 and a.result = #{filterParam.result}
+            </if>
+            <if test="filterParam.modelId != null">
+                and a.model_id = #{filterParam.modelId}
             </if>
             <if test="filterParam.time != null">
                 and (DATE_FORMAT(a.create_time, '%Y-%m-%d') = #{filterParam.time} )
