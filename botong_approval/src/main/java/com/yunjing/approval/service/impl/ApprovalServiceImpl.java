@@ -8,7 +8,6 @@ import com.baomidou.mybatisplus.mapper.EntityWrapper;
 import com.baomidou.mybatisplus.mapper.Wrapper;
 import com.baomidou.mybatisplus.plugins.Page;
 import com.common.mybatis.service.impl.BaseServiceImpl;
-import com.ctc.wstx.util.DataUtil;
 import com.yunjing.approval.dao.cache.ApprovalRedisService;
 import com.yunjing.approval.dao.cache.OrgReadisService;
 import com.yunjing.approval.dao.cache.UserRedisService;
@@ -128,6 +127,7 @@ public class ApprovalServiceImpl extends BaseServiceImpl<ApprovalMapper, Approva
             attr.setAttrName(name);
             attr.setAttrType(type);
             String value;
+            String values;
             // 类型是10-图片, 11-附件的情况
             if (type == 10 || type == 11) {
                 JSONArray array = obj.getJSONArray("value");
@@ -135,7 +135,12 @@ public class ApprovalServiceImpl extends BaseServiceImpl<ApprovalMapper, Approva
                 attr.setAttrValue(EmojiFilterUtils.filterEmoji(value));
             } else {
                 value = obj.getString("value");
-                attr.setAttrValue(EmojiFilterUtils.filterEmoji(value));
+                values = obj.getString("values");
+                if (StringUtils.isNotBlank(String.valueOf(values))) {
+                    attr.setAttrValue(EmojiFilterUtils.filterEmoji(value) + "," + values);
+                } else {
+                    attr.setAttrValue(EmojiFilterUtils.filterEmoji(value));
+                }
                 if (type == 7) {
                     // 明细类型
                     JSONArray array = obj.getJSONArray("content");
@@ -153,14 +158,20 @@ public class ApprovalServiceImpl extends BaseServiceImpl<ApprovalMapper, Approva
                         entity.setAttrName(detailName);
                         entity.setAttrType(detailType);
                         String detailValue;
+                        String detailValues = "";
                         // 明细中类型是10-图片, 11-附件的情况
                         if (detailType == 10 || detailType == 11) {
                             JSONArray detailArray = detail.getJSONArray("value");
                             detailValue = detailArray.toJSONString();
                         } else {
                             detailValue = detail.getString("value");
+                            detailValues = detail.getString("values");
                         }
-                        entity.setAttrValue(EmojiFilterUtils.filterEmoji(detailValue));
+                        if (StringUtils.isNotBlank(String.valueOf(values))) {
+                            entity.setAttrValue(EmojiFilterUtils.filterEmoji(detailValue) + "," + detailValues);
+                        } else {
+                            entity.setAttrValue(EmojiFilterUtils.filterEmoji(detailValue));
+                        }
 
                         int detailNum = detail.getIntValue("num");
                         entity.setAttrNum(detailNum);
