@@ -4,6 +4,7 @@ import com.common.mybatis.page.Page;
 import com.yunjing.approval.model.vo.ClientApprovalDetailVO;
 import com.yunjing.approval.model.vo.ClientApprovalVO;
 import com.yunjing.approval.model.vo.ClientModelVO;
+import com.yunjing.approval.param.FilterParam;
 
 import java.util.List;
 
@@ -24,46 +25,46 @@ public interface IApprovalApiService {
     /**
      * 获取待审批列表
      *
-     * @param page      @param page 分页对象  current 当前页码, size 页大小
-     * @param orgId     企业主键
-     * @param userId    用户主键
-     * @param searchKey 搜索标题
+     * @param page        @param page 分页对象  current 当前页码, size 页大小
+     * @param orgId       企业主键
+     * @param userId      用户主键
+     * @param filterParam 搜索参数
      * @return
      */
-    Page<ClientApprovalVO> getWaited(Page page, Long orgId, Long userId, String searchKey);
+    Page<ClientApprovalVO> getWaited(Page page, Long orgId, Long userId, FilterParam filterParam);
 
     /**
      * 获取已审批列表
      *
-     * @param page      @param page 分页对象  current 当前页码, size 页大小
-     * @param orgId     企业主键
-     * @param userId    用户主键
-     * @param searchKey 搜索标题
+     * @param page        @param page 分页对象  current 当前页码, size 页大小
+     * @param orgId       企业主键
+     * @param userId      用户主键
+     * @param filterParam 搜索参数
      * @return
      */
-    Page<ClientApprovalVO> getCompleted(Page page, Long orgId, Long userId, String searchKey);
+    Page<ClientApprovalVO> getCompleted(Page page, Long orgId, Long userId, FilterParam filterParam);
 
     /**
      * 获取我发起的审批列表
      *
-     * @param page      @param page 分页对象  current 当前页码, size 页大小
-     * @param orgId     企业主键
-     * @param userId    用户主键
-     * @param searchKey 搜索标题
+     * @param page        @param page 分页对象  current 当前页码, size 页大小
+     * @param orgId       企业主键
+     * @param userId      用户主键
+     * @param filterParam 搜索参数
      * @return
      */
-    Page<ClientApprovalVO> getLaunched(Page page, Long orgId, Long userId, String searchKey);
+    Page<ClientApprovalVO> getLaunched(Page page, Long orgId, Long userId, FilterParam filterParam);
 
     /**
      * 获取抄送我的审批列表
      *
-     * @param page      @param page 分页对象  current 当前页码, size 页大小
-     * @param orgId     企业主键
-     * @param userId    用户主键
-     * @param searchKey 搜索标题
+     * @param page        @param page 分页对象  current 当前页码, size 页大小
+     * @param orgId       企业主键
+     * @param userId      用户主键
+     * @param filterParam 搜索参数
      * @return
      */
-    Page<ClientApprovalVO> getCopied(Page page, Long orgId, Long userId, String searchKey);
+    Page<ClientApprovalVO> getCopied(Page page, Long orgId, Long userId, FilterParam filterParam);
 
     /**
      * 获取审批详情
