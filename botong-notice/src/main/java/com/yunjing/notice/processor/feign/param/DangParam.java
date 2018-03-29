@@ -1,7 +1,5 @@
 package com.yunjing.notice.processor.feign.param;
 
-import com.yunjing.mommon.validate.annotation.NotNullOrEmpty;
-import com.yunjing.mommon.validate.annotation.Size;
 import lombok.Data;
 
 /**
