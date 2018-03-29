@@ -18,6 +18,7 @@ import com.yunjing.notice.mapper.UserInfoMapper;
 import com.yunjing.notice.processor.feign.AuthorityFeign;
 import com.yunjing.notice.processor.feign.DangFeign;
 import com.yunjing.notice.processor.feign.InformFeign;
+import com.yunjing.notice.processor.feign.param.DangParam;
 import com.yunjing.notice.service.NoticeService;
 import com.yunjing.notice.service.NoticeUserService;
 import com.yunjing.notice.service.UserInfoService;
@@ -207,15 +208,20 @@ public class NoticeServiceImpl extends ServiceImpl<NoticeMapper, NoticeEntity> i
         informFeign.pushAllTargetByUser(pushBody);
         //发送DangRpc
         if (notice.getDangState() == 0) {
+            DangParam dangParam = new DangParam();
             if (!StringUtils.isAnyBlank(noticeBody.getPicture(),noticeBody.getPictureName(),noticeBody.getSize())) {
-                dangFeign.sendDang(notice.getIssueUserId(), 1, notice.getId(),
-                        JSONObject.toJSONString(receiveBodyList), 1, 1, 1, System.currentTimeMillis(), notice.getTitle(), 0,
-                        noticeBody.getPhone(), 1, 1,noticeBody.getPictureName(), noticeBody.getPicture(), noticeBody.getSize());
+//                dangFeign.sendDang(notice.getIssueUserId(), 1, notice.getId(),
+//                        JSONObject.toJSONString(receiveBodyList), 1, 1, 1, System.currentTimeMillis(), notice.getTitle(), 0,
+//                        noticeBody.getPhone(), 1, 1,noticeBody.getPictureName(), noticeBody.getPicture(), noticeBody.getSize());
+
+
+//                dangParam.setUserId();
             }else {
-                dangFeign.sendDang(notice.getIssueUserId(), 1, notice.getId(),
-                        JSONObject.toJSONString(receiveBodyList), 1, 1, 1, System.currentTimeMillis(), notice.getTitle(), 0,
-                        noticeBody.getPhone(), 0, 0, "","", "");
+//                dangFeign.sendDang(notice.getIssueUserId(), 1, notice.getId(),
+//                        JSONObject.toJSONString(receiveBodyList), 1, 1, 1, System.currentTimeMillis(), notice.getTitle(), 0,
+//                        noticeBody.getPhone(), 0, 0, "","", "");
             }
+            dangFeign.sendDang(dangParam);
         }
     }
 
