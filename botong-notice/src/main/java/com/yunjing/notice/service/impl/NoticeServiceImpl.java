@@ -79,14 +79,6 @@ public class NoticeServiceImpl extends ServiceImpl<NoticeMapper, NoticeEntity> i
 //        if (results == false) {
 //            throw new BaseException("只有管理员才可以发公告");
 //        }
-        int i = 15;
-        int j = 200;
-        if (noticeBody.getTitle().length() > i) {
-            throw new BaseException("标题长度不得大于15个字");
-        }
-        if (noticeBody.getContent().length() > j) {
-            throw new BaseException("内容长度不得超过200个字");
-        }
         UserInfoEntity userInfoEntity = new UserInfoEntity().selectOne(new EntityWrapper<UserInfoEntity>().eq("id",noticeBody.getIssueUserId()).eq("logic_delete",NoticeConstant.LOGIC_DELETE_NOMAL));
         if (null == userInfoEntity) {
             UserInfoEntity userInfoEntity1 = new UserInfoEntity();
