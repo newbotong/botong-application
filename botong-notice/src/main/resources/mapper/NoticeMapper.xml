@@ -31,7 +31,7 @@
     </select>
 
     <select id="selectMangerNoticePage" resultMap="NoticePage" parameterType="java.util.Map">
-        SELECT n.id,n.title,n.create_time,n.author,n.cover,n.read_num,n.not_read_num
+        SELECT DISTINCT n.id,n.title,n.create_time,n.author,n.cover,n.read_num,n.not_read_num
         FROM notice n
         LEFT JOIN notice_user nu
         ON nu.notice_id = n.id
