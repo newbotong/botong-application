@@ -1,7 +1,9 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!--该日志将日志级别不同的log信息保存到不同的文件中 -->
-<configuration>
-    <include resource="org/springframework/boot/logging/logback/defaults.xml"/>
+<configuration scan="true" scanPeriod="60 seconds">
+    <include resource="org/springframework/boot/logging/logback/base.xml"/>
+    <logger name="com.yunjing.approval.dao.mapper" level="DEBUG" />
+    <jmxConfigurator/>
 
     <springProperty scope="context" name="appName" source="spring.application.name" />
     <springProperty scope="context" name="ip" source="spring.cloud.client.ipAddress" />
@@ -64,39 +66,41 @@
 
     <!-- 通过Logback的tcpAppender将数据提交给logstash，然后logstash再提交给elasticsearch。此方式适合于将logstash部署到一个公共节点上，提供日志接收和日志提交工作 -->
     <!--<appender name="logstash"-->
-              <!--class="net.logstash.logback.appender.LogstashTcpSocketAppender">-->
-        <!--<destination>192.168.226.133:9250</destination>-->
-        <!--&lt;!&ndash; 日志输出编码 &ndash;&gt;-->
-        <!--<encoder-->
-                <!--class="net.logstash.logback.encoder.LoggingEventCompositeJsonEncoder">-->
-            <!--<providers>-->
-                <!--<timestamp>-->
-                    <!--<timeZone>UTC</timeZone>-->
-                <!--</timestamp>-->
-                <!--<pattern>-->
-                    <!--<pattern>-->
-                        <!--{-->
-                        <!--"ip": "${ip}",-->
-                        <!--"severity": "%level",-->
-                        <!--"service": "${springAppName:-}",-->
-                        <!--"trace": "%X{X-B3-TraceId:-}",-->
-                        <!--"span": "%X{X-B3-SpanId:-}",-->
-                        <!--"exportable": "%X{X-Span-Export:-}",-->
-                        <!--"pid": "${PID:-}",-->
-                        <!--"thread": "%thread",-->
-                        <!--"class": "%logger{40}",-->
-                        <!--"rest": "%message"-->
-                        <!--}-->
-                    <!--</pattern>-->
-                <!--</pattern>-->
-            <!--</providers>-->
-        <!--</encoder>-->
+    <!--class="net.logstash.logback.appender.LogstashTcpSocketAppender">-->
+    <!--<destination>192.168.226.133:9250</destination>-->
+    <!--&lt;!&ndash; 日志输出编码 &ndash;&gt;-->
+    <!--<encoder-->
+    <!--class="net.logstash.logback.encoder.LoggingEventCompositeJsonEncoder">-->
+    <!--<providers>-->
+    <!--<timestamp>-->
+    <!--<timeZone>UTC</timeZone>-->
+    <!--</timestamp>-->
+    <!--<pattern>-->
+    <!--<pattern>-->
+    <!--{-->
+    <!--"ip": "${ip}",-->
+    <!--"severity": "%level",-->
+    <!--"service": "${springAppName:-}",-->
+    <!--"trace": "%X{X-B3-TraceId:-}",-->
+    <!--"span": "%X{X-B3-SpanId:-}",-->
+    <!--"exportable": "%X{X-Span-Export:-}",-->
+    <!--"pid": "${PID:-}",-->
+    <!--"thread": "%thread",-->
+    <!--"class": "%logger{40}",-->
+    <!--"rest": "%message"-->
+    <!--}-->
+    <!--</pattern>-->
+    <!--</pattern>-->
+    <!--</providers>-->
+    <!--</encoder>-->
     <!--</appender>-->
 
     <!-- 日志输出级别 -->
-    <root level="DEBUG">
-        <appender-ref ref="console"/>
-        <appender-ref ref="logstash"/>
-        <!--<appender-ref ref="logstash" />-->
+    <root level="INFO">
+        <!--<appender-ref ref="console"/>-->
+        <!--<appender-ref ref="logstash"/>-->
+        <appender-ref ref="CONSOLE"/>
     </root>
+
 </configuration>
+

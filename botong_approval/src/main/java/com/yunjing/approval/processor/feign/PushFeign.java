@@ -19,6 +19,6 @@ public interface PushFeign {
      * @param pushParam 入参
      * @return
      */
-    @PostMapping("/thirdparty/rpc/push/pushAllTargetByUser")
+    @PostMapping("/rpc/push/push-target-user")
     ResponseEntityWrapper pushAllTargetByUser(@RequestBody PushParam pushParam);
 }

@@ -4,6 +4,7 @@ import com.common.mybatis.mapper.IBaseMapper;
 import com.yunjing.approval.model.dto.ApprovalContentDTO;
 import com.yunjing.approval.model.entity.ApprovalProcess;
 import com.yunjing.approval.model.vo.ApprovalUserVO;
+import com.yunjing.approval.param.FilterParam;
 import org.apache.ibatis.annotations.Param;
 
 import java.util.List;
@@ -17,44 +18,41 @@ public interface ApprovalProcessMapper extends IBaseMapper<ApprovalProcess> {
     /**
      * 查询-待我审批
      *
-     * @param index     当前页
-     * @param pageSize  每页显示条数
-     * @param orgId     企业主键
-     * @param userId    用户主键
-     * @param searchKey 搜索关键字
-     * @param flag      搜索关键字是不是日期
+     * @param index       当前页
+     * @param pageSize    每页显示条数
+     * @param orgId       企业主键
+     * @param userId      用户主键
+     * @param filterParam 搜索参数
      * @return
      */
     List<ApprovalContentDTO> getWaitedMeApprovalList(@Param("index") Integer index, @Param("size") Integer pageSize, @Param("orgId") Long orgId,
-                                                     @Param("userId") Long userId, @Param("searchKey") String searchKey, @Param("flag") Boolean flag);
+                                                     @Param("userId") Long userId, @Param("filterParam") FilterParam filterParam);
 
     /**
      * 查询-已审批
      *
-     * @param index     当前页
-     * @param pageSize  每页显示条数
-     * @param orgId     企业主键
-     * @param userId    用户主键
-     * @param searchKey 搜索关键字
-     * @param flag      搜索关键字是不是日期
+     * @param index       当前页
+     * @param pageSize    每页显示条数
+     * @param orgId       企业主键
+     * @param userId      用户主键
+     * @param filterParam 搜索参数
      * @return
      */
     List<ApprovalContentDTO> getCompletedApprovalList(@Param("index") Integer index, @Param("size") Integer pageSize, @Param("orgId") Long orgId,
-                                                      @Param("userId") Long userId, @Param("searchKey") String searchKey, @Param("flag") Boolean flag);
+                                                      @Param("userId") Long userId, @Param("filterParam") FilterParam filterParam);
 
     /**
      * 查询-我发起的审批
      *
-     * @param index     当前页
-     * @param pageSize  每页显示条数
-     * @param orgId     企业主键
-     * @param userId    用户主键
-     * @param searchKey 搜索关键字
-     * @param flag      搜索关键字是不是日期
+     * @param index       当前页
+     * @param pageSize    每页显示条数
+     * @param orgId       企业主键
+     * @param userId      用户主键
+     * @param filterParam 搜索参数
      * @return
      */
     List<ApprovalContentDTO> getLaunchedApprovalList(@Param("index") Integer index, @Param("size") Integer pageSize, @Param("orgId") Long orgId,
-                                                     @Param("userId") Long userId, @Param("searchKey") String searchKey, @Param("flag") Boolean flag);
+                                                     @Param("userId") Long userId, @Param("filterParam") FilterParam filterParam);
 
 
     /**

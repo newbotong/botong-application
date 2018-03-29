@@ -14,9 +14,18 @@
         SELECT a.title, a.state,a.result, a.model_id, a.create_time,m.model_name,co.create_time,co.user_id
         FROM approval_copys co,approval a,model m
         <where>
-            co.copys_type = 1 AND co.approval_id = a.id AND a.user_id = #{userId} AND a.org_id = #{orgId}
-            <if test="searchKey != null and searchKey != '' and flag == true">
-                and (DATE_FORMAT(a.create_time, '%Y-%m-%d') = #{searchKey} )
+            co.copys_type = 1 AND co.approval_id = a.id AND m.id= a.model_id AND co.user_id = #{userId} AND a.org_id = #{orgId}
+            <if test="filterParam.state != null">
+                and a.state = #{filterParam.state}
+            </if>
+            <if test="filterParam.result != null">
+                and a.result = #{filterParam.result}
+            </if>
+            <if test="filterParam.time != null">
+                and (DATE_FORMAT(co.create_time, '%Y-%m-%d') = #{filterParam.time} )
+            </if>
+            <if test="filterParam.searchKey != null and filterParam.searchKey != ''">
+                and concat(a.id,a.title,ap.reason) like CONCAT('%',#{filterParam.searchKey},'%')
             </if>
         </where>
         ORDER BY co.create_time DESC

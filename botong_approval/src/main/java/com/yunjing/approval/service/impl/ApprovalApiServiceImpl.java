@@ -13,6 +13,7 @@ import com.yunjing.approval.model.dto.InternalDetailDTO;
 import com.yunjing.approval.model.entity.*;
 import com.yunjing.approval.model.vo.*;
 import com.yunjing.approval.param.DangParam;
+import com.yunjing.approval.param.FilterParam;
 import com.yunjing.approval.processor.feign.DangFeign;
 import com.yunjing.approval.processor.task.async.ApprovalPushTask;
 import com.yunjing.approval.service.*;
@@ -77,14 +78,14 @@ public class ApprovalApiServiceImpl implements IApprovalApiService {
 
     @Override
     @Transactional(propagation = Propagation.REQUIRED, rollbackFor = Exception.class)
-    public Page<ClientApprovalVO> getWaited(Page page, Long orgId, Long userId, String searchKey) {
+    public Page<ClientApprovalVO> getWaited(Page page, Long orgId, Long userId, FilterParam filterParam) {
         boolean flag = false;
         int current = page.getCurrentPage();
         int size = page.getPageSize();
         int index = (current - 1) * size;
         Page<ClientApprovalVO> clientApprovalVOPage = new Page<>(current, size);
         List<ClientApprovalVO> clientApprovalVOS = new ArrayList<>();
-        List<ApprovalContentDTO> waitedMeApprovalList = approvalProcessMapper.getWaitedMeApprovalList(index, size, orgId, userId, searchKey, flag);
+        List<ApprovalContentDTO> waitedMeApprovalList = approvalProcessMapper.getWaitedMeApprovalList(index, size, orgId, userId, filterParam);
         convertList(clientApprovalVOS, waitedMeApprovalList);
         clientApprovalVOPage.build(clientApprovalVOS);
         clientApprovalVOPage.setTotalCount(clientApprovalVOS.size());
@@ -93,14 +94,14 @@ public class ApprovalApiServiceImpl implements IApprovalApiService {
 
     @Override
     @Transactional(propagation = Propagation.REQUIRED, rollbackFor = Exception.class)
-    public Page<ClientApprovalVO> getCompleted(Page page, Long orgId, Long userId, String searchKey) {
+    public Page<ClientApprovalVO> getCompleted(Page page, Long orgId, Long userId, FilterParam filterParam) {
         boolean flag = false;
         int current = page.getCurrentPage();
         int size = page.getPageSize();
         int index = (current - 1) * size;
         Page<ClientApprovalVO> clientApprovalVOPage = new Page<>(current, size);
         List<ClientApprovalVO> clientApprovalVOS = new ArrayList<>();
-        List<ApprovalContentDTO> completedMeApprovalList = approvalProcessMapper.getCompletedApprovalList(index, size, orgId, userId, searchKey, flag);
+        List<ApprovalContentDTO> completedMeApprovalList = approvalProcessMapper.getCompletedApprovalList(index, size, orgId, userId, filterParam);
         convertList(clientApprovalVOS, completedMeApprovalList);
         clientApprovalVOPage.build(clientApprovalVOS);
         clientApprovalVOPage.setTotalCount(clientApprovalVOS.size());
@@ -108,14 +109,14 @@ public class ApprovalApiServiceImpl implements IApprovalApiService {
     }
 
     @Override
-    public Page<ClientApprovalVO> getLaunched(Page page, Long orgId, Long userId, String searchKey) {
+    public Page<ClientApprovalVO> getLaunched(Page page, Long orgId, Long userId, FilterParam filterParam) {
         boolean flag = false;
         int current = page.getCurrentPage();
         int size = page.getPageSize();
         int index = (current - 1) * size;
         Page<ClientApprovalVO> clientApprovalVOPage = new Page<>(current, size);
         List<ClientApprovalVO> clientApprovalVOS = new ArrayList<>();
-        List<ApprovalContentDTO> launchedMeApprovalList = approvalProcessMapper.getLaunchedApprovalList(index, size, orgId, userId, searchKey, flag);
+        List<ApprovalContentDTO> launchedMeApprovalList = approvalProcessMapper.getLaunchedApprovalList(index, size, orgId, userId, filterParam);
         List<ApprovalUser> userList = approvalUserService.selectList(Condition.create());
         String message = "";
         int i = 1;
@@ -136,7 +137,7 @@ public class ApprovalApiServiceImpl implements IApprovalApiService {
                 if (critical == 1) {
                     contentVO.setMessage(message);
                 }
-            } else if (contentVO.getProcessState() == 1) {
+            } else if (contentVO.getState() == 1) {
                 message = "审批完成";
                 if (contentVO.getResult() != null && contentVO.getResult() == 1) {
                     message += " （同意）";
@@ -155,14 +156,14 @@ public class ApprovalApiServiceImpl implements IApprovalApiService {
     }
 
     @Override
-    public Page<ClientApprovalVO> getCopied(Page page, Long orgId, Long userId, String searchKey) {
+    public Page<ClientApprovalVO> getCopied(Page page, Long orgId, Long userId, FilterParam filterParam) {
         boolean flag = false;
         int current = page.getCurrentPage();
         int size = page.getPageSize();
         int index = (current - 1) * size;
         Page<ClientApprovalVO> clientApprovalVOPage = new Page<>(current, size);
         List<ClientApprovalVO> clientApprovalVOS = new ArrayList<>();
-        List<ApprovalContentDTO> copyApprovalList = copysMapper.getCopiedApprovalList(index, size, orgId, userId, searchKey, flag);
+        List<ApprovalContentDTO> copyApprovalList = copysMapper.getCopiedApprovalList(index, size, orgId, userId, filterParam);
         convertList(clientApprovalVOS, copyApprovalList);
         clientApprovalVOPage.build(clientApprovalVOS);
         clientApprovalVOPage.setTotalCount(clientApprovalVOS.size());

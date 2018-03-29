@@ -1,17 +1,15 @@
 package com.yunjing.approval.api;
 
 import com.common.mybatis.page.Page;
-import com.yunjing.approval.model.vo.*;
+import com.yunjing.approval.model.vo.ClientModelVO;
+import com.yunjing.approval.param.FilterParam;
 import com.yunjing.approval.service.IApprovalApiService;
 import com.yunjing.approval.service.IModelItemService;
-import com.yunjing.approval.util.DateUtil;
 import com.yunjing.mommon.base.BaseController;
-import com.yunjing.mommon.utils.IDUtils;
 import com.yunjing.mommon.wrapper.ResponseEntityWrapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
-import java.util.ArrayList;
 import java.util.List;
 
 
@@ -59,73 +57,72 @@ public class ClientApprovalController extends BaseController {
     /**
      * 待我审批列表
      *
-     * @param page      @param page 分页对象  current 当前页码, size 页大小
-     * @param oid       企业主键
-     * @param uid       用户主键
-     * @param searchKey 搜索标题
+     * @param page        @param page 分页对象  current 当前页码, size 页大小
+     * @param oid         企业主键
+     * @param uid         用户主键
+     * @param filterParam 搜索参数
      * @return
      */
     @GetMapping("/waited-approval")
     public ResponseEntityWrapper waitedApproval(@ModelAttribute(value = "page") Page page,
                                                 @RequestParam("oid") Long oid,
                                                 @RequestParam("uid") Long uid,
-                                                String searchKey) {
+                                                FilterParam filterParam) {
 
-        return success(approvalApiService.getWaited(page, oid, uid, searchKey));
+        return success(approvalApiService.getWaited(page, oid, uid, filterParam));
     }
 
     /**
      * 已审批列表
      *
-     * @param page      @param page 分页对象  current 当前页码, size 页大小
-     * @param oid       企业主键
-     * @param uid       用户主键
-     * @param searchKey 搜索标题
+     * @param page        @param page 分页对象  current 当前页码, size 页大小
+     * @param oid         企业主键
+     * @param uid         用户主键
+     * @param filterParam 搜索参数
      * @return
      */
     @GetMapping("/completed-approval")
     public ResponseEntityWrapper completedApproval(@ModelAttribute(value = "page") Page page,
                                                    @RequestParam("oid") Long oid,
                                                    @RequestParam("uid") Long uid,
-                                                   String searchKey) {
-        return success(approvalApiService.getCompleted(page, oid, uid, searchKey));
+                                                   FilterParam filterParam) {
+        return success(approvalApiService.getCompleted(page, oid, uid, filterParam));
     }
 
     /**
      * 我发起的--审批列表
      *
-     * @param page      @param page 分页对象  current 当前页码, size 页大小
-     * @param oid       企业主键
-     * @param uid       用户主键
-     * @param searchKey 搜索标题
+     * @param page        @param page 分页对象  current 当前页码, size 页大小
+     * @param oid         企业主键
+     * @param uid         用户主键
+     * @param filterParam 搜索参数
      * @return
      */
     @GetMapping("/launched-approval")
     public ResponseEntityWrapper launchedApproval(@ModelAttribute(value = "page") Page page,
                                                   @RequestParam("oid") Long oid,
                                                   @RequestParam("uid") Long uid,
-                                                  String searchKey) {
+                                                  FilterParam filterParam) {
 
-        return success(approvalApiService.getLaunched(page, oid, uid, searchKey));
+        return success(approvalApiService.getLaunched(page, oid, uid, filterParam));
     }
 
     /**
      * 抄送我的--审批列表
      *
-     * @param page      @param page 分页对象  current 当前页码, size 页大小
-     * @param oid       企业主键
-     * @param uid       用户主键
-     * @param state     审批状态
-     * @param searchKey 搜索标题
+     * @param page        @param page 分页对象  current 当前页码, size 页大小
+     * @param oid         企业主键
+     * @param uid         用户主键
+     * @param filterParam 搜索参数
      * @return
      */
     @GetMapping("/copied-approval")
     public ResponseEntityWrapper copiedApproval(@ModelAttribute(value = "page") Page page,
                                                 @RequestParam("oid") Long oid,
                                                 @RequestParam("uid") Long uid,
-                                                @RequestParam(value = "state", defaultValue = "0") Integer state, String searchKey) {
+                                                FilterParam filterParam) {
 
-        return success(approvalApiService.getCopied(page, oid, uid, searchKey));
+        return success(approvalApiService.getCopied(page, oid, uid, filterParam));
     }
 
     /**
