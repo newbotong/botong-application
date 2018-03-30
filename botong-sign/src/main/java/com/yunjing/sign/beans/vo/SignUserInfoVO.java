@@ -11,11 +11,10 @@ import lombok.Data;
 @Data
 public class SignUserInfoVO {
 
-
     /**
-     * 组织id
+     * 用户id
      */
-    private Long id;
+    private Long memberId;
 
     /**
      * 姓名

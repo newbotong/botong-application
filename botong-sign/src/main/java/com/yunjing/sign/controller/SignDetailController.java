@@ -1,14 +1,13 @@
 package com.yunjing.sign.controller;
 
-import com.alibaba.fastjson.JSONObject;
 import com.yunjing.mommon.base.BaseController;
 import com.yunjing.mommon.validate.BeanFieldValidator;
 import com.yunjing.mommon.wrapper.PageWrapper;
 import com.yunjing.mommon.wrapper.ResponseEntityWrapper;
+import com.yunjing.sign.beans.model.SignDetail;
+import com.yunjing.sign.beans.param.SignDetailParam;
 import com.yunjing.sign.beans.param.UserAndDeptParam;
 import com.yunjing.sign.beans.vo.UserMonthListVO;
-import com.yunjing.sign.beans.vo.UserMonthVO;
-import com.yunjing.sign.constant.SignConstant;
 import com.yunjing.sign.dao.mapper.SignDetailMapper;
 import com.yunjing.sign.excel.BaseExModel;
 import com.yunjing.sign.service.ISignDetailService;
@@ -16,12 +15,9 @@ import org.apache.poi.ss.usermodel.Workbook;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
-import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.OutputStream;
 import java.util.List;
-
-import static org.bouncycastle.asn1.x500.style.RFC4519Style.uid;
 
 /**
  * <p>
@@ -108,4 +104,17 @@ public class SignDetailController extends BaseController {
         return null;
     }
 
+
+    /**
+     * 签到明细
+     * @param signDetailParam
+     * @return
+     */
+    @PostMapping("/list")
+    public ResponseEntityWrapper statistics(@RequestBody SignDetailParam signDetailParam){
+        // 基础校验
+        BeanFieldValidator.getInstance().validate(signDetailParam);
+        List<SignDetail> list = iSignDetailService.queryDetailList(signDetailParam);
+        return success(list);
+    }
 }

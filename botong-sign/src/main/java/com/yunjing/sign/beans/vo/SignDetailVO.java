@@ -37,4 +37,9 @@ public class SignDetailVO {
      * 详细地址
      */
     private String address;
+
+    /**
+     * 备注
+     */
+    private String remark;
 }

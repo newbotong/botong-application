@@ -118,8 +118,8 @@ public class SignDetailServiceImpl extends ServiceImpl<SignDetailMapper, SignDet
         Map<Long, SignUserInfoVO> map = new HashMap<>();
         List<Long>  ids = new ArrayList<>();
         for(SignUserInfoVO obj : userList) {
-            map.put(obj.getId(), obj);
-            ids.add(obj.getId());
+            map.put(obj.getMemberId(), obj);
+            ids.add(obj.getMemberId());
         }
         String userIds = StringUtils.join(ids, ",");
         long startDate = DateUtil.stringToDate(userAndDeptParam.getSignDate()).getTime();
@@ -133,8 +133,8 @@ public class SignDetailServiceImpl extends ServiceImpl<SignDetailMapper, SignDet
         List<SignUserInfoVO> unSignList = new ArrayList<>();
 
         for(SignUserInfoVO vo : userIdList) {
-            map.get(vo.getId()).setSignState(1);
-            signList.add(map.get(vo.getId()));
+            map.get(vo.getMemberId()).setSignState(1);
+            signList.add(map.get(vo.getMemberId()));
         }
         for (Long key : map.keySet()) {
             if (map.get(key).getSignState() != 1) {
@@ -227,11 +227,14 @@ public class SignDetailServiceImpl extends ServiceImpl<SignDetailMapper, SignDet
                 Date dDate = DateUtil.addDay(startD, j);
                 vo.setSignWeek(DateUtil.getWeek(dDate).getNumber());
                 vo.setSignTime(dDate.getTime());
+                vo.setUserId(obj.getMemberId());
                 monthList.put(DateUtil.getDate(dDate), vo);
             }
             userMonthVO.setMonthList(monthList);
-            map.put(obj.getId(), userMonthVO);
-            ids.add(obj.getId());
+            map.put(obj.getMemberId(), userMonthVO);
+            if(obj.getMemberId() != null) {
+                ids.add(obj.getMemberId());
+            }
         }
         String userIds = StringUtils.join(ids, ",");
         SignMapperParam signMapperParam = new SignMapperParam();
@@ -284,8 +287,8 @@ public class SignDetailServiceImpl extends ServiceImpl<SignDetailMapper, SignDet
         HashMap obj;
         //接收rpc数据后拼装数据
         for(SignUserInfoVO objS : userList) {
-            map.put(objS.getId(), objS);
-            ids.add(objS.getId());
+            map.put(objS.getMemberId(), objS);
+            ids.add(objS.getMemberId());
         }
         String userIds = StringUtils.join(ids, ",");
         SignMapperParam signMapperParam = new SignMapperParam();
@@ -314,6 +317,20 @@ public class SignDetailServiceImpl extends ServiceImpl<SignDetailMapper, SignDet
             }
             excelVO.setListValue(imgUrls);
         }
+        return list;
+    }
+
+    /**
+     * 获取所有的签到明细
+     *
+     * @param signDetailParam
+     * @return
+     */
+    @Override
+    public List<SignDetail> queryDetailList(SignDetailParam signDetailParam) {
+        Date nowStart = DateUtil.stringToDate(signDetailParam.getSignDate());
+        Date nowEnd = DateUtil.addDay(nowStart, 1);
+        List<SignDetail> list = new SignDetail().selectList(new EntityWrapper<SignDetail>().eq("user_id", signDetailParam.getUserId()).lt("create_time", nowEnd.getTime()).ge("create_time", nowStart.getTime()));
         return list;
     }
 

@@ -20,10 +20,10 @@ import java.util.List;
 @FeignClient(name = "botong-org-structure", fallback = UserRemoteServiceFallback.class)
 public interface UserRemoteService {
 
-    @PostMapping("/api/member/find-sub-lists")
+    @PostMapping("/rpc/member/find-sub-lists")
     ResponseEntityWrapper<List<SignUserInfoVO>> findSubLists(@RequestParam(value = "deptIds", required = false) String[] deptIds, @RequestParam(value = "memberIds", required = false) String[] memberIds);
 
-    @PostMapping("/api/member/find-member-page")
+    @PostMapping("/rpc/member/find-member-page")
     ResponseEntityWrapper<PageWrapper<SignUserInfoVO>> findMemberPage(@RequestParam(value = "deptIds", required = false) String[] deptIds, @RequestParam(value = "memberIds", required = false) String[] memberIds,
                                                                       @RequestParam(value = "pageNo") int pageNo, @RequestParam(value = "pageSize") int pageSize);
 }

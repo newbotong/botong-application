@@ -12,6 +12,8 @@ import com.yunjing.sign.beans.vo.UserMonthListVO;
 import com.yunjing.sign.dao.SignBaseMapper;
 import com.yunjing.sign.excel.BaseExModel;
 
+import java.util.List;
+
 /**
  * <p>
  * 签到明细 服务类
@@ -66,4 +68,11 @@ public interface ISignDetailDailyService extends IService<SignDetailDaily> {
      * @return
      */
     PageWrapper<UserMonthListVO> staticsMonthInfo(UserAndDeptParam userAndDeptParam);
+    /**
+     * 获取所有的签到明细
+     * @param signDetailParam
+     * @return
+     */
+    List<SignDetailDaily> queryDetailList(SignDetailParam signDetailParam);
+
 }

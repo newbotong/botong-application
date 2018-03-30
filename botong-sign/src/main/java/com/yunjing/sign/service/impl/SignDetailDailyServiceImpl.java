@@ -190,4 +190,18 @@ public class SignDetailDailyServiceImpl extends ServiceImpl<SignDetailDailyMappe
     public PageWrapper<UserMonthListVO> staticsMonthInfo(UserAndDeptParam userAndDeptParam) {
         return iSignDetailService.staticsMonthInfo(userAndDeptParam, signDetailDailyMapper);
     }
+
+    /**
+     * 获取所有的签到明细
+     *
+     * @param signDetailParam
+     * @return
+     */
+    @Override
+    public List<SignDetailDaily> queryDetailList(SignDetailParam signDetailParam) {
+        Date nowStart = DateUtil.stringToDate(signDetailParam.getSignDate());
+        Date nowEnd = DateUtil.addDay(nowStart, 1);
+        List<SignDetailDaily> list = new SignDetailDaily().selectList(new EntityWrapper<SignDetailDaily>().eq("user_id", signDetailParam.getUserId()).lt("create_time", nowEnd.getTime()).ge("create_time", nowStart.getTime()));
+        return list;
+    }
 }

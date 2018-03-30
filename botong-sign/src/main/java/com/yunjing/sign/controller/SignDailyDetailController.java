@@ -4,6 +4,8 @@ import com.yunjing.mommon.base.BaseController;
 import com.yunjing.mommon.validate.BeanFieldValidator;
 import com.yunjing.mommon.wrapper.PageWrapper;
 import com.yunjing.mommon.wrapper.ResponseEntityWrapper;
+import com.yunjing.sign.beans.model.SignDetailDaily;
+import com.yunjing.sign.beans.param.SignDetailParam;
 import com.yunjing.sign.beans.param.UserAndDeptParam;
 import com.yunjing.sign.beans.vo.UserMonthListVO;
 import com.yunjing.sign.dao.mapper.SignDetailMapper;
@@ -17,6 +19,7 @@ import org.springframework.web.bind.annotation.*;
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
 import java.io.OutputStream;
+import java.util.List;
 
 /**
  * <p>
@@ -100,6 +103,20 @@ public class SignDailyDetailController extends BaseController {
 
         }
         return null;
+    }
+
+
+    /**
+     * 签到明细
+     * @param signDetailParam
+     * @return
+     */
+    @PostMapping("/list")
+    public ResponseEntityWrapper statistics(@RequestBody SignDetailParam signDetailParam){
+        // 基础校验
+        BeanFieldValidator.getInstance().validate(signDetailParam);
+        List<SignDetailDaily> list = iSignDetailDailyService.queryDetailList(signDetailParam);
+        return success(list);
     }
 
 }

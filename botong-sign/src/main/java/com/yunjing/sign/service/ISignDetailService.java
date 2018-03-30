@@ -75,4 +75,13 @@ public interface ISignDetailService extends IService<SignDetail> {
      * @return
      */
     List<SignExcelVO> getSignInList(UserAndDeptParam userAndDeptParam, SignBaseMapper mapper);
+
+
+    /**
+     * 获取所有的签到明细
+     * @param signDetailParam
+     * @return
+     */
+    List<SignDetail> queryDetailList(SignDetailParam signDetailParam);
+
 }
