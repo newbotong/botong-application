@@ -8,23 +8,23 @@ import org.springframework.web.bind.annotation.RestController;
 
 /**
  * <p>
- * <p>
+ * <p> rabbitmq 测试
  * </p>
  *
  * @author tao.zeng.
  * @since 2018/3/28.
  */
 @RestController
-@RequestMapping("/test")
-public class TestController {
+@RequestMapping("/rabbitmq")
+public class RabbitMQController {
 
     @Autowired
-    private RemindMessageProducer testMessageProducer;
+    private RemindMessageProducer remindMessageProducer;
 
     @RequestMapping("/send")
     public String send() {
         Message message = Message.obtain("123123", System.currentTimeMillis(), "hello world!!!");
-        testMessageProducer.sendMessage(message);
+        remindMessageProducer.sendMessage(message);
         return "success";
     }
 }

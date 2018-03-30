@@ -4,6 +4,9 @@ import com.google.gson.Gson;
 import com.yunjing.botong.log.vo.RemindVo;
 import com.yunjing.mommon.utils.IDUtils;
 
+import java.util.ArrayList;
+import java.util.List;
+
 /**
  * <p>
  * <p>
@@ -14,8 +17,9 @@ import com.yunjing.mommon.utils.IDUtils;
  */
 public class Test {
 
+
     @org.junit.Test
-    public void test(){
+    public void test() {
 
         RemindVo remindVo = new RemindVo();
         remindVo.setMemberId(IDUtils.getID());
@@ -24,7 +28,8 @@ public class Test {
         remindVo.setCycle("16:30");
         remindVo.setCycleType("day");
         remindVo.setJobTime("16:30");
-        remindVo.setRemindMode("dang");
+        remindVo.setRemindMode(1);
+        remindVo.setAppId("botong-log");
         // 提交周期（1每天 2 每周 3 每月 4 季度 5 年度）
         remindVo.setSubmitType(1);
 

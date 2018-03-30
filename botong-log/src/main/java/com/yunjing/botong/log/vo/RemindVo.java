@@ -1,6 +1,7 @@
 package com.yunjing.botong.log.vo;
 
 import com.yunjing.mommon.validate.annotation.NotNullOrEmpty;
+import com.yunjing.mommon.validate.annotation.Size;
 import lombok.Data;
 
 /**
@@ -14,6 +15,7 @@ import lombok.Data;
 @Data
 public class RemindVo {
 
+
     /**
      * 用户所有企业的成员id
      */
@@ -21,9 +23,15 @@ public class RemindVo {
     private Long memberId;
 
     /**
-     * 提醒开关（0-关闭，1-打开）
+     * 应用id
      */
     @NotNullOrEmpty
+    private String appId;
+
+    /**
+     * 提醒开关（0-关闭，1-打开）
+     */
+    @Size(min = 0, max = 1, message = "提醒开关参数错误")
     private int remindSwitch;
 
     /**
@@ -53,6 +61,6 @@ public class RemindVo {
     /**
      * 提醒方式（0-应用内推送，1-短信，2-dang）
      */
-    @NotNullOrEmpty
-    private String remindMode;
+    @Size(min = 0, max = 2, message = "提醒方式类型错误")
+    private Integer remindMode;
 }

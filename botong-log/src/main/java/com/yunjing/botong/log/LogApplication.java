@@ -4,6 +4,8 @@ import com.yunjing.mommon.base.BaseApplication;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.EnableAutoConfiguration;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
+import org.springframework.cloud.netflix.eureka.EnableEurekaClient;
+import org.springframework.cloud.netflix.feign.EnableFeignClients;
 import org.springframework.context.annotation.Configuration;
 
 /**
@@ -13,7 +15,8 @@ import org.springframework.context.annotation.Configuration;
  * @date 2018/3/23 16:57
  * @description
  **/
-
+@EnableEurekaClient
+@EnableFeignClients
 @SpringBootApplication
 public class LogApplication extends BaseApplication {
 

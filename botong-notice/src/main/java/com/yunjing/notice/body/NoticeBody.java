@@ -1,5 +1,6 @@
 package com.yunjing.notice.body;
 
+import com.yunjing.mommon.validate.annotation.Length;
 import com.yunjing.mommon.validate.annotation.NotNullOrEmpty;
 import lombok.Data;
 
@@ -70,12 +71,14 @@ public class NoticeBody implements Serializable {
      * 公告标题
      */
     @NotNullOrEmpty(message = "公告标题不能为空")
+    @Length(max=35, message = "公告标题长度不得大于35")
     private String title;
 
     /**
      * 公告内容
      */
     @NotNullOrEmpty(message = "公告内容不能为空")
+    @Length(max=2000, message = "公告内容长度不得大于2000")
     private String content;
 
     /**

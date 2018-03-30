@@ -1,9 +1,12 @@
 package com.yunjing.botong.log.api;
 
+import com.yunjing.botong.log.service.IRemindService;
 import com.yunjing.botong.log.vo.RemindVo;
 import com.yunjing.mommon.base.BaseController;
 import com.yunjing.mommon.validate.BeanFieldValidator;
 import com.yunjing.mommon.wrapper.ResponseEntityWrapper;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RestController;
@@ -20,14 +23,18 @@ import org.springframework.web.bind.annotation.RestController;
 @RequestMapping("/log/remind")
 public class RemindApi extends BaseController {
 
+    @Autowired
+    private IRemindService remindService;
+
     /**
      * @param remind 提醒对象
      * @return
      */
     @RequestMapping(value = "/save", method = RequestMethod.POST)
-    public ResponseEntityWrapper save(RemindVo remind) {
+    public ResponseEntityWrapper save(@RequestBody RemindVo remind) {
         BeanFieldValidator.getInstance().validate(remind);
-        return success();
+        boolean b = remindService.saveOrUpdate(remind);
+        return b ? success() : error();
     }
 
     /**
