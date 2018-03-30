@@ -40,6 +40,10 @@ spring:
       host: ${mongo.host}
       port: ${mongo.port}
       database: ${mongo.db}
+#  elasticsearch:
+#    jest:
+#      uris: http://192.168.10.67:9200
+#      read-timeout: 5000
 
 ##配置mybatis-plus
 mybatis-plus:

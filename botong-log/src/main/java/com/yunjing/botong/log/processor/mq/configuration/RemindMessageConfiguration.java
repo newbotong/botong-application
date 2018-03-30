@@ -14,18 +14,20 @@ import org.springframework.stereotype.Component;
 @Component
 public class RemindMessageConfiguration extends DefaultQueueConfiguration {
 
+    public final static String REMIND_QUEUE_NAME = "botong.log-remind.queue";
+
     @Override
     public String queueName() {
-        return "botong.log-remind.queue";
+        return REMIND_QUEUE_NAME;
     }
 
     @Override
     public String exchange() {
-        return "botong.log-remind.exchange";
+        return "botong.remind.exchange";
     }
 
     @Override
     public String routingKey() {
-        return "botong.log-remind.routing";
+        return REMIND_QUEUE_NAME;
     }
 }
