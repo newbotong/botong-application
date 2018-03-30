@@ -67,9 +67,9 @@ public class ProcessServiceImpl extends BaseServiceImpl<ProcessMapper, SetsProce
         List<UserVO> users = new ArrayList<>();
         List<SetsProcess> list;
         if (null == conditions) {
-            list = this.selectList(Condition.create().where("model={0}", modelId).and("(conditions is null or conditions='')").orderBy(true, "sort", true));
+            list = this.selectList(Condition.create().where("model_id={0}", modelId).and("(condition_id is null or condition_id='')").orderBy(true, "sort", true));
         } else {
-            list = this.selectList(Condition.create().where("model={0}", modelId).and("conditions={0}", conditions).orderBy(true, "sort", true));
+            list = this.selectList(Condition.create().where("model_id={0}", modelId).and("condition_id={0}", conditions).orderBy(true, "sort", true));
         }
 
         for (SetsProcess process : list) {
