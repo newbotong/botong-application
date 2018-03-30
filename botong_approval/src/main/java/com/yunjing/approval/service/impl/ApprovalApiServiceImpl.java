@@ -1,23 +1,22 @@
 package com.yunjing.approval.service.impl;
 
 import com.baomidou.mybatisplus.mapper.Condition;
+import com.baomidou.mybatisplus.toolkit.CollectionUtils;
+import com.baomidou.mybatisplus.toolkit.MapUtils;
 import com.common.mybatis.page.Page;
-import com.yunjing.approval.dao.mapper.ApprovalMapper;
-import com.yunjing.approval.dao.mapper.ApprovalProcessMapper;
-import com.yunjing.approval.dao.mapper.CopySMapper;
-import com.yunjing.approval.dao.mapper.ModelLMapper;
+import com.yunjing.approval.dao.mapper.*;
 import com.yunjing.approval.model.dto.ApprovalContentDTO;
 import com.yunjing.approval.model.dto.ApprovalDetailDTO;
-import com.yunjing.approval.model.dto.InputDetailDTO;
-import com.yunjing.approval.model.dto.InternalDetailDTO;
 import com.yunjing.approval.model.entity.*;
 import com.yunjing.approval.model.vo.*;
+import com.yunjing.approval.param.FilterParam;
 import com.yunjing.approval.processor.task.async.ApprovalPushTask;
 import com.yunjing.approval.service.*;
 import com.yunjing.approval.util.Colors;
-import com.yunjing.approval.util.DateUtil;
 import com.yunjing.approval.util.EmojiFilterUtils;
+import com.yunjing.mommon.global.exception.InsertMessageFailureException;
 import com.yunjing.mommon.global.exception.UpdateMessageFailureException;
+import com.yunjing.mommon.utils.IDUtils;
 import org.apache.commons.lang.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -25,8 +24,9 @@ import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
-import java.util.Set;
+import java.util.Map;
 import java.util.stream.Collectors;
 
 /**
@@ -57,6 +57,9 @@ public class ApprovalApiServiceImpl implements IApprovalApiService {
     private IApprovalService approvalService;
     @Autowired
     private ApprovalPushTask approvalPushTask;
+    @Autowired
+    private ApprovalAttrMapper approvalAttrMapper;
+
 
     @Override
     @Transactional(propagation = Propagation.REQUIRED, rollbackFor = Exception.class)
@@ -72,14 +75,14 @@ public class ApprovalApiServiceImpl implements IApprovalApiService {
 
     @Override
     @Transactional(propagation = Propagation.REQUIRED, rollbackFor = Exception.class)
-    public Page<ClientApprovalVO> getWaited(Page page, Long orgId, Long userId, String searchKey) {
+    public Page<ClientApprovalVO> getWaited(Page page, Long orgId, Long userId, FilterParam filterParam) {
         boolean flag = false;
         int current = page.getCurrentPage();
         int size = page.getPageSize();
         int index = (current - 1) * size;
         Page<ClientApprovalVO> clientApprovalVOPage = new Page<>(current, size);
         List<ClientApprovalVO> clientApprovalVOS = new ArrayList<>();
-        List<ApprovalContentDTO> waitedMeApprovalList = approvalProcessMapper.getWaitedMeApprovalList(index, size, orgId, userId, searchKey, flag);
+        List<ApprovalContentDTO> waitedMeApprovalList = approvalProcessMapper.getWaitedMeApprovalList(index, size, orgId, userId, filterParam);
         convertList(clientApprovalVOS, waitedMeApprovalList);
         clientApprovalVOPage.build(clientApprovalVOS);
         clientApprovalVOPage.setTotalCount(clientApprovalVOS.size());
@@ -88,14 +91,14 @@ public class ApprovalApiServiceImpl implements IApprovalApiService {
 
     @Override
     @Transactional(propagation = Propagation.REQUIRED, rollbackFor = Exception.class)
-    public Page<ClientApprovalVO> getCompleted(Page page, Long orgId, Long userId, String searchKey) {
+    public Page<ClientApprovalVO> getCompleted(Page page, Long orgId, Long userId, FilterParam filterParam) {
         boolean flag = false;
         int current = page.getCurrentPage();
         int size = page.getPageSize();
         int index = (current - 1) * size;
         Page<ClientApprovalVO> clientApprovalVOPage = new Page<>(current, size);
         List<ClientApprovalVO> clientApprovalVOS = new ArrayList<>();
-        List<ApprovalContentDTO> completedMeApprovalList = approvalProcessMapper.getCompletedApprovalList(index, size, orgId, userId, searchKey, flag);
+        List<ApprovalContentDTO> completedMeApprovalList = approvalProcessMapper.getCompletedApprovalList(index, size, orgId, userId, filterParam);
         convertList(clientApprovalVOS, completedMeApprovalList);
         clientApprovalVOPage.build(clientApprovalVOS);
         clientApprovalVOPage.setTotalCount(clientApprovalVOS.size());
@@ -103,14 +106,14 @@ public class ApprovalApiServiceImpl implements IApprovalApiService {
     }
 
     @Override
-    public Page<ClientApprovalVO> getLaunched(Page page, Long orgId, Long userId, String searchKey) {
+    public Page<ClientApprovalVO> getLaunched(Page page, Long orgId, Long userId, FilterParam filterParam) {
         boolean flag = false;
         int current = page.getCurrentPage();
         int size = page.getPageSize();
         int index = (current - 1) * size;
         Page<ClientApprovalVO> clientApprovalVOPage = new Page<>(current, size);
         List<ClientApprovalVO> clientApprovalVOS = new ArrayList<>();
-        List<ApprovalContentDTO> launchedMeApprovalList = approvalProcessMapper.getLaunchedApprovalList(index, size, orgId, userId, searchKey, flag);
+        List<ApprovalContentDTO> launchedMeApprovalList = approvalProcessMapper.getLaunchedApprovalList(index, size, orgId, userId, filterParam);
         List<ApprovalUser> userList = approvalUserService.selectList(Condition.create());
         String message = "";
         int i = 1;
@@ -131,7 +134,7 @@ public class ApprovalApiServiceImpl implements IApprovalApiService {
                 if (critical == 1) {
                     contentVO.setMessage(message);
                 }
-            } else if (contentVO.getProcessState() == 1) {
+            } else if (contentVO.getState() == 1) {
                 message = "审批完成";
                 if (contentVO.getResult() != null && contentVO.getResult() == 1) {
                     message += " （同意）";
@@ -150,14 +153,14 @@ public class ApprovalApiServiceImpl implements IApprovalApiService {
     }
 
     @Override
-    public Page<ClientApprovalVO> getCopied(Page page, Long orgId, Long userId, String searchKey) {
+    public Page<ClientApprovalVO> getCopied(Page page, Long orgId, Long userId, FilterParam filterParam) {
         boolean flag = false;
         int current = page.getCurrentPage();
         int size = page.getPageSize();
         int index = (current - 1) * size;
         Page<ClientApprovalVO> clientApprovalVOPage = new Page<>(current, size);
         List<ClientApprovalVO> clientApprovalVOS = new ArrayList<>();
-        List<ApprovalContentDTO> copyApprovalList = copysMapper.getCopiedApprovalList(index, size, orgId, userId, searchKey, flag);
+        List<ApprovalContentDTO> copyApprovalList = copysMapper.getCopiedApprovalList(index, size, orgId, userId, filterParam);
         convertList(clientApprovalVOS, copyApprovalList);
         clientApprovalVOPage.build(clientApprovalVOS);
         clientApprovalVOPage.setTotalCount(clientApprovalVOS.size());
@@ -166,12 +169,12 @@ public class ApprovalApiServiceImpl implements IApprovalApiService {
 
     @Override
     public ClientApprovalDetailVO getApprovalDetail(Long orgId, Long userId, Long approvalId) {
-        List<ApprovalDetailDTO> approvalDetail = approvalMapper.getApprovalDetail(approvalId);
+//        List<ApprovalDetailDTO> approvalDetail = approvalMapper.getApprovalDetail(approvalId);
         ClientApprovalDetailVO clientApprovalDetailVO = new ClientApprovalDetailVO();
         // 获取审批详情
-        List<InputDetailDTO> detail = getDetail(approvalDetail);
+        List<ApproveAttrVO> detail = getDetail(approvalId);
         // 注入审批信息详情
-        clientApprovalDetailVO.setInputDetailList(detail);
+        clientApprovalDetailVO.setApproveAttrVO(detail);
 
         // 根据审批主键查询审批信息
         ApprovalDetailDTO approvalById = approvalMapper.getApprovalById(approvalId);
@@ -231,17 +234,18 @@ public class ApprovalApiServiceImpl implements IApprovalApiService {
     }
 
     @Override
-    public boolean agreeApproval(Long orgId, Long userId, Long approvalId, Integer state, String remark) {
+    public boolean solveApproval(Long orgId, Long userId, Long approvalId, Integer state, String remark) {
         boolean flag = false;
         List<ApprovalProcess> processList = approvalProcessService.selectList(Condition.create().where("approval_id={0}", approvalId));
         if (processList != null && !processList.isEmpty()) {
             for (ApprovalProcess process : processList) {
+                // 当审批流程中的审批未处理时（0：未处理）
                 if (process.getProcessState() == 0) {
                     if (process.getUserId().equals(userId)) {
                         process.setProcessState(state);
                         String remarks = EmojiFilterUtils.filterEmoji(remark);
                         process.setReason(remarks);
-                        process.setProcessTime(DateUtil.getCurrentTime().getTime());
+                        process.setProcessTime(System.currentTimeMillis());
                         boolean update = approvalProcessService.update(process, Condition.create().where("approval_id={0}", approvalId));
                         if (!update) {
                             throw new UpdateMessageFailureException("同意审批--更新审批流程信息失败");
@@ -252,41 +256,53 @@ public class ApprovalApiServiceImpl implements IApprovalApiService {
             }
             Approval approval = approvalService.selectById(approvalId);
             if (approval != null) {
-                // 2表示撤回
+                // 2表示审批流程中的拒绝 （0:未处理 1:同意 2:拒绝 3:转交）
                 int revoke = 2;
                 if (state != revoke) {
                     int num = processList.get(processList.size() - 1).getProcessState();
                     switch (num) {
                         case 1:
-                            // 状态 0:审批中 1:审批完成 2:已撤回
+                            // 状态 1:审批完成
                             approval.setState(1);
-                            // 结果 1:已同意 2:已拒绝 4:已撤销
+                            // 结果 1:已同意
                             approval.setResult(1);
                             break;
                         case 2:
+                            // 状态 1:审批完成
                             approval.setState(1);
+                            // 结果 2:已拒绝
                             approval.setResult(2);
                             break;
                         case 4:
+                            // 2:已撤回
                             approval.setState(2);
+                            // 4:已撤销
                             approval.setResult(4);
+                            break;
+                        default:
+                            // 2:已撤回
+                            approval.setState(approval.getState());
+                            // 4:已撤销
+                            approval.setResult(approval.getResult());
                     }
                 } else if (state == revoke) {
+                    // 状态 1:审批完成
                     approval.setState(1);
+                    // 结果 2:已拒绝
                     approval.setResult(2);
                 }
                 if (approval.getResult() != null) {
                     // 保存审批完成时间
-                    approval.setFinishTime(DateUtil.getCurrentTime().getTime());
+                    approval.setFinishTime(System.currentTimeMillis());
                     List<CopyS> copySList = copySService.selectList(Condition.create().where("approval_id={0}", approvalId));
                     // 更新抄送信息
                     if (approval.getResult() == 1 && !copySList.isEmpty()) {
                         for (CopyS copyS : copySList) {
                             copyS.setCopySType(1);
-                            copyS.setCreateTime(DateUtil.getCurrentTime().getTime());
+                            copyS.setCreateTime(System.currentTimeMillis());
                         }
                         boolean batchById = copySService.updateBatchById(copySList);
-                        if (!batchById){
+                        if (!batchById) {
                             throw new UpdateMessageFailureException("同意审批操作中--更新抄送信息失败");
                         }
                     }
@@ -294,30 +310,81 @@ public class ApprovalApiServiceImpl implements IApprovalApiService {
 
             }
             flag = approvalService.updateById(approval);
-            if(!flag){
+            if (!flag) {
                 throw new UpdateMessageFailureException("同意审批操作中--更新审批信息失败");
             }
         }
         //异步推送给下一个审批人
-        approvalPushTask.init(approvalId, orgId, userId).run();
+        if (flag) {
+            approvalPushTask.init(approvalId, orgId, userId).run();
+        }
         return flag;
     }
 
     @Override
-    public boolean refuseApproval(Long orgId, Long userId, Long approvalId, Integer state, String remark) {
-        return false;
+    public boolean revokeApproval(Long orgId, Long userId, Long approvalId) {
+        boolean flag = false;
+        List<ApprovalProcess> processList = approvalProcessService.selectList(Condition.create().where("approval_id={0}", approvalId));
+        processList.forEach(approvalProcess -> {
+            approvalProcess.setProcessState(4);
+            approvalProcess.setProcessTime(System.currentTimeMillis());
+        });
+        boolean batchById = approvalProcessService.updateBatchById(processList);
+        if (!batchById) {
+            throw new UpdateMessageFailureException("审批撤销操作--批量修改审批流程信息失败");
+        }
+        Approval approval = approvalService.selectById(approvalId);
+        if (approval != null) {
+            approval.setState(2);
+            approval.setResult(4);
+            flag = approvalService.updateById(approval);
+            if (!flag) {
+                throw new UpdateMessageFailureException("审批撤销操作--修改审批信息失败");
+            }
+        }
+        return flag;
     }
 
     @Override
-    public boolean revokeApproval(Long orgId, Long userId, Long approvalId, Integer state, String remark) {
-        return false;
-    }
+    public boolean transferApproval(Long orgId, Long userId, Long transferredUserId, Long approvalId, String remark) {
 
-    @Override
-    public boolean transferApproval(Long orgId, Long userId, Long approvalId, Integer state, String remark) {
-        return false;
+        List<ApprovalProcess> processList = approvalProcessService.selectList(Condition.create().where("approval_id={0}", approvalId));
+        int num = 0;
+        List<ApprovalProcess> newProcessList = new ArrayList<>();
+        for (ApprovalProcess approvalProcess : processList) {
+            if (approvalProcess.getProcessState() == 0 && num == 0) {
+                approvalProcess.setProcessState(3);
+                approvalProcess.setReason(EmojiFilterUtils.filterEmoji(remark));
+                approvalProcess.setProcessTime(System.currentTimeMillis());
+                ApprovalProcess newProcess = new ApprovalProcess();
+                newProcess.setSeq(approvalProcess.getSeq() + 1);
+                newProcess.setId(IDUtils.getID());
+                newProcess.setUserId(transferredUserId);
+                newProcess.setProcessState(0);
+                newProcess.setApprovalId(approvalId);
+                newProcess.setProcessTime(System.currentTimeMillis());
+                newProcessList.add(newProcess);
+                num++;
+                continue;
+            }
+            if (num == 1) {
+                approvalProcess.setSeq(approvalProcess.getSeq() + 1);
+            }
+        }
+        boolean insertBatch = approvalProcessService.insertBatch(newProcessList);
+        if (!insertBatch) {
+            throw new InsertMessageFailureException("转让审批操作--新增审批流程信息失败");
+        }
+        boolean batchById = approvalProcessService.updateBatchById(processList);
+        if (!batchById) {
+            throw new UpdateMessageFailureException("转让审批操作--修改审批流程信息失败");
+        }
+        //转让成功推送下一个
+        if (batchById) {
+            approvalPushTask.init(approvalId, orgId, userId).run();
+        }
+        return batchById;
     }
-
 
     private void convertList(List<ClientApprovalVO> clientApprovalVOS, List<ApprovalContentDTO> approvalList) {
         // 获取所有用户
@@ -334,93 +401,54 @@ public class ApprovalApiServiceImpl implements IApprovalApiService {
         });
     }
 
-    private List<InputDetailDTO> getDetail(List<ApprovalDetailDTO> approvalDetail) {
-        // 审批详情内的明细集合
-        List<InternalDetailDTO> internalDetailDTOS = new ArrayList<>();
-        List<InputDetailDTO> inputDetailDTOS = new ArrayList<>();
-        int count = 0;
-        int dataType = 0;
-        String itemLabel = "";
-        for (ApprovalDetailDTO detailDTO : approvalDetail) {
-            InputDetailDTO inputDetailDTO = new InputDetailDTO();
-            if (detailDTO.getIsChild() != null && detailDTO.getDataType() != 8) {
-                // 处理审批项中有子项的情况
-                InternalDetailDTO internalDetailDTO = new InternalDetailDTO();
-                internalDetailDTO.setKeyName(detailDTO.getItemLabel());
-                internalDetailDTO.setAttrName(detailDTO.getField());
-                internalDetailDTO.setAttrValue(detailDTO.getAttrValue());
-                internalDetailDTO.setDataType(detailDTO.getDataType());
-                internalDetailDTO.setOptValue(detailDTO.getOptValue());
-                internalDetailDTOS.add(internalDetailDTO);
-            } else if (detailDTO.getDataType() == 5) {
-                // 处理数据类型是--日期区间--的情况
-                InputDetailDTO inputStart = new InputDetailDTO();
-                InputDetailDTO inputEnd = new InputDetailDTO();
-                String[] inputTime = detailDTO.getAttrValue().split(",");
-                String strName = "开始时间,结束时间";
-                if (StringUtils.isNotBlank(detailDTO.getOptValue())) {
-                    strName = detailDTO.getOptValue();
-                }
-                inputStart.setInputName(strName.split(",")[0]);
-                inputStart.setInputValue(inputTime[0]);
-                inputStart.setDataType(detailDTO.getDataType());
-                inputDetailDTOS.add(inputStart);
-                inputEnd.setInputName(strName.split(",")[1]);
-                inputEnd.setInputValue(inputTime[1]);
-                inputEnd.setDataType(detailDTO.getDataType());
-                inputDetailDTOS.add(inputEnd);
-            } else if (detailDTO.getDataType() == 7) {
-                // 数据类型是--明细 的情况
-                itemLabel = detailDTO.getItemLabel();
-                dataType = detailDTO.getDataType();
-            } else {
-                inputDetailDTO.setInputName(detailDTO.getItemLabel());
-                inputDetailDTO.setDataType(detailDTO.getDataType());
-                inputDetailDTO.setUnit(detailDTO.getUnit());
-                inputDetailDTO.setInputValue(detailDTO.getAttrValue());
-                if (inputDetailDTO.getDataType() != 0) {
-                    inputDetailDTOS.add(inputDetailDTO);
-                }
+    private List<ApproveAttrVO> getDetail(Long approvalId) {
+        List<ApproveAttributeVO> attrList = approvalAttrMapper.selectAttrList(approvalId);
+
+        List<ApproveAttrVO> attrs = new ArrayList<>();
+        for (ApproveAttributeVO attr : attrList) {
+            if (attr.getAttrParent() != null) {
+                continue;
             }
-            //审批明细数据处理输出
-            for (int i = count - 1; i >= 0; i--) {
-                InputDetailDTO input = new InputDetailDTO();
-                List<InputDetailDTO> list = new ArrayList<InputDetailDTO>();
-                int num = count - 1 - i;
-                input.setDataType(dataType);
-                input.setInputName(itemLabel);
-                input.setInputValue(String.valueOf(num));
-                for (InternalDetailDTO internalDetailDTO : internalDetailDTOS) {
-                    InputDetailDTO input0 = new InputDetailDTO();
-                    if (internalDetailDTO.getAttrValue() == null) {
+            Integer type = attr.getAttrType();
+            if (type == null) {
+                continue;
+            }
+            if (type == 7) {
+                ApproveAttrVO attrVo = new ApproveAttrVO(attr);
+                Map<Integer, List<ApproveAttrVO>> map = new HashMap<>(1);
+                for (ApproveAttributeVO childAttr : attrList) {
+                    if (childAttr.getAttrParent() == null) {
                         continue;
                     }
-                    String[] value = internalDetailDTO.getAttrValue().split(",");
-                    String str;
-                    if (value.length > i) {
-                        if (internalDetailDTO.getDataType() == 5) {
-                            String strName = "开始时间,结束时间";
-                            if (StringUtils.isNotBlank(internalDetailDTO.getOptValue())) {
-                                strName = internalDetailDTO.getOptValue();
-                            }
-                            InputDetailDTO input1 = new InputDetailDTO();
-                            InputDetailDTO input2 = new InputDetailDTO();
-                            input1.setInputName(strName.split(",")[0]);
-                            input2.setInputName(strName.split(",")[1]);
-                            list.add(input1);
-                            list.add(input2);
-                        } else {
-                            str = value[i];
-                            input0.setInputName(internalDetailDTO.getKeyName());
-                            input0.setInputValue(str);
-                            list.add(input0);
+
+                    if (attr.getId().equals(childAttr.getAttrParent())) {
+                        Integer num = childAttr.getAttrNum();
+                        if (num == null) {
+                            continue;
                         }
+                        List<ApproveAttrVO> childAttrs = map.get(num);
+
+                        if (CollectionUtils.isEmpty(childAttrs)) {
+                            childAttrs = new ArrayList<>();
+                        }
+                        childAttrs.add(new ApproveAttrVO(childAttr));
+
+                        map.put(num, childAttrs);
                     }
                 }
-                input.setInputDetailDTOS(list);
-                inputDetailDTOS.add(input);
+
+                if (MapUtils.isNotEmpty(map)) {
+                    List<ApproveRowVO> details = new ArrayList<>(map.size());
+                    for (Map.Entry<Integer, List<ApproveAttrVO>> entry : map.entrySet()) {
+                        details.add(new ApproveRowVO(entry.getKey(), entry.getValue()));
+                    }
+                    attrVo.setContents(details);
+                }
+                attrs.add(attrVo);
+            } else {
+                attrs.add(new ApproveAttrVO(attr));
             }
         }
-        return inputDetailDTOS;
+        return attrs;
     }
 }

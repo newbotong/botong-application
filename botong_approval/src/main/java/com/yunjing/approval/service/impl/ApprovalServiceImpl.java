@@ -8,7 +8,6 @@ import com.baomidou.mybatisplus.mapper.EntityWrapper;
 import com.baomidou.mybatisplus.mapper.Wrapper;
 import com.baomidou.mybatisplus.plugins.Page;
 import com.common.mybatis.service.impl.BaseServiceImpl;
-import com.ctc.wstx.util.DataUtil;
 import com.yunjing.approval.dao.cache.ApprovalRedisService;
 import com.yunjing.approval.dao.cache.OrgReadisService;
 import com.yunjing.approval.dao.cache.UserRedisService;
@@ -71,7 +70,7 @@ public class ApprovalServiceImpl extends BaseServiceImpl<ApprovalMapper, Approva
     @Autowired
     private OrgReadisService orgReadisService;
     @Autowired
-    private ApproveAttrMapper approveAttrMapper;
+    private ApprovalAttrMapper approvalAttrMapper;
     @Autowired
     private ApprovalRedisService approvalRedisService;
     @Autowired
@@ -128,6 +127,7 @@ public class ApprovalServiceImpl extends BaseServiceImpl<ApprovalMapper, Approva
             attr.setAttrName(name);
             attr.setAttrType(type);
             String value;
+            String values;
             // 类型是10-图片, 11-附件的情况
             if (type == 10 || type == 11) {
                 JSONArray array = obj.getJSONArray("value");
@@ -135,7 +135,12 @@ public class ApprovalServiceImpl extends BaseServiceImpl<ApprovalMapper, Approva
                 attr.setAttrValue(EmojiFilterUtils.filterEmoji(value));
             } else {
                 value = obj.getString("value");
-                attr.setAttrValue(EmojiFilterUtils.filterEmoji(value));
+                values = obj.getString("values");
+                if (StringUtils.isNotBlank(String.valueOf(values))) {
+                    attr.setAttrValue(EmojiFilterUtils.filterEmoji(value) + "," + values);
+                } else {
+                    attr.setAttrValue(EmojiFilterUtils.filterEmoji(value));
+                }
                 if (type == 7) {
                     // 明细类型
                     JSONArray array = obj.getJSONArray("content");
@@ -153,14 +158,20 @@ public class ApprovalServiceImpl extends BaseServiceImpl<ApprovalMapper, Approva
                         entity.setAttrName(detailName);
                         entity.setAttrType(detailType);
                         String detailValue;
+                        String detailValues = "";
                         // 明细中类型是10-图片, 11-附件的情况
                         if (detailType == 10 || detailType == 11) {
                             JSONArray detailArray = detail.getJSONArray("value");
                             detailValue = detailArray.toJSONString();
                         } else {
                             detailValue = detail.getString("value");
+                            detailValues = detail.getString("values");
                         }
-                        entity.setAttrValue(EmojiFilterUtils.filterEmoji(detailValue));
+                        if (StringUtils.isNotBlank(String.valueOf(detailValues))) {
+                            entity.setAttrValue(EmojiFilterUtils.filterEmoji(detailValue) + "," + detailValues);
+                        } else {
+                            entity.setAttrValue(EmojiFilterUtils.filterEmoji(detailValue));
+                        }
 
                         int detailNum = detail.getIntValue("num");
                         entity.setAttrNum(detailNum);
@@ -446,7 +457,7 @@ public class ApprovalServiceImpl extends BaseServiceImpl<ApprovalMapper, Approva
         List<Long> uIdList = approvalList.parallelStream().map(Approval::getUserId).collect(Collectors.toList());
         List<UserVO> userVOS = userRedisService.getByUserIdList(null);
         // 查询编辑审批表单后填写的所有审批信息数据
-        List<ApproveAttr> approveAttrList = approveAttrMapper.selectList(Condition.create().where("org_id={0}", orgId));
+        List<ApproveAttributeVO> approveAttrList = approvalAttrMapper.selectAttrListByOrgId(orgId);
         for (Approval approval : approvalList) {
             ApprovalExcelVO excelVO = new ApprovalExcelVO();
             // 模型主键
@@ -512,7 +523,7 @@ public class ApprovalServiceImpl extends BaseServiceImpl<ApprovalMapper, Approva
                 List<ApprovalAttr> attrs = approvalAttrList.parallelStream()
                         .filter(approvalAttr -> approvalAttr.getApprovalId().equals(approval.getId())).collect(Collectors.toList());
 
-                List<ApproveAttr> approveAttrs = approveAttrList.parallelStream()
+                List<ApproveAttributeVO> approveAttrs = approveAttrList.parallelStream()
                         .filter(approveAttr -> approveAttr.getApprovalId().equals(approval.getId())).collect(Collectors.toList());
                 // 其他字段名和字段值
                 Map<String, Object> map = approvalDataByType(orgId, userId, approval, items, attrs, approveAttrs);
@@ -541,12 +552,12 @@ public class ApprovalServiceImpl extends BaseServiceImpl<ApprovalMapper, Approva
      * @param approveAttrs 编辑表单后填写的审批信息数据
      * @return
      */
-    private Map<String, Object> approvalDataByType(Long orgId, Long userId, Approval approval, List<ModelItem> modelItems, List<ApprovalAttr> attrList, List<ApproveAttr> approveAttrs) {
+    private Map<String, Object> approvalDataByType(Long orgId, Long userId, Approval approval, List<ModelItem> modelItems, List<ApprovalAttr> attrList, List<ApproveAttributeVO> approveAttrs) {
         approvalRedisService.remove(String.valueOf(orgId + userId));
         List<ApprovalTemplVO> approvalTemplVOS = new ArrayList<>();
         Map<String, Object> map = new HashMap<>(16);
         if (null != approval.getModelVersion()) {
-            for (ApproveAttr attr : approveAttrs) {
+            for (ApproveAttributeVO attr : approveAttrs) {
                 ApprovalTemplVO approvalTemplVO = new ApprovalTemplVO();
                 if (attr.getAttrParent() != null) {
                     continue;
@@ -559,9 +570,9 @@ public class ApprovalServiceImpl extends BaseServiceImpl<ApprovalMapper, Approva
                 // 当item是明细时的情况
                 if (type == 7) {
                     ApproveAttrVO attrVo = new ApproveAttrVO(attr);
-                    approvalTemplVO.setCKey(attrVo.getName());
+                    approvalTemplVO.setCKey(attrVo.getLabel());
                     Map<Integer, List<ApproveAttrVO>> mingXiMap = new HashMap<>(1);
-                    for (ApproveAttr childAttr : approveAttrs) {
+                    for (ApproveAttributeVO childAttr : approveAttrs) {
                         if (childAttr.getAttrParent() == null) {
                             continue;
                         }
@@ -587,19 +598,19 @@ public class ApprovalServiceImpl extends BaseServiceImpl<ApprovalMapper, Approva
                         for (Map.Entry<Integer, List<ApproveAttrVO>> entry : mingXiMap.entrySet()) {
                             details.add(new ApproveRowVO(entry.getKey(), entry.getValue()));
                         }
-                        attrVo.setDetails(details);
-                        map.put(attrVo.getName(), attrVo.getDetails());
+                        attrVo.setContents(details);
+                        map.put(attrVo.getLabel(), attrVo.getContents());
                     } else {
-                        map.put(attrVo.getName(), attrVo.getValue());
+                        map.put(attrVo.getLabel(), attrVo.getValue());
                     }
                 } else if (type == 12) {
                     ApproveAttrVO attrVo = new ApproveAttrVO(attr);
-                    map.put(attrVo.getName(), attrVo.getImages());
-                    approvalTemplVO.setCKey(attrVo.getName());
+                    map.put(attrVo.getLabel(), attrVo.getImages());
+                    approvalTemplVO.setCKey(attrVo.getLabel());
                 } else if (type == 11) {
                     ApproveAttrVO attrVo = new ApproveAttrVO(attr);
-                    map.put(attrVo.getName(), attrVo.getFiles());
-                    approvalTemplVO.setCKey(attrVo.getName());
+                    map.put(attrVo.getLabel(), attrVo.getFiles());
+                    approvalTemplVO.setCKey(attrVo.getLabel());
                 } else {
                     map.put(attr.getAttrLabel(), attr.getAttrValue());
                     approvalTemplVO.setCKey((attr.getAttrLabel()));
@@ -683,7 +694,7 @@ public class ApprovalServiceImpl extends BaseServiceImpl<ApprovalMapper, Approva
                         ApproveRowVO approveRowVO = (ApproveRowVO) obj;
                         List<ApproveAttrVO> attrs = approveRowVO.getAttrs();
                         for (ApproveAttrVO attr : attrs) {
-                            val = new StringBuilder(val) + attr.getName() + ":" + attr.getValue() + " \r\n";
+                            val = new StringBuilder(val) + attr.getLabel() + ":" + attr.getValue() + " \r\n";
                         }
                         detail = new StringBuilder(detail) + "(" + String.valueOf(approveRowVO.getNum()) + ")\r\n" + val + " \r\n";
                         attrValue.setAttrVal(detail);

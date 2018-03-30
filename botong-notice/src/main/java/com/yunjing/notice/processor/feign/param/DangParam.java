@@ -1,5 +1,7 @@
 package com.yunjing.notice.processor.feign.param;
 
+import com.yunjing.mommon.validate.annotation.NotNullOrEmpty;
+import com.yunjing.mommon.validate.annotation.Size;
 import lombok.Data;
 
 /**
@@ -13,24 +15,31 @@ import lombok.Data;
 public class DangParam {
 
     /** 用户id，发送者 */
+    @NotNullOrEmpty(message = "发送者编号不能为空")
     private Long userId;
 
     /** 业务类型(0 Dang 1 公告) */
+    @Size(max = 1, message = "Dang 业务类型错误")
     private int bizType;
 
     /** 业务ID */
+    @NotNullOrEmpty(message = "业务编号不能为空")
     private Long bizId;
 
     /** 接收人信息对象 */
+    @NotNullOrEmpty(message = "接收者对象不能为空")
     private String receiveBody;
 
     /** dang类型(1.文字 2.语音) */
+    @Size(max = 2, min = 1, message = "Dang类型错误")
     private int dangType;
 
     /** dang提醒类型(1.应用内 2.短信 ) */
+    @Size(max = 2, min = 1, message = "Dang提醒类型错误")
     private int remindType;
 
     /** 发送类型(1,立即；2定时) */
+    @Size(max = 2, min = 1, message = "Dang发送类型错误")
     private int sendType;
 
     /** 发送时间（时间戳） */

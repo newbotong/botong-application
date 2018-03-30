@@ -52,7 +52,7 @@ public class ApprovalSetsServiceImpl extends ServiceImpl<ApprovalSetsMapper, App
         approvalSetVO.setList(conditionList);
 
         // 设置
-        ApprovalSets approvalSets = this.selectOne(Condition.create().where("model_id={0}", modelId));
+        ApprovalSets approvalSets = this.selectOne(Condition.create().where("id={0}", modelId));
         if (approvalSets != null && approvalSets.getSetting() == ApproConstants.SET_TYPE_1) {
             approvalSetVO.setSetting(ApproConstants.SET_TYPE_1);
         } else if (approvalSets != null && approvalSets.getSetting() == ApproConstants.SET_TYPE_0) {

@@ -12,7 +12,7 @@
 // * @description
 // **/
 //@Configuration
-//public class RabbitMQConfig extends GlobalMessageConfig {
+//public class RabbitMQConfig extends Global {
 //
 //    public RabbitMQConfig(ApplicationContext context, ConnectionFactory connectionFactory) throws Exception {
 //        super(context,connectionFactory);

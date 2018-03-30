@@ -5,7 +5,6 @@ import com.alibaba.fastjson.TypeReference;
 import com.baomidou.mybatisplus.mapper.EntityWrapper;
 import com.baomidou.mybatisplus.plugins.Page;
 import com.baomidou.mybatisplus.service.impl.ServiceImpl;
-import com.sun.org.apache.xpath.internal.SourceTree;
 import com.yunjing.mommon.global.exception.BaseException;
 import com.yunjing.mommon.wrapper.ResponseEntityWrapper;
 import com.yunjing.notice.body.*;
@@ -71,24 +70,6 @@ public class NoticeServiceImpl extends ServiceImpl<NoticeMapper, NoticeEntity> i
     @Override
     @Transactional(rollbackFor = Exception.class)
     public void insertNotice(NoticeBody noticeBody) throws BaseException {
-        if (null == noticeBody.getIssueUserId()) {
-            throw new BaseException("发布人的用户id不能为空");
-        }
-//        //查看该用户是否有发公告权限(等应用生成后提供)
-//        ResponseEntityWrapper responseEntityWrapper = authorityFeign.authority(appId, noticeBody.getIssueUserId());
-//        Boolean results = JSONObject.parseObject(responseEntityWrapper.getData().toString(), Boolean.class);
-//        //判断返回的结果是否为管理员，如果是管理员方可进入下一步
-//        if (results == false) {
-//            throw new BaseException("只有管理员才可以发公告");
-//        }
-        int i = 15;
-        int j = 200;
-        if (noticeBody.getTitle().length() > i) {
-            throw new BaseException("标题长度不得大于15个字");
-        }
-        if (noticeBody.getContent().length() > j) {
-            throw new BaseException("内容长度不得超过200个字");
-        }
         UserInfoEntity userInfoEntity = new UserInfoEntity().selectOne(new EntityWrapper<UserInfoEntity>().eq("id",noticeBody.getIssueUserId()).eq("logic_delete",NoticeConstant.LOGIC_DELETE_NOMAL));
         if (null == userInfoEntity) {
             UserInfoEntity userInfoEntity1 = new UserInfoEntity();
@@ -209,19 +190,32 @@ public class NoticeServiceImpl extends ServiceImpl<NoticeMapper, NoticeEntity> i
         //发送DangRpc
         if (notice.getDangState() == 0) {
             DangParam dangParam = new DangParam();
+            dangParam.setUserId(notice.getIssueUserId());
+            dangParam.setBizId( notice.getId());
+            dangParam.setBizType(1);
+            dangParam.setReceiveBody(JSONObject.toJSONString(receiveBodyList));
+            dangParam.setDangType(1);
+            dangParam.setRemindType(1);
+            dangParam.setSendType(1);
+            dangParam.setSendTime(System.currentTimeMillis());
+            dangParam.setSendContent(notice.getTitle());
+            dangParam.setVoiceTimeLength(0);
+            dangParam.setSendTelephone(noticeBody.getPhone());
             if (!StringUtils.isAnyBlank(noticeBody.getPicture(),noticeBody.getPictureName(),noticeBody.getSize())) {
-//                dangFeign.sendDang(notice.getIssueUserId(), 1, notice.getId(),
-//                        JSONObject.toJSONString(receiveBodyList), 1, 1, 1, System.currentTimeMillis(), notice.getTitle(), 0,
-//                        noticeBody.getPhone(), 1, 1,noticeBody.getPictureName(), noticeBody.getPicture(), noticeBody.getSize());
-
-
-//                dangParam.setUserId();
+                dangParam.setIsAccessory(1);
+                dangParam.setAccessoryType(1);
+                dangParam.setAccessoryName(noticeBody.getPictureName());
+                dangParam.setAccessoryUrl(noticeBody.getPicture());
+                dangParam.setAccessorySize(noticeBody.getSize());
+                dangFeign.sendDang(dangParam);
             }else {
-//                dangFeign.sendDang(notice.getIssueUserId(), 1, notice.getId(),
-//                        JSONObject.toJSONString(receiveBodyList), 1, 1, 1, System.currentTimeMillis(), notice.getTitle(), 0,
-//                        noticeBody.getPhone(), 0, 0, "","", "");
+                dangParam.setIsAccessory(0);
+                dangParam.setAccessoryType(0);
+                dangParam.setAccessoryName("");
+                dangParam.setAccessoryUrl("");
+                dangParam.setAccessorySize("");
+                dangFeign.sendDang(dangParam);
             }
-            dangFeign.sendDang(dangParam);
         }
     }
 
@@ -324,33 +318,35 @@ public class NoticeServiceImpl extends ServiceImpl<NoticeMapper, NoticeEntity> i
      */
     @Override
     public Map<String, Object> selectNoticePage(Long userId, Integer state, Integer pageNo, Integer pageSize) throws BaseException {
-        Map<String, Object> maps = new HashMap<String, Object>(3);
-        if (null == state) {
-            throw new BaseException("状态不能为空");
-        }
-//        ResponseEntityWrapper responseEntityWrapper = authorityFeign.authority(appId, userId);
-//        Boolean results = JSONObject.parseObject(responseEntityWrapper.getData().toString(), Boolean.class);
-
-        Boolean results = true;
-        //判断是否为管理员
-        maps.put("admin", results);
         Page<NoticePageBody> page = new Page<>(pageNo, pageSize);
         Map<String, Object> map = new HashMap<>(4);
-        map.put("userId", userId);
-        List<NoticePageBody> noticePageBodyList = new ArrayList<>();
-        if (state == 0 || state == 1) {
-            map.put("state", state);
-            noticePageBodyList = noticeMapper.selectNoticePage(map, page);
-        }
-        if (results == true) {
-            int i = 2;
-            if (state == i) {
-                noticePageBodyList = noticeMapper.selectMangerNoticePage(map, page);
+        Map<String, Object> maps = new HashMap<String, Object>(3);
+        if (null == state) {
+            List<NoticePageBody> noticePageBodyList = noticeMapper.selectNoticePage(map,page);
+            page.setRecords(noticePageBodyList);
+            maps.put("page", page);
+            return maps;
+        } else {
+        ResponseEntityWrapper responseEntityWrapper = authorityFeign.authority(appId, userId);
+        Boolean results = JSONObject.parseObject(responseEntityWrapper.getData().toString(), Boolean.class);
+            //判断是否为管理员
+            maps.put("admin", results);
+            map.put("userId", userId);
+            List<NoticePageBody> noticePageBodyList = new ArrayList<>();
+            if (state == 0 || state == 1) {
+                map.put("state", state);
+                noticePageBodyList = noticeMapper.selectNoticePage(map, page);
             }
+            if (results == true) {
+                int i = 2;
+                if (state == i) {
+                    noticePageBodyList = noticeMapper.selectMangerNoticePage(map, page);
+                }
+            }
+            page.setRecords(noticePageBodyList);
+            maps.put("page", page);
+            return maps;
         }
-        page.setRecords(noticePageBodyList);
-        maps.put("page",page);
-        return maps;
     }
 
     /**

@@ -1,13 +1,17 @@
 package com.yunjing.approval.api;
 
+import com.yunjing.approval.param.DangParam;
+import com.yunjing.approval.processor.feign.DangFeign;
 import com.yunjing.approval.service.IApprovalApiService;
 import com.yunjing.approval.service.IApprovalService;
 import com.yunjing.approval.service.IApprovalUserService;
-import com.yunjing.approval.service.IModelItemService;
 import com.yunjing.mommon.base.BaseController;
 import com.yunjing.mommon.wrapper.ResponseEntityWrapper;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.web.bind.annotation.*;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.RestController;
 
 
 /**
@@ -22,13 +26,12 @@ public class ClientApprovalOperationController extends BaseController {
 
     @Autowired
     private IApprovalApiService approvalApiService;
-
-    @Autowired
-    private IModelItemService modelItemService;
     @Autowired
     private IApprovalUserService approvalUserService;
     @Autowired
     private IApprovalService approvalService;
+    @Autowired
+    private DangFeign dangFeign;
 
     @PostMapping("/get-member-list")
     public ResponseEntityWrapper getMember(@RequestParam("oid") String oid,
@@ -61,7 +64,7 @@ public class ClientApprovalOperationController extends BaseController {
     }
 
     /**
-     * 审批同意操作
+     * 审批处理操作
      *
      * @param oid        企业主键
      * @param uid        用户主键
@@ -71,33 +74,13 @@ public class ClientApprovalOperationController extends BaseController {
      * @return
      * @throws Exception
      */
-    @PostMapping("/agree")
-    public ResponseEntityWrapper agree(@RequestParam("oid") Long oid,
+    @PostMapping("/solve")
+    public ResponseEntityWrapper solve(@RequestParam("oid") Long oid,
                                        @RequestParam("uid") Long uid,
                                        @RequestParam("approvalId") Long approvalId,
                                        @RequestParam("state") Integer state,
                                        @RequestParam("remark") String remark) throws Exception {
-        return success(approvalApiService.agreeApproval(oid,uid,approvalId,state,remark));
-    }
-
-    /**
-     * 审批拒绝操作
-     *
-     * @param oid        企业主键
-     * @param uid        用户主键
-     * @param approvalId 审批主键
-     * @param state      审批状态
-     * @param remark     备注信息
-     * @return
-     * @throws Exception
-     */
-    @PostMapping("/refuse")
-    public ResponseEntityWrapper refuse(@RequestParam("oid") Long oid,
-                                        @RequestParam("uid") Long uid,
-                                        @RequestParam("approvalId") Long approvalId,
-                                        @RequestParam("state") Integer state,
-                                        @RequestParam("remark") String remark) throws Exception {
-        return success(approvalApiService.refuseApproval(oid,uid,approvalId,state,remark));
+        return success(approvalApiService.solveApproval(oid, uid, approvalId, state, remark));
     }
 
     /**
@@ -106,18 +89,14 @@ public class ClientApprovalOperationController extends BaseController {
      * @param oid        企业主键
      * @param uid        用户主键
      * @param approvalId 审批主键
-     * @param state      审批状态
-     * @param remark     备注信息
      * @return
      * @throws Exception
      */
     @PostMapping("/revoke")
     public ResponseEntityWrapper revoke(@RequestParam("oid") Long oid,
                                         @RequestParam("uid") Long uid,
-                                        @RequestParam("approvalId") Long approvalId,
-                                        @RequestParam("state") Integer state,
-                                        @RequestParam("remark") String remark) throws Exception {
-        return success(approvalApiService.revokeApproval(oid,uid,approvalId,state,remark));
+                                        @RequestParam("approvalId") Long approvalId) throws Exception {
+        return success(approvalApiService.revokeApproval(oid, uid, approvalId));
     }
 
     /**
@@ -126,7 +105,6 @@ public class ClientApprovalOperationController extends BaseController {
      * @param oid        企业主键
      * @param uid        用户主键
      * @param approvalId 审批主键
-     * @param state      审批状态
      * @param remark     备注信息
      * @return
      * @throws Exception
@@ -134,9 +112,25 @@ public class ClientApprovalOperationController extends BaseController {
     @PostMapping("/transfer")
     public ResponseEntityWrapper transfer(@RequestParam("oid") Long oid,
                                           @RequestParam("uid") Long uid,
+                                          @RequestParam("userId") Long userId,
                                           @RequestParam("approvalId") Long approvalId,
-                                          @RequestParam("state") Integer state,
                                           @RequestParam("remark") String remark) throws Exception {
-        return success(approvalApiService.transferApproval(oid,uid,approvalId,state,remark));
+        return success(approvalApiService.transferApproval(oid, uid, userId, approvalId, remark));
+    }
+
+    /**
+     * 审批发送dang提醒
+     *
+     * @param oid
+     * @param uid
+     * @param message
+     * @return
+     * @throws Exception
+     */
+    @PostMapping("/send-dang")
+    public ResponseEntityWrapper sendApprovalDang(@RequestParam("oid") String oid ,
+                                                  @RequestParam("uid") String uid,
+                                                  @RequestParam("message") String message) throws Exception {
+        return success();
     }
 }

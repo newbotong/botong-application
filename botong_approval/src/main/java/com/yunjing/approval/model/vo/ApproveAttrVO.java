@@ -4,6 +4,7 @@ import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 import com.baomidou.mybatisplus.toolkit.CollectionUtils;
 import com.yunjing.approval.model.entity.ApproveAttr;
+import com.yunjing.approval.util.ApproConstants;
 import lombok.Data;
 import org.apache.commons.lang.StringUtils;
 
@@ -21,34 +22,33 @@ public class ApproveAttrVO {
 
     }
 
-    public ApproveAttrVO(ApproveAttr attr) {
+    public ApproveAttrVO(ApproveAttributeVO attr) {
         String name = attr.getAttrLabel();
+
         String unit = attr.getAttrUnit();
 
         int type = attr.getAttrType();
 
-        if (type == 5) {
-            String custom = attr.getOptValue();
-            if (StringUtils.isNotBlank(custom)) {
-                this.name = attr.getOptValue();
-            } else {
-                this.name = "开始时间,结束时间";
-            }
+        // 类型是时间区间（开始时间和结束时间）的情况
+        if (type == ApproConstants.TIME_INTERVAL_TYPE_5) {
+            this.label = attr.getAttrLabel();
+            this.labels = attr.getAttrLabels();
         } else {
             if (StringUtils.isNotBlank(name)) {
                 if (StringUtils.isNotBlank(unit)) {
-                    this.name = name + "(" + unit + ")";
+                    this.label = name + "(" + unit + ")";
                 } else {
-                    this.name = name;
+                    this.label = name;
                 }
             } else {
-                this.name = attr.getAttrName();
+                this.label = attr.getAttrName();
             }
         }
 
         String value = attr.getAttrValue();
         if (StringUtils.isNotBlank(value)) {
-            if (type == 11) {
+            // 类型是附件的情况
+            if (type == ApproConstants.ENCLOSURE_TYPE_11) {
                 JSONArray jsonArray = JSONArray.parseArray(value);
                 if (jsonArray != null) {
                     int size = jsonArray.size();
@@ -66,7 +66,8 @@ public class ApproveAttrVO {
                         }
                     }
                 }
-            } else if (type == 12) {
+                // 类型是图片的情况
+            } else if (type == ApproConstants.PICTURE_TYPE_10) {
                 JSONArray jsonArray = JSONArray.parseArray(value);
                 if (jsonArray != null) {
                     int size = jsonArray.size();
@@ -84,6 +85,10 @@ public class ApproveAttrVO {
                         }
                     }
                 }
+            } else if (type == ApproConstants.TIME_INTERVAL_TYPE_5) {
+                String[] time = attr.getAttrValue().split(",");
+                this.value = time[0];
+                this.values = time[1];
             } else {
                 this.value = attr.getAttrValue();
             }
@@ -93,20 +98,22 @@ public class ApproveAttrVO {
         this.num = attr.getAttrNum();
     }
 
-    private String name;
+    private String label;
+    private String labels;
     private String value;
+    private String values;
     private Integer type;
     private Integer num;
-    private List<ApproveRowVO> details;
+    private List<ApproveRowVO> contents;
 
     /**
-     * type = 12 专用
+     * 图片（type = 10） 专用
      */
 
     private List<ImageVO> images = new ArrayList<>();
 
     /**
-     * type = 11 专用
+     * 附件（type = 11） 专用
      */
     private List<FileVO> files = new ArrayList<>();
 

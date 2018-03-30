@@ -4,7 +4,8 @@ IF EXISTS remind;
 CREATE TABLE `remind` (
   `id` bigint(20) NOT NULL COMMENT '主键',
   `member_id` bigint(20) NOT NULL COMMENT '用户所在企业成员id',
-  `remind_switch` smallint(1) DEFAULT '0' COMMENT '提醒开关（0-关闭，1-打开）',
+  `app_id` varchar(20) NOT NULL COMMENT '应用id',
+  `remind_switch` smallint(1) NOT NULL DEFAULT '0' COMMENT '提醒开关（0-关闭，1-打开）',
   `submit_type` smallint(1) NOT NULL COMMENT '提交类型周期（1每天 2 每周 3 每月 4 季度 5 年度）',
   `cycle` varchar(20) DEFAULT NULL COMMENT '提醒周期（日 01:30，周 1-7，月 7号，一次发送：2018-03-23）',
   `cycle_type` varchar(20) DEFAULT NULL COMMENT '周期类型（day:日 周：week 月：month 一次发送：once）',

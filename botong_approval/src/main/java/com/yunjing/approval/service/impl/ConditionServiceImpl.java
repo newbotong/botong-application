@@ -70,7 +70,7 @@ public class ConditionServiceImpl extends BaseServiceImpl<ConditionMapper, SetsC
         }
 
         Wrapper<SetsCondition> wrapper = new EntityWrapper<>();
-        wrapper.eq("model", modelId);
+        wrapper.eq("model_id", modelId);
         wrapper.orderBy(true, "enabled", false);
         wrapper.orderBy(true, "sort", true);
 

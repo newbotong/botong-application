@@ -19,7 +19,7 @@ public class SetsCondition extends BaseModel<SetsCondition> {
     /**
      * 模型主键
      */
-    @TableField("model")
+    @TableField("model_id")
     private Long modelId;
 
     /**
