@@ -72,7 +72,7 @@ public class ClientApprovalDetailVO {
     /**
      * 审批模型中输入详情
      */
-    private List<InputDetailDTO> inputDetailList;
+    private List<ApproveAttrVO> approveAttrVO;
 
     /**
      * 审批情况集合
