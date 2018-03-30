@@ -1,19 +1,14 @@
 package com.yunjing.notice.controller;
 
-import com.baomidou.mybatisplus.plugins.Page;
 import com.yunjing.mommon.base.BaseController;
 import com.yunjing.mommon.global.exception.BaseException;
 import com.yunjing.mommon.wrapper.ResponseEntityWrapper;
 import com.yunjing.notice.body.NoticeBody;
-import com.yunjing.notice.body.NoticeDetailBody;
 import com.yunjing.notice.body.NoticeDetailCBody;
-import com.yunjing.notice.body.NoticePageBody;
 import com.yunjing.notice.service.NoticeService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
-import java.util.ArrayList;
-import java.util.List;
 import java.util.Map;
 
 /**
