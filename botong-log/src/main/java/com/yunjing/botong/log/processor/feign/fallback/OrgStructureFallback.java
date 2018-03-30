@@ -20,4 +20,14 @@ public class OrgStructureFallback implements OrgStructureFeignClient {
     public ResponseEntityWrapper isManager(long memberId, String appId) {
         return ResponseEntityWrapper.error(StatusCode.HTTP_RESPONSE_ERROR);
     }
+
+    @Override
+    public ResponseEntityWrapper scope(long memberId, String appId) {
+        return ResponseEntityWrapper.error(StatusCode.HTTP_RESPONSE_ERROR);
+    }
+
+    @Override
+    public ResponseEntityWrapper findMemberInfo(String memberIds) {
+        return ResponseEntityWrapper.error(StatusCode.HTTP_RESPONSE_ERROR);
+    }
 }
