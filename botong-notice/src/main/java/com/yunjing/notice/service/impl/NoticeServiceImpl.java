@@ -6,6 +6,7 @@ import com.baomidou.mybatisplus.mapper.EntityWrapper;
 import com.baomidou.mybatisplus.plugins.Page;
 import com.baomidou.mybatisplus.service.impl.ServiceImpl;
 import com.yunjing.mommon.global.exception.BaseException;
+import com.yunjing.mommon.wrapper.ResponseEntityWrapper;
 import com.yunjing.notice.body.*;
 import com.yunjing.notice.common.NoticeConstant;
 import com.yunjing.notice.entity.NoticeEntity;
@@ -69,13 +70,6 @@ public class NoticeServiceImpl extends ServiceImpl<NoticeMapper, NoticeEntity> i
     @Override
     @Transactional(rollbackFor = Exception.class)
     public void insertNotice(NoticeBody noticeBody) throws BaseException {
-//        //查看该用户是否有发公告权限(等应用生成后提供)
-//        ResponseEntityWrapper responseEntityWrapper = authorityFeign.authority(appId, noticeBody.getIssueUserId());
-//        Boolean results = JSONObject.parseObject(responseEntityWrapper.getData().toString(), Boolean.class);
-//        //判断返回的结果是否为管理员，如果是管理员方可进入下一步
-//        if (results == false) {
-//            throw new BaseException("只有管理员才可以发公告");
-//        }w
         UserInfoEntity userInfoEntity = new UserInfoEntity().selectOne(new EntityWrapper<UserInfoEntity>().eq("id",noticeBody.getIssueUserId()).eq("logic_delete",NoticeConstant.LOGIC_DELETE_NOMAL));
         if (null == userInfoEntity) {
             UserInfoEntity userInfoEntity1 = new UserInfoEntity();
@@ -333,10 +327,8 @@ public class NoticeServiceImpl extends ServiceImpl<NoticeMapper, NoticeEntity> i
             maps.put("page", page);
             return maps;
         } else {
-//        ResponseEntityWrapper responseEntityWrapper = authorityFeign.authority(appId, userId);
-//        Boolean results = JSONObject.parseObject(responseEntityWrapper.getData().toString(), Boolean.class);
-            //后面需要删除
-            Boolean results = true;
+        ResponseEntityWrapper responseEntityWrapper = authorityFeign.authority(appId, userId);
+        Boolean results = JSONObject.parseObject(responseEntityWrapper.getData().toString(), Boolean.class);
             //判断是否为管理员
             maps.put("admin", results);
             map.put("userId", userId);
