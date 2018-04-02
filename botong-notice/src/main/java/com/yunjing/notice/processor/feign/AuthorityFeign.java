@@ -20,6 +20,6 @@ public interface AuthorityFeign {
      * @param memberId 企业成员编号
      * @return ResponseEntityWrapper
      */
-    @RequestMapping("/rpc/org/admin/isManager")
+    @RequestMapping("/rpc/org/admin/is-manager")
     ResponseEntityWrapper authority(@RequestParam("appId") String appId, @RequestParam("memberId") Long memberId);
 }
