@@ -1,30 +1,27 @@
-buildscript {
-	repositories {
-		mavenCentral()
-	}
-	dependencies {
-		classpath("org.springframework.boot:spring-boot-gradle-plugin:${springBootVersion}")
-	}
-}
 apply from: "../common_service.gradle"
-apply plugin: 'java'
-apply plugin: 'eclipse'
-apply plugin: 'org.springframework.boot'
-apply plugin: 'io.spring.dependency-management'
-
-group = 'com.yunjing.sign'
-version = '0.0.1-SNAPSHOT'
+group 'com.yunjing.botong'
+version '1.0-SNAPSHOT'
 sourceCompatibility = 1.8
 
 repositories {
 	mavenCentral()
 }
-
+apply plugin: 'org.springframework.boot'
 
 dependencies {
-	compile('com.yunjing.botong:commons:2.0.0-SNAPSHOT')
-	compile('com.yunjing.botong:commons-mybatisplus:2.0.0-SNAPSHOT')
-	compile('com.yunjing.botong:commons-redis:2.0.0-SNAPSHOT')
+	compile("cn.afterturn:easypoi-base:3.1.0")
+	compile("cn.afterturn:easypoi-web:3.1.0")
+	compile("cn.afterturn:easypoi-annotation:3.1.0")
+
+	compile('com.yunjing.botong:commons:2.0.0-SNAPSHOT'){
+		changing = true //实时更新jar包
+	}
+	compile('com.yunjing.botong:commons-mybatisplus:2.0.0-SNAPSHOT'){
+		changing = true //实时更新jar包
+	}
+	compile('com.yunjing.botong:commons-redis:2.0.0-SNAPSHOT'){
+		changing = true //实时更新jar包
+	}
 	compile('org.apache.poi:poi:3.14')
 	compile('org.apache.poi:poi-ooxml:3.14')
 	// 添加Spring cloud 配置中心服务支持
