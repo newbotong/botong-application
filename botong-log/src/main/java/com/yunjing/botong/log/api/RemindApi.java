@@ -38,11 +38,14 @@ public class RemindApi extends BaseController {
     }
 
     /**
+     * 查询设置信息
+     *
      * @param memberId 用户所有企业的成员id
+     * @param appId    应用id
      * @return
      */
     @RequestMapping(value = "/info", method = RequestMethod.GET)
-    public ResponseEntityWrapper info(long memberId) {
-        return success();
+    public ResponseEntityWrapper info(long memberId, String appId) {
+        return success(remindService.info(String.valueOf(memberId), appId));
     }
 }

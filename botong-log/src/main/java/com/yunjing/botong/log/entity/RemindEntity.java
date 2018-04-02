@@ -66,6 +66,12 @@ public class RemindEntity extends BaseModel<RemindEntity> {
     private Integer remindMode;
 
     /**
+     * 是否是管理员 0-不是，1-是
+     */
+    @TableField("is_manager")
+    private Integer isManager;
+
+    /**
      * 是否删除标识
      */
     @TableField("is_delete")

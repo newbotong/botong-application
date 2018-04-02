@@ -22,8 +22,8 @@ public class RabbitMQController {
     private RemindMessageProducer remindMessageProducer;
 
     @RequestMapping("/send")
-    public String send() {
-        Message message = Message.obtain("123123", System.currentTimeMillis(), "hello world!!!");
+    public String send(String what, String data) {
+        Message message = Message.obtain(what, System.currentTimeMillis(), data);
         remindMessageProducer.sendMessage(message);
         return "success";
     }
