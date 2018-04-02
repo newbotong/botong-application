@@ -4,7 +4,7 @@
 
     <!-- 通用查询映射结果 -->
     <resultMap id="BaseResultMap" type="com.yunjing.sign.beans.vo.SignUserInfoVO">
-        <result column="user_id" property="id" />
+        <result column="user_id" property="memberId" />
     </resultMap>
 
 

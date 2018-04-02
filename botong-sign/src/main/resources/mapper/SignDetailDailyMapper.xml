@@ -4,13 +4,13 @@
 
     <!-- 通用查询映射结果 -->
     <resultMap id="BaseResultMap" type="com.yunjing.sign.beans.vo.SignUserInfoVO">
-        <result column="user_id" property="id" />
+        <result column="user_id" property="memberId" />
     </resultMap>
 
 
     <select id="getCountInfo" resultMap="BaseResultMap">
         select de.user_id
-        from sign_config_daily de
+        from sign_detail_daily de
         where de.user_id in (${userIds}) and de.create_time >= #{startDate} and de.create_time <![CDATA[ < ]]> #{endDate}
     </select>
 

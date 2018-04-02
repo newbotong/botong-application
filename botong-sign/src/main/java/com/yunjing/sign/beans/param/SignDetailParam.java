@@ -1,5 +1,6 @@
 package com.yunjing.sign.beans.param;
 
+import com.yunjing.mommon.validate.annotation.NotNullOrEmpty;
 import com.yunjing.mommon.validate.annotation.Size;
 import lombok.Data;
 
