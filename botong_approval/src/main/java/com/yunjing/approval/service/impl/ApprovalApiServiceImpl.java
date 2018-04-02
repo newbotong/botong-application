@@ -23,7 +23,10 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 import java.util.stream.Collectors;
 
 /**
@@ -38,6 +41,8 @@ public class ApprovalApiServiceImpl implements IApprovalApiService {
     private IModelService modelService;
     @Autowired
     private IApprovalUserService approvalUserService;
+    @Autowired
+    private ApprovalUserMapper approvalUserMapper;
     @Autowired
     private ModelLMapper modelLMapper;
     @Autowired
@@ -74,19 +79,18 @@ public class ApprovalApiServiceImpl implements IApprovalApiService {
     @Transactional(propagation = Propagation.REQUIRED, rollbackFor = Exception.class)
     public Page<ClientApprovalVO> getWaited(Page page, Long orgId, Long userId, FilterParam filterParam) {
 
-        boolean flag = false;
         int current = page.getCurrentPage();
         int size = page.getPageSize();
         int index = (current - 1) * size;
         String deptId = filterParam.getDeptId();
-        List<ApprovalUser> approvalUsers = approvalUserService.selectList(Condition.create().like(true, "dept_id", deptId));
+        List<ApprovalUser> approvalUsers = approvalUserMapper.selectUser(deptId);
         List<Long> userIds = approvalUsers.stream().map(ApprovalUser::getId).collect(Collectors.toList());
         userIds.add(userId);
         Page<ClientApprovalVO> clientApprovalVOPage = new Page<>(current, size);
         List<ClientApprovalVO> clientApprovalVOS = new ArrayList<>();
         List<ApprovalContentDTO> waitedMeApprovalList = approvalProcessMapper.getWaitedMeApprovalList(index, size, orgId, userIds, filterParam);
         convertList(clientApprovalVOS, waitedMeApprovalList);
-        clientApprovalVOPage.build(clientApprovalVOS);
+        clientApprovalVOPage.build(clientApprovalVOS != null ? clientApprovalVOS : new ArrayList<>());
         clientApprovalVOPage.setTotalCount(clientApprovalVOS.size());
         return clientApprovalVOPage;
     }
@@ -94,22 +98,24 @@ public class ApprovalApiServiceImpl implements IApprovalApiService {
     @Override
     @Transactional(propagation = Propagation.REQUIRED, rollbackFor = Exception.class)
     public Page<ClientApprovalVO> getCompleted(Page page, Long orgId, Long userId, FilterParam filterParam) {
-        boolean flag = false;
         int current = page.getCurrentPage();
         int size = page.getPageSize();
         int index = (current - 1) * size;
+        String deptId = filterParam.getDeptId();
+        List<ApprovalUser> approvalUsers = approvalUserMapper.selectUser(deptId);
+        List<Long> userIds = approvalUsers.stream().map(ApprovalUser::getId).collect(Collectors.toList());
+        userIds.add(userId);
         Page<ClientApprovalVO> clientApprovalVOPage = new Page<>(current, size);
         List<ClientApprovalVO> clientApprovalVOS = new ArrayList<>();
-        List<ApprovalContentDTO> completedMeApprovalList = approvalProcessMapper.getCompletedApprovalList(index, size, orgId, userId, filterParam);
+        List<ApprovalContentDTO> completedMeApprovalList = approvalProcessMapper.getCompletedApprovalList(index, size, orgId, userIds, filterParam);
         convertList(clientApprovalVOS, completedMeApprovalList);
-        clientApprovalVOPage.build(clientApprovalVOS);
+        clientApprovalVOPage.build(clientApprovalVOS != null ? clientApprovalVOS : new ArrayList<>());
         clientApprovalVOPage.setTotalCount(clientApprovalVOS.size());
         return clientApprovalVOPage;
     }
 
     @Override
     public Page<ClientApprovalVO> getLaunched(Page page, Long orgId, Long userId, FilterParam filterParam) {
-        boolean flag = false;
         int current = page.getCurrentPage();
         int size = page.getPageSize();
         int index = (current - 1) * size;
@@ -149,14 +155,13 @@ public class ApprovalApiServiceImpl implements IApprovalApiService {
             contentVO.setMessage(message);
         }
         convertList(clientApprovalVOS, launchedMeApprovalList);
-        clientApprovalVOPage.build(clientApprovalVOS);
+        clientApprovalVOPage.build(clientApprovalVOS != null ? clientApprovalVOS : new ArrayList<>());
         clientApprovalVOPage.setTotalCount(clientApprovalVOS.size());
         return clientApprovalVOPage;
     }
 
     @Override
     public Page<ClientApprovalVO> getCopied(Page page, Long orgId, Long userId, FilterParam filterParam) {
-        boolean flag = false;
         int current = page.getCurrentPage();
         int size = page.getPageSize();
         int index = (current - 1) * size;
@@ -164,7 +169,7 @@ public class ApprovalApiServiceImpl implements IApprovalApiService {
         List<ClientApprovalVO> clientApprovalVOS = new ArrayList<>();
         List<ApprovalContentDTO> copyApprovalList = copysMapper.getCopiedApprovalList(index, size, orgId, userId, filterParam);
         convertList(clientApprovalVOS, copyApprovalList);
-        clientApprovalVOPage.build(clientApprovalVOS);
+        clientApprovalVOPage.build(clientApprovalVOS != null ? clientApprovalVOS : new ArrayList<>());
         clientApprovalVOPage.setTotalCount(clientApprovalVOS.size());
         return clientApprovalVOPage;
     }
@@ -395,6 +400,7 @@ public class ApprovalApiServiceImpl implements IApprovalApiService {
             if (users != null && !users.isEmpty()) {
                 ApprovalUser user = users.get(0);
                 contentDTO.setUserNick(user.getName());
+                contentDTO.setUserAvatar(user.getAvatar());
                 if (StringUtils.isBlank(contentDTO.getUserAvatar())) {
                     contentDTO.setColor(Colors.generateBeautifulColor(StringUtils.isNotBlank(user.getMobile()) ? user.getMobile() : "", StringUtils.isNotBlank(user.getName()) ? user.getName() : ""));
                 }
