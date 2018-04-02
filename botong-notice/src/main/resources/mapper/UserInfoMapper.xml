@@ -4,7 +4,7 @@
 <mapper namespace="com.yunjing.notice.mapper.UserInfoMapper">
     <select id="selectUserIds" resultType="java.lang.Long">
         SELECT u.id
-        FROM userInfo u
+        FROM user_info u
         WHERE
         u.logic_delete = 0
     </select>
@@ -16,7 +16,7 @@
     </resultMap>
     <select id="selectUser" resultMap="userInfo" parameterType="java.util.Map">
         SELECT u.id,u.img,u.name
-        FROM userInfo u
+        FROM user_info u
         WHERE
         u.logic_delete = 0 AND
         u.id IN

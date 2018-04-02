@@ -10,7 +10,7 @@ import lombok.Data;
  * @date 2018/3/22 14:02
  */
 @Data
-@TableName("userInfo")
+@TableName("user_info")
 public class UserInfoEntity extends BaseModel<UserInfoEntity> {
     /**
      * 用户头像地址

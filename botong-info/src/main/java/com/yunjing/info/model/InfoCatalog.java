@@ -45,4 +45,10 @@ public class InfoCatalog extends BaseModel<InfoCatalog> {
      */
     @TableField("is_delete")
     private Integer isDelete;
+
+    /**
+     * 是否显示0：否，1：是
+     */
+    @TableField("whether_show")
+    private Integer whetherShow;
 }

@@ -38,7 +38,7 @@ CREATE TABLE `notice_user` (
 DROP TABLE
 IF EXISTS userInfo;
 
-CREATE TABLE `userInfo` (
+CREATE TABLE `user_info` (
   `id` bigint(22) NOT NULL COMMENT '用户id',
   `img` varchar(255) DEFAULT NULL COMMENT '用户头像地址',
   `name` varchar(32) DEFAULT NULL COMMENT '用户名称',
