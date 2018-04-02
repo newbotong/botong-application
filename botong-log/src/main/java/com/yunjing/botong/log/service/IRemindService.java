@@ -22,4 +22,14 @@ public interface IRemindService extends IBaseService<RemindEntity> {
      * @return
      */
     boolean saveOrUpdate(RemindVo remind);
+
+
+    /**
+     * 查询设置信息
+     *
+     * @param memberId
+     * @param appId
+     * @return
+     */
+    RemindVo info(String memberId, String appId);
 }

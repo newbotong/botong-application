@@ -43,7 +43,6 @@ public class RemindVo {
     /**
      * 提醒周期（日 01:30，周 1-7，月 7号，一次发送：2018-03-23）
      */
-    @NotNullOrEmpty
     private String cycle;
 
     /**
@@ -63,4 +62,10 @@ public class RemindVo {
      */
     @Size(min = 0, max = 2, message = "提醒方式类型错误")
     private Integer remindMode;
+
+    /**
+     * 是否是管理员 0-不是，1-是
+     */
+    @Size(min = 0, max = 1, message = "请设置管理员类型")
+    private Integer isManager;
 }

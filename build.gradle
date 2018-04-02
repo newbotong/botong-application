@@ -45,6 +45,9 @@ subprojects {
         compile("ch.qos.logback:logback-classic:1.2.3")
         compile("org.slf4j:slf4j-api:1.7.12")
 
+        //dozer object copy
+        compile group: 'net.sf.dozer', name: 'dozer', version: '5.5.1'
+
         //添加Spring web 支持
         compile("org.springframework.boot:spring-boot-starter-web:${springBootVersion}")
 

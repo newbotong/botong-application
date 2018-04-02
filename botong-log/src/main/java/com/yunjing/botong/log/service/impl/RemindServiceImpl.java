@@ -10,8 +10,10 @@ import com.yunjing.botong.log.entity.RemindEntity;
 import com.yunjing.botong.log.mapper.RemindMapper;
 import com.yunjing.botong.log.processor.feign.handle.SchedulerFeignClient;
 import com.yunjing.botong.log.processor.feign.param.SchedulerParam;
+import com.yunjing.botong.log.processor.mq.configuration.RemindMessageConfiguration;
 import com.yunjing.botong.log.service.IRemindService;
 import com.yunjing.botong.log.vo.RemindVo;
+import com.yunjing.mommon.constant.StatusCode;
 import com.yunjing.mommon.global.exception.ParameterErrorException;
 import com.yunjing.mommon.global.exception.RequestFailureException;
 import com.yunjing.mommon.utils.BeanUtils;
@@ -85,6 +87,11 @@ public class RemindServiceImpl extends BaseServiceImpl<RemindMapper, RemindEntit
         return flag;
     }
 
+    @Override
+    public RemindVo info(String memberId, String appId) {
+        return JSON.parseObject(redisTemplate.opsForHash().get(LogConstant.LOG_SET_REMIND + appId, memberId).toString(), RemindVo.class);
+    }
+
     /**
      * 添加到任务队列
      *
@@ -92,18 +99,19 @@ public class RemindServiceImpl extends BaseServiceImpl<RemindMapper, RemindEntit
      * @param value
      * @param remind
      */
-    private boolean task(String key, String value, RemindVo remind) {
+    private void task(String key, String value, RemindVo remind) {
         SchedulerParam param = new SchedulerParam();
         param.setCycle(remind.getCycle());
         param.setCycleType(remind.getCycleType());
         param.setOutKey(key);
-        param.setRecord(value);
-        param.setRemark("remark");
+        param.setRecord(remind.getAppId());
+        param.setRemark(value);
         param.setJobTime(remind.getJobTime());
-        param.setJobTitle(key);
 
-        String s = JSON.toJSONString(param);
-        log.info(s);
+        // topic
+        param.setJobTitle(RemindMessageConfiguration.REMIND_QUEUE_NAME);
+
+        log.info("任务调度参数:{}", JSON.toJSONString(param));
 
         ResponseEntityWrapper response;
         if (remind.getRemindSwitch() == 0) {
@@ -114,8 +122,9 @@ public class RemindServiceImpl extends BaseServiceImpl<RemindMapper, RemindEntit
             throw new ParameterErrorException("参数错误!");
         }
 
-        log.warn("response:{}", JSON.toJSONString(response));
-
-        return false;
+        log.info("设置任务结果:{}", JSON.toJSONString(response));
+        if (StatusCode.SUCCESS.getStatusCode() != response.getStatusCode()) {
+            throw new RequestFailureException(response.getStatusCode(), response.getStatusMessage());
+        }
     }
 }
