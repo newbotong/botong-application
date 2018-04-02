@@ -130,8 +130,6 @@ public class ApprovalPushTask extends BaseTask {
                 if (approval.getResult() == null) {
                     for (ApprovalUserVO approvalUserVO : approvalProcessSet) {
                         PushLog pushLog = new PushLog();
-                        // 判断用户是否在平台登陆过
-                        if (approvalUserVO.getIsActivated() == 1) {
                             if (approvalUserVO.getProcessState() == 0) {
                                 phones[0] = approvalUserVO.getMobile();
                                 pushLog.setDatatype(30);
@@ -153,9 +151,9 @@ public class ApprovalPushTask extends BaseTask {
                                 pushParam.setNotificationTitle(message);
                                 // 推送审批
                                 pushFeign.pushAllTargetByUser(pushParam);
+
                                 break;
                             }
-                        }
                     }
                 } else {
 

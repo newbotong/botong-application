@@ -24,6 +24,12 @@ public class ApprovalUser extends BaseModel<ApprovalUser>{
     private String name;
 
     /**
+     * 企业主键
+     */
+    @TableField("org_id")
+    private Long orgId;
+
+    /**
      * 用户头像
      */
     @TableField("avatar")
@@ -52,12 +58,6 @@ public class ApprovalUser extends BaseModel<ApprovalUser>{
      */
     @TableField("position")
     private String position;
-
-    /**
-     * 是否激活
-     */
-    @TableField("is_activated")
-    private Integer isActivated;
 
     /**
      * 是否删除 0：未删除；1：已删除

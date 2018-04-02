@@ -34,11 +34,6 @@ public class ApprovalUserVO {
     private String avatarName;
 
     /**
-     * 是否激活
-     */
-    private Integer isActivated;
-
-    /**
      * 审批状态
      */
     private Integer state;

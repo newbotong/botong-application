@@ -32,6 +32,11 @@ public class FilterParam {
     private Long time;
 
     /**
+     * 部门主键
+     */
+    private String deptId;
+
+    /**
      * 搜索关键字
      */
     private String searchKey;

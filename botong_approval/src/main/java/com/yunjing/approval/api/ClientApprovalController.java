@@ -63,7 +63,7 @@ public class ClientApprovalController extends BaseController {
      * @param filterParam 搜索参数
      * @return
      */
-    @GetMapping("/waited-approval")
+    @PostMapping("/waited-approval")
     public ResponseEntityWrapper waitedApproval(@ModelAttribute(value = "page") Page page,
                                                 @RequestParam("oid") Long oid,
                                                 @RequestParam("uid") Long uid,
@@ -81,7 +81,7 @@ public class ClientApprovalController extends BaseController {
      * @param filterParam 搜索参数
      * @return
      */
-    @GetMapping("/completed-approval")
+    @PostMapping("/completed-approval")
     public ResponseEntityWrapper completedApproval(@ModelAttribute(value = "page") Page page,
                                                    @RequestParam("oid") Long oid,
                                                    @RequestParam("uid") Long uid,
@@ -98,7 +98,7 @@ public class ClientApprovalController extends BaseController {
      * @param filterParam 搜索参数
      * @return
      */
-    @GetMapping("/launched-approval")
+    @PostMapping("/launched-approval")
     public ResponseEntityWrapper launchedApproval(@ModelAttribute(value = "page") Page page,
                                                   @RequestParam("oid") Long oid,
                                                   @RequestParam("uid") Long uid,
@@ -116,7 +116,7 @@ public class ClientApprovalController extends BaseController {
      * @param filterParam 搜索参数
      * @return
      */
-    @GetMapping("/copied-approval")
+    @PostMapping("/copied-approval")
     public ResponseEntityWrapper copiedApproval(@ModelAttribute(value = "page") Page page,
                                                 @RequestParam("oid") Long oid,
                                                 @RequestParam("uid") Long uid,
@@ -133,7 +133,7 @@ public class ClientApprovalController extends BaseController {
      * @param approvalId 审批主键
      * @return
      */
-    @GetMapping("/approval-detail")
+    @PostMapping("/approval-detail")
     public ResponseEntityWrapper approvalDetail(@RequestParam("oid") Long oid,
                                                 @RequestParam("uid") Long uid,
                                                 @RequestParam("approvalId") Long approvalId) {

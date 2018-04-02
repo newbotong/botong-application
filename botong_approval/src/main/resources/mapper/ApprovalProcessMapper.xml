@@ -19,22 +19,16 @@
         <where>
             ap. approval_id = a.id AND m.id = a.model_id AND ap.process_state = 0
             <if test="userId != null and userId != ''">
-                and ap.user_id = #{userId}
+                AND ap.user_id IN
+                <foreach collection="userIds" item="userId" index="index"
+                         open="(" separator="," close=")">#{userId}
+                </foreach>
             </if>
             <if test="orgId != null and orgId != ''">
                 and a.org_id = #{orgId}
             </if>
             <if test="filterParam.state != null">
                 and a.state = #{filterParam.state}
-            </if>
-            <if test="filterParam.result != null">
-                and a.result = #{filterParam.result}
-            </if>
-            <if test="filterParam.modelId != null">
-                and a.model_id = #{filterParam.modelId}
-            </if>
-            <if test="filterParam.time != null">
-                and (DATE_FORMAT(a.create_time, '%Y-%m-%d') = #{filterParam.time} )
             </if>
             <if test="filterParam.searchKey != null and filterParam.searchKey != ''">
                 and concat(a.id,a.title,ap.reason) like CONCAT('%',#{filterParam.searchKey},'%')
@@ -105,10 +99,9 @@
         <result column="process_time" property="approvalTime"/>
         <result column="reason" property="content"/>
         <result column="id" property="userId"/>
-        <result column="is_activated" property="isActivated"/>
     </resultMap>
     <select id="getApprovalUserList" resultMap="ApprovalUserMap">
-        SELECT ap.approval_id, ap.user_id, ap.process_state, ap.seq, ap.process_time,ap.reason, au.id,au.name,au.avatar,au.mobile,au.is_activated
+        SELECT ap.approval_id, ap.user_id, ap.process_state, ap.seq, ap.process_time,ap.reason, au.id,au.name,au.avatar,au.mobile
         FROM approval_process ap
         LEFT JOIN approval_user au ON ap.user_id = au.id
         WHERE ap.approval_id = #{approvalId}

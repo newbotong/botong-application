@@ -1,6 +1,5 @@
 package com.yunjing.approval.model.vo;
 
-import com.yunjing.approval.model.dto.InputDetailDTO;
 import lombok.Data;
 
 import java.util.List;

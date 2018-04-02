@@ -17,6 +17,7 @@ import com.yunjing.approval.model.entity.*;
 import com.yunjing.approval.model.vo.*;
 import com.yunjing.approval.processor.task.async.ApprovalPushTask;
 import com.yunjing.approval.service.*;
+import com.yunjing.approval.util.ApproConstants;
 import com.yunjing.approval.util.DateUtil;
 import com.yunjing.approval.util.EmojiFilterUtils;
 import com.yunjing.mommon.global.exception.BaseException;
@@ -114,6 +115,7 @@ public class ApprovalServiceImpl extends BaseServiceImpl<ApprovalMapper, Approva
             throw new InsertMessageFailureException("保存审批信息失败");
         }
         Set<ApprovalAttr> attrSet = new HashSet<>();
+        Set<ApprovalAttr> contentSet = new HashSet<>();
         // 解析并保存审批信息
         JSONArray jsonArray = JSON.parseArray(jsonData);
         Iterator<Object> it = jsonArray.iterator();
@@ -129,10 +131,12 @@ public class ApprovalServiceImpl extends BaseServiceImpl<ApprovalMapper, Approva
             String value;
             String values;
             // 类型是10-图片, 11-附件的情况
-            if (type == 10 || type == 11) {
+            if (type == ApproConstants.PICTURE_TYPE_10 || type == ApproConstants.ENCLOSURE_TYPE_11) {
                 JSONArray array = obj.getJSONArray("value");
-                value = array.toJSONString();
-                attr.setAttrValue(EmojiFilterUtils.filterEmoji(value));
+                if (array != null && array.size() > 0) {
+                    value = array.toJSONString();
+                    attr.setAttrValue(EmojiFilterUtils.filterEmoji(value));
+                }
             } else {
                 value = obj.getString("value");
                 values = obj.getString("values");
@@ -141,52 +145,66 @@ public class ApprovalServiceImpl extends BaseServiceImpl<ApprovalMapper, Approva
                 } else {
                     attr.setAttrValue(EmojiFilterUtils.filterEmoji(value));
                 }
-                if (type == 7) {
+                if (type == ApproConstants.DETAILED_TYPE_7) {
                     // 明细类型
                     JSONArray array = obj.getJSONArray("content");
-                    Iterator<Object> details = array.iterator();
-                    Set<ApprovalAttr> attrs = new HashSet<>();
-                    while (details.hasNext()) {
-                        ApprovalAttr entity = new ApprovalAttr();
-                        entity.setId(IDUtils.getID());
-                        entity.setApprovalId(approval.getId());
-                        entity.setAttrParent(attr.getId());
-                        JSONObject detail = (JSONObject) details.next();
+                    Iterator<Object> content = array.iterator();
+                    while (content.hasNext()){
 
-                        int detailType = detail.getIntValue("type");
-                        String detailName = detail.getString("field");
-                        entity.setAttrName(detailName);
-                        entity.setAttrType(detailType);
-                        String detailValue;
-                        String detailValues = "";
-                        // 明细中类型是10-图片, 11-附件的情况
-                        if (detailType == 10 || detailType == 11) {
-                            JSONArray detailArray = detail.getJSONArray("value");
-                            detailValue = detailArray.toJSONString();
-                        } else {
-                            detailValue = detail.getString("value");
-                            detailValues = detail.getString("values");
+                        ApprovalAttr attr1 = new ApprovalAttr();
+                        attr1.setId(IDUtils.getID());
+                        attr1.setApprovalId(approval.getId());
+                        JSONObject contents = (JSONObject) content.next();
+                        JSONArray array1 = contents.getJSONArray("modelItems");
+                        int types = contents.getIntValue("type");
+                        String field = contents.getString("field");
+                        attr1.setAttrType(types);
+                        attr1.setAttrName(field);
+                        contentSet.add(attr1);
+                        Iterator<Object> modelItems = array1.iterator();
+                        Set<ApprovalAttr> attrs = new HashSet<>();
+                        while (modelItems.hasNext()) {
+                            ApprovalAttr entity = new ApprovalAttr();
+                            entity.setId(IDUtils.getID());
+                            entity.setApprovalId(approval.getId());
+                            entity.setAttrParent(attr1.getId());
+                            JSONObject detail = (JSONObject) modelItems.next();
+
+                            int detailType = detail.getIntValue("type");
+                            String detailName = detail.getString("field");
+                            entity.setAttrName(detailName);
+                            entity.setAttrType(detailType);
+                            String detailValue = "";
+                            String detailValues = "";
+                            // 明细中类型是10-图片, 11-附件的情况
+                            if (detailType == ApproConstants.PICTURE_TYPE_10 || detailType == ApproConstants.ENCLOSURE_TYPE_11) {
+                                JSONArray detailArray = detail.getJSONArray("value");
+                                detailValue = detailArray.toJSONString();
+                                entity.setAttrValue(EmojiFilterUtils.filterEmoji(detailValue));
+                            } else if (detailType == ApproConstants.TIME_INTERVAL_TYPE_5){
+                                detailValue = detail.getString("value");
+                                detailValues = detail.getString("values");
+                                entity.setAttrValue(EmojiFilterUtils.filterEmoji(detailValue) + "," + detailValues);
+                            }else {
+                                entity.setAttrValue(EmojiFilterUtils.filterEmoji(detailValue));
+                            }
+
+                            int detailNum = detail.getIntValue("num");
+                            entity.setAttrNum(detailNum);
+
+                            attrs.add(entity);
                         }
-                        if (StringUtils.isNotBlank(String.valueOf(detailValues))) {
-                            entity.setAttrValue(EmojiFilterUtils.filterEmoji(detailValue) + "," + detailValues);
-                        } else {
-                            entity.setAttrValue(EmojiFilterUtils.filterEmoji(detailValue));
+                        List<ApprovalAttr> attrList = new ArrayList<>(attrs);
+                        boolean b = approvalAttrService.insertBatch(attrList);
+                        if (!b) {
+                            throw new InsertMessageFailureException("批量插入审批明细数据失败");
                         }
-
-                        int detailNum = detail.getIntValue("num");
-                        entity.setAttrNum(detailNum);
-
-                        attrs.add(entity);
-                    }
-                    List<ApprovalAttr> attrList = new ArrayList<>(attrs);
-                    boolean b = approvalAttrService.insertBatch(attrList);
-                    if (!b) {
-                        throw new InsertMessageFailureException("批量插入审批明细数据失败");
                     }
                 }
             }
             attrSet.add(attr);
         }
+        attrSet.addAll(contentSet);
         List<ApprovalAttr> attrsList = new ArrayList<>(attrSet);
         boolean isInserted = approvalAttrService.insertBatch(attrsList);
         if (!isInserted) {

@@ -23,10 +23,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.stream.Collectors;
 
 /**
@@ -76,13 +73,18 @@ public class ApprovalApiServiceImpl implements IApprovalApiService {
     @Override
     @Transactional(propagation = Propagation.REQUIRED, rollbackFor = Exception.class)
     public Page<ClientApprovalVO> getWaited(Page page, Long orgId, Long userId, FilterParam filterParam) {
+
         boolean flag = false;
         int current = page.getCurrentPage();
         int size = page.getPageSize();
         int index = (current - 1) * size;
+        String deptId = filterParam.getDeptId();
+        List<ApprovalUser> approvalUsers = approvalUserService.selectList(Condition.create().like(true, "dept_id", deptId));
+        List<Long> userIds = approvalUsers.stream().map(ApprovalUser::getId).collect(Collectors.toList());
+        userIds.add(userId);
         Page<ClientApprovalVO> clientApprovalVOPage = new Page<>(current, size);
         List<ClientApprovalVO> clientApprovalVOS = new ArrayList<>();
-        List<ApprovalContentDTO> waitedMeApprovalList = approvalProcessMapper.getWaitedMeApprovalList(index, size, orgId, userId, filterParam);
+        List<ApprovalContentDTO> waitedMeApprovalList = approvalProcessMapper.getWaitedMeApprovalList(index, size, orgId, userIds, filterParam);
         convertList(clientApprovalVOS, waitedMeApprovalList);
         clientApprovalVOPage.build(clientApprovalVOS);
         clientApprovalVOPage.setTotalCount(clientApprovalVOS.size());
@@ -169,7 +171,6 @@ public class ApprovalApiServiceImpl implements IApprovalApiService {
 
     @Override
     public ClientApprovalDetailVO getApprovalDetail(Long orgId, Long userId, Long approvalId) {
-//        List<ApprovalDetailDTO> approvalDetail = approvalMapper.getApprovalDetail(approvalId);
         ClientApprovalDetailVO clientApprovalDetailVO = new ClientApprovalDetailVO();
         // 获取审批详情
         List<ApproveAttrVO> detail = getDetail(approvalId);
@@ -389,16 +390,18 @@ public class ApprovalApiServiceImpl implements IApprovalApiService {
     private void convertList(List<ClientApprovalVO> clientApprovalVOS, List<ApprovalContentDTO> approvalList) {
         // 获取所有用户
         List<ApprovalUser> userList = approvalUserService.selectList(Condition.create());
-        approvalList.forEach(contentVO -> {
-            if (StringUtils.isBlank(contentVO.getUserAvatar())) {
-                List<ApprovalUser> users = userList.stream().filter(approvalUser -> approvalUser.getId().equals(contentVO.getUserId())).collect(Collectors.toList());
-                for (ApprovalUser user : users) {
-                    contentVO.setColor(Colors.generateBeautifulColor(StringUtils.isNotBlank(user.getMobile()) ? user.getMobile() : "", StringUtils.isNotBlank(user.getName()) ? user.getName() : ""));
+        for (ApprovalContentDTO contentDTO : approvalList) {
+            List<ApprovalUser> users = userList.stream().filter(approvalUser -> approvalUser.getId().equals(contentDTO.getUserId())).collect(Collectors.toList());
+            if (users != null && !users.isEmpty()) {
+                ApprovalUser user = users.get(0);
+                contentDTO.setUserNick(user.getName());
+                if (StringUtils.isBlank(contentDTO.getUserAvatar())) {
+                    contentDTO.setColor(Colors.generateBeautifulColor(StringUtils.isNotBlank(user.getMobile()) ? user.getMobile() : "", StringUtils.isNotBlank(user.getName()) ? user.getName() : ""));
                 }
             }
-            ClientApprovalVO clientApprovalVO = new ClientApprovalVO(contentVO);
+            ClientApprovalVO clientApprovalVO = new ClientApprovalVO(contentDTO);
             clientApprovalVOS.add(clientApprovalVO);
-        });
+        }
     }
 
     private List<ApproveAttrVO> getDetail(Long approvalId) {

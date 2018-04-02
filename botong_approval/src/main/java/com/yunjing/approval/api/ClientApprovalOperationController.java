@@ -1,6 +1,5 @@
 package com.yunjing.approval.api;
 
-import com.yunjing.approval.param.DangParam;
 import com.yunjing.approval.processor.feign.DangFeign;
 import com.yunjing.approval.service.IApprovalApiService;
 import com.yunjing.approval.service.IApprovalService;
@@ -128,7 +127,7 @@ public class ClientApprovalOperationController extends BaseController {
      * @throws Exception
      */
     @PostMapping("/send-dang")
-    public ResponseEntityWrapper sendApprovalDang(@RequestParam("oid") String oid ,
+    public ResponseEntityWrapper sendApprovalDang(@RequestParam("oid") String oid,
                                                   @RequestParam("uid") String uid,
                                                   @RequestParam("message") String message) throws Exception {
         return success();

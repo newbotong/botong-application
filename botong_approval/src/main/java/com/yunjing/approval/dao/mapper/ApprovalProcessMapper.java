@@ -21,12 +21,12 @@ public interface ApprovalProcessMapper extends IBaseMapper<ApprovalProcess> {
      * @param index       当前页
      * @param pageSize    每页显示条数
      * @param orgId       企业主键
-     * @param userId      用户主键
+     * @param userIds      用户主键
      * @param filterParam 搜索参数
      * @return
      */
     List<ApprovalContentDTO> getWaitedMeApprovalList(@Param("index") Integer index, @Param("size") Integer pageSize, @Param("orgId") Long orgId,
-                                                     @Param("userId") Long userId, @Param("filterParam") FilterParam filterParam);
+                                                     @Param("userId") List<Long> userIds, @Param("filterParam") FilterParam filterParam);
 
     /**
      * 查询-已审批
