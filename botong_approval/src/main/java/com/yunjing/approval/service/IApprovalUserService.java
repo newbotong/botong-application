@@ -5,6 +5,8 @@ import com.common.mybatis.service.IBaseService;
 import com.yunjing.approval.model.entity.ApprovalUser;
 import com.yunjing.mommon.global.exception.BaseException;
 
+import java.util.List;
+
 /**
  * @author 刘小鹏
  * @date 2018/03/26
@@ -20,5 +22,7 @@ public interface IApprovalUserService extends IBaseService<ApprovalUser> {
      * @throws BaseException
      */
     boolean addUser(String orgId,String userId) throws BaseException;
+
+
 
 }
