@@ -3,6 +3,7 @@ package com.yunjing.botong.log.api;
 import com.yunjing.botong.log.params.LogTemplateParam;
 import com.yunjing.botong.log.service.LogTemplateService;
 import com.yunjing.botong.log.vo.LogTemplateItem;
+import com.yunjing.mommon.base.BaseController;
 import com.yunjing.mommon.wrapper.PageWrapper;
 import com.yunjing.mommon.wrapper.ResponseEntityWrapper;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -14,14 +15,15 @@ import org.springframework.web.bind.annotation.*;
  */
 @RestController
 @RequestMapping("/log/template")
-public class LogTemplateApi {
+public class LogTemplateApi extends BaseController{
 
     @Autowired
     private LogTemplateService logTemplateService;
 
     @RequestMapping(value = "/add",method = RequestMethod.POST)
     public ResponseEntityWrapper<String> createLogTemplate(@RequestBody LogTemplateParam logTemplateParam){
-        return null;
+
+        return this.success(this.logTemplateService.createLogTemplate(logTemplateParam));
     }
 
     @RequestMapping(value = "/queryAll",method = RequestMethod.POST)
