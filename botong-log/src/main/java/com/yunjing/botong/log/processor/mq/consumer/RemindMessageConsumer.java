@@ -90,6 +90,12 @@ public class RemindMessageConsumer extends AbstractMessageConsumerWithQueueDecla
 
     @Override
     public void onMessageReceive(@Payload Message message) {
+
+        // TODO 临时开关
+        if (true) {
+            return;
+        }
+
         log.info("接收任务调度参数:{}", JSON.toJSONString(message));
         String memberId = message.getWhat();
 
