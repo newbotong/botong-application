@@ -3,7 +3,7 @@ package com.yunjing.botong.log.constant;
 import java.io.Serializable;
 
 /**
- * 签到中常量
+ * 日志常量
  * @version 1.0.0
  * @author: jingwj
  * @date 2018/3/28 17:07
@@ -20,5 +20,6 @@ public class LogConstant implements Serializable {
 
     public final static String  CODE_SCCUESS = "200";
 
+    public final static String  BOTONG_ORG_MEMBER = "botong:org:member";
 
 }
