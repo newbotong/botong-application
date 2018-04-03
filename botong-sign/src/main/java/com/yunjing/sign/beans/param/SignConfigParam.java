@@ -47,4 +47,14 @@ public class SignConfigParam {
      */
     private String endTime;
 
+    /**
+     * 经度
+     */
+    private String lng;
+
+    /**
+     * 维度
+     */
+    private String lat;
+
 }
