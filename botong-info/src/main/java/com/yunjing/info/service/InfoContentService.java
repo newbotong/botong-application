@@ -7,8 +7,11 @@ import com.yunjing.info.dto.InfoDTO;
 import com.yunjing.info.model.InfoContent;
 import com.yunjing.info.param.InfoCategoryParam;
 import com.yunjing.mommon.global.exception.BaseException;
+import org.springframework.web.bind.annotation.RequestParam;
 
 /**
+ * 资讯内容接口
+ *
  * @author 李双喜
  * @date 2018/3/30 15:39
  */
@@ -44,10 +47,12 @@ public interface InfoContentService extends IService<InfoContent> {
     /**
      * 模糊查询资讯
      *
-     * @param orgId 公司id
-     * @param title 标题
+     * @param orgId    企业
+     * @param title    标题
+     * @param pageNo   当前页码
+     * @param pageSize 每页显示条数
      * @return
      * @throws BaseException
      */
-    Page<InfoDTO> searchPage(Long orgId,String title) throws BaseException;
+    Page<InfoDTO> searchPage(Long orgId, String title, Integer pageNo, Integer pageSize) throws BaseException;
 }

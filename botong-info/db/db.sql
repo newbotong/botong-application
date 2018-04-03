@@ -34,3 +34,12 @@ CREATE TABLE `info_content` (
   PRIMARY KEY (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci COMMENT='资讯内容';
 
+DROP TABLE
+IF EXISTS info_dictionary;
+CREATE TABLE `info_dictionary` (
+  `id` bigint(22) NOT NULL COMMENT '资讯字典id',
+  `name` varchar(20) CHARACTER SET utf8mb4 DEFAULT NULL COMMENT '资讯字典名称',
+  PRIMARY KEY (`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_bin;
+
+

@@ -8,12 +8,15 @@ import com.yunjing.mommon.global.exception.BaseException;
 import java.util.Map;
 
 /**
+ * 资讯目录接口
+ *
  * @author 李双喜
  * @date 2018/3/30 15:37
  */
-public interface InfoCatalogService extends IService<InfoCatalog>{
+public interface InfoCatalogService extends IService<InfoCatalog> {
     /**
      * 新增类目
+     *
      * @param infoCategoryParam 入参
      */
     void insertCategory(InfoCategoryParam infoCategoryParam) throws BaseException;
@@ -26,15 +29,16 @@ public interface InfoCatalogService extends IService<InfoCatalog>{
      * @param userId 用户id
      * @return
      */
-    Map<String,Object> selectParent(Long orgId,Long userId) throws BaseException;
+    Map<String, Object> selectParent(Long orgId, Long userId) throws BaseException;
 
     /**
      * 查询资讯父级目录下分页列表
-     * @param orgId    企业id
+     *
+     * @param orgId     企业id
      * @param catalogId 目录id
      * @param userId    用户id
      * @return
      * @throws BaseException
      */
-    Map<String,Object> selectParentAll(Long orgId,Long catalogId,Long userId) throws BaseException;
+    Map<String, Object> selectParentAll(Long orgId, Long catalogId, Long userId) throws BaseException;
 }
