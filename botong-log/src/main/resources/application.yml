@@ -40,6 +40,7 @@ spring:
       host: ${mongo.host}
       port: ${mongo.port}
       database: ${mongo.db}
+      uri: ${mongo.uri}
 #  elasticsearch:
 #    jest:
 #      uris: http://192.168.10.67:9200
