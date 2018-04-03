@@ -1,6 +1,8 @@
 package com.yunjing.botong.log.service;
 
 import com.yunjing.botong.log.params.LogTemplateParam;
+import com.yunjing.botong.log.vo.LogTemplateItem;
+import com.yunjing.mommon.wrapper.PageWrapper;
 import com.yunjing.mommon.wrapper.ResponseEntityWrapper;
 
 /**
@@ -17,4 +19,21 @@ public interface LogTemplateService {
      * @return
      */
     long createLogTemplate(LogTemplateParam logTemplateParam);
+
+    /**
+     * 删除日志模板
+     * @param id
+     * @return
+     */
+    boolean deleteLogTemplate(long id);
+
+    /**
+     * 查询日志模板列表
+     * @param orgId
+     * @param pageNo
+     * @param pageSize
+     * @return
+     */
+    PageWrapper<LogTemplateItem> queryAllLogTemplate(long orgId, int pageNo, int pageSize);
+
 }

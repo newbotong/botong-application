@@ -2,5 +2,25 @@
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
 <mapper namespace="com.yunjing.botong.log.mapper.LogTemplateMapper">
 
+    <select id="totalLogTemplateByOrgId" resultType="java.lang.Long">
+        SELECT
+            COUNT(*)
+        FROM
+            `log_template`
+        WHERE
+            `deleted` = 0 AND `org_id` = #{orgId}
+    </select>
+
+    <select id="listLogTemplateByOrgId" resultType="com.yunjing.botong.log.vo.LogTemplateItem">
+        SELECT
+            `id`,`template_name`,`icon_image`,`submit_type`
+        FROM
+            `log_template`
+        WHERE
+            `deleted` = 0 AND `org_id` = #{orgId}
+        ORDER BY `sort` , `create_time`
+        LIMIT #{offset} , #{pageSize}
+
+    </select>
 
 </mapper>
