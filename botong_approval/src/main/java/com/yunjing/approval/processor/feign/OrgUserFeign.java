@@ -19,10 +19,10 @@ public interface OrgUserFeign {
     /**
      * 获取企业用户信息
      *
-     * @param companyId 企业主键
-     * @param passportIds 账号主键
+     * @param companyId 公司主键
+     * @param passportIds 成员id集合,逗号隔开
      * @return ResponseEntityWrapper
      */
     @RequestMapping(value = "/rpc/member/get-members-list",method = RequestMethod.POST)
-    ResponseEntityWrapper getMemberList(@RequestParam String companyId,@RequestParam String passportIds);
+    ResponseEntityWrapper getMemberList(@RequestParam("companyId") String companyId, @RequestParam("passportIds") String[] passportIds);
 }

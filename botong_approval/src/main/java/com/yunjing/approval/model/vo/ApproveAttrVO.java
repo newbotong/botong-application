@@ -96,10 +96,12 @@ public class ApproveAttrVO {
 
         this.type = type;
         this.num = attr.getAttrNum();
+        this.dateFormat = attr.getDateFormat();
     }
 
     private String label;
     private String labels;
+    private String dateFormat;
     private String value;
     private String values;
     private Integer type;

@@ -109,4 +109,8 @@ public class ApprovalDetailDTO {
      * 职位
      */
     private String position;
+    /**
+     * 流程审批状态
+     */
+    private Integer processState;
 }

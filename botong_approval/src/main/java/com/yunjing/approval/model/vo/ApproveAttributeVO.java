@@ -67,6 +67,11 @@ public class ApproveAttributeVO {
      */
     private Long orgId;
 
+    /**
+     * 时间格式
+     */
+    private String dateFormat;
+
 
 
 

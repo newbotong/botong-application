@@ -52,9 +52,9 @@ public class ProcessServiceImpl extends BaseServiceImpl<ProcessMapper, SetsProce
         Wrapper<SetsProcess> wrapper;
 
         if (null == conditions) {
-            wrapper = Condition.create().where("model={0}", modelId).and("conditions=''").or("conditions is null");
+            wrapper = Condition.create().where("model_id={0}", modelId).and("condition_id=''").or("condition_id is null");
         } else {
-            wrapper = Condition.create().where("model={0}", modelId).and("conditions={0}", conditions);
+            wrapper = Condition.create().where("model_id={0}", modelId).and("condition_id={0}", conditions);
         }
 
         this.delete(wrapper);

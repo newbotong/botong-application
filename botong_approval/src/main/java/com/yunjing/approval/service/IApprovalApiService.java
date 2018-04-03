@@ -83,10 +83,9 @@ public interface IApprovalApiService {
      * @param userId     用户主键
      * @param approvalId 审批主键
      * @param state      审批状态
-     * @param remark     备注信息
      * @return
      */
-    boolean solveApproval(Long orgId, Long userId, Long approvalId, Integer state, String remark);
+    boolean solveApproval(Long orgId, Long userId, Long approvalId, Integer state);
 
     /**
      * 审批撤销操作
@@ -106,10 +105,9 @@ public interface IApprovalApiService {
      * @param userId            用户主键
      * @param transferredUserId 被转让的审批人主键
      * @param approvalId        审批主键
-     * @param remark            备注信息
      * @return
      * @throws Exception
      */
-    boolean transferApproval(Long orgId, Long userId, Long transferredUserId, Long approvalId, String remark);
+    boolean transferApproval(Long orgId, Long userId, Long transferredUserId, Long approvalId);
 
 }

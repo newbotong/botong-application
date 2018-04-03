@@ -52,11 +52,11 @@ public class ConditionServiceImpl extends BaseServiceImpl<ConditionMapper, SetsC
 
         processService.delete(modelId, conditionId);
         Wrapper<SetsCondition> wrapper = new EntityWrapper<>();
-        wrapper.eq("model", modelId);
+        wrapper.eq("model_id", modelId);
         if (null == conditionId) {
-            wrapper.and("conditions=''").or("conditions is null");
+            wrapper.and("id=''").or("id is null");
         } else {
-            wrapper.and("conditions={0}", conditionId);
+            wrapper.and("id={0}", conditionId);
         }
         this.delete(wrapper);
 
