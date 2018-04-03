@@ -7,11 +7,13 @@ import lombok.Data;
 import java.io.Serializable;
 
 /**
+ * 资讯内容新增入参
+ *
  * @author 李双喜
  * @date 2018/3/30 17:29
  */
 @Data
-public class InfoContentParam implements Serializable{
+public class InfoContentParam implements Serializable {
     /**
      * 企业id
      */

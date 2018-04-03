@@ -1,10 +1,21 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
 
-<mapper namespace="com.yunjing.info.model.InfoContent">
-
-
-
-
-
+<mapper namespace="com.yunjing.info.mapper.InfoContentMapper">
+    <resultMap id="pageSearch" type="com.yunjing.info.dto.InfoDTO">
+        <id column="id" property="id"></id>
+        <result column="create_time" property="createTime"></result>
+        <result column="title" property="title"></result>
+        <result column="picture_url" property="pictureUrl"></result>
+    </resultMap>
+    <!--模糊查询-->
+    <select id="searchPage" resultMap="pageSearch" parameterType="java.util.Map">
+        SELECT id,create_time,title,picture_url
+        FROM info_content
+        WHERE is_delete = 0 AND
+        org_id = #{orgId}
+        <if test="title!= null and title != ''">
+            AND title LIKE CONCAT(CONCAT('%',#{title}),'%')
+        </if>
+    </select>
 </mapper>

@@ -8,26 +8,24 @@ import lombok.Data;
 import java.io.Serializable;
 
 /**
+ * 资讯新增目录入参
+ *
  * @author 李双喜
  * @date 2018/3/30 16:04
  */
 @Data
-public class InfoCategoryParam implements Serializable{
+public class InfoCategoryParam implements Serializable {
 
     /**
      * 企业类目名称
      */
     @NotNullOrEmpty
-    private long catalogId;
+    private Long catalogId;
     /**
      * 企业id
      */
     @NotNullOrEmpty
     private Long orgId;
-    /**
-     * 父id
-     */
-    private Long parentId;
     /**
      * 部门名称
      */
