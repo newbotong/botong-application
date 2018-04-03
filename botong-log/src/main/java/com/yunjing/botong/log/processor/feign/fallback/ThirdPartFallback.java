@@ -10,12 +10,15 @@ import org.springframework.stereotype.Component;
 /**
  * <p>
  * <p> 降级处理
+ * <p>
+ * <p>使用okhttp调用
  * </p>
  *
  * @author tao.zeng.
  * @since 2018/3/29.
  */
 @Component
+@Deprecated
 public class ThirdPartFallback implements ThirdPartFeignClient {
     /**
      * 推送至指定用户
@@ -39,3 +42,4 @@ public class ThirdPartFallback implements ThirdPartFeignClient {
         return ResponseEntityWrapper.error(StatusCode.HTTP_RESPONSE_ERROR);
     }
 }
+

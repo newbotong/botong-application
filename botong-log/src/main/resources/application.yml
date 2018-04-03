@@ -56,3 +56,10 @@ mybatis-plus:
     logic-delete-value: 1
     logic-not-delete-value: 0
     sql-injector: com.baomidou.mybatisplus.mapper.LogicSqlInjector
+
+## 阿里短信推送
+ali:
+  sms:
+    accessKey: ${ali.sms.accessKey}
+    secretKey: ${ali.sms.secretKey}
+    signName: ${ali.sms.signName}

@@ -23,7 +23,8 @@ public class SchedulerFallback implements SchedulerFeignClient {
     }
 
     @Override
-    public ResponseEntityWrapper cancel(SchedulerParam param) {
+    public ResponseEntityWrapper cancel(Long taskId, String jobTitle) {
         return ResponseEntityWrapper.error(StatusCode.HTTP_RESPONSE_ERROR);
     }
+
 }

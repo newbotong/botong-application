@@ -11,11 +11,14 @@ import org.springframework.web.bind.annotation.RequestMapping;
 /**
  * <p>
  * <p> 第三方服务 rpc
+ * <p>
+ * <p> 使用okhttp调用
  * </p>
  *
  * @author tao.zeng.
  * @since 2018/3/29.
  */
+@Deprecated
 @FeignClient(value = "botong-third-party", fallback = ThirdPartFallback.class)
 public interface ThirdPartFeignClient {
 
@@ -25,7 +28,7 @@ public interface ThirdPartFeignClient {
      * @param pushParam
      * @return
      */
-    @RequestMapping(value = "/rpc/push/sendByAlias")
+    @RequestMapping(value = "/rpc/push/send-alias")
     ResponseEntityWrapper sendByAlias(@RequestBody PushParam pushParam);
 
     /**
@@ -34,6 +37,6 @@ public interface ThirdPartFeignClient {
      * @param smSParam
      * @return
      */
-    @RequestMapping(value = "/rpc/sms/sendSMS")
+    @RequestMapping(value = "/rpc/sms/send-sms")
     ResponseEntityWrapper sendSms(@RequestBody SmSParam smSParam);
 }

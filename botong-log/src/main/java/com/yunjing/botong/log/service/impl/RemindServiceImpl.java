@@ -14,7 +14,6 @@ import com.yunjing.botong.log.processor.mq.configuration.RemindMessageConfigurat
 import com.yunjing.botong.log.service.IRemindService;
 import com.yunjing.botong.log.vo.RemindVo;
 import com.yunjing.mommon.constant.StatusCode;
-import com.yunjing.mommon.global.exception.ParameterErrorException;
 import com.yunjing.mommon.global.exception.RequestFailureException;
 import com.yunjing.mommon.utils.BeanUtils;
 import com.yunjing.mommon.wrapper.ResponseEntityWrapper;
@@ -43,6 +42,7 @@ public class RemindServiceImpl extends BaseServiceImpl<RemindMapper, RemindEntit
      * 任务调度
      */
     @Autowired
+    @SuppressWarnings("all")
     private SchedulerFeignClient schedulerFeignClient;
 
     @Override
@@ -57,14 +57,12 @@ public class RemindServiceImpl extends BaseServiceImpl<RemindMapper, RemindEntit
         entity.setSubmitType(remind.getSubmitType());
 
         entity = baseMapper.selectOne(entity);
-        // 没有保存过设置则新增
         if (entity == null) {
             entity = new RemindEntity();
             entity.beforeInsert();
             BeanUtils.copy(remind, entity);
             res = baseMapper.insert(entity);
         } else {
-            // 修改
             BeanUtils.copy(remind, entity);
             entity.setUpdateTime(System.currentTimeMillis());
             Wrapper<RemindEntity> wrapper = new EntityWrapper<>();
@@ -78,11 +76,7 @@ public class RemindServiceImpl extends BaseServiceImpl<RemindMapper, RemindEntit
         }
         boolean flag = res > 0;
         if (flag) {
-            String key = String.valueOf(remind.getMemberId());
-            String value = new Gson().toJson(remind);
-            redisTemplate.opsForHash().put(LogConstant.LOG_SET_REMIND + remind.getAppId(), key, value);
-
-            task(key, value, remind);
+            setTask(remind);
         }
         return flag;
     }
@@ -92,14 +86,33 @@ public class RemindServiceImpl extends BaseServiceImpl<RemindMapper, RemindEntit
         return JSON.parseObject(redisTemplate.opsForHash().get(LogConstant.LOG_SET_REMIND + appId, memberId).toString(), RemindVo.class);
     }
 
+    @Override
+    public boolean updateByMemberIdAndAppId(Long taskId, Long memberId, String appId) {
+        RemindEntity entity = new RemindEntity();
+        entity.setAppId(appId);
+        entity.setMemberId(memberId);
+        entity.setTaskId(taskId);
+        Integer result = baseMapper.update(entity, new EntityWrapper<RemindEntity>().eq("app_id", appId).and().eq("member_id", memberId));
+        return result > 0;
+    }
+
     /**
      * 添加到任务队列
      *
-     * @param key
-     * @param value
      * @param remind
      */
-    private void task(String key, String value, RemindVo remind) {
+    private void setTask(RemindVo remind) {
+        Gson gson = new Gson();
+        String key = String.valueOf(remind.getMemberId());
+        String value = gson.toJson(remind);
+
+        // topic
+        String jobTitle = RemindMessageConfiguration.REMIND_QUEUE_NAME;
+        Long taskId = null;
+        RemindVo vo = gson.fromJson(redisTemplate.opsForHash().get(LogConstant.LOG_SET_REMIND + remind.getAppId(), key).toString(), RemindVo.class);
+        if (vo != null) {
+            taskId = vo.getTaskId();
+        }
         SchedulerParam param = new SchedulerParam();
         param.setCycle(remind.getCycle());
         param.setCycleType(remind.getCycleType());
@@ -107,24 +120,26 @@ public class RemindServiceImpl extends BaseServiceImpl<RemindMapper, RemindEntit
         param.setRecord(remind.getAppId());
         param.setRemark(value);
         param.setJobTime(remind.getJobTime());
-
-        // topic
-        param.setJobTitle(RemindMessageConfiguration.REMIND_QUEUE_NAME);
-
-        log.info("任务调度参数:{}", JSON.toJSONString(param));
-
-        ResponseEntityWrapper response;
-        if (remind.getRemindSwitch() == 0) {
-            response = schedulerFeignClient.cancel(param);
-        } else if (remind.getRemindSwitch() == 1) {
-            response = schedulerFeignClient.set(param);
-        } else {
-            throw new ParameterErrorException("参数错误!");
+        param.setJobTitle(jobTitle);
+        if (taskId != null) {
+            param.setTaskId(taskId);
         }
+        log.info("设置任务调度参数:{}", gson.toJson(param));
+        ResponseEntityWrapper response = schedulerFeignClient.set(param);
 
-        log.info("设置任务结果:{}", JSON.toJSONString(response));
-        if (StatusCode.SUCCESS.getStatusCode() != response.getStatusCode()) {
-            throw new RequestFailureException(response.getStatusCode(), response.getStatusMessage());
+        if (response != null) {
+            log.info("设置任务结果:{}", JSON.toJSONString(response));
+            if (StatusCode.SUCCESS.getStatusCode() != response.getStatusCode()) {
+                throw new RequestFailureException(response.getStatusCode(), response.getStatusMessage());
+            } else {
+                taskId = Long.parseLong(String.valueOf(response.getData()));
+                boolean flag = updateByMemberIdAndAppId(taskId, remind.getMemberId(), remind.getAppId());
+                if (flag) {
+                    remind.setTaskId(taskId);
+                    value = gson.toJson(remind);
+                    redisTemplate.opsForHash().put(LogConstant.LOG_SET_REMIND + remind.getAppId(), key, value);
+                }
+            }
         }
     }
 }

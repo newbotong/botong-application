@@ -23,6 +23,11 @@ public class RemindVo {
     private Long memberId;
 
     /**
+     * 任务id
+     */
+    private Long taskId;
+
+    /**
      * 应用id
      */
     @NotNullOrEmpty
