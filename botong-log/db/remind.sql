@@ -3,6 +3,7 @@ IF EXISTS remind;
 
 CREATE TABLE `remind` (
   `id` BIGINT (20) NOT NULL COMMENT '主键',
+  `task_id` BIGINT (20) DEFAULT NULL COMMENT '任务id',
   `member_id` BIGINT (20) NOT NULL COMMENT '用户所在企业成员id',
   `app_id` VARCHAR (20) NOT NULL COMMENT '应用id',
   `remind_switch` SMALLINT (1) NOT NULL DEFAULT '0' COMMENT '提醒开关（0-关闭，1-打开）',

@@ -9,12 +9,15 @@ import org.springframework.stereotype.Component;
 /**
  * <p>
  * <p> 降级处理
+ * <p>
+ * <p> 使用okhttp调用
  * </p>
  *
  * @author tao.zeng.
  * @since 2018/3/29.
  */
 @Component
+@Deprecated
 public class DangFallback implements DangFeignClient {
 
     @Override
