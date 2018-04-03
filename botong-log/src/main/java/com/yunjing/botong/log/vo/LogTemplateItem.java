@@ -1,11 +1,16 @@
 package com.yunjing.botong.log.vo;
 
+import lombok.Data;
+
+import java.io.Serializable;
+
 /**
  * 封装 日志模板 列表VO
  * @author  王开亮
  * @date 2018/3/30 16:51
  */
-public class LogTemplateItem {
+@Data
+public class LogTemplateItem{
 
     /**
      * 主键ID
