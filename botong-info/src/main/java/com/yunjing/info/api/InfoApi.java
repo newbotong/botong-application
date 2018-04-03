@@ -53,8 +53,8 @@ public class InfoApi extends BaseController {
      * @throws BaseException
      */
     @PostMapping("/select-parent-all")
-    public ResponseEntityWrapper selectParentAll(@RequestParam Long orgId, @RequestParam Long catalogId, @RequestParam Long userId) throws BaseException {
-        Map<String, Object> map = infoCatalogService.selectParentAll(orgId, catalogId, userId);
+    public ResponseEntityWrapper selectParentAll(@RequestParam Long orgId, @RequestParam Long catalogId, @RequestParam Long userId,@RequestParam Integer pageNo,@RequestParam Integer pageSize) throws BaseException {
+        Map<String, Object> map = infoCatalogService.selectParentAll(orgId, catalogId, userId,pageNo,pageSize);
         return success(map);
     }
 
