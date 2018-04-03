@@ -14,6 +14,16 @@ import lombok.Data;
 public class SchedulerParam {
 
     /**
+     * 任务id
+     */
+    private Long id;
+
+    /**
+     * 任务id
+     */
+    private Long taskId;
+
+    /**
      * 周期
      */
     private String cycle;

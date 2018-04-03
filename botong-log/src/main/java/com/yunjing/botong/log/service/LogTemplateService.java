@@ -1,5 +1,8 @@
 package com.yunjing.botong.log.service;
 
+import com.yunjing.botong.log.params.LogTemplateParam;
+import com.yunjing.mommon.wrapper.ResponseEntityWrapper;
+
 /**
  * 日志模板服务
  *
@@ -8,6 +11,10 @@ package com.yunjing.botong.log.service;
  */
 public interface LogTemplateService {
 
-
-
+    /**
+     * 创建日志模板
+     * @param logTemplateParam  日志模板参数
+     * @return
+     */
+    long createLogTemplate(LogTemplateParam logTemplateParam);
 }

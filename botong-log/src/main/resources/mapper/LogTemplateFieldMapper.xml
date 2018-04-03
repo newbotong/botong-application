@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.yunjing.botong.log.mapper.LogTemplateFieldMapper">
+
+    <insert id="batchInsertLogTemplateFields">
+        INSERT INTO `log_template_details`
+        (`id`, `template_id`, `field_name`, `field_label`, `field_type`, `required`, `default_value`,
+        `unit`, `help`, `sort`,`enum_id`, `display`, `currently`, `version`, `deleted`,`create_time`, `update_time`)
+        VALUES
+        <foreach collection="logTemplateFieldEntities" separator="," item="item">
+            (#{item.id}, #{item.templateId}, #{item.fieldName}, #{item.fieldLabel}, #{item.fieldType}, #{item.required}, #{item.defaultValue},
+            #{item.unit}, #{item.help}, #{item.sort},#{item.enumId}, #{item.display}, #{item.currently}, #{item.version}, #{item.deleted}, #{item.createTime}, #{item.updateTime})
+        </foreach>
+    </insert>
+
+</mapper>

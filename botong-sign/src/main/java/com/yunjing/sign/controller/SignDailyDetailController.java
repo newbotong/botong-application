@@ -5,11 +5,14 @@ import com.yunjing.mommon.validate.BeanFieldValidator;
 import com.yunjing.mommon.wrapper.PageWrapper;
 import com.yunjing.mommon.wrapper.ResponseEntityWrapper;
 import com.yunjing.sign.beans.model.SignDetailDaily;
+import com.yunjing.sign.beans.param.SignConfigParam;
 import com.yunjing.sign.beans.param.SignDetailParam;
 import com.yunjing.sign.beans.param.UserAndDeptParam;
+import com.yunjing.sign.beans.vo.SignConfigVO;
 import com.yunjing.sign.beans.vo.UserMonthListVO;
 import com.yunjing.sign.dao.mapper.SignDetailMapper;
 import com.yunjing.sign.excel.BaseExModel;
+import com.yunjing.sign.service.ISignConfigDailyService;
 import com.yunjing.sign.service.ISignDetailDailyService;
 import com.yunjing.sign.service.ISignDetailService;
 import org.apache.poi.ss.usermodel.Workbook;
@@ -36,6 +39,9 @@ public class SignDailyDetailController extends BaseController {
     @Autowired
     private ISignDetailDailyService iSignDetailDailyService;
 
+    @Autowired
+    private ISignConfigDailyService iSignConfigDailyService;
+
 
     /**
      * 签到统计
@@ -49,6 +55,35 @@ public class SignDailyDetailController extends BaseController {
         PageWrapper<UserMonthListVO> page = iSignDetailDailyService.staticsMonthInfo(userAndDeptParam);
         return success(page);
     }
+
+    /**
+     * 签到设置
+     * @param signConfigParam
+     * @return
+     */
+    @PostMapping("/setting")
+    public ResponseEntityWrapper setting(@RequestBody SignConfigParam signConfigParam){
+        // 基础校验
+        BeanFieldValidator.getInstance().validate(signConfigParam);
+        boolean isAdd = iSignConfigDailyService.setSignConfig(signConfigParam);
+        return success(isAdd);
+    }
+
+
+    /**
+     * 查看签到设置
+     * @param orgId     组织Id
+     * @return
+     */
+    @GetMapping("/get-setting")
+    public ResponseEntityWrapper getSetting(@RequestParam String orgId){
+        // 基础校验
+        BeanFieldValidator.getInstance().validate(orgId);
+        SignConfigVO vo = iSignConfigDailyService.getSignConfig(orgId);
+        return success(vo);
+    }
+
+
 
     /**
      * 导出签到数据

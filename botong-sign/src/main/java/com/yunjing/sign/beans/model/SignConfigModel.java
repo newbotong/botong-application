@@ -57,4 +57,14 @@ public class SignConfigModel extends BaseModel<SignConfigModel> {
     @TableField("end_time")
     private String endTime;
 
+    /**
+     * 经度
+     */
+    private String lng;
+
+    /**
+     * 维度
+     */
+    private String lat;
+
 }
