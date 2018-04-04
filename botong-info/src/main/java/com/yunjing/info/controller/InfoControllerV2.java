@@ -112,7 +112,7 @@ public class InfoControllerV2 extends BaseController {
      * @param orgId
      * @return
      */
-    @GetMapping("/catelog-list")
+    @GetMapping("/catalog-list")
     public ResponseEntityWrapper getInfoCatalogList(@RequestParam Long orgId)  throws BaseException {
         return success(infoContentService.getInfoCatalogList(orgId));
     }

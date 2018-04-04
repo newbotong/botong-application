@@ -19,6 +19,7 @@ public interface InfoCatalogService extends IService<InfoCatalog> {
      * 新增类目
      *
      * @param infoCategoryParam 入参
+     * @throws BaseException
      */
     void insertCategory(InfoCategoryParam infoCategoryParam) throws BaseException;
 
@@ -36,11 +37,13 @@ public interface InfoCatalogService extends IService<InfoCatalog> {
     /**
      * 查询资讯父级目录下分页列表
      *
-     * @param orgId     企业id
-     * @param catalogId 目录id
-     * @param userId    用户id
+     * @param orgId    企业id
+     * @param catalogId 类目id
+     * @param userId  用户id
+     * @param pageNo  当前页码
+     * @param pageSize 每页显示条数
      * @return
      * @throws BaseException
      */
-    Map<String, Object> selectParentAll(Long orgId, Long catalogId, Long userId,Integer pageNo,Integer pageSize) throws BaseException;
+    Map<String, Object> selectParentAll(Long orgId, Long catalogId, Long userId, Integer pageNo, Integer pageSize) throws BaseException;
 }
