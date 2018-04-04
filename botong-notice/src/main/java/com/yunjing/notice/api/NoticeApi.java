@@ -24,7 +24,7 @@ import java.util.Map;
  * @since 2018/3/20.
  */
 @RestController
-@RequestMapping("/notice/app")
+@RequestMapping("/notice")
 public class NoticeApi extends BaseController {
 
     @Autowired
@@ -36,7 +36,7 @@ public class NoticeApi extends BaseController {
      * @param body 公告实体类
      * @throws BaseException
      */
-    @PostMapping("/add")
+    @PostMapping("/save")
     public ResponseEntityWrapper insertNotice(@RequestBody NoticeBody body) throws BaseException {
         BeanFieldValidator.getInstance().ignore().validate(body);
         noticeService.insertNotice(body);
@@ -50,7 +50,7 @@ public class NoticeApi extends BaseController {
      * @param state    是否阅读 0为已读 1为未读
      * @throws BaseException
      */
-    @PostMapping("/update-state")
+    @PostMapping("/update")
     public ResponseEntityWrapper updateNoticeState(@RequestParam Long userId,@RequestParam Long id,@RequestParam Integer state) throws BaseException {
        noticeService.updateNoticeState(userId,id,state);
         return success();
@@ -75,7 +75,7 @@ public class NoticeApi extends BaseController {
      * @return
      * @throws BaseException
      */
-    @PostMapping("/select-page")
+    @PostMapping("/page")
     public ResponseEntityWrapper selectNoticePage(@RequestParam Long userId,Integer state,@RequestParam Integer pageNo,@RequestParam Integer pageSize) throws BaseException{
         Map<String,Object> map = noticeService.selectNoticePage(userId,state,pageNo,pageSize);
         return success(map);
@@ -87,7 +87,7 @@ public class NoticeApi extends BaseController {
      * @return
      * @throws BaseException
      */
-    @PostMapping("/select-detail")
+    @PostMapping("/detail")
     public ResponseEntityWrapper selectNoticeDetail(@RequestParam Long id,@RequestParam Long userId) throws BaseException {
         NoticeDetailBody noticeDetailBody = noticeService.selectNoticeDetail(id,userId);
         return success(noticeDetailBody);
@@ -100,7 +100,7 @@ public class NoticeApi extends BaseController {
      * @return
      * @throws BaseException
      */
-    @PostMapping("/select-user")
+    @PostMapping("/user")
     public ResponseEntityWrapper selectNoticeUser(@RequestParam Long id,@RequestParam Integer state,@RequestParam Integer pageNo,@RequestParam Integer pageSize) throws BaseException {
         Page<UserInfoBody> page = noticeService.selectNoticeUser(id,state,pageNo,pageSize);
         return success(page);
