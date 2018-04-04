@@ -112,11 +112,11 @@ public class ApproveAttrVO {
      * 图片（type = 10） 专用
      */
 
-    private List<ImageVO> images = new ArrayList<>();
+    private List<ImageVO> images;
 
     /**
      * 附件（type = 11） 专用
      */
-    private List<FileVO> files = new ArrayList<>();
+    private List<FileVO> files;
 
 }

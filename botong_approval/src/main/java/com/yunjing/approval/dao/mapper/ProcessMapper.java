@@ -10,5 +10,12 @@ import org.apache.ibatis.annotations.Param;
  * @date 2017/12/21
  */
 public interface ProcessMapper extends IBaseMapper<SetsProcess> {
+
+    /**
+     * 删除审批人
+     *
+     * @param oid 企业主键
+     * @param uid 用户主键
+     */
     void deleteProcessUser(@Param("oid") Long oid, @Param("uid") Long uid);
 }

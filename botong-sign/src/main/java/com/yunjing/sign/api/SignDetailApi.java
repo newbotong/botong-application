@@ -39,8 +39,8 @@ public class SignDetailApi extends BaseController {
 
     /**
      * 外出签到
-     * @param signDetailParam
-     * @return
+     * @param signDetailParam       签到明细参数
+     * @return                      返回签到明细对象
      */
     @PostMapping("/sign")
     public ResponseEntityWrapper toSign(@RequestBody SignDetailParam signDetailParam){
@@ -52,9 +52,9 @@ public class SignDetailApi extends BaseController {
 
     /**
      * 获取签到次数
-     * @param userId
-     * @param orgId
-     * @return
+     * @param userId            memberId
+     * @param orgId             企业id
+     * @return                  返回签到次数
      */
     @GetMapping("/get-count")
     public ResponseEntityWrapper getSignCount(@RequestParam String userId, @RequestParam String orgId){
@@ -65,8 +65,8 @@ public class SignDetailApi extends BaseController {
 
     /**
      * 签到统计
-     * @param userAndDeptParam
-     * @return
+     * @param userAndDeptParam  多部门Id和多memberId
+     * @return                  返回未签到和已签到列表
      */
     @PostMapping("/sign-count")
     public ResponseEntityWrapper signGroup(@RequestBody UserAndDeptParam userAndDeptParam){
@@ -78,8 +78,8 @@ public class SignDetailApi extends BaseController {
 
     /**
      * 按月统计我的签到情况
-     * @param signDetailParam
-     * @return
+     * @param signDetailParam    签到明细参数
+     * @return                   返回用户一月的签到详情
      */
     @PostMapping("/query-month")
     public ResponseEntityWrapper queryMonthInfo(@RequestBody SignDetailParam signDetailParam){

@@ -34,12 +34,12 @@ public class SetConditionVO {
     /**
      * 0: 无效 1: 有效
      */
-    private int enabled;
+    private Integer enabled;
 
     /**
      * 顺序
      */
-    private int sort;
+    private Integer sort;
 
     /**
      * 审批人信息

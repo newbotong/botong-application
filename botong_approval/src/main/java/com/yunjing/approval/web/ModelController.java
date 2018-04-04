@@ -23,7 +23,7 @@ public class ModelController extends BaseController {
      * 获取审批模板列表
      *
      * @param oid 企业主键
-     * @return
+     * @return ResponseEntityWrapper
      */
     @GetMapping("/list")
     public ResponseEntityWrapper getList(@RequestParam("oid") Long oid) throws Exception {
@@ -36,7 +36,7 @@ public class ModelController extends BaseController {
      *
      * @param categoryId 分组主键
      * @param sortArray  序号数组
-     * @return
+     * @return ResponseEntityWrapper
      */
     @PostMapping("/sort")
     public ResponseEntityWrapper sort(@RequestParam("categoryId") Long categoryId, @RequestParam("sortArray") String sortArray) throws Exception {
@@ -49,9 +49,9 @@ public class ModelController extends BaseController {
      *
      * @param categoryId 要移动到的分组主键
      * @param modelId    模型主键
-     * @return
+     * @return ResponseEntityWrapper
      */
-    @PostMapping("/move_to")
+    @PostMapping("/move-to")
     public ResponseEntityWrapper moveTo(@RequestParam("categoryId") Long categoryId, @RequestParam("modelId") Long modelId) throws Exception {
 
         return success(modelService.moveModel(categoryId, modelId));
@@ -62,9 +62,9 @@ public class ModelController extends BaseController {
      *
      * @param modelId    模型主键
      * @param isDisabled 是否停用（0：正常，1,：停用）
-     * @return
+     * @return ResponseEntityWrapper
      */
-    @PostMapping("/is_disabled")
+    @PostMapping("/is-disabled")
     public ResponseEntityWrapper updateIsDisabled(@RequestParam("modelId") Long modelId,
                                                   @RequestParam("isDisabled") Integer isDisabled) throws Exception {
 
@@ -77,9 +77,9 @@ public class ModelController extends BaseController {
      * @param modelId    模型主键
      * @param  deptIds（多个部门以英文,隔开）
      * @param  userIds（多个用户以英文,隔开）
-     * @return
+     * @return ResponseEntityWrapper
      */
-    @PostMapping("/update_visible_range")
+    @PostMapping("/update-visible-range")
     public ResponseEntityWrapper updateVisibleRange(@RequestParam("modelId") Long modelId,
                                                   @RequestParam("deptIds") String deptIds,
                                                     @RequestParam("userIds") String userIds) throws Exception {

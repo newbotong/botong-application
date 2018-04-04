@@ -6,9 +6,11 @@ import com.common.mybatis.service.impl.BaseServiceImpl;
 import com.yunjing.approval.dao.cache.UserRedisService;
 import com.yunjing.approval.dao.mapper.ProcessMapper;
 import com.yunjing.approval.model.entity.ApprovalSets;
+import com.yunjing.approval.model.entity.ApprovalUser;
 import com.yunjing.approval.model.entity.SetsProcess;
 import com.yunjing.approval.model.vo.UserVO;
 import com.yunjing.approval.service.IApprovalSetsService;
+import com.yunjing.approval.service.IApprovalUserService;
 import com.yunjing.approval.service.IOrgModelService;
 import com.yunjing.approval.service.IProcessService;
 import com.yunjing.approval.util.ApproConstants;
@@ -21,6 +23,8 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Set;
+import java.util.stream.Collectors;
 
 /**
  * @author roc
@@ -41,6 +45,8 @@ public class ProcessServiceImpl extends BaseServiceImpl<ProcessMapper, SetsProce
 
     @Autowired
     private ProcessMapper processMapper;
+    @Autowired
+    private IApprovalUserService approvalUserService;
 
     @Override
     public boolean delete(Long modelId, Long conditions) throws Exception {
@@ -71,24 +77,26 @@ public class ProcessServiceImpl extends BaseServiceImpl<ProcessMapper, SetsProce
         } else {
             list = this.selectList(Condition.create().where("model_id={0}", modelId).and("condition_id={0}", conditions).orderBy(true, "sort", true));
         }
-
+        List<ApprovalUser> userList = approvalUserService.selectList(Condition.create());
         for (SetsProcess process : list) {
-            String userId = process.getApprover();
+            Long userId = process.getApprover();
             String userNick = "";
             String userAvatar = null;
-            if (userId.indexOf("admin_") != -1) {
-                String[] temp = userId.split("_");
+            if (String.valueOf(userId).indexOf("admin_") != -1) {
+                String[] temp = String.valueOf(userId).split("_");
                 userNick = "第" + temp[2] + "级主管";
             } else {
-                UserVO userVo = userRedisService.getByUserId(userId);
-                if (userVo != null) {
-                    userNick = userVo.getUserNick();
-                    userAvatar = userVo.getUserAvatar();
+                Set<ApprovalUser> userSet = userList.stream().filter(user -> user.getId().equals(userId)).collect(Collectors.toSet());
+                for (ApprovalUser user : userSet) {
+                    if (user != null) {
+                        userNick = user.getName();
+                        userAvatar = user.getAvatar();
+                    }
                 }
 
             }
             UserVO vo = new UserVO();
-            vo.setUserId(userId);
+            vo.setUserId(String.valueOf(userId));
             vo.setUserNick(userNick);
             vo.setUserAvatar(userAvatar);
             users.add(vo);
@@ -126,7 +134,7 @@ public class ProcessServiceImpl extends BaseServiceImpl<ProcessMapper, SetsProce
             process.setId(IDUtils.getID());
             process.setModelId(modelId);
             process.setConditionId(conditionId);
-            process.setApprover(userIds[i]);
+            process.setApprover(Long.valueOf(userIds[i]));
             process.setSort(i + 1);
             list.add(process);
         }

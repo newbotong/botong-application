@@ -7,8 +7,6 @@ import com.common.mybatis.model.BaseModel;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 
-import java.sql.Timestamp;
-
 
 /**
  * @author 刘小鹏
@@ -17,7 +15,7 @@ import java.sql.Timestamp;
 @Data
 @TableName("approval_copys")
 @EqualsAndHashCode(callSuper = true)
-public class CopyS extends BaseModel<CopyS> {
+public class Copys extends BaseModel<Copys> {
 
     /**
      * 用户主键

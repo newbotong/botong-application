@@ -65,19 +65,19 @@ public class ApprovalSetsServiceImpl extends ServiceImpl<ApprovalSetsMapper, App
 
     @Override
     public boolean saveApprovalSets(Long modelId, Integer setting) throws Exception {
-        ApprovalSets approvalSets = this.selectOne(Condition.create().where("model_id={0}", modelId));
+        ApprovalSets approvalSets = this.selectById(modelId);
         if (setting == ApproConstants.SET_TYPE_2) {
             if (approvalSets != null) {
-                this.delete(Condition.create().where("model_id={0}", modelId));
+                this.delete(Condition.create().where("id={0}", modelId));
             }
         } else {
-            if(approvalSets == null){
+            if (approvalSets == null) {
                 approvalSets = new ApprovalSets();
                 approvalSets.setId(modelId);
             }
             approvalSets.setSetting(setting);
             boolean insertOrUpdate = this.insertOrUpdate(approvalSets);
-            if(!insertOrUpdate){
+            if (!insertOrUpdate) {
                 throw new BaseException("审批设置项保存失败");
             }
 

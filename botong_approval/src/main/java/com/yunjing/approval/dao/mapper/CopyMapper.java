@@ -11,5 +11,12 @@ import org.apache.ibatis.annotations.Param;
  */
 public interface CopyMapper extends IBaseMapper<Copy> {
 
-    void deleteCopyUser(@Param("oid") Long oid, @Param("uid") Long uid);
+    /**
+     * 删除抄送人
+     *
+     * @param oid 企业主键
+     * @param uid 用户主键
+     * @return boolean
+     */
+    boolean deleteCopyUser(@Param("oid") Long oid, @Param("uid") Long uid);
 }

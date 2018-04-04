@@ -5,7 +5,7 @@ import com.baomidou.mybatisplus.mapper.Condition;
 import com.common.mybatis.service.impl.BaseServiceImpl;
 import com.yunjing.approval.dao.mapper.ConditionMapper;
 import com.yunjing.approval.dao.mapper.ModelItemMapper;
-import com.yunjing.approval.dao.mapper.ModelLMapper;
+import com.yunjing.approval.dao.mapper.ModelMapper;
 import com.yunjing.approval.model.entity.ModelItem;
 import com.yunjing.approval.model.entity.ModelL;
 import com.yunjing.approval.model.entity.OrgModel;
@@ -52,7 +52,7 @@ public class ModelItemServiceImpl extends BaseServiceImpl<ModelItemMapper, Model
     private ConditionMapper conditionMapper;
 
     @Autowired
-    private ModelLMapper modelLMapper;
+    private ModelMapper modelMapper;
     @Autowired
     private IApprovalSetsService approvalSetsService;
 
@@ -169,7 +169,7 @@ public class ModelItemServiceImpl extends BaseServiceImpl<ModelItemMapper, Model
             entity.setId(modelId);
             entity.setLogo("https://web.botong.tech/resource/img/public.png");
 
-            Integer max = modelLMapper.getMaxSort(orgId);
+            Integer max = modelMapper.getMaxSort(orgId);
             if (max == null) {
                 max = 0;
             }

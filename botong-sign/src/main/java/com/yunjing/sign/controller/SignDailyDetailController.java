@@ -45,8 +45,8 @@ public class SignDailyDetailController extends BaseController {
 
     /**
      * 签到统计
-     * @param userAndDeptParam
-     * @return
+     * @param userAndDeptParam      多部门id和多memberid
+     * @return                      按月返回所有member的签到明细
      */
     @PostMapping("/statistics")
     public ResponseEntityWrapper statistics(@RequestBody UserAndDeptParam userAndDeptParam){
@@ -58,8 +58,8 @@ public class SignDailyDetailController extends BaseController {
 
     /**
      * 签到设置
-     * @param signConfigParam
-     * @return
+     * @param signConfigParam       签到设置参数
+     * @return                      是否设置成功
      */
     @PostMapping("/setting")
     public ResponseEntityWrapper setting(@RequestBody SignConfigParam signConfigParam){
@@ -72,8 +72,8 @@ public class SignDailyDetailController extends BaseController {
 
     /**
      * 查看签到设置
-     * @param orgId     组织Id
-     * @return
+     * @param orgId             组织Id
+     * @return                  签到设置对象
      */
     @GetMapping("/get-setting")
     public ResponseEntityWrapper getSetting(@RequestParam String orgId){
@@ -88,12 +88,12 @@ public class SignDailyDetailController extends BaseController {
     /**
      * 导出签到数据
      *
-     * @param response
-     * @param userIds
-     * @param deptIds
-     * @param signDate
-     * @return
-     * @throws Exception
+     * @param response          reponse
+     * @param userIds           多个memberids
+     * @param deptIds           多个部门ids
+     * @param signDate          统计时间
+     * @return                  输出文件流
+     * @throws Exception        异常
      */
     @GetMapping("/export")
     public ResponseEntityWrapper export(HttpServletResponse response, String userIds, String deptIds, String signDate) throws Exception {
@@ -118,6 +118,14 @@ public class SignDailyDetailController extends BaseController {
         return success(response, excel, exportFlag);
     }
 
+    /**
+     * 返回到输出流，
+     * @param response      输出response
+     * @param excel         excel表格对象
+     * @param resultFlag    成功与否
+     * @return              输出流，null
+     * @throws Exception    异常
+     */
     private ResponseEntityWrapper success(HttpServletResponse response, BaseExModel excel, boolean resultFlag) throws Exception {
         OutputStream out = response.getOutputStream();
         Workbook workbook = null;
@@ -143,8 +151,8 @@ public class SignDailyDetailController extends BaseController {
 
     /**
      * 签到明细
-     * @param signDetailParam
-     * @return
+     * @param signDetailParam       签到明细对象
+     * @return                      返回明细列表
      */
     @PostMapping("/list")
     public ResponseEntityWrapper statistics(@RequestBody SignDetailParam signDetailParam){

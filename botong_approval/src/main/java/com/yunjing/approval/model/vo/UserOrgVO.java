@@ -3,7 +3,10 @@ package com.yunjing.approval.model.vo;
 import lombok.Data;
 
 /**
- * function: 通讯录信息——标签信息实体类
+ * 通讯录信息——标签信息实体类
+ *
+ * @author 刘小鹏
+ * @date 2018/04/04
  */
 @Data
 public class UserOrgVO {
@@ -14,7 +17,7 @@ public class UserOrgVO {
     private String userId;
 
     /**
-     *  企业（组织）主键
+     * 企业（组织）主键
      */
     private String orgId;
 
