@@ -8,7 +8,7 @@ import lombok.Data;
 /**
  * 资讯目录实体
  *
- * @author 裴志鹏
+ * @author 李双喜
  * @date 2018/3/20 17:07
  */
 @Data
