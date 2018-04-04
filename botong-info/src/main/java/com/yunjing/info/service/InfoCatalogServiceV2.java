@@ -89,6 +89,7 @@ public interface InfoCatalogServiceV2 extends IService<InfoCatalog> {
      * 获取一级下的所有分类
      * @param orgId
      * @return
+     * @throws BaseException
      */
     List<InfoCatalogDTO> getInfoCatalogList(Long orgId) throws BaseException;
 

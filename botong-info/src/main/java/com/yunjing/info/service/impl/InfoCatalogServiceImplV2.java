@@ -67,7 +67,7 @@ public class InfoCatalogServiceImplV2 extends ServiceImpl<InfoCatalogMapper, Inf
             return InfoConstants.StateCode.CODE_400;
         }
 
-        if(infoCatalogList.size()>=6){
+        if(infoCatalogList.size()>=InfoConstants.INFO_NAME_MIX){
             return InfoConstants.StateCode.CODE_604;
         }
         InfoCatalog infoCatalog = new InfoCatalog();
@@ -147,8 +147,8 @@ public class InfoCatalogServiceImplV2 extends ServiceImpl<InfoCatalogMapper, Inf
                 falg = infoContentMapper.update(infoContent,infoContentEntityWrapper);
             }
             //更新分类缓存
-            if (redisTemplate.hasKey(InfoConstants.BOTONG_INFO_CATALOG_LIST+orgId.toString()+":"+parentId.toString())) {
-                redisTemplate.opsForHash().delete(InfoConstants.BOTONG_INFO_CATALOG_LIST + orgId.toString() + ":" + parentId.toString(), id.toString());
+            if (redisTemplate.hasKey(InfoConstants.BOTONG_INFO_CATALOG_LIST+orgId.toString()+InfoConstants.BOTONG_INFO_FIX+parentId.toString())) {
+                redisTemplate.opsForHash().delete(InfoConstants.BOTONG_INFO_CATALOG_LIST + orgId.toString() + InfoConstants.BOTONG_INFO_FIX + parentId.toString(), id.toString());
             }
         }
         return falg > 0 ? InfoConstants.StateCode.CODE_200 : InfoConstants.StateCode.CODE_602;
@@ -195,8 +195,8 @@ public class InfoCatalogServiceImplV2 extends ServiceImpl<InfoCatalogMapper, Inf
         if(InfoConstants.INFO_TYPE_DISPLAY.equals(displayType)){
             updateInfoCategoryRedis(orgId,parentId,id);
         }else{
-            if (redisTemplate.hasKey(InfoConstants.BOTONG_INFO_CATALOG_LIST+orgId.toString()+":"+parentId.toString())) {
-                redisTemplate.opsForHash().delete(InfoConstants.BOTONG_INFO_CATALOG_LIST + orgId.toString() + ":" + parentId.toString(), id.toString());
+            if (redisTemplate.hasKey(InfoConstants.BOTONG_INFO_CATALOG_LIST+orgId.toString()+InfoConstants.BOTONG_INFO_FIX+parentId.toString())) {
+                redisTemplate.opsForHash().delete(InfoConstants.BOTONG_INFO_CATALOG_LIST + orgId.toString() + InfoConstants.BOTONG_INFO_FIX + parentId.toString(), id.toString());
             }
         }
         //如果是显示则添加缓存数据
@@ -277,11 +277,11 @@ public class InfoCatalogServiceImplV2 extends ServiceImpl<InfoCatalogMapper, Inf
         InfoCatalog infoCatalog = (InfoCatalog) infoCatalogMapper.selectByMap(infoContentMap);
         if(!ValidationUtil.isEmpty(infoCatalog)){
             //先删除
-            if (redisTemplate.hasKey(InfoConstants.BOTONG_INFO_CATALOG_LIST+orgId.toString()+":"+parentId.toString())) {
-                redisTemplate.opsForHash().delete(InfoConstants.BOTONG_INFO_CATALOG_LIST+orgId.toString()+":"+parentId.toString(),infoCatalog.getId().toString());
+            if (redisTemplate.hasKey(InfoConstants.BOTONG_INFO_CATALOG_LIST+orgId.toString()+InfoConstants.BOTONG_INFO_FIX+parentId.toString())) {
+                redisTemplate.opsForHash().delete(InfoConstants.BOTONG_INFO_CATALOG_LIST+orgId.toString()+InfoConstants.BOTONG_INFO_FIX+parentId.toString(),infoCatalog.getId().toString());
             }else{
                 // 在更新
-                redisTemplate.opsForHash().put(InfoConstants.BOTONG_INFO_CATALOG_LIST+orgId.toString()+":"+parentId.toString(),infoCatalog.getId().toString(), JSON.toJSONString(infoCatalog));
+                redisTemplate.opsForHash().put(InfoConstants.BOTONG_INFO_CATALOG_LIST+orgId.toString()+InfoConstants.BOTONG_INFO_FIX+parentId.toString(),infoCatalog.getId().toString(), JSON.toJSONString(infoCatalog));
             }
         }
     }

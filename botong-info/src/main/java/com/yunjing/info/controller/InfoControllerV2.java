@@ -37,7 +37,7 @@ public class InfoControllerV2 extends BaseController {
     @PostMapping("/insert-catalog")
     public ResponseEntityWrapper insert(@RequestParam Long orgId, @RequestParam Long parentId,@RequestParam String name) throws BaseException{
         //校验分类名称，如果包含中文字符 算两个，总计不超过12个字符
-        if(ValidationUtil.length(ValidationUtil.trim(name))>12){
+        if((ValidationUtil.trim(name).length())>InfoConstants.INFO_NAME_MAX){
             return result(InfoConstants.StateCode.CODE_604);
         }
         return result(infoContentService.insertInfoCategory(orgId,parentId,name));
@@ -55,7 +55,7 @@ public class InfoControllerV2 extends BaseController {
     @PostMapping("/update-parent")
     public ResponseEntityWrapper modify(@RequestParam Long orgId, @RequestParam Long parentId,@RequestParam Long catalogId,@RequestParam String name) throws BaseException{
         //校验分类名称，如果包含中文字符 算两个，总计不超过12个字符
-        if(ValidationUtil.length(ValidationUtil.trim(name))>12){
+        if((ValidationUtil.trim(name)).length()>InfoConstants.INFO_NAME_MAX){
             return result(InfoConstants.StateCode.CODE_604);
         }
         return result(infoContentService.modifyInfoCategory(orgId,parentId,catalogId,name));

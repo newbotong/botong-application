@@ -20,9 +20,24 @@ public interface InfoConstants {
     Integer INFO_TYPE_HIDE = 0;
 
     /**
+     * 最小名字长度5
+     */
+    Integer INFO_NAME_MIX = 6;
+
+    /**
+     * 最大长度12
+     */
+    Integer INFO_NAME_MAX = 12;
+
+
+    /**
      * 资讯类目缓存key
      */
     String BOTONG_INFO_CATALOG_LIST = "botong:info:";
+    /**
+     * redis 分隔
+     */
+    String BOTONG_INFO_FIX = ":";
 
     @Getter
     enum StateCode {

@@ -10,20 +10,20 @@ import java.util.Map;
 import java.util.regex.Pattern;
 
 /**
- * 
+ *
  * <pre>
  *  Tyrest
  *  File: ValidationUtil.java
- * 
+ *
  *  Tyrest, Inc.
  *  Copyright (C): 2016
- * 
+ *
  *  Description:
  *  TODO
- * 
+ *
  *  Notes:
- *  $Id: ValidationUtil.java  Tyrest\magintrursh $ 
- * 
+ *  $Id: ValidationUtil.java  Tyrest\magintrursh $
+ *
  *  Revision History
  *  &lt;Date&gt;,			&lt;Who&gt;,			&lt;What&gt;
  *  2016年11月1日		liushujie		Initial.
@@ -35,7 +35,7 @@ public class ValidationUtil {
 
 	/**
 	 * Check whether the Object has value or not.
-	 * 
+	 *
 	 * @param aObj
 	 * @return if the obj is empty
 	 */
@@ -60,7 +60,7 @@ public class ValidationUtil {
 
 	/**
 	 * Check whether the String has value or not.
-	 * 
+	 *
 	 * @param aStr
 	 * @return if the string is empty
 	 */
@@ -74,7 +74,7 @@ public class ValidationUtil {
 
 	/**
 	 * Check whether the Long has value or not.
-	 * 
+	 *
 	 * @param aLong
 	 * @return if the Long is null
 	 */
@@ -88,7 +88,7 @@ public class ValidationUtil {
 
 	/**
 	 * Check whether a Collection object is empty.
-	 * 
+	 *
 	 * @param c:
 	 *            a java.util.Collection object
 	 * @return if the Map is empty
@@ -103,7 +103,7 @@ public class ValidationUtil {
 
 	/**
 	 * Check whether a Map object is empty.
-	 * 
+	 *
 	 * @param m:
 	 *            a java.util.Map object
 	 * @return if the Map is empty
@@ -118,7 +118,7 @@ public class ValidationUtil {
 
 	/**
 	 * Check whether the Date has value or not.
-	 * 
+	 *
 	 * @param aDate
 	 * @return if the date is null
 	 */
@@ -132,7 +132,7 @@ public class ValidationUtil {
 
 	/**
 	 * Trim the specified String.
-	 * 
+	 *
 	 * @param aStr
 	 * @return the result string,"" return if string is NULL
 	 */
@@ -179,7 +179,7 @@ public class ValidationUtil {
 
 	/**
 	 * Check whether the Object is null or not.
-	 * 
+	 *
 	 * @param oStr
 	 * @return if the object is NULL
 	 */
@@ -195,21 +195,19 @@ public class ValidationUtil {
 	/**
 	 * Validation method for time. The support time format is "hh:mm" or
 	 * "hh:mm:ss".
-	 * 
+	 *
 	 * @param text
 	 *            Input time value to be validated.
 	 * @return Return true if validation ok, otherwise return false.
 	 */
 	public static boolean isTime(String text) {
-		// Pattern p =
-		// Pattern.compile("((([0]|[1])?\\d)|([2][0-3]))([\\:](([0-5]\\d)|[0](\\d))){1,2}");
 		Pattern p = Pattern.compile("(([0][1-9])|([1][0-2]))([\\:](([0-5]\\d)|[0](\\d))){1,2}");
 		return p.matcher(text).matches();
 	}
 
 	/**
 	 * Validation method for Currency format.
-	 * 
+	 *
 	 * @param text
 	 *            Input currency value to be validated.
 	 * @return Return true if validation ok, otherwise return false.
@@ -238,7 +236,7 @@ public class ValidationUtil {
 
 	/**
 	 * Validation method for Number Format (decimal is excluded)
-	 * 
+	 *
 	 * @param text
 	 * @return Return true if validation ok, otherwise return false.
 	 */
@@ -253,63 +251,11 @@ public class ValidationUtil {
 
 	/**
 	 * Validation method for date. It is a very strict date validator.
-	 * 
-	 * @param text
+	 *
 	 *            Input date to be validated.
-	 * @param pattern
 	 *            Inputed date pattern.
 	 * @return Return true if validation ok, otherwise return false.
 	 */
-	public static boolean isDate(String text, String pattern) {
-		if (text == null || text.trim().isEmpty()) {
-			return false;
-		}
-
-		try {
-			SimpleDateFormat formatter = new SimpleDateFormat(pattern);
-			formatter.setLenient(false);
-			formatter.parse(text);
-		} catch (Exception e) {
-			return false;
-		}
-		try {
-			// date pattern: MM/dd/yyyy
-			int mPos, dPos, yPos, mVal, dVal, yVal;
-			String _pattern = pattern.toUpperCase();
-			String separator = String.valueOf(getSeparator(_pattern));
-			String[] _patternArr = _pattern.split(separator);
-			mPos = getPosition(_patternArr, "[M]{1,}");
-			dPos = getPosition(_patternArr, "[D]{1,}");
-			yPos = getPosition(_patternArr, "[Y]{1,}");
-
-			String[] dateVals = text.trim().split(separator);
-			mVal = Integer.parseInt(dateVals[mPos]);
-			dVal = Integer.parseInt(dateVals[dPos]);
-			yVal = Integer.parseInt(dateVals[yPos]);
-
-			if (mVal < 1 || mVal > 12) {
-				return false;
-			}
-			if (dVal < 1 || dVal > 31) {
-				return false;
-			}
-			if (yVal < 0 || yVal > 9999) {
-				return false;
-			}
-			// FixBug 28507:
-			// The input year's length should be the same as the year's format.
-			if (dateVals[yPos].length() != _patternArr[yPos].length()) {
-				return false;
-			}
-			int[] num_of_days_in_monthes = getNumberOfDaysInMonthes(yVal);
-			if (dVal > num_of_days_in_monthes[mVal - 1]) {
-				return false;
-			}
-		} catch (Exception eg) {
-			return false;
-		}
-		return true;
-	}
 
 	private static int getPosition(String[] patternArr, String regex) {
 		for (int i = 0; i < patternArr.length; i++) {
@@ -330,18 +276,12 @@ public class ValidationUtil {
 		throw new IllegalArgumentException("Inputted date pattern is fatal wrong.");
 	}
 
-	private static int[] getNumberOfDaysInMonthes(int theyear) {
-		return new int[] { 31, getLeapYear(theyear), 31, 30, 31, 30, 31, 31, 30, 31, 30, 31 };
-	}
 
-	private static int getLeapYear(int theyear) {
-		return ((theyear % 4 == 0 && theyear % 100 != 0) || theyear % 400 == 0) ? 29 : 28;
-	}
 
 	// ----------------- Add by Anderson End:---------------------
 	/**
 	 * retrieve not null value.
-	 * 
+	 *
 	 * @param valueA
 	 * @param valueB
 	 * @return
@@ -356,36 +296,17 @@ public class ValidationUtil {
 		}
 	}
 
-	/**
-	 * make length of doc type value in 250
-	 * 
-	 * @param docType
-	 * @return
-	 */
-	public static String getValidDocType(String docType) {
-		String herder = "application/";
-		if (docType != null && docType.length() > 250) {
-			// if doc type start with "application/", cut it first
-			if (docType.startsWith(herder)) {
-				docType = docType.substring(herder.length());
-			}
-
-			if (docType.length() > 250) {
-				docType = docType.substring(0, 250);
-			}
-		}
-		return docType;
-	}
 
 	/**
 	 * To validate email address.
-	 * 
+	 *
 	 * @param email
 	 * @return
 	 */
 	public static boolean isValidEmailAddress(String email) {
-		if (isEmpty(email))
+		if (isEmpty(email)){
 			return false;
+		}
 		String regex = "^[_A-Za-z0-9-]+(\\.[_A-Za-z0-9-]+)*@[A-Za-z0-9-]+(\\.[A-Za-z0-9-]+)*(\\.[_A-Za-z-]+)";
 		return email.matches(regex);
 	}
@@ -396,7 +317,7 @@ public class ValidationUtil {
 
 	/**
 	 * Check if object1 equals object2.
-	 * 
+	 *
 	 * @param obj1
 	 *            object1
 	 * @param obj2
@@ -416,7 +337,7 @@ public class ValidationUtil {
 	/**
 	 * Check if trim(str1) equals trim(str2). Null is parsed to ""(empty
 	 * string).
-	 * 
+	 *
 	 * @param str1
 	 *            str1
 	 * @param str2
@@ -430,7 +351,7 @@ public class ValidationUtil {
 	/**
 	 * Check if trim(str1) equalsIgnoreCase trim(str2). Null is parsed to
 	 * ""(empty string).
-	 * 
+	 *
 	 * @param str1
 	 *            str1
 	 * @param str2
@@ -445,13 +366,13 @@ public class ValidationUtil {
 		return str1 != null ? str1.equalsIgnoreCase(str2) : str2 == null;
 	}
 
-	public static boolean equals(Long L1, Long L2) {
-		return L1 != null ? L1.equals(L2) : L2 == null;
+	public static boolean equals(Long l1, Long l2) {
+		return l1 != null ? l1.equals(l2) : l2 == null;
 	}
 
 	/**
 	 * this method is moved from ValidatorUtil
-	 * 
+	 *
 	 * @author rocket.he
 	 * @param url
 	 * @return
@@ -463,7 +384,7 @@ public class ValidationUtil {
 
 	/**
 	 * this method is moved from ValidatorUtil
-	 * 
+	 *
 	 * @author rocket.he
 	 * @param inputObject
 	 * @return
@@ -509,7 +430,7 @@ public class ValidationUtil {
 
 	/**
 	 * is Comparison Operator
-	 * 
+	 *
 	 * @param str
 	 *            String
 	 * @return
@@ -533,30 +454,6 @@ public class ValidationUtil {
 		}else{
 			return source;
 		}
-	}
-
-	/**
-	 * 获取字符串的长度，如果有中文，则每个中文字符计为2位
-	 * @param value 指定的字符串
-	 * @return 字符串的长度
-	 */
-	public static int length(String value) {
-		int valueLength = 0;
-		String chinese = "[\u0391-\uFFE5]";
-        /* 获取字段值的长度，如果含中文字符，则每个中文字符长度为2，否则为1 */
-		for (int i = 0; i < value.length(); i++) {
-            /* 获取一个字符 */
-			String temp = value.substring(i, i + 1);
-            /* 判断是否为中文字符 */
-			if (temp.matches(chinese)) {
-                /* 中文字符长度为2 */
-				valueLength += 2;
-			} else {
-                /* 其他字符长度为1 */
-				valueLength += 1;
-			}
-		}
-		return valueLength;
 	}
 
 }
