@@ -4,7 +4,7 @@ import com.baomidou.mybatisplus.mapper.Condition;
 import com.common.mybatis.service.impl.BaseServiceImpl;
 import com.yunjing.approval.dao.mapper.ApprovalUserMapper;
 import com.yunjing.approval.model.entity.ApprovalUser;
-import com.yunjing.approval.processor.feign.OrgUserFeign;
+import com.yunjing.approval.processor.okhttp.OrgMemberService;
 import com.yunjing.approval.service.IApprovalUserService;
 import com.yunjing.mommon.constant.StatusCode;
 import com.yunjing.mommon.global.exception.BaseException;
@@ -12,7 +12,10 @@ import com.yunjing.mommon.wrapper.ResponseEntityWrapper;
 import org.apache.commons.lang.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import retrofit2.Call;
+import retrofit2.Response;
 
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -25,14 +28,19 @@ import java.util.Map;
 public class ApprovalUserServiceImpl extends BaseServiceImpl<ApprovalUserMapper, ApprovalUser> implements IApprovalUserService {
 
     @Autowired
-    private OrgUserFeign orgUserFeign;
+    private OrgMemberService orgMemberService;
     @Autowired
     private IApprovalUserService approvalUserService;
 
     @Override
     public boolean addUser(String orgId, String userId) throws BaseException {
         String[] passportIds = new String[]{userId};
-        ResponseEntityWrapper<List<Map<String, Object>>> memberList = orgUserFeign.getMemberList(orgId, passportIds);
+        ResponseEntityWrapper<List<Map<String, Object>>> memberList = null;
+        try {
+            memberList = orgMemberService.getMemberList(orgId, passportIds).execute().body();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
         List<ApprovalUser> list = approvalUserService.selectList(Condition.create().where("org_id={0}", orgId));
         if (memberList.getStatusCode() == StatusCode.SUCCESS.getStatusCode()) {
             List<Map<String, Object>> memberDTOS = memberList.getData();

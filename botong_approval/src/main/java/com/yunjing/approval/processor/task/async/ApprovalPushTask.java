@@ -2,7 +2,6 @@ package com.yunjing.approval.processor.task.async;
 
 import com.alibaba.fastjson.JSONObject;
 import com.yunjing.approval.dao.mapper.ApprovalProcessMapper;
-import com.yunjing.approval.dao.mapper.CopyMapper;
 import com.yunjing.approval.dao.mapper.CopysMapper;
 import com.yunjing.approval.model.entity.Approval;
 import com.yunjing.approval.model.entity.ApprovalUser;
@@ -10,7 +9,7 @@ import com.yunjing.approval.model.entity.PushLog;
 import com.yunjing.approval.model.vo.ApprovalUserVO;
 import com.yunjing.approval.model.vo.CopyUserVO;
 import com.yunjing.approval.param.PushParam;
-import com.yunjing.approval.processor.feign.PushFeign;
+import com.yunjing.approval.processor.okhttp.PushService;
 import com.yunjing.approval.service.IApprovalService;
 import com.yunjing.approval.service.IApprovalUserService;
 import com.yunjing.approval.service.ICopysService;
@@ -49,7 +48,7 @@ public class ApprovalPushTask extends BaseTask {
     @Autowired
     private IPushLogService pushLogService;
     @Autowired
-    private PushFeign pushFeign;
+    private PushService pushService;
 
     /**
      * 审批主键
@@ -151,7 +150,7 @@ public class ApprovalPushTask extends BaseTask {
                             pushParam.setRegistrationId(user.getMobile());
                             pushParam.setNotificationTitle(message);
                             // 推送审批
-                            pushFeign.pushAllTargetByUser(pushParam);
+                            pushService.pushAllTargetByUser(pushParam);
 
                             break;
                         }
@@ -174,7 +173,7 @@ public class ApprovalPushTask extends BaseTask {
                     pushParam.setRegistrationId(user.getMobile());
                     pushParam.setNotificationTitle(message);
                     // 推送审批
-                    pushFeign.pushAllTargetByUser(pushParam);
+                    pushService.pushAllTargetByUser(pushParam);
                     boolean insert = pushLogService.insert(pushLog);
                     if (!insert) {
                         throw new InsertMessageFailureException("保存推送审批记录失败");
@@ -217,7 +216,7 @@ public class ApprovalPushTask extends BaseTask {
                                 pushParam2.setRegistrationId(user.getMobile());
                                 pushParam2.setNotificationTitle(message);
                                 // 推送审批
-                                pushFeign.pushAllTargetByUser(pushParam2);
+                                pushService.pushAllTargetByUser(pushParam2);
                                 n = 1;
                             } else if (i == copyUserList.size() - 1 && n < 100) {
                                 for (int j = 0; j < userPhones.size(); j++) {
@@ -232,7 +231,7 @@ public class ApprovalPushTask extends BaseTask {
                                 pushParam2.setRegistrationId(user.getMobile());
                                 pushParam2.setNotificationTitle(message);
                                 // 推送审批
-                                pushFeign.pushAllTargetByUser(pushParam2);
+                                pushService.pushAllTargetByUser(pushParam2);
                             }
                             n++;
                             i++;
