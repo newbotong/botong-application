@@ -32,7 +32,7 @@ public class SetsProcess extends BaseModel<SetsProcess> {
      * 审批人
      */
     @TableField("approver")
-    private String approver;
+    private Long approver;
 
     /**
      * 顺序

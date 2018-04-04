@@ -17,8 +17,8 @@ public interface ICopyService extends IBaseService<Copy> {
      * 获取抄送人
      *
      * @param modelId 模型编号
-     * @return
-     * @throws Exception
+     * @return List<UserVO>
+     * @throws Exception 抛异常
      */
     List<UserVO> get(Long modelId) throws Exception;
 
@@ -27,8 +27,8 @@ public interface ICopyService extends IBaseService<Copy> {
      *
      * @param modelId 模型编号
      * @param userIds 用户集合
-     * @return
-     * @throws Exception
+     * @return boolean
+     * @throws Exception 抛异常
      */
     boolean save(Long modelId, String userIds) throws Exception;
 
@@ -37,6 +37,7 @@ public interface ICopyService extends IBaseService<Copy> {
      *
      * @param oid 模型主键
      * @param uid 用户主键
+     * @return boolean
      */
-    void deleteCopyUser(Long oid, Long uid);
+    boolean deleteCopyUser(Long oid, Long uid);
 }

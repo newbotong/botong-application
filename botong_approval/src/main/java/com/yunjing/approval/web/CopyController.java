@@ -24,8 +24,8 @@ public class CopyController extends BaseController {
      * 获取抄送人
      *
      * @param modelId 模型主键
-     * @return
-     * @throws Exception
+     * @return ResponseEntityWrapper
+     * @throws Exception 抛异常
      */
     @PostMapping("/get")
     public ResponseEntityWrapper get(@RequestParam Long modelId) throws Exception {
@@ -35,8 +35,8 @@ public class CopyController extends BaseController {
     /**
      * @param modelId 模型主键
      * @param userIds 用户主键集合
-     * @return
-     * @throws Exception
+     * @return ResponseEntityWrapper
+     * @throws Exception 抛异常
      */
     @PostMapping("/save")
     public ResponseEntityWrapper save(@RequestParam Long modelId, String userIds) throws Exception {
@@ -49,7 +49,7 @@ public class CopyController extends BaseController {
      * @param oid 模型主键
      * @param uid 用户主键
      */
-    @PostMapping("/deleteCopyUser")
+    @PostMapping("/delete")
     public void deleteCopyUser(@RequestParam Long oid, @RequestParam Long uid) {
         copyService.deleteCopyUser(oid, uid);
     }

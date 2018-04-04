@@ -31,7 +31,7 @@ public class UserVO implements Serializable{
     }
 
     public void setUserId(String userId) {
-        this.userId = userId == null ? null : userId.trim();
+        this.userId = userId;
     }
 
 

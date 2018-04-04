@@ -14,12 +14,12 @@ import java.util.List;
  * @author 刘小鹏
  * @date 2017/11/29
  */
-public interface ModelLMapper extends IBaseMapper<ModelL> {
+public interface ModelMapper extends IBaseMapper<ModelL> {
 
     /**
      * 查询企业下的所有审批模板
      * @param orgId 企业Id
-     * @return
+     * @return List<ModelVO>
      */
     List<ModelVO> selectModelListByOrgId(@Param("orgId") Long orgId);
 

@@ -50,7 +50,7 @@ public class ExportController extends BaseController {
      * 删除审批数据
      *
      * @param approvalId 审批主键
-     * @return
+     * @return ResponseEntityWrapper
      */
     @PostMapping("/delete")
     public ResponseEntityWrapper deleteApproval(@RequestParam("approvalId") Long approvalId) throws Exception {
@@ -62,7 +62,7 @@ public class ExportController extends BaseController {
      *
      * @param page 分页对象
      * @param oid  企业主键
-     * @return
+     * @return ResponseEntityWrapper
      */
     @PostMapping("/log")
     public ResponseEntityWrapper getExportLog(@ModelAttribute(value = "page") Page page, @RequestParam("oid") Long oid) {
@@ -82,13 +82,12 @@ public class ExportController extends BaseController {
      * @param createTimeEnd   发起时间_结束
      * @param finishTimeStart 完成时间_开始
      * @param finishTimeEnd   完成时间_结束
-     * @return
-     * @throws Exception
+     * @return ResponseEntityWrapper
+     * @throws Exception 抛异常
      */
     @GetMapping("/export")
     public ResponseEntityWrapper exportData(@RequestParam("oid") Long oid, @RequestParam("uid") Long uid, Long mid, Integer state, String title, String createTimeStart,
                              String createTimeEnd, String finishTimeStart, String finishTimeEnd, HttpServletResponse response) throws Exception {
-        boolean exportFlag = false;
         BaseExModel excel = approvalService.createApprovalExcel(oid,uid, mid, state, title, createTimeStart, createTimeEnd, finishTimeStart, finishTimeEnd);
         String fileName =  excel.getFileName();
         //设置响应类型，告知浏览器输出的是图片
@@ -101,16 +100,17 @@ public class ExportController extends BaseController {
         response.setHeader("Set-Cookie", "name=value; HttpOnly");
         //生成图片并通过response输出
         response.setDateHeader("Expire", 0);
-        return success(excel,exportFlag,response);
+        return success(excel,response);
     }
 
-    private ResponseEntityWrapper success(BaseExModel excel, boolean resultFlag,HttpServletResponse response) throws Exception {
+    private ResponseEntityWrapper success(BaseExModel excel,HttpServletResponse response) throws Exception {
         try {
             OutputStream out = response.getOutputStream();
             excel.createWorkbook().write(out);
-            resultFlag = true;
+            return success();
         } catch (Exception e) {
             e.printStackTrace();
+            return error();
         } finally {
             try {
                 response.getOutputStream().flush();
@@ -118,7 +118,6 @@ public class ExportController extends BaseController {
             } catch (Exception e2) {
                 e2.printStackTrace();
             }
-            return success(resultFlag);
         }
     }
 }

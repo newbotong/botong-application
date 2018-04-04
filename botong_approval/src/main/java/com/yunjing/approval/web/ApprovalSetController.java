@@ -13,8 +13,9 @@ import org.springframework.web.bind.annotation.*;
  * @date 2017/12/21
  */
 @RestController
-@RequestMapping("/approval")
-public class ApprovalController extends BaseController {
+@RequestMapping("/approval/set")
+public class ApprovalSetController extends BaseController {
+
 
     @Autowired
     private IModelService modelService;
@@ -27,9 +28,9 @@ public class ApprovalController extends BaseController {
      * 获取审批设置项
      *
      * @param modelId 模型主键
-     * @return
+     * @return ResponseEntityWrapper
      */
-    @PostMapping("/getSetItem")
+    @PostMapping("/get")
     public ResponseEntityWrapper getSetItem(@RequestParam("modelId") Long modelId) throws Exception {
 
         return success(approvalSetsService.getApprovalSet(modelId));
@@ -39,9 +40,9 @@ public class ApprovalController extends BaseController {
      * 保存审批设置项
      *
      * @param modelId 模型主键
-     * @return
+     * @return ResponseEntityWrapper
      */
-    @PostMapping("/saveSetItem")
+    @PostMapping("/save")
     public ResponseEntityWrapper saveSetItem(@RequestParam("modelId") Long modelId, @RequestParam("setting") int setting) throws Exception {
 
         return success(approvalSetsService.saveApprovalSets(modelId, setting));
@@ -51,7 +52,7 @@ public class ApprovalController extends BaseController {
      * 设置审批流程
      *
      * @param modelId 模型主键
-     * @return
+     * @return ResponseEntityWrapper
      */
     @PostMapping("/updateProcess")
     public ResponseEntityWrapper updateProcess(@RequestParam("modelId") Long modelId,
@@ -66,7 +67,7 @@ public class ApprovalController extends BaseController {
      *
      * @param modelId     模型主键
      * @param conditionId 条件主键
-     * @return
+     * @return ResponseEntityWrapper
      */
     @PostMapping("/deleteProcess")
     public ResponseEntityWrapper deleteProcess(@RequestParam("modelId") Long modelId, @RequestParam(value = "conditionId", required = false) Long conditionId) throws Exception {

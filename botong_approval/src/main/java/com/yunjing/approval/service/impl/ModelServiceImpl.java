@@ -4,7 +4,7 @@ import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 import com.baomidou.mybatisplus.mapper.Condition;
 import com.common.mybatis.service.impl.BaseServiceImpl;
-import com.yunjing.approval.dao.mapper.ModelLMapper;
+import com.yunjing.approval.dao.mapper.ModelMapper;
 import com.yunjing.approval.model.entity.ModelCategory;
 import com.yunjing.approval.model.entity.ModelL;
 import com.yunjing.approval.model.vo.ModelListVO;
@@ -29,10 +29,10 @@ import java.util.stream.Collectors;
  * @date 2017/11/30
  */
 @Service
-public class ModelServiceImpl extends BaseServiceImpl<ModelLMapper, ModelL> implements IModelService {
+public class ModelServiceImpl extends BaseServiceImpl<ModelMapper, ModelL> implements IModelService {
 
     @Autowired
-    private ModelLMapper modelLMapper;
+    private ModelMapper modelMapper;
 
     @Autowired
     private ICopyService copyService;
@@ -43,7 +43,7 @@ public class ModelServiceImpl extends BaseServiceImpl<ModelLMapper, ModelL> impl
     @Override
     @Transactional(propagation = Propagation.REQUIRED, rollbackFor = Exception.class)
     public List<ModelListVO> findModelList(Long orgId) {
-        List<ModelVO> modelVOList = modelLMapper.selectModelListByOrgId(orgId);
+        List<ModelVO> modelVOList = modelMapper.selectModelListByOrgId(orgId);
         List<ModelListVO> modelListVOList = new ArrayList<>();
         List<ModelCategory> list = modelCategoryService.selectList(Condition.create().where("org_id={0}", orgId));
         if (!list.isEmpty()) {
@@ -130,7 +130,7 @@ public class ModelServiceImpl extends BaseServiceImpl<ModelLMapper, ModelL> impl
     @Override
     @Transactional(propagation = Propagation.REQUIRED, rollbackFor = Exception.class)
     public List<ModelVO> findModelListByOrgId(Long orgId) {
-        List<ModelVO> modelVOList = modelLMapper.selectModelListByOrgId(orgId);
+        List<ModelVO> modelVOList = modelMapper.selectModelListByOrgId(orgId);
         for (ModelVO modelVO : modelVOList) {
             // 获取每个审批项的抄送人数量
             int count = copyService.selectCount(Condition.create().where("model_id={0}", modelVO.getModelId()));

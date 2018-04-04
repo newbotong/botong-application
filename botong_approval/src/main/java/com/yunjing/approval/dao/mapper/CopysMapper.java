@@ -3,7 +3,7 @@ package com.yunjing.approval.dao.mapper;
 
 import com.common.mybatis.mapper.IBaseMapper;
 import com.yunjing.approval.model.dto.ApprovalContentDTO;
-import com.yunjing.approval.model.entity.CopyS;
+import com.yunjing.approval.model.entity.Copys;
 import com.yunjing.approval.model.vo.CopyUserVO;
 import com.yunjing.approval.param.FilterParam;
 import org.apache.ibatis.annotations.Param;
@@ -14,7 +14,7 @@ import java.util.List;
  * @author 刘小鹏
  * @date 2018/01/15
  */
-public interface CopySMapper extends IBaseMapper<CopyS> {
+public interface CopysMapper extends IBaseMapper<Copys> {
 
 
     /**
