@@ -50,7 +50,7 @@ public class CopyController extends BaseController {
      * @param memberId  成员id
      */
     @PostMapping("/delete")
-    public void deleteCopyUser(@RequestParam Long companyId, @RequestParam Long memberId) {
-        copyService.deleteCopyUser(companyId, memberId);
+    public ResponseEntityWrapper deleteCopyUser(@RequestParam Long companyId, @RequestParam Long memberId) {
+        return success(copyService.deleteCopyUser(companyId, memberId));
     }
 }

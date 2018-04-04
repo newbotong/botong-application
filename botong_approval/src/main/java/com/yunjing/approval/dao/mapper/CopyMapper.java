@@ -14,9 +14,9 @@ public interface CopyMapper extends IBaseMapper<Copy> {
     /**
      * 删除抄送人
      *
-     * @param oid 企业主键
-     * @param uid 用户主键
+     * @param companyId 公司id
+     * @param memberId  成员id
      * @return boolean
      */
-    boolean deleteCopyUser(@Param("oid") Long oid, @Param("uid") Long uid);
+    boolean deleteCopyUser(@Param("companyId") Long companyId, @Param("memberId") Long memberId);
 }
