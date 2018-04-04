@@ -3,8 +3,8 @@ package com.yunjing.approval.model.vo;
 import lombok.Data;
 
 /**
- * @author liuxiaopeng
- * @date 2018/01/17
+ * @author 刘小鹏
+ * @date 2018/04/04
  */
 @Data
 public class AttrValueVO {

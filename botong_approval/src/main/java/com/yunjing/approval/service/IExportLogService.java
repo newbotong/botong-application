@@ -8,7 +8,7 @@ import com.yunjing.approval.model.vo.LogPageVO;
 /**
  * 导出记录--业务接口
  *
- * @author liuxiaopeng
+ * @author 刘小鹏
  * @date 2018/01/15
  */
 public interface IExportLogService extends IBaseService<ExportLog> {

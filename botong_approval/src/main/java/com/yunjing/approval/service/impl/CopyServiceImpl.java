@@ -57,21 +57,10 @@ public class CopyServiceImpl extends BaseServiceImpl<CopyMapper, Copy> implement
      */
     @Override
     public List<UserVO> get(Long modelId) throws Exception {
-        OrgModel entity = orgModelService.selectOne(Condition.create().where("model_id={0}", modelId));
-        Long oid = entity.getOrgId();
-        if (null == oid) {
-            throw new BaseException("模型所属企业不存在");
-        }
-        List<Copy> copys = copyService.selectList(Condition.create().where("model_id={0}", modelId).orderBy("sort", true));
+        List<Copy> copyList = copyService.selectList(Condition.create().where("model_id={0}", modelId).orderBy("sort", true));
         List<UserVO> userVos = new ArrayList<>();
-        if (copys == null || copys.isEmpty()) {
-            return userVos;
-        }
-        List<String> userIdList = new ArrayList<>(copys.size());
-        for (Copy c : copys) {
-            if (StringUtils.isBlank(c.getUserId())) {
-                continue;
-            }
+        List<String> userIdList = new ArrayList<>(copyList.size());
+        for (Copy c : copyList) {
             //0.用户 1.主管
             if (c.getType() == 0) {
                 userIdList.add(c.getUserId());
@@ -80,43 +69,15 @@ public class CopyServiceImpl extends BaseServiceImpl<CopyMapper, Copy> implement
         Map<String, UserVO> userVOMap = new HashMap<>(userIdList.size());
         Map<Long, ApprovalUser> userOrgVOMap = new HashMap<>(userIdList.size());
         if (CollectionUtils.isNotEmpty(userIdList)) {
-            List<UserVO> users = userRedisService.getByUserIdList(userIdList);
-
-            if (CollectionUtils.isEmpty(users)) {
-                throw new BaseException("无法获取用户缓存信息");
-            }
-
-            if (users.size() != userIdList.size()) {
-                throw new BaseException("获取用户缓存信息数据异常");
-            }
-
-            for (UserVO vo : users) {
-                userVOMap.put(String.valueOf(vo.getUserId()), vo);
-            }
-
             // 调用企业服务
             List<ApprovalUser> userOrgs = approvalUserService.selectList(Condition.create());
-            if (CollectionUtils.isEmpty(userOrgs)) {
-                throw new BaseException("无法获取用户信息");
-            }
-
-            if (userOrgs.size() != userIdList.size()) {
-                throw new BaseException("获取用户信息数据异常");
-            }
-
             for (ApprovalUser uo : userOrgs) {
                 userOrgVOMap.put(uo.getId(), uo);
             }
         }
-
-        for (Copy c : copys) {
+        for (Copy c : copyList) {
             UserVO vo = new UserVO();
             String userId = c.getUserId();
-
-            if (StringUtils.isBlank(userId)) {
-                continue;
-            }
-
             if (c.getType() == 0) {
                 vo = userVOMap.get(userId);
                 ApprovalUser uo = userOrgVOMap.get(userId);
@@ -129,10 +90,8 @@ public class CopyServiceImpl extends BaseServiceImpl<CopyMapper, Copy> implement
             } else {
                 vo.setUserId(userId);
             }
-
             userVos.add(vo);
         }
-
         return userVos;
     }
 

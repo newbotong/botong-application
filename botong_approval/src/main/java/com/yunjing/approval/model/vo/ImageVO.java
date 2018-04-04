@@ -6,6 +6,7 @@ import lombok.Data;
  * 图片
  *
  * @author lixiaopeng
+ * @date 2018/04/04
  */
 @Data
 public class ImageVO {

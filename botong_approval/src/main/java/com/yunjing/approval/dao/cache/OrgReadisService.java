@@ -5,7 +5,7 @@ import com.yunjing.approval.model.entity.Org;
 import org.springframework.stereotype.Service;
 
 /**
- * @author roc
+ * @author 刘小鹏
  */
 @Service
 public class OrgReadisService extends BaseRedisService<Org> {

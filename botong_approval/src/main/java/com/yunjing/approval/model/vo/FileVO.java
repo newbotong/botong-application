@@ -6,6 +6,7 @@ import lombok.Data;
  * 附件
  *
  * @author liuxiaopeng
+ * @date 2018/04/04
  */
 @Data
 public class FileVO {

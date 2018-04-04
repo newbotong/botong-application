@@ -7,7 +7,7 @@ import com.yunjing.approval.model.entity.ExportLog;
 /**
  * 导出记录--mapper
  *
- * @author liuxiaopeng
+ * @author 刘小鹏
  * @date 2018/01/15
  */
 public interface ExportLogMapper extends IBaseMapper<ExportLog> {
