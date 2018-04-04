@@ -45,7 +45,9 @@ public class DangServiceImpl implements DangService {
      */
     @Override
     public Call<ResponseEntityWrapper> sendDang(DangParam dangParam) {
-        initRetrofit();
+        if(service == null){
+            initRetrofit();
+        }
         try {
             Call<ResponseEntityWrapper> call = service.sendDang(dangParam);
             call.execute();
