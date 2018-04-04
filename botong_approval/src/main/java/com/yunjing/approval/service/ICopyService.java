@@ -26,18 +26,18 @@ public interface ICopyService extends IBaseService<Copy> {
      * 保存抄送人
      *
      * @param modelId 模型编号
-     * @param userIds 用户集合
+     * @param memberIds 成员集合
      * @return boolean
      * @throws Exception 抛异常
      */
-    boolean save(Long modelId, String userIds) throws Exception;
+    boolean save(Long modelId, String memberIds) throws Exception;
 
     /**
      * 删除审批抄送人
      *
-     * @param oid 模型主键
-     * @param uid 用户主键
+     * @param companyId 公司id
+     * @param memberId  成员id
      * @return boolean
      */
-    boolean deleteCopyUser(Long oid, Long uid);
+    boolean deleteCopyUser(Long companyId, Long memberId);
 }

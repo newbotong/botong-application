@@ -17,10 +17,10 @@ public interface IModelService extends IBaseService<ModelL> {
     /**
      * 查询企业下的初始化模板
      *
-     * @param orgId 企业主键
+     * @param companyId 公司id
      * @return
      */
-    List<ModelListVO> findModelList(Long orgId);
+    List<ModelListVO> findModelList(Long companyId);
 
     /**
      * 审批模板排序
@@ -45,10 +45,10 @@ public interface IModelService extends IBaseService<ModelL> {
     /**
      * 查询企业下的初始化模板
      *
-     * @param orgId 企业主键
+     * @param companyId 公司id
      * @return
      */
-    List<ModelVO> findModelListByOrgId(Long orgId);
+    List<ModelVO> findModelListByOrgId(Long companyId);
 
     /**
      * 设置是否停用模型

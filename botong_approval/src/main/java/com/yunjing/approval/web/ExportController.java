@@ -31,8 +31,8 @@ public class ExportController extends BaseController {
      * 获取审批数据列表
      *
      * @param page            分页对象, 可空 页码current 默认1页    大小size 默认10
-     * @param oid             企业主键
-     * @param mid             模型主键, 审批类型, 可空(全部)
+     * @param companyId       公司id
+     * @param modelId         模型主键, 审批类型, 可空(全部)
      * @param state           审批状态  0:审批中 1:审批完成 2:已撤回, 可空(全部)
      * @param title           审批标题, 可空
      * @param createTimeStart 发起时间_开始, 可空
@@ -42,8 +42,8 @@ public class ExportController extends BaseController {
      * @return 分页列表
      */
     @PostMapping("/list")
-    public ResponseEntityWrapper page(@ModelAttribute(value = "page") Page<Approval> page, @RequestParam("oid") Long oid, Long mid, Integer state, String title, String createTimeStart, String createTimeEnd, String finishTimeStart, String finishTimeEnd) throws Exception {
-        return success(approvalService.page(page, oid, mid, state, title, createTimeStart, createTimeEnd, finishTimeStart, finishTimeEnd));
+    public ResponseEntityWrapper page(@ModelAttribute(value = "page") Page<Approval> page, @RequestParam("companyId") Long companyId, Long modelId, Integer state, String title, String createTimeStart, String createTimeEnd, String finishTimeStart, String finishTimeEnd) throws Exception {
+        return success(approvalService.page(page, companyId, modelId, state, title, createTimeStart, createTimeEnd, finishTimeStart, finishTimeEnd));
     }
 
     /**
@@ -57,24 +57,25 @@ public class ExportController extends BaseController {
 
         return success(approvalService.delete(approvalId));
     }
+
     /**
      * 获取导出记录
      *
-     * @param page 分页对象
-     * @param oid  企业主键
+     * @param page      分页对象
+     * @param companyId 公司id
      * @return ResponseEntityWrapper
      */
     @PostMapping("/log")
-    public ResponseEntityWrapper getExportLog(@ModelAttribute(value = "page") Page page, @RequestParam("oid") Long oid) {
+    public ResponseEntityWrapper getExportLog(@ModelAttribute(value = "page") Page page, @RequestParam("companyId") Long companyId) {
 
-        return success(exportLogService.findExportLogPage(page, oid));
+        return success(exportLogService.findExportLogPage(page, companyId));
     }
 
     /**
      * 审批数据导出
      *
-     * @param oid             企业主键
-     * @param uid             用户主键
+     * @param companyId       公司id
+     * @param memberId        成员id
      * @param mid             模型主键, 审批类型, 可空(全部)
      * @param state           审批状态  0:审批中 1:审批完成 2:已撤回, 可空(全部)
      * @param title           审批标题
@@ -86,10 +87,10 @@ public class ExportController extends BaseController {
      * @throws Exception 抛异常
      */
     @GetMapping("/export")
-    public ResponseEntityWrapper exportData(@RequestParam("oid") Long oid, @RequestParam("uid") Long uid, Long mid, Integer state, String title, String createTimeStart,
-                             String createTimeEnd, String finishTimeStart, String finishTimeEnd, HttpServletResponse response) throws Exception {
-        BaseExModel excel = approvalService.createApprovalExcel(oid,uid, mid, state, title, createTimeStart, createTimeEnd, finishTimeStart, finishTimeEnd);
-        String fileName =  excel.getFileName();
+    public ResponseEntityWrapper exportData(@RequestParam("companyId") Long companyId, @RequestParam("memberId") Long memberId, Long mid, Integer state, String title, String createTimeStart,
+                                            String createTimeEnd, String finishTimeStart, String finishTimeEnd, HttpServletResponse response) throws Exception {
+        BaseExModel excel = approvalService.createApprovalExcel(companyId, memberId, mid, state, title, createTimeStart, createTimeEnd, finishTimeStart, finishTimeEnd);
+        String fileName = excel.getFileName();
         //设置响应类型，告知浏览器输出的是图片
         response.setContentType("application/vnd.ms-excel;charset=utf-8");
         response.setHeader("Content-disposition", "attachment; filename=" + new String(fileName.getBytes("UTF-8"), "ISO8859-1"));
@@ -100,10 +101,10 @@ public class ExportController extends BaseController {
         response.setHeader("Set-Cookie", "name=value; HttpOnly");
         //生成图片并通过response输出
         response.setDateHeader("Expire", 0);
-        return success(excel,response);
+        return success(excel, response);
     }
 
-    private ResponseEntityWrapper success(BaseExModel excel,HttpServletResponse response) throws Exception {
+    private ResponseEntityWrapper success(BaseExModel excel, HttpServletResponse response) throws Exception {
         try {
             OutputStream out = response.getOutputStream();
             excel.createWorkbook().write(out);

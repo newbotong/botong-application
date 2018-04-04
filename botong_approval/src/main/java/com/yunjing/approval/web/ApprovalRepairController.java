@@ -24,24 +24,24 @@ public class ApprovalRepairController extends BaseController {
     /**
      * 修复审批标题数据
      *
-     * @param oid 企业主键
+     * @param companyId 公司id
      * @return 审批列表
      * @throws Exception 异常
      */
     @PostMapping("/title")
-    public ResponseEntityWrapper title(Long oid) throws Exception {
-        return success(approvalRepairService.repairTitle(oid));
+    public ResponseEntityWrapper title(Long companyId) throws Exception {
+        return success(approvalRepairService.repairTitle(companyId));
     }
 
     /**
      * 修复审批完成时间数据
      *
-     * @param oid 企业主键
+     * @param companyId 公司id
      * @return 审批列表
      * @throws Exception 异常
      */
     @PostMapping("/finish")
-    public ResponseEntityWrapper finish(Long oid) throws Exception {
-        return success(approvalRepairService.repairFinishTime(oid));
+    public ResponseEntityWrapper finish(Long companyId) throws Exception {
+        return success(approvalRepairService.repairFinishTime(companyId));
     }
 }

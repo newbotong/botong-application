@@ -24,6 +24,11 @@ public  abstract class BaseExModel {
 
     private String fileName;
 
+    /**
+     * 创建工作表
+     * @return Workbook
+     * @throws Exception 抛异常
+     */
     public abstract Workbook createWorkbook() throws Exception;
     /**
      * 创建 HSSF 格式的Excel 文件，即 xls 格式
@@ -88,8 +93,6 @@ public  abstract class BaseExModel {
             noticeStyle.setFont(font);
             noticeStyle.setAlignment(CellStyle.ALIGN_CENTER);
             noticeStyle.setVerticalAlignment(CellStyle.VERTICAL_CENTER);
-//            noticeStyle.setWrapText(true);
-//            CellRangeAddress
             s.addMergedRegion(new CellRangeAddress(ApprovalExConsts.ROW_NUM_NOTICE_0, ApprovalExConsts.ROW_NUM_NOTICE_0, 0, excelModel.getTitles().size() - 1));
             s.addMergedRegion(new CellRangeAddress(ApprovalExConsts.ROW_NUM_TABLE_1, ApprovalExConsts.ROW_NUM_TABLE_1, 0, excelModel.getTitles().size() - 1));
             // Define userIndex few rows
@@ -106,7 +109,6 @@ public  abstract class BaseExModel {
             tableHeader.setFillPattern(CellStyle.SOLID_FOREGROUND);
             tableHeader.setFillForegroundColor(HSSFColor.SKY_BLUE.index);
             tableCell.setCellStyle(tableHeader);
-//        tableCell.setCellStyle(tableStyle);
             if (titles != null && titles.size() > 0) {
                 createRow(s, ApprovalExConsts.ROW_NUM_TITLE_2, titles);
             }

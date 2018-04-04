@@ -22,13 +22,13 @@ public class ModelController extends BaseController {
     /**
      * 获取审批模板列表
      *
-     * @param oid 企业主键
+     * @param companyId 公司id
      * @return ResponseEntityWrapper
      */
     @GetMapping("/list")
-    public ResponseEntityWrapper getList(@RequestParam("oid") Long oid) throws Exception {
+    public ResponseEntityWrapper getList(@RequestParam("companyId") Long companyId) throws Exception {
 
-        return success(modelService.findModelList(oid));
+        return success(modelService.findModelList(companyId));
     }
 
     /**

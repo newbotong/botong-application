@@ -46,9 +46,4 @@ public class ApprovalExConsts {
     public static Integer EXCEL_ERROR_0 = 0;
     public static Integer EXCEL_ERROR_1 = 1;
 
-
-    public static enum Type {
-        HSSFWorkbook, XSSFWorkbook;
-
-    }
 }

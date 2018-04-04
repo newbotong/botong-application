@@ -16,9 +16,9 @@ public interface IExportLogService extends IBaseService<ExportLog> {
     /**
      * 获取所有导出记录
      *
-     * @param page 分页对象
-     * @param orgId 企业主键
+     * @param page      分页对象
+     * @param companyId 公司id
      * @return
      */
-    LogPageVO findExportLogPage(Page page, Long orgId);
+    LogPageVO findExportLogPage(Page page, Long companyId);
 }
