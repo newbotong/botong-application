@@ -6,10 +6,10 @@ import java.io.Serializable;
 
 /**
  * <p>
- * <p> 地理位置收藏
+ * <p> 公告详情返回Body
  * </p>
  *
- * @author tao.zeng.
+ * @author 李双喜
  * @since 2018/3/20.
  */
 @Data

@@ -8,6 +8,8 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
 /**
+ * 公告用户信息Service实现类
+ *
  * @author 李双喜
  * @date 2018/3/22 14:20
  */

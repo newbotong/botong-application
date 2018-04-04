@@ -11,7 +11,7 @@ import java.util.List;
 import java.util.Map;
 
 /**
- * 公告
+ * 公告Mapper
  *
  * @author 李双喜
  * @since 2018/03/20/.

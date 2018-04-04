@@ -34,13 +34,14 @@ import java.lang.reflect.Type;
 import java.util.*;
 
 /**
- * 公告
+ * 公告Service实现类
  *
  * @author 李双喜
  * @since 2018/03/20/.
  */
 @Service
 public class NoticeServiceImpl extends ServiceImpl<NoticeMapper, NoticeEntity> implements NoticeService {
+
     @Autowired
     AuthorityFeign authorityFeign;
     @Autowired
@@ -57,7 +58,9 @@ public class NoticeServiceImpl extends ServiceImpl<NoticeMapper, NoticeEntity> i
 
     @Autowired
     private UserInfoMapper userInfoMapper;
-
+    /**
+     * 绑定的公告appId
+     */
     @Value("${notice.appId}")
     private String appId;
 
@@ -70,7 +73,7 @@ public class NoticeServiceImpl extends ServiceImpl<NoticeMapper, NoticeEntity> i
     @Override
     @Transactional(rollbackFor = Exception.class)
     public void insertNotice(NoticeBody noticeBody) throws BaseException {
-        UserInfoEntity userInfoEntity = new UserInfoEntity().selectOne(new EntityWrapper<UserInfoEntity>().eq("id",noticeBody.getIssueUserId()).eq("logic_delete",NoticeConstant.LOGIC_DELETE_NOMAL));
+        UserInfoEntity userInfoEntity = new UserInfoEntity().selectOne(new EntityWrapper<UserInfoEntity>().eq("id", noticeBody.getIssueUserId()).eq("logic_delete", NoticeConstant.LOGIC_DELETE_NOMAL));
         if (null == userInfoEntity) {
             UserInfoEntity userInfoEntity1 = new UserInfoEntity();
             userInfoEntity1.setId(noticeBody.getIssueUserId());
@@ -79,7 +82,7 @@ public class NoticeServiceImpl extends ServiceImpl<NoticeMapper, NoticeEntity> i
             userInfoEntity1.setName(noticeBody.getName());
             userInfoEntity1.setLogicDelete(NoticeConstant.LOGIC_DELETE_NOMAL);
             userInfoEntity1.insert();
-        }else {
+        } else {
             userInfoEntity.setPhone(noticeBody.getPhone());
             userInfoEntity.setImg(noticeBody.getImg());
             userInfoEntity.setName(noticeBody.getName());
@@ -180,7 +183,7 @@ public class NoticeServiceImpl extends ServiceImpl<NoticeMapper, NoticeEntity> i
         pushBody.setNotificationTitle(notice.getTitle());
         List<String> listUserId = new ArrayList<>();
         for (Long id : stringList) {
-            listUserId.add(id+"");
+            listUserId.add(id + "");
         }
         pushBody.setAlias(listUserId.toArray(new String[0]));
         pushBody.setMap(map);
@@ -191,7 +194,7 @@ public class NoticeServiceImpl extends ServiceImpl<NoticeMapper, NoticeEntity> i
         if (notice.getDangState() == 0) {
             DangParam dangParam = new DangParam();
             dangParam.setUserId(notice.getIssueUserId());
-            dangParam.setBizId( notice.getId());
+            dangParam.setBizId(notice.getId());
             dangParam.setBizType(1);
             dangParam.setReceiveBody(JSONObject.toJSONString(receiveBodyList));
             dangParam.setDangType(1);
@@ -201,14 +204,14 @@ public class NoticeServiceImpl extends ServiceImpl<NoticeMapper, NoticeEntity> i
             dangParam.setSendContent(notice.getTitle());
             dangParam.setVoiceTimeLength(0);
             dangParam.setSendTelephone(noticeBody.getPhone());
-            if (!StringUtils.isAnyBlank(noticeBody.getPicture(),noticeBody.getPictureName(),noticeBody.getSize())) {
+            if (!StringUtils.isAnyBlank(noticeBody.getPicture(), noticeBody.getPictureName(), noticeBody.getSize())) {
                 dangParam.setIsAccessory(1);
                 dangParam.setAccessoryType(1);
                 dangParam.setAccessoryName(noticeBody.getPictureName());
                 dangParam.setAccessoryUrl(noticeBody.getPicture());
                 dangParam.setAccessorySize(noticeBody.getSize());
                 dangFeign.sendDang(dangParam);
-            }else {
+            } else {
                 dangParam.setIsAccessory(0);
                 dangParam.setAccessoryType(0);
                 dangParam.setAccessoryName("");
@@ -322,13 +325,13 @@ public class NoticeServiceImpl extends ServiceImpl<NoticeMapper, NoticeEntity> i
         Map<String, Object> map = new HashMap<>(4);
         Map<String, Object> maps = new HashMap<String, Object>(3);
         if (null == state) {
-            List<NoticePageBody> noticePageBodyList = noticeMapper.selectNoticePage(map,page);
+            List<NoticePageBody> noticePageBodyList = noticeMapper.selectNoticePage(map, page);
             page.setRecords(noticePageBodyList);
             maps.put("page", page);
             return maps;
         } else {
-        ResponseEntityWrapper responseEntityWrapper = authorityFeign.authority(appId, userId);
-        Boolean results = JSONObject.parseObject(responseEntityWrapper.getData().toString(), Boolean.class);
+            ResponseEntityWrapper responseEntityWrapper = authorityFeign.authority(appId, userId);
+            Boolean results = JSONObject.parseObject(responseEntityWrapper.getData().toString(), Boolean.class);
             //判断是否为管理员
             maps.put("admin", results);
             map.put("userId", userId);
@@ -358,11 +361,11 @@ public class NoticeServiceImpl extends ServiceImpl<NoticeMapper, NoticeEntity> i
      * @throws BaseException
      */
     @Override
-    public Page<UserInfoBody> selectNoticeUser(Long id, Integer state,Integer pageNo,Integer pageSize) throws BaseException {
+    public Page<UserInfoBody> selectNoticeUser(Long id, Integer state, Integer pageNo, Integer pageSize) throws BaseException {
         if (null == id && null == state) {
             throw new BaseException("参数错误");
         }
-        Page<UserInfoBody> page = new Page(pageNo,pageSize);
+        Page<UserInfoBody> page = new Page(pageNo, pageSize);
         List<NoticeUserEntity> list = new NoticeUserEntity().selectList(new EntityWrapper<NoticeUserEntity>()
                 .eq("logic_delete", NoticeConstant.LOGIC_DELETE_NOMAL).eq("notice_id", id).eq("state", state));
         List<UserInfoBody> userInfoBodyList = new ArrayList<>();
@@ -376,7 +379,7 @@ public class NoticeServiceImpl extends ServiceImpl<NoticeMapper, NoticeEntity> i
             if (!CollectionUtils.isEmpty(userIds)) {
                 Map<String, Object> map = new HashMap<>(1);
                 map.put("userIds", userIds);
-                userInfoBodyList = userInfoMapper.selectUser(map,page);
+                userInfoBodyList = userInfoMapper.selectUser(map, page);
             }
             page.setRecords(userInfoBodyList);
         }
@@ -425,10 +428,10 @@ public class NoticeServiceImpl extends ServiceImpl<NoticeMapper, NoticeEntity> i
      * @param id 公告id
      */
     @Override
-    public NoticeDetailCBody selectCNoticeDetail(Long id) throws BaseException {
+    public NoticeDetailsBody selectCNoticeDetail(Long id) throws BaseException {
         NoticeEntity noticeEntity = new NoticeEntity().selectOne(new EntityWrapper<NoticeEntity>().eq("id", id).eq("logic_delete", NoticeConstant.LOGIC_DELETE_NOMAL));
-        NoticeDetailCBody noticeDetailCBody = new NoticeDetailCBody();
-        BeanUtils.copyProperties(noticeEntity, noticeDetailCBody);
-        return noticeDetailCBody;
+        NoticeDetailsBody noticeDetailsBody = new NoticeDetailsBody();
+        BeanUtils.copyProperties(noticeEntity, noticeDetailsBody);
+        return noticeDetailsBody;
     }
 }

@@ -6,6 +6,8 @@ import com.common.mybatis.model.BaseModel;
 import lombok.Data;
 
 /**
+ * 用户信息实体
+ *
  * @author 李双喜
  * @date 2018/3/22 14:02
  */

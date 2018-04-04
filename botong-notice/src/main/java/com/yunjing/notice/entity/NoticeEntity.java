@@ -9,7 +9,7 @@ import lombok.Data;
 import java.io.Serializable;
 
 /**
- * 公告
+ * 公告内容实体
  *
  * @author 李双喜
  * @since 2018/03/20/.

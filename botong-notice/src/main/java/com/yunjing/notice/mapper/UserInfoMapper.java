@@ -10,6 +10,8 @@ import java.util.List;
 import java.util.Map;
 
 /**
+ * 用户信息Mapper
+ *
  * @author 李双喜
  * @date 2018/3/22 14:23
  */
@@ -17,14 +19,17 @@ import java.util.Map;
 public interface UserInfoMapper extends BaseMapper<UserInfoEntity> {
     /**
      * 查询用户id
+     *
      * @return
      */
     List<Long> selectUserIds();
 
     /**
      * 查询用户属性
-     * @param map
+     *
+     * @param map  map入参
+     * @param page 分页入参
      * @return
      */
-    List<UserInfoBody> selectUser(Map<String,Object> map, Page<UserInfoBody> page);
+    List<UserInfoBody> selectUser(Map<String, Object> map, Page<UserInfoBody> page);
 }

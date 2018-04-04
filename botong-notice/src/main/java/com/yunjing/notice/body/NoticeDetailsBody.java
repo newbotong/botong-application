@@ -5,11 +5,13 @@ import lombok.Data;
 import java.io.Serializable;
 
 /**
+ * 公告详情参数返回类型
+ *
  * @author 李双喜
  * @date 2018/3/21 17:51
  */
 @Data
-public class NoticeDetailCBody implements Serializable{
+public class NoticeDetailsBody implements Serializable {
     /**
      * id
      */

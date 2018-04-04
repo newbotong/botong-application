@@ -7,6 +7,8 @@ import com.yunjing.notice.processor.feign.InformFeign;
 import org.springframework.stereotype.Component;
 
 /**
+ * 用户信息降级
+ *
  * @author 李双喜
  * @date 2018/3/21 16:48
  */

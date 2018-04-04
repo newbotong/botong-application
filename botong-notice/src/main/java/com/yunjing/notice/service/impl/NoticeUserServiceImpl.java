@@ -7,7 +7,7 @@ import com.yunjing.notice.service.NoticeUserService;
 import org.springframework.stereotype.Service;
 
 /**
- * 公告用户
+ * 公告用户Service实现类
  *
  * @author 李双喜
  * @since 2018/03/20/.

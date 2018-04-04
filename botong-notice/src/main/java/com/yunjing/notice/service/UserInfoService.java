@@ -4,7 +4,8 @@ import com.baomidou.mybatisplus.service.IService;
 import com.yunjing.notice.entity.UserInfoEntity;
 
 /**
- * 用户信息
+ * 用户信息Service
+ *
  * @author 李双喜
  * @date 2018/3/22 14:20
  */

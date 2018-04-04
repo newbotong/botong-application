@@ -9,6 +9,7 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestParam;
 
 /**
+ * 用户发DangRpc
  * @author 李双喜
  * @date 2018/3/21 16:45
  */
@@ -17,6 +18,7 @@ public interface DangFeign {
 
     /**
      * 发送Dang
+     * @param dangParam  入参实体
      * @return
      */
     @PostMapping("/rpc/dang/send")

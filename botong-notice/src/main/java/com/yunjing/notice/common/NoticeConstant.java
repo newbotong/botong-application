@@ -2,6 +2,7 @@ package com.yunjing.notice.common;
 
 /**
  * 公告常量
+ *
  * @author 李双喜
  * @date 2018/3/21 13:45
  */

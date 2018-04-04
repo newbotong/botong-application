@@ -8,7 +8,7 @@ import org.springframework.context.annotation.Configuration;
 
 /**
  * <p>
- * <p> 公告服务
+ * <p> 公告服务启动类
  * </p>
  *
  * @author 李双喜

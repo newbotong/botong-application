@@ -9,14 +9,17 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestParam;
 
 /**
+ * 用户推送Rpc
+ *
  * @author 李双喜
  * @date 2018/3/21 16:48
  */
-@FeignClient(name = "botong-third-party",fallback = DangFallback.class)
+@FeignClient(name = "botong-third-party", fallback = DangFallback.class)
 public interface InformFeign {
     /**
      * 公告推送(工作通知)
-     * @param pushParam  入参
+     *
+     * @param pushParam 入参
      * @return
      */
     @PostMapping("/rpc/push/push-all-target-user")

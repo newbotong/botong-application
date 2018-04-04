@@ -4,7 +4,7 @@ import com.yunjing.mommon.base.BaseController;
 import com.yunjing.mommon.global.exception.BaseException;
 import com.yunjing.mommon.wrapper.ResponseEntityWrapper;
 import com.yunjing.notice.body.NoticeBody;
-import com.yunjing.notice.body.NoticeDetailCBody;
+import com.yunjing.notice.body.NoticeDetailsBody;
 import com.yunjing.notice.service.NoticeService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
@@ -12,6 +12,7 @@ import org.springframework.web.bind.annotation.*;
 import java.util.Map;
 
 /**
+ * 公告controller
  * @author 李双喜
  * @date 2018/3/21 17:40
  */
@@ -65,7 +66,7 @@ public class NoticeController extends BaseController {
      */
     @PostMapping("/select-notice-detail")
     public ResponseEntityWrapper selectNoticeDetail(@RequestParam Long id) throws BaseException {
-        NoticeDetailCBody noticeDetailCBody = noticeService.selectCNoticeDetail(id);
-        return success(noticeDetailCBody);
+        NoticeDetailsBody noticeDetailsBody = noticeService.selectCNoticeDetail(id);
+        return success(noticeDetailsBody);
     }
 }

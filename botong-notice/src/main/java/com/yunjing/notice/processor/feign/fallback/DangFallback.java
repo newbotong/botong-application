@@ -7,6 +7,8 @@ import com.yunjing.notice.processor.feign.param.DangParam;
 import org.springframework.stereotype.Component;
 
 /**
+ * 发送Dang降级
+ *
  * @author 李双喜
  * @date 2018/3/21 16:46
  */
@@ -16,6 +18,7 @@ public class DangFallback implements DangFeign {
     /**
      * 发送Dang
      * dangParam 发送DANG入参
+     *
      * @return
      */
     @Override

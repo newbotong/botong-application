@@ -5,7 +5,7 @@ import com.yunjing.notice.entity.NoticeUserEntity;
 import org.springframework.stereotype.Repository;
 
 /**
- * 公告用户
+ * 公告用户Mapper
  *
  * @author 李双喜
  * @since 2018/03/20/.
