@@ -8,7 +8,7 @@ import com.yunjing.approval.model.vo.UserVO;
 import java.util.List;
 
 /**
- * @author roc
+ * @author 刘小鹏
  * @date 2017/12/21
  */
 public interface ICopyService extends IBaseService<Copy> {

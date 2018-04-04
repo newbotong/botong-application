@@ -8,7 +8,7 @@ import com.yunjing.approval.model.entity.Approval;
 import com.yunjing.approval.model.vo.ApprovalPageVO;
 
 /**
- * @author roc
+ * @author 刘小鹏
  * @date 2018/1/15
  */
 public interface IApprovalService extends IBaseService<Approval> {

@@ -1,6 +1,5 @@
 package com.yunjing.approval.api;
 
-import com.yunjing.approval.processor.feign.DangFeign;
 import com.yunjing.approval.service.IApprovalApiService;
 import com.yunjing.approval.service.IApprovalService;
 import com.yunjing.approval.service.IApprovalUserService;
@@ -29,8 +28,6 @@ public class ClientApprovalOperationController extends BaseController {
     private IApprovalUserService approvalUserService;
     @Autowired
     private IApprovalService approvalService;
-    @Autowired
-    private DangFeign dangFeign;
 
     @PostMapping("/get-member-list")
     public ResponseEntityWrapper getMember(@RequestParam("companyId") String companyId,

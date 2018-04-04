@@ -7,7 +7,7 @@ import com.yunjing.approval.model.entity.Approval;
 import java.util.List;
 
 /**
- * @author roc
+ * @author 刘小鹏
  * @date 2018/1/15
  */
 public interface IApprovalRepairService extends IBaseService<Approval> {

@@ -5,7 +5,7 @@ import com.yunjing.approval.model.entity.SetsCondition;
 import org.apache.ibatis.annotations.Param;
 
 /**
- * @author roc
+ * @author 刘小鹏
  * @date 2017/12/21
  */
 public interface ConditionMapper extends IBaseMapper<SetsCondition> {

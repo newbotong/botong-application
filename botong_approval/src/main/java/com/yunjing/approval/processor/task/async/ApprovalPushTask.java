@@ -2,7 +2,8 @@ package com.yunjing.approval.processor.task.async;
 
 import com.alibaba.fastjson.JSONObject;
 import com.yunjing.approval.dao.mapper.ApprovalProcessMapper;
-import com.yunjing.approval.dao.mapper.CopySMapper;
+import com.yunjing.approval.dao.mapper.CopyMapper;
+import com.yunjing.approval.dao.mapper.CopysMapper;
 import com.yunjing.approval.model.entity.Approval;
 import com.yunjing.approval.model.entity.ApprovalUser;
 import com.yunjing.approval.model.entity.PushLog;
@@ -12,7 +13,7 @@ import com.yunjing.approval.param.PushParam;
 import com.yunjing.approval.processor.feign.PushFeign;
 import com.yunjing.approval.service.IApprovalService;
 import com.yunjing.approval.service.IApprovalUserService;
-import com.yunjing.approval.service.ICopySService;
+import com.yunjing.approval.service.ICopysService;
 import com.yunjing.approval.service.IPushLogService;
 import com.yunjing.approval.util.DateUtil;
 import com.yunjing.mommon.global.exception.InsertMessageFailureException;
@@ -42,9 +43,9 @@ public class ApprovalPushTask extends BaseTask {
     @Autowired
     private ApprovalProcessMapper approvalProcessMapper;
     @Autowired
-    private ICopySService copySService;
+    private ICopysService copySService;
     @Autowired
-    private CopySMapper copySMapper;
+    private CopysMapper copySMapper;
     @Autowired
     private IPushLogService pushLogService;
     @Autowired
@@ -130,30 +131,30 @@ public class ApprovalPushTask extends BaseTask {
                 if (approval.getResult() == null) {
                     for (ApprovalUserVO approvalUserVO : approvalProcessSet) {
                         PushLog pushLog = new PushLog();
-                            if (approvalUserVO.getProcessState() == 0) {
-                                phones[0] = approvalUserVO.getMobile();
-                                pushLog.setDatatype(30);
-                                pushLog.setInfoId(approvalId);
-                                pushLog.setUserId(approvalUserVO.getUserId());
-                                pushLog.setOrgId(orgId);
-                                pushLog.setCopyNum(2);
-                                pushLog.setCreateTime(DateUtil.getCurrentTime().getTime());
-                                pushLog.setMessage("您收到一条审批消息");
-                                boolean insert = pushLogService.insert(pushLog);
-                                if (!insert) {
-                                    throw new InsertMessageFailureException("保存推送审批记录失败");
-                                }
-                                // 审批推送入参
-                                PushParam pushParam = new PushParam();
-                                pushParam.setMsg(systemMessage);
-                                pushParam.setAlias(phones);
-                                pushParam.setRegistrationId(user.getMobile());
-                                pushParam.setNotificationTitle(message);
-                                // 推送审批
-                                pushFeign.pushAllTargetByUser(pushParam);
-
-                                break;
+                        if (approvalUserVO.getProcessState() == 0) {
+                            phones[0] = approvalUserVO.getMobile();
+                            pushLog.setDatatype(30);
+                            pushLog.setInfoId(approvalId);
+                            pushLog.setUserId(approvalUserVO.getUserId());
+                            pushLog.setOrgId(orgId);
+                            pushLog.setCopyNum(2);
+                            pushLog.setCreateTime(DateUtil.getCurrentTime().getTime());
+                            pushLog.setMessage("您收到一条审批消息");
+                            boolean insert = pushLogService.insert(pushLog);
+                            if (!insert) {
+                                throw new InsertMessageFailureException("保存推送审批记录失败");
                             }
+                            // 审批推送入参
+                            PushParam pushParam = new PushParam();
+                            pushParam.setMsg(systemMessage);
+                            pushParam.setAlias(phones);
+                            pushParam.setRegistrationId(user.getMobile());
+                            pushParam.setNotificationTitle(message);
+                            // 推送审批
+                            pushFeign.pushAllTargetByUser(pushParam);
+
+                            break;
+                        }
                     }
                 } else {
 

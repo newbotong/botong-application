@@ -6,7 +6,7 @@ import com.yunjing.approval.model.entity.SetsProcess;
 import org.apache.ibatis.annotations.Param;
 
 /**
- * @author roc
+ * @author 刘小鹏
  * @date 2017/12/21
  */
 public interface ProcessMapper extends IBaseMapper<SetsProcess> {

@@ -2,7 +2,7 @@ package com.yunjing.approval.util;
 
 
 /**
- * @author liuxiaopeng
+ * @author 刘小鹏
  * @date 2018/01/23
  */
 public class BaseResult<T> {

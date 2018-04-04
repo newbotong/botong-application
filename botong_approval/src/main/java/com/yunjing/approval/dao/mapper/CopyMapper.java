@@ -6,7 +6,7 @@ import com.yunjing.approval.model.entity.Copy;
 import org.apache.ibatis.annotations.Param;
 
 /**
- * @author roc
+ * @author 刘小鹏
  * @date 2017/12/21
  */
 public interface CopyMapper extends IBaseMapper<Copy> {
