@@ -231,13 +231,12 @@ public class ApprovalServiceImpl extends BaseServiceImpl<ApprovalMapper, Approva
     }
 
     @Override
-    public ApprovalPageVO page(Page<Approval> page, Long oid, Long mid, Integer state, String title, String createTimeStart, String createTimeEnd, String finishTimeStart, String finishTimeEnd) throws Exception {
-        page = this.getPage(page, oid, mid, state, title, createTimeStart, createTimeEnd, finishTimeStart, finishTimeEnd);
+    public ApprovalPageVO page(Page<Approval> page, Long companyId, Long modelId, Integer state, String title, String createTimeStart, String createTimeEnd, String finishTimeStart, String finishTimeEnd) throws Exception {
+        page = this.getPage(page, companyId, modelId, state, title, createTimeStart, createTimeEnd, finishTimeStart, finishTimeEnd);
         List<Approval> approvalList = page.getRecords();
         if (CollectionUtils.isEmpty(approvalList)) {
             return null;
         }
-
         ApprovalPageVO result = new ApprovalPageVO(page);
 
         List<Long> approvaIds = approvalList.stream().map(Approval::getId).collect(Collectors.toList());
@@ -255,8 +254,7 @@ public class ApprovalServiceImpl extends BaseServiceImpl<ApprovalMapper, Approva
 
         List<Long> userIds = new ArrayList<>(userIdSet.size());
         userIds.addAll(userIdSet);
-        List<ApprovalUser> users = approvalUserService.selectBatchIds(userIds);
-
+        List<ApprovalUser> users = approvalUserService.selectList(Condition.create().in("id", userIds));
         if (CollectionUtils.isEmpty(users)) {
             throw new BaseException("获取审批人信息不存在");
         }
@@ -276,7 +274,7 @@ public class ApprovalServiceImpl extends BaseServiceImpl<ApprovalMapper, Approva
             records.add(approvalVO);
         });
 
-        result.setRecords(records);
+        result.setRows(records);
         return result;
     }
 
@@ -309,7 +307,7 @@ public class ApprovalServiceImpl extends BaseServiceImpl<ApprovalMapper, Approva
 
         ApprovalExModel approvalExModel = new ApprovalExModel();
         // 从redis缓存中获取approvalExData
-        ApprovalExData approvalExData = approvalRedisService.get(String.valueOf(orgId + userId));
+        ApprovalExData approvalExData = approvalRedisService.get(String.valueOf(orgId) + String.valueOf(userId));
         Map<String, List<ApprovalTemplVO>> temMap = approvalExData.getTemMap();
 
         List<ModelItem> modelItemList = modelItemMapper.selectAll(orgId);
@@ -321,7 +319,7 @@ public class ApprovalServiceImpl extends BaseServiceImpl<ApprovalMapper, Approva
         }
         List<ModelL> modelLS;
         if (CollectionUtils.isNotEmpty(modelIdList)) {
-            modelLS = modelService.selectBatchIds(modelIdList);
+            modelLS = modelService.selectList(Condition.create().in("id",modelIdList));
         } else {
             modelLS = new ArrayList<>();
         }
@@ -348,7 +346,8 @@ public class ApprovalServiceImpl extends BaseServiceImpl<ApprovalMapper, Approva
                     if (StringUtils.isNotBlank(createTimeStart) && StringUtils.isNotBlank(createTimeEnd)) {
                         statisticDate = statisticDate + createTimeStart + " —— " + createTimeEnd + "       ";
                     } else {
-                        String orgCreateTime = DateUtil.dateFormmat(orgReadisService.get(String.valueOf(orgId)).getCreateTime(), DateUtil.DATE_FORMAT_2);
+                        // DateUtil.dateFormmat(orgReadisService.get(String.valueOf(orgId)).getCreateTime(), DateUtil.DATE_FORMAT_2);
+                        String orgCreateTime = "";
                         statisticDate = statisticDate + orgCreateTime + " —— " + DateUtil.dateFormmat(new Date(), DateUtil.DATE_FORMAT_2) + "       ";
                     }
                     excelModel.setTableHeader(statisticDate + tableHead);
@@ -430,7 +429,7 @@ public class ApprovalServiceImpl extends BaseServiceImpl<ApprovalMapper, Approva
      */
     private List<ApprovalExcelVO> getExportData(Long orgId, Long userId, Long modelId, Integer state, String title, String createTimeStart,
                                                 String createTimeEnd, String finishTimeStart, String finishTimeEnd) throws Exception {
-        approvalRedisService.remove(String.valueOf(orgId + userId));
+        approvalRedisService.remove(String.valueOf(orgId) + String.valueOf(userId));
         List<Approval> approvalList = this.getList(orgId, modelId, state, title, createTimeStart, createTimeEnd, finishTimeStart, finishTimeEnd);
         List<ApprovalExcelVO> excelVOList = new ArrayList<>();
         Map<String, List<ApprovalTemplVO>> tmpMap = new HashMap<>(1);
@@ -448,7 +447,7 @@ public class ApprovalServiceImpl extends BaseServiceImpl<ApprovalMapper, Approva
         }
         List<Long> userIds = new ArrayList<>(userIdSet.size());
         userIds.addAll(userIdSet);
-        List<ApprovalUser> users = approvalUserService.selectBatchIds(userIds);
+        List<ApprovalUser> users = approvalUserService.selectList(Condition.create().in("id", userIds));
         if (CollectionUtils.isEmpty(users)) {
             logger.error("获取审批人信息不存在");
 //            throw new BaseException("获取审批人信息不存在");
@@ -461,20 +460,17 @@ public class ApprovalServiceImpl extends BaseServiceImpl<ApprovalMapper, Approva
         String result = "";
         String timeConsuming = "";
 
-        List<Long> userIdList = approvalList.stream().map(Approval::getUserId).collect(Collectors.toList());
-        List<DeptVO> deptNameList = new ArrayList<>();
-        if (userIdList != null && !userIdList.isEmpty()) {
-            String[] userIdArray = userIdList.toArray(new String[userIdList.size()]);
-            // 调用企业服务
-        }
 
         // 获取该企业下所有modelItem
         List<ModelItem> modelItems = modelItemMapper.selectAll(orgId);
         // 获取该企业下所有的审批属性信息
-        List<ApprovalAttr> approvalAttrList = null;
+        List<ApprovalAttr> approvalAttrList = approvalAttrMapper.selectAttrByOrgId(orgId);
         // 从redis缓存中批量获取用户信息
-        List<Long> uIdList = approvalList.parallelStream().map(Approval::getUserId).collect(Collectors.toList());
-        List<UserVO> userVOS = userRedisService.getByUserIdList(null);
+        List<Long> userIdList = approvalList.stream().map(Approval::getUserId).collect(Collectors.toList());
+        List<ApprovalUser> userList = new ArrayList<>();
+        if (userIdList != null && !userIdList.isEmpty()) {
+            userList = approvalUserService.selectList(Condition.create().in("id", userIds));
+        }
         // 查询编辑审批表单后填写的所有审批信息数据
         List<ApproveAttributeVO> approveAttrList = approvalAttrMapper.selectAttrListByOrgId(orgId);
         for (Approval approval : approvalList) {
@@ -508,10 +504,12 @@ public class ApprovalServiceImpl extends BaseServiceImpl<ApprovalMapper, Approva
                 excelVO.setCreateTime(null != approval.getCreateTime() ? approval.getCreateTime() : null);
                 // 审批结束时间
                 excelVO.setFinishTime(null != approval.getFinishTime() ? approval.getFinishTime() : null);
-                List<UserVO> userVO1 = userVOS.parallelStream().filter(userVO -> userVO.getUserId().equals(approval.getUserId())).collect(Collectors.toList());
+                List<ApprovalUser> userVO1 = userList.parallelStream().filter(userVO -> userVO.getId().equals(approval.getUserId())).collect(Collectors.toList());
                 if (!userVO1.isEmpty()) {
                     // 发起人姓名
-                    excelVO.setUserName(userVO1.get(0).getUserNick());
+                    excelVO.setUserName(userVO1.get(0).getName());
+                    // 发起人部门
+                    excelVO.setDeptName(userVO1.get(0).getDeptName());
                 }
                 // 审批人
                 List<Long> uIds = approvalProcessList.parallelStream().filter(process -> approval.getId().equals(process.getApprovalId()))
@@ -520,14 +518,7 @@ public class ApprovalServiceImpl extends BaseServiceImpl<ApprovalMapper, Approva
                 uIds.forEach(uid -> nicks.add(userMap.get(uid)));
                 String approver = StringUtils.join(nicks, "|");
                 excelVO.setApprovalName(approver);
-                // 发起人部门
-                if (deptNameList != null && !deptNameList.isEmpty()) {
-                    List<String> deptName = deptNameList.stream().filter(deptVO -> deptVO.getUserId().equals(approval.getUserId()))
-                            .map(DeptVO::getDeptName).collect(Collectors.toList());
-                    excelVO.setDeptName(deptName.get(0));
-                } else {
-                    excelVO.setDeptName("");
-                }
+
                 // 耗时
                 if (null != approval.getFinishTime() && null != approval.getCreateTime()) {
                     long time = approval.getFinishTime() - approval.getCreateTime();
@@ -553,11 +544,11 @@ public class ApprovalServiceImpl extends BaseServiceImpl<ApprovalMapper, Approva
                 // 添加到集合
                 excelVOList.add(excelVO);
             }
-            ApprovalExData approvalExData = approvalRedisService.get(String.valueOf(orgId + userId));
+            ApprovalExData approvalExData = approvalRedisService.get(String.valueOf(orgId) + String.valueOf(userId));
             tmpMap.put(approval.getModelId() + "-" + approval.getModelVersion(), approvalExData.getApprovalTempVOList());
         }
         ApprovalExData exData = new ApprovalExData(tmpMap);
-        approvalRedisService.put(String.valueOf(orgId + userId), exData, 30 * 60);
+        approvalRedisService.put(String.valueOf(orgId) + String.valueOf(userId), exData, 30 * 60);
         return excelVOList;
 
     }
@@ -572,7 +563,7 @@ public class ApprovalServiceImpl extends BaseServiceImpl<ApprovalMapper, Approva
      * @return
      */
     private Map<String, Object> approvalDataByType(Long orgId, Long userId, Approval approval, List<ModelItem> modelItems, List<ApprovalAttr> attrList, List<ApproveAttributeVO> approveAttrs) {
-        approvalRedisService.remove(String.valueOf(orgId + userId));
+        approvalRedisService.remove(String.valueOf(orgId) + String.valueOf(userId));
         List<ApprovalTemplVO> approvalTemplVOS = new ArrayList<>();
         Map<String, Object> map = new HashMap<>(16);
         if (null != approval.getModelVersion()) {
@@ -622,11 +613,11 @@ public class ApprovalServiceImpl extends BaseServiceImpl<ApprovalMapper, Approva
                     } else {
                         map.put(attrVo.getLabel(), attrVo.getValue());
                     }
-                } else if (type == 12) {
+                } else if (type == ApproConstants.PICTURE_TYPE_10) {
                     ApproveAttrVO attrVo = new ApproveAttrVO(attr);
                     map.put(attrVo.getLabel(), attrVo.getImages());
                     approvalTemplVO.setCKey(attrVo.getLabel());
-                } else if (type == 11) {
+                } else if (type == ApproConstants.ENCLOSURE_TYPE_11) {
                     ApproveAttrVO attrVo = new ApproveAttrVO(attr);
                     map.put(attrVo.getLabel(), attrVo.getFiles());
                     approvalTemplVO.setCKey(attrVo.getLabel());
@@ -678,7 +669,7 @@ public class ApprovalServiceImpl extends BaseServiceImpl<ApprovalMapper, Approva
             });
         }
         ApprovalExData approvalExData = new ApprovalExData(approvalTemplVOS);
-        approvalRedisService.put(String.valueOf(orgId + userId), approvalExData, 30 * 60);
+        approvalRedisService.put(String.valueOf(orgId) + String.valueOf(userId), approvalExData, 30 * 60);
         return map;
     }
 

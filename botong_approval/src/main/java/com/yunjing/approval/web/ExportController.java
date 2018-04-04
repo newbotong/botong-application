@@ -76,7 +76,7 @@ public class ExportController extends BaseController {
      *
      * @param companyId       公司id
      * @param memberId        成员id
-     * @param mid             模型主键, 审批类型, 可空(全部)
+     * @param modelId             模型主键, 审批类型, 可空(全部)
      * @param state           审批状态  0:审批中 1:审批完成 2:已撤回, 可空(全部)
      * @param title           审批标题
      * @param createTimeStart 发起时间_开始
@@ -87,9 +87,9 @@ public class ExportController extends BaseController {
      * @throws Exception 抛异常
      */
     @GetMapping("/export")
-    public ResponseEntityWrapper exportData(@RequestParam("companyId") Long companyId, @RequestParam("memberId") Long memberId, Long mid, Integer state, String title, String createTimeStart,
+    public ResponseEntityWrapper exportData(@RequestParam("companyId") Long companyId, @RequestParam("memberId") Long memberId, Long modelId, Integer state, String title, String createTimeStart,
                                             String createTimeEnd, String finishTimeStart, String finishTimeEnd, HttpServletResponse response) throws Exception {
-        BaseExModel excel = approvalService.createApprovalExcel(companyId, memberId, mid, state, title, createTimeStart, createTimeEnd, finishTimeStart, finishTimeEnd);
+        BaseExModel excel = approvalService.createApprovalExcel(companyId, memberId, modelId, state, title, createTimeStart, createTimeEnd, finishTimeStart, finishTimeEnd);
         String fileName = excel.getFileName();
         //设置响应类型，告知浏览器输出的是图片
         response.setContentType("application/vnd.ms-excel;charset=utf-8");

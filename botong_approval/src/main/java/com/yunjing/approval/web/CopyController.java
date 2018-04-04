@@ -44,7 +44,7 @@ public class CopyController extends BaseController {
     }
 
     /**
-     * 删除审批抄送人
+     * 删除抄送人
      *
      * @param companyId 公司id
      * @param memberId  成员id
