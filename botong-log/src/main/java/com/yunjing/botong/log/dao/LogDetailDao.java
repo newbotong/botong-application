@@ -27,7 +27,18 @@ import java.util.List;
 @Component(value = "logDetailDao")
 public class LogDetailDao extends BaseMongoDaoImpl<LogDetail> {
 
-    public PageWrapper<LogDetail> find(int pageNo, int pageSize, Long orgId, Long userId, String readStatus, Long[] sendUserIds) {
+    /**
+     *
+     * @param pageNo
+     * @param pageSize
+     * @param orgId
+     * @param userId
+     * @param readStatus
+     * @param sendUserIds
+     * @param type
+     * @return
+     */
+    public PageWrapper<LogDetail> find(int pageNo, int pageSize, Long orgId, Long userId, String readStatus, Long[] sendUserIds, String type) {
         PageWrapper<LogDetail> resultP = new PageWrapper();
         Page<LogDetail> page = new Page<LogDetail>();
         page.setCurrent(pageNo);
@@ -39,18 +50,21 @@ public class LogDetailDao extends BaseMongoDaoImpl<LogDetail> {
             } else if (LogConstant.BOTONG_ONE_STR.equals(readStatus) ) {
                 criteria.and("readUserId").is(userId);
             }
-
         }
         if (ArrayUtils.isNotEmpty(sendUserIds)) {
             criteria.and("memberId").in(sendUserIds);
         }
+        //我收到的
+        if (LogConstant.BOTONG_ONE_STR.equals(type)) {
+            criteria.and("sendToUserId").is(userId);
+        }
 
-        criteria.and("sendToUserId").is(userId);
         Query query = new Query(criteria);
         query.with(new Sort(Sort.Direction.DESC, "submitTime"));
         resultP = BeanUtils.mapPage(findPage(page, query), LogDetail.class);
         return resultP;
     }
+
 
     public LogDetail find(String passportId) {
         Query query = new Query(Criteria.where("_id").is(passportId));
