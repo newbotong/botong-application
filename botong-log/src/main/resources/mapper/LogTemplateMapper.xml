@@ -11,7 +11,7 @@
             `deleted` = 0 AND `org_id` = #{orgId}
     </select>
 
-    <select id="listLogTemplateByOrgId" resultType="com.yunjing.botong.log.vo.LogTemplateItem">
+    <select id="listLogTemplateByOrgId" resultType="com.yunjing.botong.log.vo.LogTemplateItemVo">
         SELECT
             `id`,`template_name`,`icon_image`,`submit_type`
         FROM

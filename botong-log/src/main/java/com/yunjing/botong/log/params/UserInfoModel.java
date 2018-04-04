@@ -1,4 +1,4 @@
-package com.yunjing.botong.log.processor.feign.param;
+package com.yunjing.botong.log.params;
 
 import lombok.AllArgsConstructor;
 import lombok.Data;

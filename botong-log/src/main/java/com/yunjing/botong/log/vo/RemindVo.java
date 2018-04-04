@@ -34,6 +34,12 @@ public class RemindVo {
     private String appId;
 
     /**
+     * 组织架构id
+     */
+    @NotNullOrEmpty
+    private String orgId;
+
+    /**
      * 提醒开关（0-关闭，1-打开）
      */
     @Size(min = 0, max = 1, message = "提醒开关参数错误")
@@ -63,9 +69,9 @@ public class RemindVo {
     private String jobTime;
 
     /**
-     * 提醒方式（0-应用内推送，1-短信，2-dang）
+     * 提醒方式（1-应用内推送，2-短信，3-dang）
      */
-    @Size(min = 0, max = 2, message = "提醒方式类型错误")
+    @Size(min = 1, max = 3, message = "提醒方式类型错误")
     private Integer remindMode;
 
     /**

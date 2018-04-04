@@ -15,29 +15,41 @@ import java.util.List;
 @Data
 public class MemberInfo {
 
+    /**
+     * id
+     */
     private String id;
 
-    private String parentId;
-
-    private String sort;
-
-    private String orgType;
-
-    private String name;
-
-    private int createTime;
-
-    private String childrenList;
-
+    /**
+     * 用户id
+     */
     private String passportId;
 
+    /**
+     * 名称
+     */
+    private String name;
+
+    /**
+     * 成员所在企业Id
+     */
     private String companyId;
-
+    /**
+     * 职位
+     */
     private String position;
-
+    /**
+     * 电话号
+     */
     private String mobile;
 
-    private String email;
-
+    /**
+     * 部门id集合
+     */
     private List<String> deptIds;
+
+    /**
+     * 部门名称集合
+     */
+    private List<String> deptNames;
 }

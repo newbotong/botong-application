@@ -2,7 +2,7 @@ package com.yunjing.botong.log.mapper;
 
 import com.baomidou.mybatisplus.mapper.BaseMapper;
 import com.yunjing.botong.log.entity.LogTemplateEntity;
-import com.yunjing.botong.log.vo.LogTemplateItem;
+import com.yunjing.botong.log.vo.LogTemplateItemVo;
 import org.apache.ibatis.annotations.Param;
 
 import java.util.List;
@@ -29,5 +29,5 @@ public interface LogTemplateMapper extends BaseMapper<LogTemplateEntity>{
      * @param pageSize
      * @return
      */
-    List<LogTemplateItem> listLogTemplateByOrgId(@Param("orgId") long orgId,@Param("offset") int offset,@Param("pageSize") int pageSize);
+    List<LogTemplateItemVo> listLogTemplateByOrgId(@Param("orgId") long orgId, @Param("offset") int offset, @Param("pageSize") int pageSize);
 }

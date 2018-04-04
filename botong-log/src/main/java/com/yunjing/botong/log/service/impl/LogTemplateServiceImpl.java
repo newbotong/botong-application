@@ -1,5 +1,6 @@
 package com.yunjing.botong.log.service.impl;
 
+import com.baomidou.mybatisplus.mapper.EntityWrapper;
 import com.yunjing.botong.log.entity.LogTemplateEntity;
 import com.yunjing.botong.log.entity.LogTemplateEnumEntity;
 import com.yunjing.botong.log.entity.LogTemplateEnumItemEntity;
@@ -10,7 +11,10 @@ import com.yunjing.botong.log.mapper.LogTemplateFieldMapper;
 import com.yunjing.botong.log.mapper.LogTemplateMapper;
 import com.yunjing.botong.log.params.LogTemplateParam;
 import com.yunjing.botong.log.service.LogTemplateService;
-import com.yunjing.botong.log.vo.LogTemplateItem;
+import com.yunjing.botong.log.vo.LogTemplateEnumItemVo;
+import com.yunjing.botong.log.vo.LogTemplateFieldVo;
+import com.yunjing.botong.log.vo.LogTemplateItemVo;
+import com.yunjing.botong.log.vo.LogTemplateVo;
 import com.yunjing.mommon.wrapper.PageWrapper;
 import org.apache.commons.collections.CollectionUtils;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -88,8 +92,8 @@ public class LogTemplateServiceImpl implements LogTemplateService {
     }
 
     @Override
-    public PageWrapper<LogTemplateItem> queryAllLogTemplate(long orgId, int pageNo, int pageSize) {
-        PageWrapper<LogTemplateItem> result = new PageWrapper<>();
+    public PageWrapper<LogTemplateItemVo> queryAllLogTemplate(long orgId, int pageNo, int pageSize) {
+        PageWrapper<LogTemplateItemVo> result = new PageWrapper<>();
 
         int offset = (pageNo-1)*pageSize;
         result.setCurrent(offset);
@@ -98,6 +102,66 @@ public class LogTemplateServiceImpl implements LogTemplateService {
         result.setTotal(total);
         result.setPages((int)((total+pageSize-1)/pageSize));
         result.setRecords(this.logTemplateMapper.listLogTemplateByOrgId(orgId,offset,pageSize));
+
+        return result;
+    }
+
+    @Override
+    public LogTemplateVo queryLogTemplate(long id) {
+        // 查询日志模板
+        LogTemplateEntity entity = new LogTemplateEntity();
+        entity = entity.selectOne(new EntityWrapper().eq("id",id).eq("deleted",false));
+        if(entity==null){
+            return null;
+        }
+
+        // 组织返回结果
+        LogTemplateVo result = new LogTemplateVo();
+        result.fromEntity(entity);
+
+        // 查询日志模板字段
+        LogTemplateFieldEntity logTemplateFieldEntity = new LogTemplateFieldEntity();
+        List<LogTemplateFieldEntity> fieldEntities = logTemplateFieldEntity.selectList(new EntityWrapper().eq("template_id",id).eq("deleted",false));
+
+        //组织字段列表返回值
+        if(CollectionUtils.isNotEmpty(fieldEntities)){
+            List<LogTemplateFieldVo> logTemplateFieldVoList = new ArrayList<>(fieldEntities.size());
+
+            List<Long> enumIdList = new ArrayList<>();
+            for (int i = 0; i < fieldEntities.size(); i++) {
+                LogTemplateFieldVo logTemplateFieldVo = new LogTemplateFieldVo();
+                logTemplateFieldVo.fromEntity(fieldEntities.get(i));
+                if(fieldEntities.get(i).getFieldType()==3){
+                    enumIdList.add(fieldEntities.get(i).getEnumId());
+                }
+                logTemplateFieldVoList.add(logTemplateFieldVo);
+            }
+
+            // 查询日志模板字段枚举项
+            if(CollectionUtils.isNotEmpty(enumIdList)){
+                LogTemplateEnumItemEntity logTemplateEnumItemEntity = new LogTemplateEnumItemEntity();
+                List<LogTemplateEnumItemEntity> logTemplateEnumItemEntities = logTemplateEnumItemEntity.selectList(new EntityWrapper().in("enum_id",enumIdList).eq("deleted",false));
+
+                // 循环日志字段列表，初始化枚举类型数据的枚举项
+                for (int i = 0; i < logTemplateFieldVoList.size(); i++) {
+                    LogTemplateFieldVo logTemplateFieldVo = logTemplateFieldVoList.get(i);
+                    if(logTemplateFieldVo.getType()!=3){
+                        continue;
+                    }
+                    for (int j = 0; j < logTemplateEnumItemEntities.size(); j++) {
+                        if (logTemplateFieldVo.getEnumId().equals(logTemplateEnumItemEntities.get(j).getEnumId())){
+                            if(logTemplateFieldVo.getEnumItems()==null){
+                                logTemplateFieldVo.setEnumItems(new ArrayList<LogTemplateEnumItemVo>());
+                            }
+                            LogTemplateEnumItemVo logTemplateEnumItemVo = new LogTemplateEnumItemVo();
+                            logTemplateEnumItemVo.fromEntity(logTemplateEnumItemEntities.get(i));
+                            logTemplateFieldVo.getEnumItems().add(logTemplateEnumItemVo);
+                        }
+                    }
+                }
+            }
+            result.setItems(logTemplateFieldVoList);
+        }
 
         return result;
     }

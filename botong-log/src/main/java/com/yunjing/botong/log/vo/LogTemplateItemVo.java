@@ -10,7 +10,7 @@ import java.io.Serializable;
  * @date 2018/3/30 16:51
  */
 @Data
-public class LogTemplateItem{
+public class LogTemplateItemVo {
 
     /**
      * 主键ID

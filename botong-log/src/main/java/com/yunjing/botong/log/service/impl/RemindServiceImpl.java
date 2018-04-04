@@ -7,16 +7,13 @@ import com.common.mybatis.service.impl.BaseServiceImpl;
 import com.google.gson.Gson;
 import com.yunjing.botong.log.config.LogConstant;
 import com.yunjing.botong.log.entity.RemindEntity;
+import com.yunjing.botong.log.processor.okhttp.AppCenterService;
 import com.yunjing.botong.log.mapper.RemindMapper;
-import com.yunjing.botong.log.processor.feign.handle.SchedulerFeignClient;
-import com.yunjing.botong.log.processor.feign.param.SchedulerParam;
+import com.yunjing.botong.log.params.SchedulerParam;
 import com.yunjing.botong.log.processor.mq.configuration.RemindMessageConfiguration;
 import com.yunjing.botong.log.service.IRemindService;
 import com.yunjing.botong.log.vo.RemindVo;
-import com.yunjing.mommon.constant.StatusCode;
-import com.yunjing.mommon.global.exception.RequestFailureException;
 import com.yunjing.mommon.utils.BeanUtils;
-import com.yunjing.mommon.wrapper.ResponseEntityWrapper;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.redis.core.StringRedisTemplate;
@@ -38,12 +35,9 @@ public class RemindServiceImpl extends BaseServiceImpl<RemindMapper, RemindEntit
     @Autowired
     private StringRedisTemplate redisTemplate;
 
-    /**
-     * 任务调度
-     */
     @Autowired
-    @SuppressWarnings("all")
-    private SchedulerFeignClient schedulerFeignClient;
+    private AppCenterService appCenterService;
+
 
     @Override
     @Transactional(rollbackFor = Exception.class)
@@ -54,6 +48,7 @@ public class RemindServiceImpl extends BaseServiceImpl<RemindMapper, RemindEntit
         // 该成员在该企业的该模版类型下是否已经设置提醒
         entity.setMemberId(remind.getMemberId());
         entity.setAppId(remind.getAppId());
+        entity.setOrgId(remind.getOrgId());
         entity.setSubmitType(remind.getSubmitType());
 
         entity = baseMapper.selectOne(entity);
@@ -69,6 +64,8 @@ public class RemindServiceImpl extends BaseServiceImpl<RemindMapper, RemindEntit
             wrapper.eq("member_id", remind.getMemberId())
                     .and()
                     .eq("app_id", remind.getAppId())
+                    .and()
+                    .eq("org_id", remind.getOrgId())
                     .and()
                     .eq("submit_type", remind.getSubmitType());
 
@@ -109,7 +106,7 @@ public class RemindServiceImpl extends BaseServiceImpl<RemindMapper, RemindEntit
         // topic
         String jobTitle = RemindMessageConfiguration.REMIND_QUEUE_NAME;
         Long taskId = null;
-        RemindVo vo = gson.fromJson(redisTemplate.opsForHash().get(LogConstant.LOG_SET_REMIND + remind.getAppId(), key).toString(), RemindVo.class);
+        RemindVo vo = gson.fromJson(String.valueOf(redisTemplate.opsForHash().get(LogConstant.LOG_SET_REMIND + remind.getAppId(), key)), RemindVo.class);
         if (vo != null) {
             taskId = vo.getTaskId();
         }
@@ -125,20 +122,14 @@ public class RemindServiceImpl extends BaseServiceImpl<RemindMapper, RemindEntit
             param.setTaskId(taskId);
         }
         log.info("设置任务调度参数:{}", gson.toJson(param));
-        ResponseEntityWrapper response = schedulerFeignClient.set(param);
+        taskId = appCenterService.setTask(param);
 
-        if (response != null) {
-            log.info("设置任务结果:{}", JSON.toJSONString(response));
-            if (StatusCode.SUCCESS.getStatusCode() != response.getStatusCode()) {
-                throw new RequestFailureException(response.getStatusCode(), response.getStatusMessage());
-            } else {
-                taskId = Long.parseLong(String.valueOf(response.getData()));
-                boolean flag = updateByMemberIdAndAppId(taskId, remind.getMemberId(), remind.getAppId());
-                if (flag) {
-                    remind.setTaskId(taskId);
-                    value = gson.toJson(remind);
-                    redisTemplate.opsForHash().put(LogConstant.LOG_SET_REMIND + remind.getAppId(), key, value);
-                }
+        if (taskId != null) {
+            boolean flag = updateByMemberIdAndAppId(taskId, remind.getMemberId(), remind.getAppId());
+            if (flag) {
+                remind.setTaskId(taskId);
+                value = gson.toJson(remind);
+                redisTemplate.opsForHash().put(LogConstant.LOG_SET_REMIND + remind.getAppId(), key, value);
             }
         }
     }
