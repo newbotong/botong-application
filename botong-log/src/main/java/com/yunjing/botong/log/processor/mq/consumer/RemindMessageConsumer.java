@@ -3,10 +3,9 @@ package com.yunjing.botong.log.processor.mq.consumer;
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
 import com.yunjing.botong.log.config.LogConstant;
-import com.yunjing.botong.log.http.AppCenterService;
-import com.yunjing.botong.log.processor.feign.handle.OrgStructureFeignClient;
-import com.yunjing.botong.log.processor.feign.param.DangParam;
-import com.yunjing.botong.log.processor.feign.param.UserInfoModel;
+import com.yunjing.botong.log.processor.okhttp.AppCenterService;
+import com.yunjing.botong.log.params.DangParam;
+import com.yunjing.botong.log.params.UserInfoModel;
 import com.yunjing.botong.log.processor.mq.configuration.RemindMessageConfiguration;
 import com.yunjing.botong.log.service.ISMSService;
 import com.yunjing.botong.log.vo.MemberInfo;
@@ -16,8 +15,6 @@ import com.yunjing.message.declare.consumer.AbstractMessageConsumerWithQueueDecl
 import com.yunjing.message.model.Message;
 import com.yunjing.mommon.base.PushParam;
 import com.yunjing.mommon.base.SmSParam;
-import com.yunjing.mommon.constant.StatusCode;
-import com.yunjing.mommon.wrapper.ResponseEntityWrapper;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.redis.core.StringRedisTemplate;
@@ -45,12 +42,8 @@ public class RemindMessageConsumer extends AbstractMessageConsumerWithQueueDecla
 
     private final static String[] CONTENT = {"您当日的日报尚未提交，请及时提交。", "您本周的周报尚未提交，请及时提交。", "您本月的月报尚未提交，请及时提交。"};
 
-    /**
-     * 组织结构rpc
-     */
-    @Autowired
-    @SuppressWarnings("all")
-    private OrgStructureFeignClient orgStructureFeignClient;
+
+    private final static String[] CYCLE_TYPE = {"day", "week", "", ""};
 
     /**
      * 应用中心
@@ -67,6 +60,7 @@ public class RemindMessageConsumer extends AbstractMessageConsumerWithQueueDecla
 
     @Autowired
     private StringRedisTemplate redisTemplate;
+
 
     public RemindMessageConsumer(RemindMessageConfiguration configuration) {
         super(configuration);
@@ -91,11 +85,6 @@ public class RemindMessageConsumer extends AbstractMessageConsumerWithQueueDecla
     @Override
     public void onMessageReceive(@Payload Message message) {
 
-        // TODO 临时开关
-        if (true) {
-            return;
-        }
-
         log.info("接收任务调度参数:{}", JSON.toJSONString(message));
         String memberId = message.getWhat();
 
@@ -114,28 +103,10 @@ public class RemindMessageConsumer extends AbstractMessageConsumerWithQueueDecla
         if (remind.getRemindSwitch() == 0) {
             return;
         }
-        ResponseEntityWrapper response = null;
 
         // 保存设置时不是管理员不需要校验管理员
         if (remind.getIsManager() == 0) {
-
-            MemberInfo memberInfo = null;
-            response = orgStructureFeignClient.findMemberInfo(memberId);
-            if (verificationResult("查询成员信息", response)) {
-                // 获取成员信息
-                if (response.getData() != null) {
-                    memberInfo = JSON.parseObject(response.getData().toString(), MemberInfo.class);
-                    memberInfo = new MemberInfo();
-                    memberInfo.setEmail("31231231@qq.com");
-                    memberInfo.setId("6384302108069335040");
-                    memberInfo.setPassportId("1000000000");
-                    memberInfo.setCompanyId("6386505037916409856");
-                    memberInfo.setName("李双喜");
-                    memberInfo.setOrgType("MEMBER");
-                    memberInfo.setMobile("18562818246");
-                    memberInfo.setPosition("美国");
-                }
-            }
+            MemberInfo memberInfo = JSON.parseObject(String.valueOf(redisTemplate.opsForHash().get("", memberId)), MemberInfo.class);
             if (memberInfo != null) {
                 // 不是管理员，根据remindMode提醒
                 switch (remind.getRemindMode()) {
@@ -162,14 +133,7 @@ public class RemindMessageConsumer extends AbstractMessageConsumerWithQueueDecla
             }
         } else {
             // 设置提醒时是管理员，校验是否是管理员
-            response = orgStructureFeignClient.isManager(Long.parseLong(memberId), appId);
-
-            if (response.getStatusCode() != StatusCode.SUCCESS.getStatusCode()) {
-                verificationResult("校验是否是管理员", response);
-                return;
-            }
-
-            boolean isManager = (boolean) response.getData();
+            boolean isManager = appCenterService.isManager(appId, memberId, false);
             if (isManager) {
                 // 3. 如果是管理员
                 // 3.1 查询出当天所有已经发送日志的人员
@@ -187,9 +151,9 @@ public class RemindMessageConsumer extends AbstractMessageConsumerWithQueueDecla
     private void push(String[] alias, String type) {
         PushParam param = new PushParam();
         String title;
-        if ("day".equalsIgnoreCase(type)) {
+        if (CYCLE_TYPE[0].equalsIgnoreCase(type)) {
             title = CONTENT[0];
-        } else if ("week".equalsIgnoreCase(type)) {
+        } else if (CYCLE_TYPE[1].equalsIgnoreCase(type)) {
             title = CONTENT[1];
         } else {
             title = CONTENT[2];
@@ -225,11 +189,5 @@ public class RemindMessageConsumer extends AbstractMessageConsumerWithQueueDecla
         param.setSendType(1);
         param.setSendContent("dang消息内容");
         appCenterService.dang(param);
-    }
-
-    private boolean verificationResult(String rpc, ResponseEntityWrapper response) {
-        String result = JSON.toJSONString(response);
-        log.warn("调用【{} rpc】结果:{}", rpc, result);
-        return response.getStatusCode() == StatusCode.SUCCESS.getStatusCode();
     }
 }

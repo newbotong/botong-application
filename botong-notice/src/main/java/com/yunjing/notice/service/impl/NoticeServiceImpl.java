@@ -435,7 +435,7 @@ public class NoticeServiceImpl extends ServiceImpl<NoticeMapper, NoticeEntity> i
         }
         //H5分享地址(?)
         if (noticeEntity.getSecrecyState() == 1) {
-            noticeDetailBody.setNoticeH5Address("http://www.baidu.com" + "sort=13" + "&" + "id=" + id + "&" + "userId=" + userId);
+            noticeDetailBody.setNoticeH5Address("okhttp://www.baidu.com" + "sort=13" + "&" + "id=" + id + "&" + "userId=" + userId);
         } else {
             noticeDetailBody.setNoticeH5Address(null);
         }

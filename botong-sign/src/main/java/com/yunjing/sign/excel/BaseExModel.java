@@ -198,7 +198,7 @@ public abstract class BaseExModel {
         urlStyle.setFont(urlFont);
         for (int i = 0; i < items.size(); i++) {
             Cell c = tileRow.createCell(i);
-            if (StringUtils.isNotBlank(items.get(i)) && items.get(i).startsWith("http")) {
+            if (StringUtils.isNotBlank(items.get(i)) && items.get(i).startsWith("okhttp")) {
                 c.setCellType(HSSFCell.CELL_TYPE_FORMULA);
                 c.setCellFormula("HYPERLINK(\"" + items.get(i) + "\",\"" + "图" + "\")");
                 c.setCellStyle(urlStyle);

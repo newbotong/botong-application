@@ -28,6 +28,11 @@ public class MemberVO implements Serializable {
     private String name;
 
     /**
+     * 用户id
+     */
+    private String passportId;
+
+    /**
      * 成员所在企业Id
      */
     private String companyId;

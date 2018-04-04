@@ -1,4 +1,4 @@
-package com.yunjing.botong.log.param;
+package com.yunjing.botong.log.params;
 
 import com.yunjing.mommon.validate.annotation.NotNullOrEmpty;
 import lombok.Data;

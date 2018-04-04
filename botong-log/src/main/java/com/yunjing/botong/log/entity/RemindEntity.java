@@ -24,7 +24,6 @@ public class RemindEntity extends BaseModel<RemindEntity> {
     @TableField("member_id")
     private Long memberId;
 
-
     /**
      * 任务id
      */
@@ -36,6 +35,12 @@ public class RemindEntity extends BaseModel<RemindEntity> {
      */
     @TableField("app_id")
     private String appId;
+
+    /**
+     * 组织架构id
+     */
+    @TableField("org_id")
+    private String orgId;
 
     /**
      * 提醒开关（0-关闭，1-打开）

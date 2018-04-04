@@ -4,10 +4,12 @@ import com.common.redis.config.BaseRedisConfig;
 import org.springframework.context.annotation.Configuration;
 
 /**
- * @version: 1.0.0
- * @author: yangc
- * @date: 2018/3/5 14:51
- * @description:
+ * <p>
+ * <p> redis 配置
+ * </p>
+ *
+ * @author tao.zeng.
+ * @since 2018/4/3.
  */
 @Configuration
 public class RedisConfig extends BaseRedisConfig {
