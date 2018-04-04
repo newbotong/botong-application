@@ -55,7 +55,8 @@ public class InfoCatalogServiceImplV2 extends ServiceImpl<InfoCatalogMapper, Inf
      */
     @Override
     public InfoConstants.StateCode insertInfoCategory(Long orgId,Long parentId,String name) throws BaseException {
-        Map<String, Object> infoCatalogMap = new HashMap<>();
+        int i = 5;
+        Map<String, Object> infoCatalogMap = new HashMap<>(i);
         infoCatalogMap.put("org_id", orgId);
         infoCatalogMap.put("is_delete", InfoConstant.LOGIC_DELETE_NOMAL);
         infoCatalogMap.put("parent_id",parentId);
@@ -132,7 +133,7 @@ public class InfoCatalogServiceImplV2 extends ServiceImpl<InfoCatalogMapper, Inf
         //删除成功 删除该分类下的内容
         if(falg>0){
             //先查询 该分类下是否有内容
-            Map<String, Object> infoContentMap = new HashMap<>();
+            Map<String, Object> infoContentMap = new HashMap<>(4);
             infoContentMap.put("org_id", orgId);
             infoContentMap.put("catalog_id", id);
             List<InfoContent> infoContentList = infoContentMapper.selectByMap(infoContentMap);
@@ -269,7 +270,7 @@ public class InfoCatalogServiceImplV2 extends ServiceImpl<InfoCatalogMapper, Inf
      * @param id
      */
     private void updateInfoCategoryRedis(Long orgId,Long parentId,Long id){
-        Map<String, Object> infoContentMap = new HashMap<>();
+        Map<String, Object> infoContentMap = new HashMap<>(5);
         infoContentMap.put("org_id", orgId);
         infoContentMap.put("parent_id", parentId);
         infoContentMap.put("catalog_id", id);
