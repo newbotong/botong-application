@@ -17,10 +17,14 @@ import java.io.Serializable;
 public class InfoCategoryParam implements Serializable {
 
     /**
-     * 企业类目名称
+     * 二级类目id
+     */
+    private Long catalogId;
+    /**
+     * 一级类目id
      */
     @NotNullOrEmpty
-    private Long catalogId;
+    private Long oneCatalogId;
     /**
      * 企业id
      */
