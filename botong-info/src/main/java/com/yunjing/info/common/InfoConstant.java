@@ -24,4 +24,9 @@ public interface InfoConstant {
      */
     String REDIS_CATALOG_TWO = "botong:info:second";
 
+    /**
+     * 资讯首页缓存
+     */
+    String REDIS_HOME = "botong:info:home";
+
 }

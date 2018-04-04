@@ -54,5 +54,5 @@ public interface InfoContentService extends IService<InfoContent> {
      * @return
      * @throws BaseException
      */
-    Page<InfoDTO> searchPage(Long orgId, String title, Integer pageNo, Integer pageSize) throws BaseException;
+    Page<InfoDTO> searchPage(Long orgId, String title, Integer pageNo, Integer pageSize);
 }

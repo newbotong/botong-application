@@ -4,6 +4,7 @@ import com.baomidou.mybatisplus.service.IService;
 import com.yunjing.info.model.InfoCatalog;
 import com.yunjing.info.param.InfoCategoryParam;
 import com.yunjing.mommon.global.exception.BaseException;
+import org.springframework.web.bind.annotation.RequestParam;
 
 import java.util.Map;
 
@@ -28,6 +29,7 @@ public interface InfoCatalogService extends IService<InfoCatalog> {
      * @param orgId  企业id
      * @param userId 用户id
      * @return
+     * @throws BaseException
      */
     Map<String, Object> selectParent(Long orgId, Long userId) throws BaseException;
 
@@ -40,5 +42,5 @@ public interface InfoCatalogService extends IService<InfoCatalog> {
      * @return
      * @throws BaseException
      */
-    Map<String, Object> selectParentAll(Long orgId, Long catalogId, Long userId) throws BaseException;
+    Map<String, Object> selectParentAll(Long orgId, Long catalogId, Long userId,Integer pageNo,Integer pageSize) throws BaseException;
 }

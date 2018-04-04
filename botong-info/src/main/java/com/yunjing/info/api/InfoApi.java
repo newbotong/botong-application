@@ -22,7 +22,7 @@ import java.util.Map;
  * @date 2018/3/20 17:57
  */
 @RestController
-@RequestMapping("/info/app")
+@RequestMapping("/info")
 public class InfoApi extends BaseController {
 
     @Autowired
@@ -36,8 +36,9 @@ public class InfoApi extends BaseController {
      * @param orgId  企业id
      * @param userId 用户id
      * @return
+     * @throws BaseException
      */
-    @PostMapping("/select-parent")
+    @PostMapping("/parent")
     public ResponseEntityWrapper selectParent(@RequestParam Long orgId, @RequestParam Long userId) throws BaseException {
         Map<String, Object> map = infoCatalogService.selectParent(orgId, userId);
         return success(map);
@@ -52,7 +53,7 @@ public class InfoApi extends BaseController {
      * @return
      * @throws BaseException
      */
-    @PostMapping("/select-parent-all")
+    @PostMapping("/parent-all")
     public ResponseEntityWrapper selectParentAll(@RequestParam Long orgId, @RequestParam Long catalogId, @RequestParam Long userId,@RequestParam Integer pageNo,@RequestParam Integer pageSize) throws BaseException {
         Map<String, Object> map = infoCatalogService.selectParentAll(orgId, catalogId, userId,pageNo,pageSize);
         return success(map);
@@ -66,7 +67,7 @@ public class InfoApi extends BaseController {
      * @param userId 用户id
      * @return
      */
-    @PostMapping("/select-detail")
+    @PostMapping("/detail")
     public ResponseEntityWrapper selectDetail(@RequestParam Long id, @RequestParam Long userId) throws BaseException {
         InfoContentDetailDTO infoContentDetailDTO = infoContentService.selectDetail(id, userId);
         return success(infoContentDetailDTO);
@@ -79,7 +80,7 @@ public class InfoApi extends BaseController {
      * @param id 资讯id
      * @return
      */
-    @PostMapping("/update-number")
+    @PostMapping("/update")
     public ResponseEntityWrapper updateNumber(@RequestParam Long id) throws BaseException {
         infoContentService.updateNumber(id);
         return success();
@@ -92,7 +93,7 @@ public class InfoApi extends BaseController {
      * @param infoCategoryParam 入参对象
      * @return
      */
-    @PostMapping("/insert-info")
+    @PostMapping("/insert")
     public ResponseEntityWrapper insertInfo(@RequestBody InfoCategoryParam infoCategoryParam) throws BaseException {
         BeanFieldValidator.getInstance().ignore().validate(infoCategoryParam);
         infoContentService.insertInfo(infoCategoryParam);
@@ -111,7 +112,7 @@ public class InfoApi extends BaseController {
      * @throws BaseException
      */
     @PostMapping("/search-page")
-    public ResponseEntityWrapper searchPage(@RequestParam Long orgId, String title, @RequestParam Integer pageNo, @RequestParam Integer pageSize) throws BaseException {
+    public ResponseEntityWrapper searchPage(@RequestParam Long orgId, String title, @RequestParam Integer pageNo, @RequestParam Integer pageSize) {
         Page<InfoDTO> page = infoContentService.searchPage(orgId, title, pageNo, pageSize);
         return success(page);
     }

@@ -1,12 +1,16 @@
 package com.yunjing.info.service.impl;
 
+import com.alibaba.fastjson.JSON;
+import com.alibaba.fastjson.JSONObject;
 import com.baomidou.mybatisplus.mapper.EntityWrapper;
 import com.baomidou.mybatisplus.plugins.Page;
 import com.baomidou.mybatisplus.service.impl.ServiceImpl;
 import com.yunjing.info.common.InfoConstant;
 import com.yunjing.info.dto.InfoContentDetailDTO;
 import com.yunjing.info.dto.InfoDTO;
+import com.yunjing.info.dto.ParentInfoDetailDTO;
 import com.yunjing.info.mapper.InfoContentMapper;
+import com.yunjing.info.model.InfoCatalog;
 import com.yunjing.info.model.InfoContent;
 import com.yunjing.info.param.InfoCategoryParam;
 import com.yunjing.info.service.InfoContentService;
@@ -15,6 +19,7 @@ import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.lang.StringUtils;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -31,6 +36,8 @@ import java.util.Map;
 public class InfoContentServiceImpl extends ServiceImpl<InfoContentMapper, InfoContent> implements InfoContentService {
     @Autowired
     private InfoContentMapper infoContentMapper;
+    @Autowired
+    private StringRedisTemplate redisTemplate;
     /**
      * 查询资讯详情接口
      *
@@ -83,6 +90,11 @@ public class InfoContentServiceImpl extends ServiceImpl<InfoContentMapper, InfoC
     public void insertInfo(InfoCategoryParam infoCategoryParam) throws BaseException {
         InfoContent infoContent = new InfoContent();
         BeanUtils.copyProperties(infoCategoryParam, infoContent);
+        if (null == infoCategoryParam.getCatalogId()){
+            infoContent.setCatalogId(infoCategoryParam.getOneCatalogId());
+        }else {
+            infoContent.setCatalogId(infoCategoryParam.getCatalogId());
+        }
         infoContent.setIsDelete(InfoConstant.LOGIC_DELETE_NOMAL);
         infoContent.setReadNumber(0);
         infoContent.setWhetherShow(1);
@@ -98,6 +110,15 @@ public class InfoContentServiceImpl extends ServiceImpl<InfoContentMapper, InfoC
         if (!result) {
             throw new BaseException("新增失败");
         }
+        ParentInfoDetailDTO parentInfoDetailDTO = new ParentInfoDetailDTO();
+        InfoCatalog infoCatalog = new InfoCatalog().selectOne(new EntityWrapper<InfoCatalog>().eq("is_delete",InfoConstant.LOGIC_DELETE_NOMAL).eq("id",infoCategoryParam.getOneCatalogId()));
+        BeanUtils.copyProperties(infoContent,parentInfoDetailDTO);
+        if (null != infoCatalog){
+            parentInfoDetailDTO.setName(infoCatalog.getName());
+            parentInfoDetailDTO.setCatalogSort(infoCatalog.getSort());
+        }
+        parentInfoDetailDTO.setCatalogId(infoCategoryParam.getOneCatalogId());
+        redisTemplate.opsForHash().put(InfoConstant.REDIS_HOME+":"+infoCategoryParam.getOrgId(),infoCategoryParam.getOneCatalogId().toString(), JSON.toJSONString(parentInfoDetailDTO));
     }
 
 
@@ -112,7 +133,7 @@ public class InfoContentServiceImpl extends ServiceImpl<InfoContentMapper, InfoC
      * @throws BaseException
      */
     @Override
-    public Page<InfoDTO> searchPage(Long orgId, String title,Integer pageNo,Integer pageSize) throws BaseException {
+    public Page<InfoDTO> searchPage(Long orgId, String title,Integer pageNo,Integer pageSize) {
         Page<InfoDTO> page = new Page<>(pageNo,pageSize);
         int i = 4;
         Map<String,Object> map = new HashMap<>(i);
