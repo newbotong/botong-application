@@ -6,25 +6,25 @@ import lombok.Data;
 import java.util.List;
 
 /**
- * @author roc
+ * @author 刘小鹏
  * @date 2018/01/15
  */
 @Data
 public class ApprovalPageVO {
     public ApprovalPageVO(Page page) {
-        this.current = page.getCurrent();
-        this.pages = page.getPages();
-        this.size = page.getSize();
-        this.total = page.getTotal();
+        this.currentPage = page.getCurrent();
+        this.totalPage = page.getPages();
+        this.pageSize = page.getSize();
+        this.totalCount = page.getTotal();
     }
 
-    private Integer current;
+    private Integer currentPage;
 
-    private Integer pages;
+    private Integer totalPage;
 
-    private Integer size;
+    private Integer pageSize;
 
-    private Integer total;
+    private Integer totalCount;
 
-    private List<ApprovalVO> records;
+    private List<ApprovalVO> rows;
 }

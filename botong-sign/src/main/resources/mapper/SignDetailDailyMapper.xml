@@ -38,6 +38,7 @@
         de.address,
         de.address_title,
         de.create_time
+        ORDER BY de.create_time DESC
     </select>
 
     <resultMap id="MonthResultMap" type="com.yunjing.sign.beans.vo.SignMonthVO">

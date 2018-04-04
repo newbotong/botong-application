@@ -15,36 +15,36 @@ public interface IModelCategoryService extends IBaseService<ModelCategory> {
     /**
      * 新增分组
      *
-     * @param orgId        企业主键
+     * @param companyId    公司id
      * @param categoryId   分组主键
      * @param categoryName 分组名称
-     * @return
+     * @return boolean
      */
-    boolean createOrEditCategory(Long orgId, Long categoryId, String categoryName);
+    boolean createOrEditCategory(Long companyId, Long categoryId, String categoryName);
 
     /**
      * 删除分组
      *
-     * @param orgId      企业主键
+     * @param companyId  公司id
      * @param categoryId 分组主键
-     * @return
+     * @return boolean
      */
-    boolean deleteCategory(Long orgId, Long categoryId);
+    boolean deleteCategory(Long companyId, Long categoryId);
 
     /**
      * 分组排序
      *
-     * @param orgId     企业主键
+     * @param companyId 公司id
      * @param sortArray 序号数组
-     * @return
+     * @return boolean
      */
-    boolean sortedCategory(Long orgId, String sortArray) throws Exception;
+    boolean sortedCategory(Long companyId, String sortArray) throws Exception;
 
     /**
      * 查询分组列表
      *
-     * @param orgId 企业主键
-     * @return
+     * @param companyId 公司id
+     * @return  List<ModelCategoryVO>
      */
-    List<ModelCategoryVO> getCategoryList(Long orgId);
+    List<ModelCategoryVO> getCategoryList(Long companyId);
 }

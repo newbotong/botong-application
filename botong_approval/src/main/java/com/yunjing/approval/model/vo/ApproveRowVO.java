@@ -5,7 +5,8 @@ import lombok.Data;
 import java.util.List;
 
 /**
- * @author 016
+ * @author 刘小鹏
+ * @date 2018/04/04
  */
 @Data
 public class ApproveRowVO {

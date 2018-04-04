@@ -8,7 +8,7 @@ import com.yunjing.approval.model.entity.Approval;
 import com.yunjing.approval.model.vo.ApprovalPageVO;
 
 /**
- * @author roc
+ * @author 刘小鹏
  * @date 2018/1/15
  */
 public interface IApprovalService extends IBaseService<Approval> {
@@ -16,8 +16,8 @@ public interface IApprovalService extends IBaseService<Approval> {
     /**
      * 提交审批信息
      *
-     * @param oid         企业主键
-     * @param uid         用户主键
+     * @param companyId   公司id
+     * @param memberId    成员id
      * @param modelId     模型主键
      * @param jsonData    要提交的审批数据
      * @param sendUserIds 要推送的审批人主键，多个以英文，隔开
@@ -25,14 +25,14 @@ public interface IApprovalService extends IBaseService<Approval> {
      * @return
      * @throws Exception
      */
-    boolean submit(Long oid, Long uid, Long modelId, String jsonData, String sendUserIds, String sendCopyIds) throws Exception;
+    boolean submit(Long companyId, Long memberId, Long modelId, String jsonData, String sendUserIds, String sendCopyIds) throws Exception;
 
     /**
      * 获取审批数据列表
      *
      * @param page            分页对象  current 页码, size页大小
-     * @param oid             企业主键
-     * @param mid             模型主键, 审批类型, 可空(全部)
+     * @param companyId       公司id
+     * @param modelId         模型主键, 审批类型, 可空(全部)
      * @param state           审批状态  0:审批中 1:审批完成 2:已撤回, 可空(全部)
      * @param title           审批标题
      * @param createTimeStart 发起时间_开始
@@ -42,7 +42,7 @@ public interface IApprovalService extends IBaseService<Approval> {
      * @return 分页列表
      * @throws Exception 异常
      */
-    ApprovalPageVO page(Page<Approval> page, Long oid, Long mid, Integer state, String title, String createTimeStart, String createTimeEnd, String finishTimeStart, String finishTimeEnd) throws Exception;
+    ApprovalPageVO page(Page<Approval> page, Long companyId, Long modelId, Integer state, String title, String createTimeStart, String createTimeEnd, String finishTimeStart, String finishTimeEnd) throws Exception;
 
     /**
      * 删除审批数据
@@ -56,8 +56,8 @@ public interface IApprovalService extends IBaseService<Approval> {
     /**
      * 审批数据导出
      *
-     * @param orgId           企业主键
-     * @param userId          用户主键
+     * @param companyId       公司id
+     * @param memberId        成员id
      * @param modelId         模型主键, 审批类型, 可空(全部)
      * @param state           审批状态  0:审批中 1:审批完成 2:已撤回, 可空(全部)
      * @param title           审批标题
@@ -68,6 +68,6 @@ public interface IApprovalService extends IBaseService<Approval> {
      * @return
      * @throws Exception
      */
-    BaseExModel createApprovalExcel(Long orgId, Long userId, Long modelId, Integer state, String title, String createTimeStart,
+    BaseExModel createApprovalExcel(Long companyId, Long memberId, Long modelId, Integer state, String title, String createTimeStart,
                                     String createTimeEnd, String finishTimeStart, String finishTimeEnd) throws Exception;
 }

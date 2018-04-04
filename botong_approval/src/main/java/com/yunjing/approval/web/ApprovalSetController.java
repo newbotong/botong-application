@@ -6,11 +6,14 @@ import com.yunjing.approval.service.IProcessService;
 import com.yunjing.mommon.base.BaseController;
 import com.yunjing.mommon.wrapper.ResponseEntityWrapper;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.web.bind.annotation.*;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.RestController;
 
 /**
- * @author roc
- * @date 2017/12/21
+ * @author 刘小鹏
+ * @date 2018/04/04
  */
 @RestController
 @RequestMapping("/approval/set")
@@ -56,8 +59,8 @@ public class ApprovalSetController extends BaseController {
      */
     @PostMapping("/updateProcess")
     public ResponseEntityWrapper updateProcess(@RequestParam("modelId") Long modelId,
-                                @RequestParam(value = "conditionId", required = false) Long conditionId,
-                                @RequestParam(value = "userArray", required = false) String userArray) throws Exception {
+                                               @RequestParam(value = "conditionId", required = false) Long conditionId,
+                                               @RequestParam(value = "userArray", required = false) String userArray) throws Exception {
 
         return success(processService.updateProcess(modelId, conditionId, userArray));
     }
@@ -77,11 +80,11 @@ public class ApprovalSetController extends BaseController {
     /**
      * 删除审批流程人
      *
-     * @param oid 企业主键
-     * @param uid 用户主键
+     * @param companyId 公司id
+     * @param memberId  成员id
      */
     @PostMapping("/deleteProcessUser")
-    public void deleteProcessUser(@RequestParam("oid") Long oid, @RequestParam("uid") Long uid) {
-        processService.deleteProcessUser(oid, uid);
+    public void deleteProcessUser(@RequestParam("companyId") Long companyId, @RequestParam("memberId") Long memberId) {
+        processService.deleteProcessUser(companyId, memberId);
     }
 }

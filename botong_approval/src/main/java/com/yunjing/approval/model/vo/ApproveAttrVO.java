@@ -13,7 +13,8 @@ import java.util.Iterator;
 import java.util.List;
 
 /**
- * @author liuxiaopeng
+ * @author 刘小鹏
+ * @date 2018/04/04
  */
 @Data
 public class ApproveAttrVO {

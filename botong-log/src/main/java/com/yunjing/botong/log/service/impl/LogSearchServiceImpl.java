@@ -55,8 +55,44 @@ public class LogSearchServiceImpl implements ILogSearchService {
      */
     @Override
     public PageWrapper<LogDetailVO> receivePage(ReceviedParam receviedParam) {
+        PageWrapper<LogDetail> detailResult = logDetailDao.find(receviedParam.getPageNo(), receviedParam.getPageSize(), receviedParam.getOrgId(), receviedParam.getUserId(), receviedParam.getReadStatus(), receviedParam.getSendUserIds(), LogConstant.BOTONG_ONE_STR);
+        PageWrapper<LogDetailVO> result = convertResults(receviedParam, detailResult);
+        return result;
+    }
+
+    /**
+     * 查询我发送的日志列表
+     *
+     * @param receviedParam 日志参数对象
+     * @return 日志明细列表
+     */
+    @Override
+    public PageWrapper<LogDetailVO> sendPage(ReceviedParam receviedParam) {
+        PageWrapper<LogDetail> detailResult = logDetailDao.find(receviedParam.getPageNo(), receviedParam.getPageSize(), receviedParam.getOrgId(), null, null, null, LogConstant.BOTONG_ZERO_STR);
+        PageWrapper<LogDetailVO> result = convertResults(receviedParam, detailResult);
+        return result;
+    }
+
+    /**
+     * 查询我发送的日志列表
+     *
+     * @param logId 日志Id
+     * @return 日志明细列表
+     */
+    @Override
+    public boolean read(String logId) {
+
+        return false;
+    }
+
+    /**
+     * mongo中拿到的实体转为返回的vo列表
+     * @param receviedParam         参数对象
+     * @param detailResult          明细结果
+     * @return                      带分页参数的明细列表
+     */
+    private PageWrapper<LogDetailVO> convertResults(ReceviedParam receviedParam, PageWrapper<LogDetail> detailResult){
         PageWrapper<LogDetailVO> result = new PageWrapper<>();
-        PageWrapper<LogDetail> detailResult = logDetailDao.find(receviedParam.getPageNo(), receviedParam.getPageSize(), receviedParam.getOrgId(), receviedParam.getUserId(), receviedParam.getReadStatus(), receviedParam.getSendUserIds());
         if (detailResult.getRecords() != null && detailResult.getSize() > 0) {
             LogDetailVO vo;
             List<LogDetailVO> resultRecord = new ArrayList<>();
@@ -65,9 +101,9 @@ public class LogSearchServiceImpl implements ILogSearchService {
             for (LogDetail detail : detailResult.getRecords()) {
                 //设置读取状态
                 if(detail.getReadUserId().contains(String.valueOf(receviedParam.getUserId()))) {
-                    detail.setState("1");
+                    detail.setState(LogConstant.BOTONG_ONE_STR);
                 } else {
-                    detail.setState("0");
+                    detail.setState(LogConstant.BOTONG_ZERO_STR);
                 }
                 //放入发送人，已读，未读人员集合
                 userIds.add(detail.getMemberId().toString());
@@ -105,7 +141,6 @@ public class LogSearchServiceImpl implements ILogSearchService {
             result.setTotal(detailResult.getTotal());
             result.setRecords(resultRecord);
         }
-
         return result;
     }
 

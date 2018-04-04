@@ -9,7 +9,7 @@ import com.yunjing.approval.model.vo.SetConditionVO;
 import java.util.List;
 
 /**
- * @author roc
+ * @author 刘小鹏
  * @date 2017/12/21
  */
 public interface IConditionService extends IBaseService<SetsCondition> {

@@ -12,7 +12,7 @@ import java.sql.Timestamp;
 
 /**
  * 企业信息
- * @author
+ * @author  刘小鹏
  */
 @Data
 @EqualsAndHashCode(callSuper = true)

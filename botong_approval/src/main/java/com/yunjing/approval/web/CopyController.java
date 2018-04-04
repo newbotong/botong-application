@@ -10,7 +10,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 /**
- * @author roc
+ * @author 刘小鹏
  * @date 2017/12/21
  */
 @RestController
@@ -44,13 +44,13 @@ public class CopyController extends BaseController {
     }
 
     /**
-     * 删除审批抄送人
+     * 删除抄送人
      *
-     * @param oid 模型主键
-     * @param uid 用户主键
+     * @param companyId 公司id
+     * @param memberId  成员id
      */
     @PostMapping("/delete")
-    public void deleteCopyUser(@RequestParam Long oid, @RequestParam Long uid) {
-        copyService.deleteCopyUser(oid, uid);
+    public ResponseEntityWrapper deleteCopyUser(@RequestParam Long companyId, @RequestParam Long memberId) {
+        return success(copyService.deleteCopyUser(companyId, memberId));
     }
 }

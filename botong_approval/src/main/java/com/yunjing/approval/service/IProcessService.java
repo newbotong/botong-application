@@ -8,7 +8,7 @@ import com.yunjing.approval.model.vo.UserVO;
 import java.util.List;
 
 /**
- * @author roc
+ * @author 刘小鹏
  * @date 2017/12/21
  */
 public interface IProcessService extends IBaseService<SetsProcess> {
@@ -26,7 +26,7 @@ public interface IProcessService extends IBaseService<SetsProcess> {
     /**
      * 获取审批流程
      *
-     * @param modelId    模型主键
+     * @param modelId     模型主键
      * @param conditionId 条件主键
      * @return
      * @throws Exception
@@ -47,9 +47,9 @@ public interface IProcessService extends IBaseService<SetsProcess> {
     /**
      * 删除审批流程人
      *
-     * @param oid 企业主键
-     * @param uid 用户主键
+     * @param companyId 公司id
+     * @param memberId  成员id
      */
-    void deleteProcessUser(Long oid, Long uid);
+    void deleteProcessUser(Long companyId, Long memberId);
 
 }
