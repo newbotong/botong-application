@@ -26,7 +26,7 @@ public class CategoryController extends BaseController {
      * @param categoryName 审批类别名称
      * @return
      */
-    @PostMapping("/create_or_rename")
+    @PostMapping("/create-or-rename")
     public ResponseEntityWrapper createOrEdit(@RequestParam("oid") Long oid, Long categoryId, @RequestParam("categoryName") String categoryName) throws Exception {
 
         return success(modelCategoryService.createOrEditCategory(oid, categoryId, categoryName));

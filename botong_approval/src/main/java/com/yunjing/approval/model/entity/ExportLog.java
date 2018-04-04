@@ -29,7 +29,7 @@ public class ExportLog extends BaseModel<ExportLog> {
      * 企业主键
      */
     @TableField("org_id")
-    private Long org_id;
+    private Long orgId;
 
     /**
      * 用户主键

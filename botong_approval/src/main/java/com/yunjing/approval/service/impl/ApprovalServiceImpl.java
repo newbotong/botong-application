@@ -768,7 +768,7 @@ public class ApprovalServiceImpl extends BaseServiceImpl<ApprovalMapper, Approva
         exportLog.setFileName(fileName);
         exportLog.setId(IDUtils.getID());
         exportLog.setCreateTime(DateUtil.getCurrentTime().getTime());
-        exportLog.setOrg_id(orgId);
+        exportLog.setOrgId(orgId);
         exportLog.setUserId(userId);
         boolean insert = exportLogService.insert(exportLog);
 
