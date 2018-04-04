@@ -45,64 +45,70 @@ public class NoticeApi extends BaseController {
 
     /**
      * 更新已读和未读状态
-     * @param userId   用户id
-     * @param id       公告id
-     * @param state    是否阅读 0为已读 1为未读
+     *
+     * @param userId 用户id
+     * @param id     公告id
+     * @param state  是否阅读 0为已读 1为未读
      * @throws BaseException
      */
     @PostMapping("/update")
-    public ResponseEntityWrapper updateNoticeState(@RequestParam Long userId,@RequestParam Long id,@RequestParam Integer state) throws BaseException {
-       noticeService.updateNoticeState(userId,id,state);
+    public ResponseEntityWrapper updateNoticeState(@RequestParam Long userId, @RequestParam Long id, @RequestParam Integer state) throws BaseException {
+        noticeService.updateNoticeState(userId, id, state);
         return success();
     }
+
     /**
      * 逻辑删除公告
-     * @param ids             多个公告id，用逗号隔开
+     *
+     * @param ids 多个公告id，用逗号隔开
      * @throws BaseException
      */
     @PostMapping("/delete-batch")
-    public ResponseEntityWrapper deleteNotice(@RequestParam String ids) throws BaseException{
+    public ResponseEntityWrapper deleteNotice(@RequestParam String ids) throws BaseException {
         noticeService.deleteNotice(ids);
         return success();
     }
 
     /**
      * 查询公告列表接口
-     * @param userId        用户id
-     * @param state         阅读状态   0已读 1未读 2为管理员
-     * @param pageNo        当前页码
-     * @param pageSize      每页显示的条数
+     *
+     * @param userId   用户id
+     * @param state    阅读状态   0已读 1未读 2为管理员
+     * @param pageNo   当前页码
+     * @param pageSize 每页显示的条数
      * @return
      * @throws BaseException
      */
     @PostMapping("/page")
-    public ResponseEntityWrapper selectNoticePage(@RequestParam Long userId,Integer state,@RequestParam Integer pageNo,@RequestParam Integer pageSize) throws BaseException{
-        Map<String,Object> map = noticeService.selectNoticePage(userId,state,pageNo,pageSize);
+    public ResponseEntityWrapper selectNoticePage(@RequestParam Long userId, Integer state, @RequestParam Integer pageNo, @RequestParam Integer pageSize) throws BaseException {
+        Map<String, Object> map = noticeService.selectNoticePage(userId, state, pageNo, pageSize);
         return success(map);
     }
 
     /**
      * 根据公告id查询公告详情接口
-     * @param id             公告id
+     *
+     * @param id 公告id
      * @return
      * @throws BaseException
      */
     @PostMapping("/detail")
-    public ResponseEntityWrapper selectNoticeDetail(@RequestParam Long id,@RequestParam Long userId) throws BaseException {
-        NoticeDetailBody noticeDetailBody = noticeService.selectNoticeDetail(id,userId);
+    public ResponseEntityWrapper selectNoticeDetail(@RequestParam Long id, @RequestParam Long userId) throws BaseException {
+        NoticeDetailBody noticeDetailBody = noticeService.selectNoticeDetail(id, userId);
         return success(noticeDetailBody);
     }
 
     /**
      * 根据公告id查询已读未读用户接口
-     * @param id     公告id
-     * @param state  是否阅读 0为已读 1为未读
+     *
+     * @param id    公告id
+     * @param state 是否阅读 0为已读 1为未读
      * @return
      * @throws BaseException
      */
     @PostMapping("/user")
-    public ResponseEntityWrapper selectNoticeUser(@RequestParam Long id,@RequestParam Integer state,@RequestParam Integer pageNo,@RequestParam Integer pageSize) throws BaseException {
-        Page<UserInfoBody> page = noticeService.selectNoticeUser(id,state,pageNo,pageSize);
+    public ResponseEntityWrapper selectNoticeUser(@RequestParam Long id, @RequestParam Integer state, @RequestParam Integer pageNo, @RequestParam Integer pageSize) throws BaseException {
+        Page<UserInfoBody> page = noticeService.selectNoticeUser(id, state, pageNo, pageSize);
         return success(page);
     }
 }
