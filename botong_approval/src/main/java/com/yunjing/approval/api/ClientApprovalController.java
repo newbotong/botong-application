@@ -32,12 +32,12 @@ public class ClientApprovalController extends BaseController {
     /**
      * 获取审批列表
      *
-     * @param oid 企业主键
+     * @param companyId 公司id
      * @return
      */
     @GetMapping("/index")
-    public ResponseEntityWrapper index(@RequestParam("oid") Long oid) throws Exception {
-        List<ClientModelVO> list = approvalApiService.getList(oid);
+    public ResponseEntityWrapper index(@RequestParam("companyId") Long companyId) throws Exception {
+        List<ClientModelVO> list = approvalApiService.getList(companyId);
         return success(list);
     }
 
@@ -58,85 +58,85 @@ public class ClientApprovalController extends BaseController {
      * 待我审批列表
      *
      * @param page        @param page 分页对象  current 当前页码, size 页大小
-     * @param oid         企业主键
-     * @param uid         用户主键
+     * @param companyId   公司id
+     * @param memberId    成员id
      * @param filterParam 搜索参数
      * @return
      */
     @PostMapping("/waited-approval")
     public ResponseEntityWrapper waitedApproval(@ModelAttribute(value = "page") Page page,
-                                                @RequestParam("oid") Long oid,
-                                                @RequestParam("uid") Long uid,
+                                                @RequestParam("companyId") Long companyId,
+                                                @RequestParam("memberId") Long memberId,
                                                 FilterParam filterParam) {
 
-        return success(approvalApiService.getWaited(page, oid, uid, filterParam));
+        return success(approvalApiService.getWaited(page, companyId, memberId, filterParam));
     }
 
     /**
      * 已审批列表
      *
      * @param page        @param page 分页对象  current 当前页码, size 页大小
-     * @param oid         企业主键
-     * @param uid         用户主键
+     * @param companyId   公司id
+     * @param memberId    成员id
      * @param filterParam 搜索参数
      * @return
      */
     @PostMapping("/completed-approval")
     public ResponseEntityWrapper completedApproval(@ModelAttribute(value = "page") Page page,
-                                                   @RequestParam("oid") Long oid,
-                                                   @RequestParam("uid") Long uid,
+                                                   @RequestParam("companyId") Long companyId,
+                                                   @RequestParam("memberId") Long memberId,
                                                    FilterParam filterParam) {
-        return success(approvalApiService.getCompleted(page, oid, uid, filterParam));
+        return success(approvalApiService.getCompleted(page, companyId, memberId, filterParam));
     }
 
     /**
      * 我发起的--审批列表
      *
      * @param page        @param page 分页对象  current 当前页码, size 页大小
-     * @param oid         企业主键
-     * @param uid         用户主键
+     * @param companyId   公司id
+     * @param memberId    成员id
      * @param filterParam 搜索参数
      * @return
      */
     @PostMapping("/launched-approval")
     public ResponseEntityWrapper launchedApproval(@ModelAttribute(value = "page") Page page,
-                                                  @RequestParam("oid") Long oid,
-                                                  @RequestParam("uid") Long uid,
+                                                  @RequestParam("companyId") Long companyId,
+                                                  @RequestParam("memberId") Long memberId,
                                                   FilterParam filterParam) {
 
-        return success(approvalApiService.getLaunched(page, oid, uid, filterParam));
+        return success(approvalApiService.getLaunched(page, companyId, memberId, filterParam));
     }
 
     /**
      * 抄送我的--审批列表
      *
      * @param page        @param page 分页对象  current 当前页码, size 页大小
-     * @param oid         企业主键
-     * @param uid         用户主键
+     * @param companyId   公司id
+     * @param memberId    成员id
      * @param filterParam 搜索参数
      * @return
      */
     @PostMapping("/copied-approval")
     public ResponseEntityWrapper copiedApproval(@ModelAttribute(value = "page") Page page,
-                                                @RequestParam("oid") Long oid,
-                                                @RequestParam("uid") Long uid,
+                                                @RequestParam("companyId") Long companyId,
+                                                @RequestParam("memberId") Long memberId,
                                                 FilterParam filterParam) {
 
-        return success(approvalApiService.getCopied(page, oid, uid, filterParam));
+        return success(approvalApiService.getCopied(page, companyId, memberId, filterParam));
     }
 
     /**
      * 审批详情
      *
-     * @param oid        企业主键
-     * @param uid        用户主键
+     * @param companyId  公司id
+     * @param memberId   成员id
      * @param approvalId 审批主键
      * @return
      */
     @PostMapping("/approval-detail")
-    public ResponseEntityWrapper approvalDetail(@RequestParam("oid") Long oid,
-                                                @RequestParam("uid") Long uid,
+    public ResponseEntityWrapper approvalDetail(@RequestParam("companyId") Long companyId,
+                                                @RequestParam("memberId") Long memberId,
                                                 @RequestParam("approvalId") Long approvalId) {
-        return success(approvalApiService.getApprovalDetail(oid, uid, approvalId));
+        return success(approvalApiService.getApprovalDetail(companyId, memberId, approvalId));
     }
 }

@@ -24,11 +24,11 @@ public interface IModelItemService extends IBaseService<ModelItem> {
     /**
      * 保存模型
      *
-     * @param orgId  企业主键
-     * @param userId 用户主键
-     * @param json   字段数据
+     * @param companyId 公司id
+     * @param memberId  成员id
+     * @param json      字段数据
      * @return 模型视图
      * @throws Exception 异常
      */
-    ModelVO saveModelItem(Long orgId, Long userId, String json) throws Exception;
+    ModelVO saveModelItem(Long companyId, Long memberId, String json) throws Exception;
 }
