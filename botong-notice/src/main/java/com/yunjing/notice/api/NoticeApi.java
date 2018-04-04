@@ -2,16 +2,26 @@ package com.yunjing.notice.api;
 
 import com.baomidou.mybatisplus.plugins.Page;
 import com.yunjing.mommon.base.BaseController;
+import com.yunjing.mommon.base.PushParam;
 import com.yunjing.mommon.global.exception.BaseException;
 import com.yunjing.mommon.validate.BeanFieldValidator;
 import com.yunjing.mommon.wrapper.ResponseEntityWrapper;
 import com.yunjing.notice.body.NoticeBody;
 import com.yunjing.notice.body.NoticeDetailBody;
+import com.yunjing.notice.body.PushBody;
 import com.yunjing.notice.body.UserInfoBody;
+import com.yunjing.notice.processor.feign.param.DangParam;
+import com.yunjing.notice.processor.okhttp.AuthorityService;
+import com.yunjing.notice.processor.okhttp.DangService;
+import com.yunjing.notice.processor.okhttp.InformService;
 import com.yunjing.notice.service.NoticeService;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
+import retrofit2.Call;
+import retrofit2.Response;
 
+import java.io.IOException;
 import java.util.List;
 import java.util.Map;
 
@@ -23,12 +33,58 @@ import java.util.Map;
  * @author 李双喜
  * @since 2018/3/20.
  */
+@Slf4j
 @RestController
 @RequestMapping("/notice")
 public class NoticeApi extends BaseController {
 
     @Autowired
     private NoticeService noticeService;
+    @Autowired
+    private DangService dangService;
+    @Autowired
+    private InformService informService;
+
+    @Autowired
+    private AuthorityService authorityService;
+
+    @GetMapping
+    public void aaa(){
+        Call<ResponseEntityWrapper> call = authorityService.authority("be61789d315b11e89a1c0242ac110004", (long) 1111111);
+        try {
+            Response<ResponseEntityWrapper> execute = call.execute();
+            ResponseEntityWrapper body = execute.body();
+            log.info("code:{},message:{},data:{}", body.getStatusCode(), body.getStatusMessage(), body.getData());
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
+
+    @PostMapping("/test-dang")
+    public void dang(){
+        DangParam dangParam = new DangParam();
+        Call<ResponseEntityWrapper> call = dangService.sendDang(dangParam);
+        try {
+            Response<ResponseEntityWrapper> execute = call.execute();
+            ResponseEntityWrapper body = execute.body();
+            log.info("code:{},message:{},data:{}", body.getStatusCode(), body.getStatusMessage(), body.getData());
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
+
+    @PostMapping("/test-push")
+    public void push(){
+        PushParam dangParam = new PushParam();
+        Call<ResponseEntityWrapper> call = informService.pushAllTargetByUser(dangParam);
+        try {
+            Response<ResponseEntityWrapper> execute = call.execute();
+            ResponseEntityWrapper body = execute.body();
+            log.info("code:{},message:{},data:{}", body.getStatusCode(), body.getStatusMessage(), body.getData());
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
 
     /**
      * 新增公告接口

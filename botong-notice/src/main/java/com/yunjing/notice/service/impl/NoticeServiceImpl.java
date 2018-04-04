@@ -5,6 +5,7 @@ import com.alibaba.fastjson.TypeReference;
 import com.baomidou.mybatisplus.mapper.EntityWrapper;
 import com.baomidou.mybatisplus.plugins.Page;
 import com.baomidou.mybatisplus.service.impl.ServiceImpl;
+import com.yunjing.mommon.base.PushParam;
 import com.yunjing.mommon.global.exception.BaseException;
 import com.yunjing.mommon.wrapper.ResponseEntityWrapper;
 import com.yunjing.notice.body.*;
@@ -18,6 +19,9 @@ import com.yunjing.notice.processor.feign.AuthorityFeign;
 import com.yunjing.notice.processor.feign.DangFeign;
 import com.yunjing.notice.processor.feign.InformFeign;
 import com.yunjing.notice.processor.feign.param.DangParam;
+import com.yunjing.notice.processor.okhttp.AuthorityService;
+import com.yunjing.notice.processor.okhttp.DangService;
+import com.yunjing.notice.processor.okhttp.InformService;
 import com.yunjing.notice.service.NoticeService;
 import com.yunjing.notice.service.NoticeUserService;
 import com.yunjing.notice.service.UserInfoService;
@@ -29,7 +33,10 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.CollectionUtils;
+import retrofit2.Call;
+import retrofit2.Response;
 
+import java.io.IOException;
 import java.lang.reflect.Type;
 import java.util.*;
 
@@ -43,12 +50,13 @@ import java.util.*;
 public class NoticeServiceImpl extends ServiceImpl<NoticeMapper, NoticeEntity> implements NoticeService {
 
     @Autowired
-    AuthorityFeign authorityFeign;
-    @Autowired
-    private DangFeign dangFeign;
+    private AuthorityService authorityService;
 
     @Autowired
-    private InformFeign informFeign;
+    private DangService dangService;
+
+    @Autowired
+    private InformService informService;
 
     @Autowired
     private NoticeMapper noticeMapper;
@@ -178,19 +186,18 @@ public class NoticeServiceImpl extends ServiceImpl<NoticeMapper, NoticeEntity> i
         } else {
             map.put("accessory", null);
         }
-        PushBody pushBody = new PushBody();
-        pushBody.setTitle("公告");
-        pushBody.setNotificationTitle(notice.getTitle());
+        PushParam pushParam = new PushParam();
+        pushParam.setTitle("公告");
+        pushParam.setNotificationTitle(notice.getTitle());
         List<String> listUserId = new ArrayList<>();
         for (Long id : stringList) {
             listUserId.add(id + "");
         }
-        pushBody.setAlias(listUserId.toArray(new String[0]));
-        pushBody.setMap(map);
-        pushBody.setMsg("");
-        //调用工作通知RPC
-        informFeign.pushAllTargetByUser(pushBody);
-        //发送DangRpc
+        pushParam.setAlias(listUserId.toArray(new String[0]));
+        pushParam.setMap(map);
+        pushParam.setMsg("");
+        // okhttp调用工作通知
+        informService.pushAllTargetByUser(pushParam);
         if (notice.getDangState() == 0) {
             DangParam dangParam = new DangParam();
             dangParam.setUserId(notice.getIssueUserId());
@@ -210,15 +217,15 @@ public class NoticeServiceImpl extends ServiceImpl<NoticeMapper, NoticeEntity> i
                 dangParam.setAccessoryName(noticeBody.getPictureName());
                 dangParam.setAccessoryUrl(noticeBody.getPicture());
                 dangParam.setAccessorySize(noticeBody.getSize());
-                dangFeign.sendDang(dangParam);
             } else {
                 dangParam.setIsAccessory(0);
                 dangParam.setAccessoryType(0);
                 dangParam.setAccessoryName("");
                 dangParam.setAccessoryUrl("");
                 dangParam.setAccessorySize("");
-                dangFeign.sendDang(dangParam);
             }
+            // okhttp调用发送dang消息
+            dangService.sendDang(dangParam);
         }
     }
 
@@ -330,9 +337,22 @@ public class NoticeServiceImpl extends ServiceImpl<NoticeMapper, NoticeEntity> i
             maps.put("page", page);
             return maps;
         } else {
-            ResponseEntityWrapper responseEntityWrapper = authorityFeign.authority(appId, userId);
-            Boolean results = JSONObject.parseObject(responseEntityWrapper.getData().toString(), Boolean.class);
+            //okhttp
+            Call<ResponseEntityWrapper> call = authorityService.authority(appId, userId);
+            ResponseEntityWrapper body = null;
+            try {
+                Response<ResponseEntityWrapper> execute = call.execute();
+                body = execute.body();
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+
+            //rpc调用【弃用】
+//            ResponseEntityWrapper responseEntityWrapper = authorityFeign.authority(appId, userId);
+//            Boolean results = JSONObject.parseObject(responseEntityWrapper.getData().toString(), Boolean.class);
+
             //判断是否为管理员
+            boolean results = (boolean) body.getData();
             maps.put("admin", results);
             map.put("userId", userId);
             List<NoticePageBody> noticePageBodyList = new ArrayList<>();
