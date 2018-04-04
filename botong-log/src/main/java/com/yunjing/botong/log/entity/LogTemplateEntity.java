@@ -14,7 +14,6 @@ import lombok.Data;
 @TableName("log_template")
 public class LogTemplateEntity extends BaseModel<LogTemplateEntity> {
 
-
     /**
      * 模板名称
      */

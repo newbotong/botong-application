@@ -2,7 +2,8 @@ package com.yunjing.botong.log.api;
 
 import com.yunjing.botong.log.params.LogTemplateParam;
 import com.yunjing.botong.log.service.LogTemplateService;
-import com.yunjing.botong.log.vo.LogTemplateItem;
+import com.yunjing.botong.log.vo.LogTemplateItemVo;
+import com.yunjing.botong.log.vo.LogTemplateVo;
 import com.yunjing.mommon.base.BaseController;
 import com.yunjing.mommon.wrapper.PageWrapper;
 import com.yunjing.mommon.wrapper.ResponseEntityWrapper;
@@ -27,13 +28,13 @@ public class LogTemplateApi extends BaseController{
     }
 
     @RequestMapping(value = "/query-all",method = RequestMethod.GET)
-    public PageWrapper<LogTemplateItem> queryAll(@RequestParam("orgId") long orgId,@RequestParam("pageNo") int pageNo,@RequestParam("pageSize") int pageSize){
+    public PageWrapper<LogTemplateItemVo> queryAll(@RequestParam("orgId") long orgId, @RequestParam("pageNo") int pageNo, @RequestParam("pageSize") int pageSize){
         return this.logTemplateService.queryAllLogTemplate(orgId,pageNo,pageSize);
     }
 
-    @RequestMapping(value = "/query",method = RequestMethod.POST)
-    public ResponseEntityWrapper query(@RequestParam("id") long id){
-        return null;
+    @RequestMapping(value = "/query",method = RequestMethod.GET)
+    public ResponseEntityWrapper<LogTemplateVo> query(@RequestParam("id") long id){
+        return this.success(this.logTemplateService.queryLogTemplate(id));
     }
 
     @RequestMapping(value = "/update",method = RequestMethod.POST)

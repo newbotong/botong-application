@@ -98,6 +98,7 @@ public class LogTemplateFieldEntity extends BaseModel<LogTemplateFieldEntity >{
     @TableField("deleted")
     private Boolean deleted ;
 
+    @TableField(exist=false)
     private LogTemplateEnumEntity logTemplateEnumEntity ;
 
 }
