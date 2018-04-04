@@ -240,7 +240,7 @@ public class ApprovalServiceImpl extends BaseServiceImpl<ApprovalMapper, Approva
         ApprovalPageVO result = new ApprovalPageVO(page);
 
         List<Long> approvaIds = approvalList.stream().map(Approval::getId).collect(Collectors.toList());
-        List<ApprovalProcess> approvalProcessList = approvalProcessService.selectList(new EntityWrapper<ApprovalProcess>().in("approval_id", approvaIds));
+        List<ApprovalProcess> approvalProcessList = approvalProcessService.selectList(new EntityWrapper<ApprovalProcess>().in("approval_id", approvaIds).and("is_delete=0"));
 
         if (CollectionUtils.isEmpty(approvalProcessList)) {
             throw new BaseException("审批流程信息不存在");
@@ -294,7 +294,7 @@ public class ApprovalServiceImpl extends BaseServiceImpl<ApprovalMapper, Approva
         approvalProcessService.delete(Condition.create().where("approval_id={0}", approvalId));
 
         // 删除审批结果数据
-        flag = approvalService.delete(Condition.create().where("approval_id={0}", approvalId));
+        flag = approvalService.delete(Condition.create().where("id={0}", approvalId));
         if (!flag) {
             throw new BaseException("审批结果数据删除异常或已经被删除");
         }
@@ -621,6 +621,15 @@ public class ApprovalServiceImpl extends BaseServiceImpl<ApprovalMapper, Approva
                     ApproveAttrVO attrVo = new ApproveAttrVO(attr);
                     map.put(attrVo.getLabel(), attrVo.getFiles());
                     approvalTemplVO.setCKey(attrVo.getLabel());
+                } else if (type == ApproConstants.TIME_INTERVAL_TYPE_5) {
+                    ApproveAttrVO attrVo = new ApproveAttrVO(attr);
+                    map.put(attrVo.getLabel(),attrVo.getValue() );
+                    map.put(attrVo.getLabels(),attrVo.getValues() );
+                    ApprovalTemplVO approvalTemplVO1 = new ApprovalTemplVO();
+                    approvalTemplVO.setCKey(attrVo.getLabel());
+                    approvalTemplVO1.setCKey(attrVo.getLabels());
+                    approvalTemplVOS.add(approvalTemplVO1);
+
                 } else {
                     map.put(attr.getAttrLabel(), attr.getAttrValue());
                     approvalTemplVO.setCKey((attr.getAttrLabel()));

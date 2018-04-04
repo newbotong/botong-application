@@ -11,13 +11,15 @@
         <result column="category_name" property="categoryName"/>
         <result column="update_time" property="updateTime"/>
         <result column="visible_range" property="visibleRange"/>
+        <result column="approver" property="approver"/>
     </resultMap>
 
     <select id="selectModelListByOrgId" resultMap="ModelInfoMap">
-        SELECT m.id, m.model_name,m.logo, m.sort, m.introduce,m.is_disabled,m.visible_range,m.update_time,m.category_id,mc.category_name,mc.update_time
+        SELECT m.id, m.model_name,m.logo, m.sort, m.introduce,m.is_disabled,m.visible_range,m.update_time,m.category_id,mc.category_name,mc.update_time,asp.approver
         FROM model m
         JOIN org_model om ON m.id = om.model_id
         LEFT JOIN model_category mc ON m.category_id = mc.id
+        LEFT JOIN approval_sets_process asp ON asp.model_id = m.id
         WHERE om.org_id= #{ orgId }
         AND m.model_type=2  AND m.is_def=0 ORDER BY m.sort ASC,mc.update_time DESC
     </select>
