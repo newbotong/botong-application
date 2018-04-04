@@ -22,10 +22,11 @@
         <result column="unit" property="attrUnit"/>
         <result column="opt_value" property="optValue"/>
         <result column="org_id" property="orgId"/>
+        <result column="date_format" property="dateFormat"/>
     </resultMap>
     <select id="selectAttrList" resultMap="AttrMap">
         SELECT t1.id, t1.approval_id, t1.attr_parent, t1.attr_name, t1.attr_value, t1.attr_num, t1.attr_type,
-        	t3.item_label,t3.item_labels, t3.unit, t3.opt_value, t2.org_id
+        	t3.item_label,t3.item_labels, t3.unit, t3.opt_value, t2.org_id,t3.date_format
         FROM approval_attr t1
         LEFT JOIN approval t2 ON t1.approval_id = t2.id
         LEFT JOIN model_item t3 ON t2.model_id = t3.model_id

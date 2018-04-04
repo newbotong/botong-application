@@ -6,7 +6,7 @@ import org.springframework.stereotype.Repository;
 
 /**
  * <p>
- * <p> 资讯目录
+ * <p> 资讯目录Mapper
  * </p>
  *
  * @author tao.zeng.

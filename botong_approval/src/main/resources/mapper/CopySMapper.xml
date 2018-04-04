@@ -18,14 +18,8 @@
             <if test="filterParam.state != null">
                 and a.state = #{filterParam.state}
             </if>
-            <if test="filterParam.result != null">
-                and a.result = #{filterParam.result}
-            </if>
-            <if test="filterParam.modelId != null">
-                and a.model_id = #{filterParam.modelId}
-            </if>
             <if test="filterParam.time != null">
-                and (DATE_FORMAT(co.create_time, '%Y-%m-%d') = #{filterParam.time} )
+                and from_unixtime(a.create_time/1000, '%Y%m%d') = from_unixtime(#{filterParam.time}/1000,'%Y%m%d')
             </if>
             <if test="filterParam.searchKey != null and filterParam.searchKey != ''">
                 and concat(a.id,a.title,ap.reason) like CONCAT('%',#{filterParam.searchKey},'%')
@@ -40,7 +34,7 @@
         <result column="is_activated" property="isActivated"/>
     </resultMap>
     <select id="getCopyUserList" resultMap="CopyUserMap">
-        SELECT au.name, co.user_id,au.avatar,au.mobile,au.is_activated
+        SELECT au.name, co.user_id,au.avatar,au.mobile
         FROM approval_copys co LEFT JOIN approval_user au ON co.user_id = au.id
         WHERE co.approval_id=#{approvalId}
 

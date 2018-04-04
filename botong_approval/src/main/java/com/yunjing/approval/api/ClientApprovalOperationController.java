@@ -69,7 +69,6 @@ public class ClientApprovalOperationController extends BaseController {
      * @param uid        用户主键
      * @param approvalId 审批主键
      * @param state      审批状态
-     * @param remark     备注信息
      * @return
      * @throws Exception
      */
@@ -77,9 +76,8 @@ public class ClientApprovalOperationController extends BaseController {
     public ResponseEntityWrapper solve(@RequestParam("oid") Long oid,
                                        @RequestParam("uid") Long uid,
                                        @RequestParam("approvalId") Long approvalId,
-                                       @RequestParam("state") Integer state,
-                                       @RequestParam("remark") String remark) throws Exception {
-        return success(approvalApiService.solveApproval(oid, uid, approvalId, state, remark));
+                                       @RequestParam("state") Integer state) throws Exception {
+        return success(approvalApiService.solveApproval(oid, uid, approvalId, state));
     }
 
     /**
@@ -104,7 +102,6 @@ public class ClientApprovalOperationController extends BaseController {
      * @param oid        企业主键
      * @param uid        用户主键
      * @param approvalId 审批主键
-     * @param remark     备注信息
      * @return
      * @throws Exception
      */
@@ -112,9 +109,8 @@ public class ClientApprovalOperationController extends BaseController {
     public ResponseEntityWrapper transfer(@RequestParam("oid") Long oid,
                                           @RequestParam("uid") Long uid,
                                           @RequestParam("userId") Long userId,
-                                          @RequestParam("approvalId") Long approvalId,
-                                          @RequestParam("remark") String remark) throws Exception {
-        return success(approvalApiService.transferApproval(oid, uid, userId, approvalId, remark));
+                                          @RequestParam("approvalId") Long approvalId) throws Exception {
+        return success(approvalApiService.transferApproval(oid, uid, userId, approvalId));
     }
 
     /**

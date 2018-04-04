@@ -17,6 +17,7 @@ import java.util.Map;
 
 /**
  * 资讯Api
+ *
  * @author 李双喜
  * @date 2018/3/20 17:57
  */
@@ -37,22 +38,23 @@ public class InfoApi extends BaseController {
      * @return
      */
     @PostMapping("/select-parent")
-    public ResponseEntityWrapper selectParent(@RequestParam Long orgId, @RequestParam Long userId) throws BaseException{
-        Map<String,Object> map = infoCatalogService.selectParent(orgId,userId);
+    public ResponseEntityWrapper selectParent(@RequestParam Long orgId, @RequestParam Long userId) throws BaseException {
+        Map<String, Object> map = infoCatalogService.selectParent(orgId, userId);
         return success(map);
     }
 
     /**
      * 查询资讯父级目录下分页列表
-     * @param orgId    企业id
+     *
+     * @param orgId     企业id
      * @param catalogId 目录id
      * @param userId    用户id
      * @return
      * @throws BaseException
      */
     @PostMapping("/select-parent-all")
-    public ResponseEntityWrapper selectParentAll(@RequestParam Long orgId,@RequestParam Long catalogId,@RequestParam Long userId) throws BaseException{
-        Map<String,Object> map = infoCatalogService.selectParentAll(orgId,catalogId,userId);
+    public ResponseEntityWrapper selectParentAll(@RequestParam Long orgId, @RequestParam Long catalogId, @RequestParam Long userId,@RequestParam Integer pageNo,@RequestParam Integer pageSize) throws BaseException {
+        Map<String, Object> map = infoCatalogService.selectParentAll(orgId, catalogId, userId,pageNo,pageSize);
         return success(map);
     }
 
@@ -65,8 +67,8 @@ public class InfoApi extends BaseController {
      * @return
      */
     @PostMapping("/select-detail")
-    public ResponseEntityWrapper selectDetail(@RequestParam Long id, @RequestParam Long userId) throws BaseException{
-        InfoContentDetailDTO infoContentDetailDTO = infoContentService.selectDetail(id,userId);
+    public ResponseEntityWrapper selectDetail(@RequestParam Long id, @RequestParam Long userId) throws BaseException {
+        InfoContentDetailDTO infoContentDetailDTO = infoContentService.selectDetail(id, userId);
         return success(infoContentDetailDTO);
     }
 
@@ -78,7 +80,7 @@ public class InfoApi extends BaseController {
      * @return
      */
     @PostMapping("/update-number")
-    public ResponseEntityWrapper updateNumber(@RequestParam Long id) throws BaseException{
+    public ResponseEntityWrapper updateNumber(@RequestParam Long id) throws BaseException {
         infoContentService.updateNumber(id);
         return success();
     }
@@ -91,7 +93,7 @@ public class InfoApi extends BaseController {
      * @return
      */
     @PostMapping("/insert-info")
-    public ResponseEntityWrapper insertInfo(@RequestBody InfoCategoryParam infoCategoryParam) throws BaseException{
+    public ResponseEntityWrapper insertInfo(@RequestBody InfoCategoryParam infoCategoryParam) throws BaseException {
         BeanFieldValidator.getInstance().ignore().validate(infoCategoryParam);
         infoContentService.insertInfo(infoCategoryParam);
         return success();
@@ -101,13 +103,16 @@ public class InfoApi extends BaseController {
     /**
      * 模糊查询资讯
      *
-     * @param orgId 公司id
-     * @param title 标题
+     * @param orgId    企业
+     * @param title    标题
+     * @param pageNo   当前页码
+     * @param pageSize 每页显示条数
      * @return
+     * @throws BaseException
      */
     @PostMapping("/search-page")
-    public ResponseEntityWrapper searchPage(@RequestParam Long orgId, @RequestParam String title) throws BaseException{
-        Page<InfoDTO> page = infoContentService.searchPage(orgId,title);
+    public ResponseEntityWrapper searchPage(@RequestParam Long orgId, String title, @RequestParam Integer pageNo, @RequestParam Integer pageSize) throws BaseException {
+        Page<InfoDTO> page = infoContentService.searchPage(orgId, title, pageNo, pageSize);
         return success(page);
     }
 }

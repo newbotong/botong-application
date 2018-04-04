@@ -12,7 +12,7 @@ import org.springframework.web.bind.annotation.RequestParam;
  * @author 刘小鹏
  * @date 2018/3/21 16:45
  */
-@FeignClient(name = "botong-dang", fallback = DangFallback.class)
+//@FeignClient(name = "botong-dang", fallback = DangFallback.class)
 public interface DangFeign {
     /**
      * 发送Dang
@@ -20,8 +20,8 @@ public interface DangFeign {
      * @param param dang参数
      * @return
      */
-    @PostMapping("/rpc/dang/send")
-    ResponseEntityWrapper sendDang(@RequestBody DangParam param);
+//    @PostMapping("/rpc/dang/send")
+//    ResponseEntityWrapper sendDang(@RequestBody DangParam param);
 
 
 }

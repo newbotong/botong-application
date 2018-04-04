@@ -6,26 +6,19 @@ import com.common.mybatis.model.BaseModel;
 import lombok.Data;
 
 /**
- * 资讯目录实体
+ * 资讯字典实体
  *
- * @author 裴志鹏
- * @date 2018/3/20 17:07
+ * @author 李双喜
+ * @date 2018/4/3 11:38
  */
 @Data
-@TableName("info_catalog")
-public class InfoCatalog extends BaseModel<InfoCatalog> {
-
+@TableName("info_dictionary")
+public class InfoDictionary extends BaseModel<InfoDictionary> {
     /**
-     * 名称
+     * 字典名称
      */
+    @TableField("name")
     private String name;
-
-    /**
-     * 机构id
-     */
-    @TableField("org_id")
-    private Long orgId;
-
     /**
      * 父id
      */
@@ -35,11 +28,13 @@ public class InfoCatalog extends BaseModel<InfoCatalog> {
     /**
      * 级别
      */
+    @TableField("level")
     private Integer level;
 
     /**
      * 展示顺序
      */
+    @TableField("sort")
     private Integer sort;
 
     /**
@@ -48,9 +43,4 @@ public class InfoCatalog extends BaseModel<InfoCatalog> {
     @TableField("is_delete")
     private Integer isDelete;
 
-    /**
-     * 是否显示0：否，1：是
-     */
-    @TableField("whether_show")
-    private Integer whetherShow;
 }

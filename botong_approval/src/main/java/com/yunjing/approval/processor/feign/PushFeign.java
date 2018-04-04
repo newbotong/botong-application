@@ -14,11 +14,11 @@ import org.springframework.web.bind.annotation.RequestBody;
 @FeignClient(name = "botong-third-party", fallback = PushFallback.class)
 public interface PushFeign {
     /**
-     * 公告推送(工作通知)
+     * 审批推送
      *
-     * @param pushParam 入参
+     * @param pushParam 推送参数
      * @return
      */
-    @PostMapping("/rpc/push/push-target-user")
+    @PostMapping("/rpc/push/push-all-target-user")
     ResponseEntityWrapper pushAllTargetByUser(@RequestBody PushParam pushParam);
 }

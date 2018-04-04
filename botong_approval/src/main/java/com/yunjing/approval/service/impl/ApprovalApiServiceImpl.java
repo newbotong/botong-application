@@ -210,10 +210,9 @@ public class ApprovalApiServiceImpl implements IApprovalApiService {
                 approvalUserVO.setAvatarName(approvalUserVO.getName().length() <= 2 ? approvalUserVO.getName() : approvalUserVO.getName().substring(1, 3));
             }
             if (approvalUserVO.getProcessState() == 0) {
-                approvalUserVO.setApprovalTime(null);
                 if (approvalUserVO.getUserId().equals(userId)) {
                     //描述提醒用户信息
-                    clientApprovalDetailVO.setProcessState(approvalUserVO.getState());
+                    clientApprovalDetailVO.setProcessState(approvalUserVO.getProcessState());
                     clientApprovalDetailVO.setMessage("等待我审批");
                 } else {
                     int flag = index++;
@@ -240,7 +239,7 @@ public class ApprovalApiServiceImpl implements IApprovalApiService {
     }
 
     @Override
-    public boolean solveApproval(Long orgId, Long userId, Long approvalId, Integer state, String remark) {
+    public boolean solveApproval(Long orgId, Long userId, Long approvalId, Integer state) {
         boolean flag = false;
         List<ApprovalProcess> processList = approvalProcessService.selectList(Condition.create().where("approval_id={0}", approvalId));
         if (processList != null && !processList.isEmpty()) {
@@ -249,8 +248,6 @@ public class ApprovalApiServiceImpl implements IApprovalApiService {
                 if (process.getProcessState() == 0) {
                     if (process.getUserId().equals(userId)) {
                         process.setProcessState(state);
-                        String remarks = EmojiFilterUtils.filterEmoji(remark);
-                        process.setReason(remarks);
                         process.setProcessTime(System.currentTimeMillis());
                         boolean update = approvalProcessService.update(process, Condition.create().where("approval_id={0}", approvalId));
                         if (!update) {
@@ -352,7 +349,7 @@ public class ApprovalApiServiceImpl implements IApprovalApiService {
     }
 
     @Override
-    public boolean transferApproval(Long orgId, Long userId, Long transferredUserId, Long approvalId, String remark) {
+    public boolean transferApproval(Long orgId, Long userId, Long transferredUserId, Long approvalId) {
 
         List<ApprovalProcess> processList = approvalProcessService.selectList(Condition.create().where("approval_id={0}", approvalId));
         int num = 0;
@@ -360,7 +357,6 @@ public class ApprovalApiServiceImpl implements IApprovalApiService {
         for (ApprovalProcess approvalProcess : processList) {
             if (approvalProcess.getProcessState() == 0 && num == 0) {
                 approvalProcess.setProcessState(3);
-                approvalProcess.setReason(EmojiFilterUtils.filterEmoji(remark));
                 approvalProcess.setProcessTime(System.currentTimeMillis());
                 ApprovalProcess newProcess = new ApprovalProcess();
                 newProcess.setSeq(approvalProcess.getSeq() + 1);

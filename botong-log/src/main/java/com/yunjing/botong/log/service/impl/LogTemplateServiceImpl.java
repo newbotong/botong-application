@@ -7,8 +7,11 @@ import com.yunjing.botong.log.entity.LogTemplateFieldEntity;
 import com.yunjing.botong.log.mapper.LogTemplateEnumItemMapper;
 import com.yunjing.botong.log.mapper.LogTemplateEnumMapper;
 import com.yunjing.botong.log.mapper.LogTemplateFieldMapper;
+import com.yunjing.botong.log.mapper.LogTemplateMapper;
 import com.yunjing.botong.log.params.LogTemplateParam;
 import com.yunjing.botong.log.service.LogTemplateService;
+import com.yunjing.botong.log.vo.LogTemplateItem;
+import com.yunjing.mommon.wrapper.PageWrapper;
 import org.apache.commons.collections.CollectionUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -25,6 +28,9 @@ import java.util.List;
  */
 @Service
 public class LogTemplateServiceImpl implements LogTemplateService {
+
+    @Autowired
+    private LogTemplateMapper logTemplateMapper ;
 
     @Autowired
     private LogTemplateFieldMapper logTemplateFieldMapper;
@@ -49,10 +55,10 @@ public class LogTemplateServiceImpl implements LogTemplateService {
         List<LogTemplateEnumEntity> enums = new ArrayList<>();
         List<LogTemplateEnumItemEntity> enumItems = new ArrayList<>();
 
-        for (int i = 0; i < fields.size() ; i++) {
+        for (int i = 0; i < fields.size(); i++) {
             LogTemplateFieldEntity fieldEntity = fields.get(i);
             fieldEntity.setTemplateId(entity.getId());
-            if(fieldEntity.getFieldType()==3){
+            if (fieldEntity.getFieldType() == 3) {
                 enums.add(fieldEntity.getLogTemplateEnumEntity());
                 enumItems.addAll(fieldEntity.getLogTemplateEnumEntity().getLogTemplateEnumItemEntities());
             }
@@ -61,14 +67,38 @@ public class LogTemplateServiceImpl implements LogTemplateService {
         this.logTemplateFieldMapper.batchInsertLogTemplateFields(fields);
 
         // 批量插入枚举列表
-        if (!CollectionUtils.isEmpty(enums)){
+        if (!CollectionUtils.isEmpty(enums)) {
             logTemplateEnumMapper.batchInsertLogTemplateEnums(enums);
         }
         // 批量插入枚举项列表
-        if (!CollectionUtils.isEmpty(enumItems)){
+        if (!CollectionUtils.isEmpty(enumItems)) {
             logTemplateEnumItemMapper.batchInsertLogTemplateEnumItems(enumItems);
         }
 
         return entity.getId();
+    }
+
+    @Override
+    public boolean deleteLogTemplate(long id) {
+        LogTemplateEntity logTemplateEntity = new LogTemplateEntity();
+        logTemplateEntity.setId(id);
+        logTemplateEntity.setDeleted(true);
+        logTemplateEntity.updateById();
+        return true;
+    }
+
+    @Override
+    public PageWrapper<LogTemplateItem> queryAllLogTemplate(long orgId, int pageNo, int pageSize) {
+        PageWrapper<LogTemplateItem> result = new PageWrapper<>();
+
+        int offset = (pageNo-1)*pageSize;
+        result.setCurrent(offset);
+        result.setSize(pageSize);
+        long total = this.logTemplateMapper.totalLogTemplateByOrgId(orgId);
+        result.setTotal(total);
+        result.setPages((int)((total+pageSize-1)/pageSize));
+        result.setRecords(this.logTemplateMapper.listLogTemplateByOrgId(orgId,offset,pageSize));
+
+        return result;
     }
 }
