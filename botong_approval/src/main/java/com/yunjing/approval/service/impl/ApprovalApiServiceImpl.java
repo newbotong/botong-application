@@ -13,7 +13,6 @@ import com.yunjing.approval.param.FilterParam;
 import com.yunjing.approval.processor.task.async.ApprovalPushTask;
 import com.yunjing.approval.service.*;
 import com.yunjing.approval.util.Colors;
-import com.yunjing.approval.util.EmojiFilterUtils;
 import com.yunjing.mommon.global.exception.InsertMessageFailureException;
 import com.yunjing.mommon.global.exception.UpdateMessageFailureException;
 import com.yunjing.mommon.utils.IDUtils;
@@ -44,15 +43,15 @@ public class ApprovalApiServiceImpl implements IApprovalApiService {
     @Autowired
     private ApprovalUserMapper approvalUserMapper;
     @Autowired
-    private ModelLMapper modelLMapper;
+    private ModelMapper modelMapper;
     @Autowired
     private ApprovalProcessMapper approvalProcessMapper;
     @Autowired
     private IApprovalProcessService approvalProcessService;
     @Autowired
-    private CopySMapper copysMapper;
+    private CopysMapper copysMapper;
     @Autowired
-    private ICopySService copySService;
+    private ICopysService copySService;
     @Autowired
     private ApprovalMapper approvalMapper;
     @Autowired
@@ -66,7 +65,7 @@ public class ApprovalApiServiceImpl implements IApprovalApiService {
     @Override
     @Transactional(propagation = Propagation.REQUIRED, rollbackFor = Exception.class)
     public List<ClientModelVO> getList(Long orgId) {
-        List<ModelVO> modelVOS = modelLMapper.selectModelListByOrgId(orgId);
+        List<ModelVO> modelVOS = modelMapper.selectModelListByOrgId(orgId);
         List<ClientModelVO> list = new ArrayList<>();
         for (ModelVO modelVO : modelVOS) {
             ClientModelVO modelVO1 = new ClientModelVO(modelVO);
@@ -297,14 +296,14 @@ public class ApprovalApiServiceImpl implements IApprovalApiService {
                 if (approval.getResult() != null) {
                     // 保存审批完成时间
                     approval.setFinishTime(System.currentTimeMillis());
-                    List<CopyS> copySList = copySService.selectList(Condition.create().where("approval_id={0}", approvalId));
+                    List<Copys> copysList = copySService.selectList(Condition.create().where("approval_id={0}", approvalId));
                     // 更新抄送信息
-                    if (approval.getResult() == 1 && !copySList.isEmpty()) {
-                        for (CopyS copyS : copySList) {
-                            copyS.setCopySType(1);
-                            copyS.setCreateTime(System.currentTimeMillis());
+                    if (approval.getResult() == 1 && !copysList.isEmpty()) {
+                        for (Copys copys : copysList) {
+                            copys.setCopySType(1);
+                            copys.setCreateTime(System.currentTimeMillis());
                         }
-                        boolean batchById = copySService.updateBatchById(copySList);
+                        boolean batchById = copySService.updateBatchById(copysList);
                         if (!batchById) {
                             throw new UpdateMessageFailureException("同意审批操作中--更新抄送信息失败");
                         }

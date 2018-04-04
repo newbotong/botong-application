@@ -54,9 +54,9 @@ public class ApprovalServiceImpl extends BaseServiceImpl<ApprovalMapper, Approva
     @Autowired
     private IApprovalAttrService approvalAttrService;
     @Autowired
-    private ICopySService copySService;
+    private ICopysService copySService;
     @Autowired
-    private CopySMapper copySMapper;
+    private CopyMapper copySMapper;
     @Autowired
     private IApprovalService approvalService;
     @Autowired
@@ -329,7 +329,7 @@ public class ApprovalServiceImpl extends BaseServiceImpl<ApprovalMapper, Approva
         String currentTime = DateUtil.dateFormmat(DateUtil.getCurrentTime(), "yyyyMMddHHmmss");
         StringBuilder fileName = new StringBuilder().append(currentTime).append(ApprovalExConsts.SEPARATOR_POINT).append(ApprovalExConsts.Type_xls);
         List<ExcelModel> excelModelList = new ArrayList<>();
-        String TABLE_HEADER = "报表生成日期：" + DateUtil.dateFormmat(DateUtil.getCurrentTime(), DateUtil.DATE_FORMAT_1);
+        String tableHead = "报表生成日期：" + DateUtil.dateFormmat(DateUtil.getCurrentTime(), DateUtil.DATE_FORMAT_1);
         if (!modelLS.isEmpty()) {
             for (ModelL modelL : modelLS) {
                 int length = modelL.getModelVersion() + 1;
@@ -351,7 +351,7 @@ public class ApprovalServiceImpl extends BaseServiceImpl<ApprovalMapper, Approva
                         String orgCreateTime = DateUtil.dateFormmat(orgReadisService.get(String.valueOf(orgId)).getCreateTime(), DateUtil.DATE_FORMAT_2);
                         statisticDate = statisticDate + orgCreateTime + " —— " + DateUtil.dateFormmat(new Date(), DateUtil.DATE_FORMAT_2) + "       ";
                     }
-                    excelModel.setTableHeader(statisticDate + TABLE_HEADER);
+                    excelModel.setTableHeader(statisticDate + tableHead);
                     if (exportData.get(0).getModelVersion() == null) {
                         List<ModelItem> collect = modelItemList.stream().filter(modelItem -> modelItem.getModelId().equals(modelL.getId())).collect(Collectors.toSet()).stream().collect(Collectors.toList());
                         List<ApprovalTemplVO> approvalTemplVOList = new ArrayList<>();
@@ -403,7 +403,7 @@ public class ApprovalServiceImpl extends BaseServiceImpl<ApprovalMapper, Approva
                 statisticDate = statisticDate + orgCreateTime + " —— " + DateUtil.dateFormmat(new Date(), DateUtil.DATE_FORMAT_2) + "       ";
             }
 
-            excelModel.setTableHeader(statisticDate + TABLE_HEADER);
+            excelModel.setTableHeader(statisticDate + tableHead);
             excelModelList.add(excelModel);
         }
         approvalExModel.setExcelModelList(excelModelList);
@@ -466,14 +466,6 @@ public class ApprovalServiceImpl extends BaseServiceImpl<ApprovalMapper, Approva
         if (userIdList != null && !userIdList.isEmpty()) {
             String[] userIdArray = userIdList.toArray(new String[userIdList.size()]);
             // 调用企业服务
-//            String jsonData = deptUserDao.getDeptNameListByUserIds(orgId, userIdArray);
-//            Type type = new TypeReference<BaseResult<List<DeptVO>>>() {
-//            }.getType();
-//            BaseResult<List<DeptVO>> baseResult = JSONObject.parseObject(jsonData, type);
-//            if (!BotongBaseCode.SUCCESS.equals(baseResult.getCode())) {
-//                throw new BaseException("调用企业服务获取部门信息失败");
-//            }
-//            deptNameList = baseResult.getData();
         }
 
         // 获取该企业下所有modelItem
@@ -902,17 +894,17 @@ public class ApprovalServiceImpl extends BaseServiceImpl<ApprovalMapper, Approva
                 n++;
             }
             List<ApprovalUser> users = approvalUserService.selectList(Condition.create().in("id", ids));
-            Set<CopyS> copyS = new HashSet<>();
+            Set<Copys> copies = new HashSet<>();
             for (ApprovalUser user : users) {
-                CopyS copyS1 = new CopyS();
-                copyS1.setApprovalId(approval.getId());
-                copyS1.setUserId(user.getId());
-                copyS1.setId(IDUtils.getID());
-                copyS1.setCopySType(0);
-                copyS1.setCreateTime(DateUtil.getCurrentTime().getTime());
-                copyS.add(copyS1);
+                Copys copys1 = new Copys();
+                copys1.setApprovalId(approval.getId());
+                copys1.setUserId(user.getId());
+                copys1.setId(IDUtils.getID());
+                copys1.setCopySType(0);
+                copys1.setCreateTime(DateUtil.getCurrentTime().getTime());
+                copies.add(copys1);
             }
-            flag = copySService.insertBatch(new ArrayList<>(copyS));
+            flag = copySService.insertBatch(new ArrayList<>(copies));
             if (!flag) {
                 throw new InsertMessageFailureException("批量保存抄送人失败");
             }
