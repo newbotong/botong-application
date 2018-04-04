@@ -19,22 +19,22 @@ public class SignConfigVO {
     private Long orgId;
 
 
-    private int photoStatus;
+    private Integer photoStatus;
 
     /**
      * 是否可以微调
      */
-    private int distanceStatus;
+    private Integer distanceStatus;
 
     /**
      * 微调距离
      */
-    private int distance;
+    private Integer distance;
 
     /**
      * 是否可以需要设置时间
      */
-    private int timeStatus;
+    private Integer timeStatus;
 
     /**
      * 开启时间

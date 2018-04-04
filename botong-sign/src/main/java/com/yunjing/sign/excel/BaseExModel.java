@@ -26,6 +26,11 @@ public abstract class BaseExModel {
 
     private String fileName;
 
+    /**
+     * 抽象方法
+     * @return
+     * @throws Exception
+     */
     public abstract Workbook createWorkbook() throws Exception;
 
     /**
@@ -92,9 +97,6 @@ public abstract class BaseExModel {
             noticeStyle.setFont(font);
             noticeStyle.setAlignment(CellStyle.ALIGN_CENTER);
             noticeStyle.setVerticalAlignment(CellStyle.VERTICAL_CENTER);
-//            noticeStyle.setBorderBottom(HSSFColor.SKY_BLUE.index);
-//            noticeStyle.setWrapText(true);
-//            CellRangeAddress
             s.addMergedRegion(new CellRangeAddress(SignExConsts.ROW_NUM_NOTICE_0, SignExConsts.ROW_NUM_NOTICE_0, 0, excelModel.getTitles().size() - 1));
             s.addMergedRegion(new CellRangeAddress(SignExConsts.ROW_NUM_TABLE_1, SignExConsts.ROW_NUM_TABLE_1, 0, excelModel.getTitles().size() - 1));
             // Define userIndex few rows
@@ -111,7 +113,6 @@ public abstract class BaseExModel {
             tableHeader.setFillPattern(CellStyle.SOLID_FOREGROUND);
             tableHeader.setFillForegroundColor(HSSFColor.SKY_BLUE.index);
             tableCell.setCellStyle(tableHeader);
-//        tableCell.setCellStyle(tableStyle);
             if (titles != null && titles.size() > 0) {
                 createRow(s, SignExConsts.ROW_NUM_TITLE_2, titles);
             }

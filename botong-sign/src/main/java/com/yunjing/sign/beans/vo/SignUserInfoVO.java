@@ -41,5 +41,5 @@ public class SignUserInfoVO {
     /**
      * 签到状态
      */
-    private int signState;
+    private Integer signState;
 }

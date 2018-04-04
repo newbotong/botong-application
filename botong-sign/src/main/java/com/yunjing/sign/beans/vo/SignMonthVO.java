@@ -17,7 +17,7 @@ public class SignMonthVO {
 
     private String signDate;
 
-    private int signWeek;
+    private Integer signWeek;
 
-    private int signCount;
+    private Integer signCount;
 }

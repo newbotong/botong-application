@@ -38,7 +38,7 @@ public interface ISignDetailService extends IService<SignDetail> {
 
     /**
      * 签到统计接口
-     *
+     * @param mapper 传入mapper
      * @param userAndDeptParam 部门id和用户id组合
      * @return
      */
@@ -46,7 +46,7 @@ public interface ISignDetailService extends IService<SignDetail> {
 
     /**
      * 按月查询我签到的明细
-     *
+     * @param mapper 传入mapper
      * @param signDetailParam 签到明细
      * @return
      */
@@ -55,7 +55,7 @@ public interface ISignDetailService extends IService<SignDetail> {
 
     /**
      * 按月统计指定部门和人员的考勤信息
-     *
+     * @param mapper 传入mapper
      * @param userAndDeptParam  部门和人员
      * @return
      */

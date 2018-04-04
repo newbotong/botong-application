@@ -11,6 +11,15 @@ import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
 
+
+/**
+ * <p>
+ * 签到明细 redis配置
+ * </p>
+ *
+ * @author jingwj
+ * @since 2018-03-21
+ */
 @Repository
 public class SignRedisRepository extends BaseRedisService<SignConfigModel> {
 

@@ -56,7 +56,15 @@ public class SignExConsts {
 
 
     public static enum Type {
-        HSSFWorkbook, XSSFWorkbook;
+        /**
+         * 2013
+         */
+        HSSFWorkbook,
+
+        /**
+         * 2017
+         */
+        XSSFWorkbook;
 
     }
 }

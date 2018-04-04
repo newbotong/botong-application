@@ -160,12 +160,12 @@ public class SignDetailDailyServiceImpl extends ServiceImpl<SignDetailDailyMappe
         // 注入表头
         String statisticDate = "统计日期：";
         statisticDate = statisticDate + DateUtil.getDate(startD) + " —— " + DateUtil.getDate(endDate) + "       ";
-        String TABLE_HEADER = "报表生成日期："+ DateUtil.getDate(new Date());
-        excelModel.setTableHeader(statisticDate + TABLE_HEADER);
+        String tableHead = "报表生成日期："+ DateUtil.getDate(new Date());
+        excelModel.setTableHeader(statisticDate + tableHead);
 
         // 注入数据项名称
         List<SignTemplVO> signTemplVOList = new ArrayList<>();
-        for (int i = 1; i < 7; i++) {
+        for (int i = 1; i < SignConstant.BOTONG_SEVEN_VALUE; i++) {
             SignTemplVO signTemplVO = new SignTemplVO();
             signTemplVO.setCKey("图" + i);
             signTemplVOList.add(signTemplVO);

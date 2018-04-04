@@ -20,9 +20,23 @@ import java.util.List;
 @FeignClient(name = "botong-org-structure", fallback = UserRemoteServiceFallback.class)
 public interface UserRemoteService {
 
+    /**
+     * 获取所有的人员id
+     * @param deptIds
+     * @param memberIds
+     * @return
+     */
     @PostMapping("/rpc/member/find-sub-lists")
     ResponseEntityWrapper<List<SignUserInfoVO>> findSubLists(@RequestParam(value = "deptIds", required = false) String[] deptIds, @RequestParam(value = "memberIds", required = false) String[] memberIds);
 
+    /**
+     * 分页获取人员id
+     * @param deptIds
+     * @param memberIds
+     * @param pageNo
+     * @param pageSize
+     * @return
+     */
     @PostMapping("/rpc/member/find-member-page")
     ResponseEntityWrapper<PageWrapper<SignUserInfoVO>> findMemberPage(@RequestParam(value = "deptIds", required = false) String[] deptIds, @RequestParam(value = "memberIds", required = false) String[] memberIds,
                                                                       @RequestParam(value = "pageNo") int pageNo, @RequestParam(value = "pageSize") int pageSize);
