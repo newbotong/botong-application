@@ -27,8 +27,8 @@ public class SignConfigDailyApi extends BaseController {
 
     /**
      * 设置签到规则
-     * @param signConfigParam
-     * @return
+     * @param signConfigParam   签到设置规则对象
+     * @return                  返回布尔值，表示是否设置成功
      */
     @PostMapping("/setting")
     public ResponseEntityWrapper setting(@RequestBody SignConfigParam signConfigParam){

@@ -39,8 +39,8 @@ public class SignDetailController extends BaseController {
 
     /**
      * 签到统计
-     * @param userAndDeptParam
-     * @return
+     * @param userAndDeptParam      多部门id和多memberid
+     * @return                      按月返回所有member的签到明细
      */
     @PostMapping("/statistics")
     public ResponseEntityWrapper statistics(@RequestBody UserAndDeptParam userAndDeptParam){
@@ -53,12 +53,12 @@ public class SignDetailController extends BaseController {
     /**
      * 导出签到数据
      *
-     * @param response
-     * @param userIds
-     * @param deptIds
-     * @param signDate
-     * @return
-     * @throws Exception
+     * @param response          reponse
+     * @param userIds           多个memberids
+     * @param deptIds           多个部门ids
+     * @param signDate          统计时间
+     * @return                  输出文件流
+     * @throws Exception        异常
      */
     @GetMapping("/export")
     public ResponseEntityWrapper export(HttpServletResponse response, String userIds, String deptIds, String signDate) throws Exception {
@@ -83,6 +83,14 @@ public class SignDetailController extends BaseController {
         return success(response, excel, exportFlag);
     }
 
+    /**
+     * 返回到输出流，
+     * @param response      输出response
+     * @param excel         excel表格对象
+     * @param resultFlag    成功与否
+     * @return              输出流，null
+     * @throws Exception    异常
+     */
     private ResponseEntityWrapper success(HttpServletResponse response, BaseExModel excel, boolean resultFlag) throws Exception {
         OutputStream out = response.getOutputStream();
         Workbook workbook = null;
@@ -107,8 +115,8 @@ public class SignDetailController extends BaseController {
 
     /**
      * 签到明细
-     * @param signDetailParam
-     * @return
+     * @param signDetailParam   签到明细对象
+     * @return                  返回明细列表
      */
     @PostMapping("/list")
     public ResponseEntityWrapper statistics(@RequestBody SignDetailParam signDetailParam){
