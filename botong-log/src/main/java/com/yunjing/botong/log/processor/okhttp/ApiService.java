@@ -23,7 +23,7 @@ public interface ApiService {
     /**
      * 服务器地址，必须以 / 结尾，别问我为啥，因为没有 / 会报错
      */
-    String BASE_URL = "okhttp://192.168.10.233:8000/";
+    String BASE_URL = "http://192.168.10.233:8000/";
 
     /**
      * 推送
