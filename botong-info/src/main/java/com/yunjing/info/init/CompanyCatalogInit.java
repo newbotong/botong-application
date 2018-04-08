@@ -1,13 +1,9 @@
 package com.yunjing.info.init;
 
-import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
-import com.alibaba.fastjson.TypeReference;
-import com.google.gson.JsonObject;
 import com.yunjing.info.common.InfoConstant;
 import com.yunjing.info.config.InfoConstants;
 import com.yunjing.info.dto.InfoRedisInit;
-import com.yunjing.info.dto.ParentInfoDetailDTO;
 import com.yunjing.info.model.InfoCatalog;
 import com.yunjing.info.model.InfoDictionary;
 import com.yunjing.info.service.InfoCatalogService;
@@ -16,14 +12,12 @@ import com.yunjing.mommon.global.exception.BaseException;
 import com.yunjing.mommon.utils.IDUtils;
 import com.yunjing.mommon.wrapper.ResponseEntityWrapper;
 import org.apache.commons.collections.CollectionUtils;
-import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
-import java.lang.reflect.Type;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -61,7 +55,7 @@ public class CompanyCatalogInit extends BaseController {
             InfoRedisInit infoRedisInit = JSONObject.parseObject(entry.getValue().toString(), InfoRedisInit.class);
             InfoCatalog infoCatalog = new InfoCatalog();
             infoCatalog.setId(IDUtils.getID());
-            infoCatalog.setIsDelete(InfoConstant.LOGIC_DELETE_NOMAL);
+            infoCatalog.setIsDelete(InfoConstant.LOGIC_DELETE_NORMAL);
             infoCatalog.setLevel(infoRedisInit.getLevel());
             infoCatalog.setName(infoRedisInit.getName());
             infoCatalog.setOrgId(orgId);
@@ -85,7 +79,7 @@ public class CompanyCatalogInit extends BaseController {
                     info.setLevel(infoDictionary.getLevel());
                     info.setName(infoDictionary.getName());
                     info.setOrgId(orgId);
-                    info.setIsDelete(InfoConstant.LOGIC_DELETE_NOMAL);
+                    info.setIsDelete(InfoConstant.LOGIC_DELETE_NORMAL);
                     info.setParentId(infoCatalog.getId());
                     info.setUpdateTime(System.currentTimeMillis());
                     info.setCreateTime(System.currentTimeMillis());

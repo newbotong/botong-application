@@ -34,7 +34,7 @@ public class RedisInit extends BaseController {
     @RequestMapping("/info-catalog")
     public ResponseEntityWrapper initCatalog() throws BaseException {
         //查询出所有的一级目录
-        List<InfoDictionary> infoDictionaries = new InfoDictionary().selectList(new EntityWrapper<InfoDictionary>().eq("is_delete", InfoConstant.LOGIC_DELETE_NOMAL).eq("level", 1).orderBy("sort"));
+        List<InfoDictionary> infoDictionaries = new InfoDictionary().selectList(new EntityWrapper<InfoDictionary>().eq("is_delete", InfoConstant.LOGIC_DELETE_NORMAL).eq("level", 1).orderBy("sort"));
         if (CollectionUtils.isNotEmpty(infoDictionaries)) {
             redisTemplate.delete(InfoConstant.REDIS_CATALOG_ONE);
             List<InfoRedisInit> list = new ArrayList<>();
@@ -50,7 +50,7 @@ public class RedisInit extends BaseController {
             if (CollectionUtils.isNotEmpty(ids)) {
                 for (Long id : ids) {
                     List<InfoDictionary> redisInitList = new InfoDictionary().selectList(new EntityWrapper<InfoDictionary>()
-                            .eq("is_delete", InfoConstant.LOGIC_DELETE_NOMAL).eq("parent_id", id).orderBy("sort"));
+                            .eq("is_delete", InfoConstant.LOGIC_DELETE_NORMAL).eq("parent_id", id).orderBy("sort"));
                     if (CollectionUtils.isNotEmpty(redisInitList)) {
                         redisTemplate.delete(InfoConstant.REDIS_CATALOG_TWO + ":" + id);
                         redisTemplate.opsForList().rightPushAll(InfoConstant.REDIS_CATALOG_TWO + ":" + id, JSONObject.toJSONString(redisInitList));
