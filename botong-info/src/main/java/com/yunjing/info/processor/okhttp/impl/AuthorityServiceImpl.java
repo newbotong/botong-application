@@ -48,7 +48,7 @@ public class AuthorityServiceImpl implements AuthorityService {
      * @throws IOException
      */
     @Override
-    public Call<ResponseEntityWrapper> authority(String appId, Long memberId) throws BaseException, IOException {
+    public Call<ResponseEntityWrapper> authority(String appId, Long memberId) throws BaseException,IOException {
         if (service == null) {
             initRetrofit();
         }

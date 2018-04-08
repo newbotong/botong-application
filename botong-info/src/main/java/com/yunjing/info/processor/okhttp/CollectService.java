@@ -26,5 +26,5 @@ public interface CollectService {
      * @throws IOException
      */
     @POST("/rpc/favourite/verification")
-    Call<ResponseEntityWrapper> collectState(@Query("userId") Long userId, @Query("originId") Long originId) throws BaseException, IOException;
+    Call<ResponseEntityWrapper> collectState(@Query("userId") Long userId, @Query("originId") Long originId) throws BaseException,IOException;
 }

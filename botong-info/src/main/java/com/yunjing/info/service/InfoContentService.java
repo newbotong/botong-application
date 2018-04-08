@@ -27,7 +27,7 @@ public interface InfoContentService extends IService<InfoContent> {
      * @throws BaseException
      * @throws IOException
      */
-    InfoContentDetailDTO selectDetail(Long id, Long userId) throws BaseException,IOException;
+    InfoContentDetailDTO selectDetail(Long id, Long userId) throws BaseException, IOException;
 
     /**
      * 更新阅读数量接口

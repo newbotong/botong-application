@@ -24,17 +24,19 @@ public interface InfoCatalogServiceV2 extends IService<InfoCatalog> {
 
     /**
      * 新增类目
+     *
      * @param orgId
      * @param parentId
      * @param name
      * @return
      * @throws BaseException
      */
-    InfoConstants.StateCode insertInfoCategory(Long orgId,Long parentId,String name) throws BaseException;
+    InfoConstants.StateCode insertInfoCategory(Long orgId, Long parentId, String name) throws BaseException;
 
 
     /**
      * 修改分类
+     *
      * @param orgId
      * @param parentId
      * @param id
@@ -42,30 +44,33 @@ public interface InfoCatalogServiceV2 extends IService<InfoCatalog> {
      * @return
      * @throws BaseException
      */
-    InfoConstants.StateCode modifyInfoCategory(Long orgId,Long parentId,Long id,String name) throws BaseException;
+    InfoConstants.StateCode modifyInfoCategory(Long orgId, Long parentId, Long id, String name) throws BaseException;
 
     /**
      * 删除分类
+     *
      * @param orgId
      * @param parentId
      * @param id
      * @return
      * @throws BaseException
      */
-    InfoConstants.StateCode deleteInfoCategory(Long orgId,Long parentId,Long id) throws BaseException;
+    InfoConstants.StateCode deleteInfoCategory(Long orgId, Long parentId, Long id) throws BaseException;
 
 
     /**
      * 删除资讯
+     *
      * @param orgId
      * @param id
      * @return
      * @throws BaseException
      */
-    InfoConstants.StateCode deleteInfoContent(Long orgId,Long id) throws BaseException;
+    InfoConstants.StateCode deleteInfoContent(Long orgId, Long id) throws BaseException;
 
     /**
      * 显示、隐藏分类
+     *
      * @param orgId
      * @param parentId
      * @param id
@@ -73,22 +78,24 @@ public interface InfoCatalogServiceV2 extends IService<InfoCatalog> {
      * @return
      * @throws BaseException
      */
-    InfoConstants.StateCode displayInfoCategory(Long orgId,Long parentId,Long id,Integer displayType) throws BaseException;
+    InfoConstants.StateCode displayInfoCategory(Long orgId, Long parentId, Long id, Integer displayType) throws BaseException;
 
 
     /**
      * 显示隐藏资讯内容
+     *
      * @param orgId
      * @param id
-     * @param displayType  0：否，1：是
+     * @param displayType 0：否，1：是
      * @return
      * @throws BaseException
      */
-    InfoConstants.StateCode displayInfoContent(Long orgId,Long id,Integer displayType) throws BaseException;
+    InfoConstants.StateCode displayInfoContent(Long orgId, Long id, Integer displayType) throws BaseException;
 
 
     /**
      * 根据orgI获取一级下的所有分类
+     *
      * @param orgId
      * @return
      * @throws BaseException
@@ -98,6 +105,7 @@ public interface InfoCatalogServiceV2 extends IService<InfoCatalog> {
 
     /**
      * 类目排序
+     *
      * @param orgId
      * @param parentId
      * @param catalogId1
@@ -105,22 +113,24 @@ public interface InfoCatalogServiceV2 extends IService<InfoCatalog> {
      * @return
      * @throws BaseException
      */
-    InfoConstants.StateCode updateCatalogSort(Long orgId,Long parentId,Long catalogId1,Long catalogId2)throws BaseException;
+    InfoConstants.StateCode updateCatalogSort(Long orgId, Long parentId, Long catalogId1, Long catalogId2) throws BaseException;
 
 
     /**
      * 资讯排序
+     *
      * @param orgId
      * @param catalogId1
      * @param catalogId2
      * @return
      * @throws BaseException
      */
-    InfoConstants.StateCode updateInfoSort(Long orgId,Long catalogId1,Long catalogId2)throws BaseException;
+    InfoConstants.StateCode updateInfoSort(Long orgId, Long catalogId1, Long catalogId2) throws BaseException;
 
 
     /**
      * web端资讯分页模糊查询
+     *
      * @param orgId
      * @param catalogId
      * @param title
@@ -128,8 +138,6 @@ public interface InfoCatalogServiceV2 extends IService<InfoCatalog> {
      * @throws BaseException
      */
     PageWrapper<InfoContentDTO> selectParentPage(Long orgId, Long catalogId, String title, Integer pageNo, Integer pageSize) throws BaseException;
-
-
 
 
 }

@@ -47,7 +47,7 @@ public class CollectServiceImpl implements CollectService {
      * @throws IOException
      */
     @Override
-    public Call<ResponseEntityWrapper> collectState(Long userId, Long originId) throws BaseException,IOException {
+    public Call<ResponseEntityWrapper> collectState(Long userId, Long originId) throws BaseException, IOException {
         if (service == null) {
             initRetrofit();
         }

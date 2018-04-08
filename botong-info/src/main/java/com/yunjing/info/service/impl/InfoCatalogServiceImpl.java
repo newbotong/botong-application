@@ -134,7 +134,7 @@ public class InfoCatalogServiceImpl extends ServiceImpl<InfoCatalogMapper, InfoC
         List<InfoDTO> infoDTOList = infoCatalogMapper.selectInfoCatalog(map, page);
         page.setRecords(infoDTOList);
         resultMap.put("page", page);
-        //OKHttp
+        //OKHttp调用
         Call<ResponseEntityWrapper> call = authorityService.authority(appId, userId);
         Response<ResponseEntityWrapper> execute = call.execute();
         ResponseEntityWrapper body = execute.body();
