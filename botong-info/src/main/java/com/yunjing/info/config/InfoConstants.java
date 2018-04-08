@@ -33,7 +33,7 @@ public interface InfoConstants {
     /**
      * 资讯类目缓存key
      */
-    String BOTONG_INFO_CATALOG_LIST = "botong:info:";
+    String BOTONG_INFO_CATALOG_LIST = "botong:info:org:";
     /**
      * redis 分隔
      */
