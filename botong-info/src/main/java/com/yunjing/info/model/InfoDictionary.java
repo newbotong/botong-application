@@ -4,6 +4,7 @@ import com.baomidou.mybatisplus.annotations.TableField;
 import com.baomidou.mybatisplus.annotations.TableName;
 import com.common.mybatis.model.BaseModel;
 import lombok.Data;
+import lombok.EqualsAndHashCode;
 
 /**
  * 资讯字典实体
@@ -12,6 +13,7 @@ import lombok.Data;
  * @date 2018/4/3 11:38
  */
 @Data
+@EqualsAndHashCode(callSuper = true)
 @TableName("info_dictionary")
 public class InfoDictionary extends BaseModel<InfoDictionary> {
     /**

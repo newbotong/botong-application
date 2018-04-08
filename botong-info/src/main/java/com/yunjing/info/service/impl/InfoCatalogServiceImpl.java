@@ -1,19 +1,25 @@
 package com.yunjing.info.service.impl;
 
 import com.alibaba.fastjson.JSONObject;
+import com.baomidou.mybatisplus.mapper.EntityWrapper;
 import com.baomidou.mybatisplus.plugins.Page;
 import com.baomidou.mybatisplus.service.impl.ServiceImpl;
 import com.yunjing.info.common.InfoConstant;
 import com.yunjing.info.config.InfoConstants;
 import com.yunjing.info.dto.CompanyRedisCatalogDTO;
 import com.yunjing.info.dto.InfoDTO;
+import com.yunjing.info.dto.InfoRedisInit;
 import com.yunjing.info.dto.ParentInfoDetailDTO;
 import com.yunjing.info.mapper.InfoCatalogMapper;
 import com.yunjing.info.model.InfoCatalog;
+import com.yunjing.info.model.InfoDictionary;
 import com.yunjing.info.param.InfoCategoryParam;
 import com.yunjing.info.service.InfoCatalogService;
 import com.yunjing.mommon.global.exception.BaseException;
+import com.yunjing.mommon.wrapper.ResponseEntityWrapper;
+import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.collections.MapUtils;
+import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.stereotype.Service;
@@ -119,5 +125,40 @@ public class InfoCatalogServiceImpl extends ServiceImpl<InfoCatalogMapper, InfoC
         //OKHttp
         resultMap.put("admin",true);
         return resultMap;
+    }
+
+
+    /**
+     * 初始化公共资讯类目
+     * @return
+     */
+    public void init() throws BaseException{
+        //查询出所有的一级目录
+        List<InfoDictionary> infoDictionaries = new InfoDictionary().selectList(new EntityWrapper<InfoDictionary>().eq("is_delete", InfoConstant.LOGIC_DELETE_NORMAL).eq("level", 1).orderBy("sort"));
+        if (CollectionUtils.isNotEmpty(infoDictionaries)) {
+            redisTemplate.delete(InfoConstant.REDIS_CATALOG_ONE);
+            List<InfoRedisInit> list = new ArrayList<>();
+            //将每一个一级目录全部存到redis
+            List<Long> ids = new ArrayList<Long>();
+            for (InfoDictionary infoDictionary : infoDictionaries) {
+                InfoRedisInit infoRedisInit = new InfoRedisInit();
+                BeanUtils.copyProperties(infoDictionary, infoRedisInit);
+                list.add(infoRedisInit);
+                ids.add(infoDictionary.getId());
+                redisTemplate.opsForHash().put(InfoConstant.REDIS_CATALOG_ONE, infoDictionary.getId().toString(), JSONObject.toJSONString(infoRedisInit));
+            }
+            if (CollectionUtils.isNotEmpty(ids)) {
+                for (Long id : ids) {
+                    List<InfoDictionary> redisInitList = new InfoDictionary().selectList(new EntityWrapper<InfoDictionary>()
+                            .eq("is_delete", InfoConstant.LOGIC_DELETE_NORMAL).eq("parent_id", id).orderBy("sort"));
+                    if (CollectionUtils.isNotEmpty(redisInitList)) {
+                        redisTemplate.delete(InfoConstant.REDIS_CATALOG_TWO + ":" + id);
+                        redisTemplate.opsForList().rightPushAll(InfoConstant.REDIS_CATALOG_TWO + ":" + id, JSONObject.toJSONString(redisInitList));
+                    }
+                }
+            }
+        }else {
+            throw new BaseException("请先初始化公共类目缓存");
+        }
     }
 }

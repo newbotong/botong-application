@@ -4,6 +4,7 @@ import com.baomidou.mybatisplus.annotations.TableField;
 import com.baomidou.mybatisplus.annotations.TableName;
 import com.common.mybatis.model.BaseModel;
 import lombok.Data;
+import lombok.EqualsAndHashCode;
 
 /**
  * 资讯内容实体
@@ -13,6 +14,7 @@ import lombok.Data;
  */
 @Data
 @TableName("info_content")
+@EqualsAndHashCode(callSuper = true)
 public class InfoContent extends BaseModel<InfoContent> {
     /**
      * 目录id

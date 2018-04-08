@@ -4,6 +4,7 @@ import com.baomidou.mybatisplus.annotations.TableField;
 import com.baomidou.mybatisplus.annotations.TableName;
 import com.common.mybatis.model.BaseModel;
 import lombok.Data;
+import lombok.EqualsAndHashCode;
 
 /**
  * 资讯目录实体
@@ -12,6 +13,7 @@ import lombok.Data;
  * @date 2018/3/20 17:07
  */
 @Data
+@EqualsAndHashCode(callSuper = true)
 @TableName("info_catalog")
 public class InfoCatalog extends BaseModel<InfoCatalog> implements Comparable<InfoCatalog>{
 
