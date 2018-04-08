@@ -13,6 +13,7 @@ import com.yunjing.mommon.wrapper.ResponseEntityWrapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
+import java.io.IOException;
 import java.util.Map;
 
 /**
@@ -50,11 +51,14 @@ public class InfoApi extends BaseController {
      * @param orgId     企业id
      * @param catalogId 目录id
      * @param userId    用户id
+     * @param pageNo    当前页码
+     * @param pageSize  每页显示条数
      * @return
      * @throws BaseException
+     * @throws IOException
      */
     @PostMapping("/parent-all")
-    public ResponseEntityWrapper selectParentAll(@RequestParam Long orgId, @RequestParam Long catalogId, @RequestParam Long userId, @RequestParam Integer pageNo, @RequestParam Integer pageSize) throws BaseException {
+    public ResponseEntityWrapper selectParentAll(@RequestParam Long orgId, @RequestParam Long catalogId, @RequestParam Long userId, @RequestParam Integer pageNo, @RequestParam Integer pageSize) throws BaseException, IOException {
         Map<String, Object> map = infoCatalogService.selectParentAll(orgId, catalogId, userId, pageNo, pageSize);
         return success(map);
     }
@@ -66,9 +70,11 @@ public class InfoApi extends BaseController {
      * @param id     资讯id
      * @param userId 用户id
      * @return
+     * @throws BaseException
+     * @throws IOException
      */
     @PostMapping("/detail")
-    public ResponseEntityWrapper selectDetail(@RequestParam Long id, @RequestParam Long userId) throws BaseException {
+    public ResponseEntityWrapper selectDetail(@RequestParam Long id, @RequestParam Long userId) throws BaseException,IOException  {
         InfoContentDetailDTO infoContentDetailDTO = infoContentService.selectDetail(id, userId);
         return success(infoContentDetailDTO);
     }
