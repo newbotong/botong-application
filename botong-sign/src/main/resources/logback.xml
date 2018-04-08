@@ -98,7 +98,7 @@
     <!-- 日志输出级别 -->
     <root level="INFO">
         <!--<appender-ref ref="console"/>-->
-        <!--<appender-ref ref="logstash"/>-->
+        <appender-ref ref="logstash"/>
         <appender-ref ref="CONSOLE"/>
     </root>
 
