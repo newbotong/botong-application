@@ -11,8 +11,6 @@ import com.yunjing.info.mapper.InfoCatalogMapper;
 import com.yunjing.info.mapper.InfoContentMapper;
 import com.yunjing.info.model.InfoCatalog;
 import com.yunjing.info.model.InfoContent;
-import com.yunjing.info.param.InfoCategoryParam;
-import com.yunjing.info.service.InfoCatalogService;
 import com.yunjing.info.service.InfoCatalogServiceV2;
 import com.yunjing.mommon.global.exception.BaseException;
 import com.yunjing.mommon.utils.BeanUtils;
@@ -20,7 +18,6 @@ import com.yunjing.mommon.utils.IDUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -58,7 +55,7 @@ public class InfoCatalogServiceImplV2 extends ServiceImpl<InfoCatalogMapper, Inf
         int i = 5;
         Map<String, Object> infoCatalogMap = new HashMap<>(i);
         infoCatalogMap.put("org_id", orgId);
-        infoCatalogMap.put("is_delete", InfoConstant.LOGIC_DELETE_NOMAL);
+        infoCatalogMap.put("is_delete", InfoConstant.LOGIC_DELETE_NORMAL);
         infoCatalogMap.put("parent_id",parentId);
         List<InfoCatalog> infoCatalogList = infoCatalogMapper.selectByMap(infoCatalogMap);
         //每个公司的分类不能超过6个
@@ -78,7 +75,7 @@ public class InfoCatalogServiceImplV2 extends ServiceImpl<InfoCatalogMapper, Inf
         infoCatalog.setWhetherShow(InfoConstants.INFO_TYPE_DISPLAY);
         //顺序+1
         infoCatalog.setSort(infoCatalogList.size()+1);
-        infoCatalog.setIsDelete(InfoConstant.LOGIC_DELETE_NOMAL);
+        infoCatalog.setIsDelete(InfoConstant.LOGIC_DELETE_NORMAL);
         infoCatalog.setCreateTime(System.currentTimeMillis());
         infoCatalog.setUpdateTime(System.currentTimeMillis());
         infoCatalog.setId(IDUtils.getID());
@@ -105,7 +102,7 @@ public class InfoCatalogServiceImplV2 extends ServiceImpl<InfoCatalogMapper, Inf
         InfoCatalog infoCatalog = new InfoCatalog();
         infoCatalog.setUpdateTime(System.currentTimeMillis());
         infoCatalog.setName(name);
-        wrapper.where("org_id={0}", orgId).and("parent_id={0}",parentId).and("id={0}", id).and("is_delete={0}", InfoConstant.LOGIC_DELETE_NOMAL);
+        wrapper.where("org_id={0}", orgId).and("parent_id={0}",parentId).and("id={0}", id).and("is_delete={0}", InfoConstant.LOGIC_DELETE_NORMAL);
         int falg = infoCatalogMapper.update(infoCatalog, wrapper);
         //更新缓存
         if(falg>0){
@@ -186,7 +183,7 @@ public class InfoCatalogServiceImplV2 extends ServiceImpl<InfoCatalogMapper, Inf
         EntityWrapper<InfoCatalog> wrapper = new EntityWrapper<>();
         InfoCatalog infoCatalog = new InfoCatalog();
         infoCatalog.setUpdateTime(System.currentTimeMillis());
-        infoCatalog.setIsDelete(InfoConstant.LOGIC_DELETE_NOMAL);
+        infoCatalog.setIsDelete(InfoConstant.LOGIC_DELETE_NORMAL);
         infoCatalog.setWhetherShow(displayType);
         wrapper.where("org_id={0}", orgId).and("parent_id={0}",parentId).and("id={0}", id);
         int falg = infoCatalogMapper.update(infoCatalog, wrapper);
@@ -216,7 +213,7 @@ public class InfoCatalogServiceImplV2 extends ServiceImpl<InfoCatalogMapper, Inf
         EntityWrapper<InfoContent> infoContentEntityWrapper = new EntityWrapper<>();
         InfoContent infoContent = new InfoContent();
         infoContent.setUpdateTime(System.currentTimeMillis());
-        infoContent.setIsDelete(InfoConstant.LOGIC_DELETE_NOMAL);
+        infoContent.setIsDelete(InfoConstant.LOGIC_DELETE_NORMAL);
         infoContent.setWhetherShow(displayType);
         infoContentEntityWrapper.where("org_id={0}", orgId).and("id={0}",id);
         int falg = infoContentMapper.update(infoContent,infoContentEntityWrapper);

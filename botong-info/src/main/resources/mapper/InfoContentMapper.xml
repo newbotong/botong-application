@@ -18,6 +18,6 @@
         <if test="title!= null and title != ''">
             AND title LIKE CONCAT(CONCAT('%',#{title}),'%')
         </if>
-        ORDER BY sort
+        ORDER BY sort DESC
     </select>
 </mapper>

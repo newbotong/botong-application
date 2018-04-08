@@ -17,6 +17,6 @@
         org_id = #{orgId} AND
         whether_show = 1 AND
         catalog_id = #{catalogId}
-        ORDER BY sort
+        ORDER BY sort DESC
     </select>
 </mapper>

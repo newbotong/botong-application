@@ -1,7 +1,6 @@
 package com.yunjing.info.service.impl;
 
 import com.alibaba.fastjson.JSON;
-import com.alibaba.fastjson.JSONObject;
 import com.baomidou.mybatisplus.mapper.EntityWrapper;
 import com.baomidou.mybatisplus.plugins.Page;
 import com.baomidou.mybatisplus.service.impl.ServiceImpl;
@@ -48,7 +47,7 @@ public class InfoContentServiceImpl extends ServiceImpl<InfoContentMapper, InfoC
      */
     @Override
     public InfoContentDetailDTO selectDetail(Long id, Long userId) throws BaseException {
-        InfoContent infoContent = new InfoContent().selectOne(new EntityWrapper<InfoContent>().eq("is_delete", InfoConstant.LOGIC_DELETE_NOMAL).eq("id", id));
+        InfoContent infoContent = new InfoContent().selectOne(new EntityWrapper<InfoContent>().eq("is_delete", InfoConstant.LOGIC_DELETE_NORMAL).eq("id", id));
         if (null == infoContent) {
             throw new BaseException("该资讯已被删除");
         }
@@ -71,7 +70,7 @@ public class InfoContentServiceImpl extends ServiceImpl<InfoContentMapper, InfoC
     @Override
     @Transactional(rollbackFor = Exception.class)
     public void updateNumber(Long id) throws BaseException {
-        InfoContent infoContent = new InfoContent().selectOne(new EntityWrapper<InfoContent>().eq("is_delete", InfoConstant.LOGIC_DELETE_NOMAL).eq("id", id));
+        InfoContent infoContent = new InfoContent().selectOne(new EntityWrapper<InfoContent>().eq("is_delete", InfoConstant.LOGIC_DELETE_NORMAL).eq("id", id));
         if (null != infoContent) {
             infoContent.setReadNumber(infoContent.getReadNumber() + 1);
             this.updateById(infoContent);
@@ -95,11 +94,11 @@ public class InfoContentServiceImpl extends ServiceImpl<InfoContentMapper, InfoC
         }else {
             infoContent.setCatalogId(infoCategoryParam.getCatalogId());
         }
-        infoContent.setIsDelete(InfoConstant.LOGIC_DELETE_NOMAL);
+        infoContent.setIsDelete(InfoConstant.LOGIC_DELETE_NORMAL);
         infoContent.setReadNumber(0);
         infoContent.setWhetherShow(1);
         List<InfoContent> infoContentList = new InfoContent().selectList(new EntityWrapper<InfoContent>()
-                .eq("is_delete", InfoConstant.LOGIC_DELETE_NOMAL).eq("catalog_id", infoCategoryParam.getCatalogId()).orderBy("sort", false));
+                .eq("is_delete", InfoConstant.LOGIC_DELETE_NORMAL).eq("catalog_id", infoCategoryParam.getCatalogId()).orderBy("sort", false));
         if (CollectionUtils.isNotEmpty(infoContentList)) {
             InfoContent infoContent1 = infoContentList.get(0);
             infoContent.setSort(infoContent1.getSort() + 1);
@@ -111,7 +110,7 @@ public class InfoContentServiceImpl extends ServiceImpl<InfoContentMapper, InfoC
             throw new BaseException("新增失败");
         }
         ParentInfoDetailDTO parentInfoDetailDTO = new ParentInfoDetailDTO();
-        InfoCatalog infoCatalog = new InfoCatalog().selectOne(new EntityWrapper<InfoCatalog>().eq("is_delete",InfoConstant.LOGIC_DELETE_NOMAL).eq("id",infoCategoryParam.getOneCatalogId()));
+        InfoCatalog infoCatalog = new InfoCatalog().selectOne(new EntityWrapper<InfoCatalog>().eq("is_delete",InfoConstant.LOGIC_DELETE_NORMAL).eq("id",infoCategoryParam.getOneCatalogId()));
         BeanUtils.copyProperties(infoContent,parentInfoDetailDTO);
         if (null != infoCatalog){
             parentInfoDetailDTO.setName(infoCatalog.getName());
