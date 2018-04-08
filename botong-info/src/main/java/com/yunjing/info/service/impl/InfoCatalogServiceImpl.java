@@ -86,6 +86,19 @@ public class InfoCatalogServiceImpl extends ServiceImpl<InfoCatalogMapper, InfoC
         }
         Collections.sort(detailDTOList);
         map.put("info", detailDTOList);
+        List<CompanyRedisCatalogDTO> companyRedisCatalogDTOS = this.selectParentCatalog(orgId);
+        map.put("parent", companyRedisCatalogDTOS);
+        return map;
+    }
+
+    /**
+     * 查询企业类目
+     *
+     * @param orgId  企业类目id
+     * @return
+     */
+    @Override
+    public List<CompanyRedisCatalogDTO> selectParentCatalog(Long orgId) {
         //查询目录结构(一级Id)
         Map<Object, Object> mapRedis = redisTemplate.opsForHash().entries(InfoConstant.COMPANY_INFO_REDIS + orgId);
         List<CompanyRedisCatalogDTO> companyRedisCatalogDTOS = new ArrayList<>();
@@ -108,9 +121,9 @@ public class InfoCatalogServiceImpl extends ServiceImpl<InfoCatalogMapper, InfoC
             //针对一级结构排序
             Collections.sort(companyRedisCatalogDTOS);
         }
-        map.put("parent", companyRedisCatalogDTOS);
-        return map;
+        return companyRedisCatalogDTOS;
     }
+
 
     /**
      * 查询资讯父级目录下分页列表

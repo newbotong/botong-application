@@ -1,11 +1,18 @@
 package com.yunjing.info.controller;
 
+import com.yunjing.info.dto.CompanyRedisCatalogDTO;
+import com.yunjing.info.param.InfoCategoryParam;
 import com.yunjing.info.service.InfoCatalogService;
 import com.yunjing.info.service.InfoContentService;
 import com.yunjing.mommon.base.BaseController;
+import com.yunjing.mommon.global.exception.BaseException;
+import com.yunjing.mommon.validate.BeanFieldValidator;
+import com.yunjing.mommon.wrapper.ResponseEntityWrapper;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
+
+import java.util.List;
+import java.util.Map;
 
 /**
  * 资讯的Web端接口
@@ -14,27 +21,35 @@ import org.springframework.web.bind.annotation.RestController;
  * @date 2018/3/30 15:24
  */
 @RestController
-@RequestMapping("/info")
+@RequestMapping("/web/info")
 public class InfoController extends BaseController {
     @Autowired
     private InfoContentService infoContentService;
 
     @Autowired
     private InfoCatalogService infoCatalogService;
-//    /**
-//     * 新增类目
-//     */
-//    @RequestMapping("/insert-category")
-//    public ResponseEntityWrapper insertCategory(@RequestBody InfoCategoryParam infoCategoryParam) throws BaseException{
-//        infoCatalogService.insertCategory(infoCategoryParam);
-//        return success();
-//    }
-//
-//    /**
-//     * 增加内容
-//     */
-//    @RequestMapping("/insert-content")
-//    public ResponseEntityWrapper insertContent(@RequestBody )throws BaseException{
-//        return null;
-//    }
+    /**
+     * 新增资讯接口
+     *
+     * @param infoCategoryParam 入参对象
+     * @return
+     */
+    @PostMapping("/insert")
+    public ResponseEntityWrapper insertInfo(@RequestBody InfoCategoryParam infoCategoryParam) throws BaseException {
+        BeanFieldValidator.getInstance().ignore().validate(infoCategoryParam);
+        infoContentService.insertInfo(infoCategoryParam);
+        return success();
+    }
+
+    /**
+     * 查询企业类目
+     *
+     * @param orgId 企业类目id
+     * @return
+     */
+    @PostMapping("/parent")
+    public ResponseEntityWrapper selectParent(@RequestParam Long orgId){
+        List<CompanyRedisCatalogDTO> list = infoCatalogService.selectParentCatalog(orgId);
+        return success(list);
+    }
 }
