@@ -2,7 +2,7 @@ spring:
   cloud:
     config:
       profile: dev
-      uri: okhttp://192.168.10.233:10200/
+      uri: http://192.168.10.233:10200/
 #      profile: test
 #      uri: http://10.30.137.38:10020/
 #      profile: pro
