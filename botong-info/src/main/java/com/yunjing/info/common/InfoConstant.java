@@ -29,4 +29,9 @@ public interface InfoConstant {
      */
     String REDIS_HOME = "botong:info:home";
 
+    /**
+     * 企业初始化一级缓存结构
+     */
+    String COMPANY_INFO_REDIS = "botong:info:company:";
+
 }

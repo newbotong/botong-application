@@ -13,7 +13,7 @@ import lombok.Data;
  */
 @Data
 @TableName("info_catalog")
-public class InfoCatalog extends BaseModel<InfoCatalog> {
+public class InfoCatalog extends BaseModel<InfoCatalog> implements Comparable<InfoCatalog>{
 
     /**
      * 名称
@@ -53,4 +53,14 @@ public class InfoCatalog extends BaseModel<InfoCatalog> {
      */
     @TableField("whether_show")
     private Integer whetherShow;
+
+    /**
+     * 排序
+     * @param o 目录结构排序入参
+     * @return
+     */
+    @Override
+    public int compareTo(InfoCatalog o) {
+        return this.getSort()- o.getSort();
+    }
 }

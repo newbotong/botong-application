@@ -1,8 +1,13 @@
 package com.yunjing.info.mapper;
 
+import com.baomidou.mybatisplus.plugins.Page;
 import com.common.mybatis.mapper.IBaseMapper;
+import com.yunjing.info.dto.InfoDTO;
 import com.yunjing.info.model.InfoCatalog;
 import org.springframework.stereotype.Repository;
+
+import java.util.List;
+import java.util.Map;
 
 /**
  * <p>
@@ -14,4 +19,12 @@ import org.springframework.stereotype.Repository;
  */
 @Repository
 public interface InfoCatalogMapper extends IBaseMapper<InfoCatalog> {
+    /**
+     * 根据目录id查询企业分页内容
+     *
+     * @param map  map入参
+     * @param page 分页
+     * @return
+     */
+    List<InfoDTO> selectInfoCatalog(Map<String, Object> map, Page<InfoDTO> page);
 }

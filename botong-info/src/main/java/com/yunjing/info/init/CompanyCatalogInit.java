@@ -5,6 +5,7 @@ import com.alibaba.fastjson.JSONObject;
 import com.alibaba.fastjson.TypeReference;
 import com.google.gson.JsonObject;
 import com.yunjing.info.common.InfoConstant;
+import com.yunjing.info.config.InfoConstants;
 import com.yunjing.info.dto.InfoRedisInit;
 import com.yunjing.info.dto.ParentInfoDetailDTO;
 import com.yunjing.info.model.InfoCatalog;
@@ -66,8 +67,11 @@ public class CompanyCatalogInit extends BaseController {
             infoCatalog.setOrgId(orgId);
             infoCatalog.setSort(infoRedisInit.getSort());
             infoCatalog.setWhetherShow(1);
+            infoCatalog.setCreateTime(System.currentTimeMillis());
+            infoCatalog.setUpdateTime(System.currentTimeMillis());
             infoCatalogList.add(infoCatalog);
             List<String> list = redisTemplate.opsForList().range(InfoConstant.REDIS_CATALOG_TWO + ":" + entry.getKey(), 0, -1);
+            redisTemplate.opsForHash().put(InfoConstant.COMPANY_INFO_REDIS+orgId,infoCatalog.getId().toString(),JSONObject.toJSONString(infoCatalog));
             if (CollectionUtils.isEmpty(list)) {
                 continue;
             }
@@ -75,6 +79,7 @@ public class CompanyCatalogInit extends BaseController {
             if (CollectionUtils.isNotEmpty(objList)) {
                 for (InfoDictionary infoDictionary : objList) {
                     InfoCatalog info = new InfoCatalog();
+                    info.setId(IDUtils.getID());
                     info.setWhetherShow(1);
                     info.setSort(infoDictionary.getSort());
                     info.setLevel(infoDictionary.getLevel());
@@ -82,6 +87,9 @@ public class CompanyCatalogInit extends BaseController {
                     info.setOrgId(orgId);
                     info.setIsDelete(InfoConstant.LOGIC_DELETE_NOMAL);
                     info.setParentId(infoCatalog.getId());
+                    info.setUpdateTime(System.currentTimeMillis());
+                    info.setCreateTime(System.currentTimeMillis());
+                    redisTemplate.opsForHash().put(InfoConstants.BOTONG_INFO_CATALOG_LIST+orgId+InfoConstants.BOTONG_INFO_FIX+infoCatalog.getId(),info.getId().toString(),JSONObject.toJSONString(info));
                     infoCatalogList.add(info);
                 }
             }

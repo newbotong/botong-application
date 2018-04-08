@@ -13,9 +13,11 @@
         SELECT id,create_time,title,picture_url
         FROM info_content
         WHERE is_delete = 0 AND
-        org_id = #{orgId}
+        org_id = #{orgId} AND
+        whether_show = 1
         <if test="title!= null and title != ''">
             AND title LIKE CONCAT(CONCAT('%',#{title}),'%')
         </if>
+        ORDER BY sort
     </select>
 </mapper>

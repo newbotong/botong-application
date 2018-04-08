@@ -1,10 +1,22 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
 
-<mapper namespace="com.yunjing.info.model.InfoCatalog">
+<mapper namespace="com.yunjing.info.mapper.InfoCatalogMapper">
+    <resultMap id="pageCatalog" type="com.yunjing.info.dto.InfoDTO">
+        <id column="id" property="id"></id>
+        <result column="create_time" property="createTime"></result>
+        <result column="title" property="title"></result>
+        <result column="picture_url" property="pictureUrl"></result>
+    </resultMap>
 
-
-
-
-
+    <!--根据目录id分页查询内容-->
+    <select id="selectInfoCatalog" resultMap="pageCatalog" parameterType="java.util.Map">
+        SELECT id,create_time,title,picture_url
+        FROM info_content
+        WHERE is_delete = 0 AND
+        org_id = #{orgId} AND
+        whether_show = 1 AND
+        catalog_id = #{catalogId}
+        ORDER BY sort
+    </select>
 </mapper>
