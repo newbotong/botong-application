@@ -14,6 +14,7 @@ import com.yunjing.info.mapper.InfoCatalogMapper;
 import com.yunjing.info.model.InfoCatalog;
 import com.yunjing.info.model.InfoDictionary;
 import com.yunjing.info.param.InfoCategoryParam;
+import com.yunjing.info.processor.okhttp.AuthorityService;
 import com.yunjing.info.service.InfoCatalogService;
 import com.yunjing.mommon.global.exception.BaseException;
 import com.yunjing.mommon.wrapper.ResponseEntityWrapper;
@@ -21,10 +22,14 @@ import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.collections.MapUtils;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import retrofit2.Call;
+import retrofit2.Response;
 
+import java.io.IOException;
 import java.util.*;
 
 /**
@@ -40,6 +45,12 @@ public class InfoCatalogServiceImpl extends ServiceImpl<InfoCatalogMapper, InfoC
 
     @Autowired
     private InfoCatalogMapper infoCatalogMapper;
+
+    @Autowired
+    private AuthorityService authorityService;
+
+    @Value("${info.appId}")
+    private String appId;
 
     /**
      * 新增类目
@@ -105,34 +116,41 @@ public class InfoCatalogServiceImpl extends ServiceImpl<InfoCatalogMapper, InfoC
      * 查询资讯父级目录下分页列表
      *
      * @param orgId     企业id
-     * @param catalogId 类目id
+     * @param catalogId 目录id
      * @param userId    用户id
      * @param pageNo    当前页码
      * @param pageSize  每页显示条数
      * @return
      * @throws BaseException
+     * @throws IOException
      */
     @Override
-    public Map<String, Object> selectParentAll(Long orgId, Long catalogId, Long userId, Integer pageNo, Integer pageSize) throws BaseException {
-        Map<String,Object> resultMap = new HashMap<>(4);
+    public Map<String, Object> selectParentAll(Long orgId, Long catalogId, Long userId, Integer pageNo, Integer pageSize) throws BaseException, IOException {
+        Map<String, Object> resultMap = new HashMap<>(4);
         Page<InfoDTO> page = new Page<>(pageNo, pageSize);
-        Map<String,Object> map = new HashMap<>(4);
-        map.put("orgId",orgId);
-        map.put("catalogId",catalogId);
-        List<InfoDTO> infoDTOList = infoCatalogMapper.selectInfoCatalog(map,page);
+        Map<String, Object> map = new HashMap<>(4);
+        map.put("orgId", orgId);
+        map.put("catalogId", catalogId);
+        List<InfoDTO> infoDTOList = infoCatalogMapper.selectInfoCatalog(map, page);
         page.setRecords(infoDTOList);
-        resultMap.put("page",page);
+        resultMap.put("page", page);
         //OKHttp
-        resultMap.put("admin",true);
+        Call<ResponseEntityWrapper> call = authorityService.authority(appId, userId);
+        Response<ResponseEntityWrapper> execute = call.execute();
+        ResponseEntityWrapper body = execute.body();
+        //判断是否为管理员
+        boolean results = (boolean) body.getData();
+        resultMap.put("admin", results);
         return resultMap;
     }
 
 
     /**
      * 初始化公共资讯类目
-     * @return
+     *
+     * @throws BaseException
      */
-    public void init() throws BaseException{
+    public void init() throws BaseException {
         //查询出所有的一级目录
         List<InfoDictionary> infoDictionaries = new InfoDictionary().selectList(new EntityWrapper<InfoDictionary>().eq("is_delete", InfoConstant.LOGIC_DELETE_NORMAL).eq("level", 1).orderBy("sort"));
         if (CollectionUtils.isNotEmpty(infoDictionaries)) {
@@ -157,7 +175,7 @@ public class InfoCatalogServiceImpl extends ServiceImpl<InfoCatalogMapper, InfoC
                     }
                 }
             }
-        }else {
+        } else {
             throw new BaseException("请先初始化公共类目缓存");
         }
     }

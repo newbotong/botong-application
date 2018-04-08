@@ -9,6 +9,8 @@ import com.yunjing.info.param.InfoCategoryParam;
 import com.yunjing.mommon.global.exception.BaseException;
 import org.springframework.web.bind.annotation.RequestParam;
 
+import java.io.IOException;
+
 /**
  * 资讯内容接口
  *
@@ -23,8 +25,9 @@ public interface InfoContentService extends IService<InfoContent> {
      * @param userId 用户id
      * @return
      * @throws BaseException
+     * @throws IOException
      */
-    InfoContentDetailDTO selectDetail(Long id, Long userId) throws BaseException;
+    InfoContentDetailDTO selectDetail(Long id, Long userId) throws BaseException,IOException;
 
     /**
      * 更新阅读数量接口

@@ -6,6 +6,7 @@ import com.yunjing.info.param.InfoCategoryParam;
 import com.yunjing.mommon.global.exception.BaseException;
 import org.springframework.web.bind.annotation.RequestParam;
 
+import java.io.IOException;
 import java.util.Map;
 
 /**
@@ -37,13 +38,14 @@ public interface InfoCatalogService extends IService<InfoCatalog> {
     /**
      * 查询资讯父级目录下分页列表
      *
-     * @param orgId    企业id
-     * @param catalogId 类目id
-     * @param userId  用户id
-     * @param pageNo  当前页码
-     * @param pageSize 每页显示条数
+     * @param orgId     企业id
+     * @param catalogId 目录id
+     * @param userId    用户id
+     * @param pageNo    当前页码
+     * @param pageSize  每页显示条数
      * @return
      * @throws BaseException
+     * @throws IOException
      */
-    Map<String, Object> selectParentAll(Long orgId, Long catalogId, Long userId, Integer pageNo, Integer pageSize) throws BaseException;
+    Map<String, Object> selectParentAll(Long orgId, Long catalogId, Long userId, Integer pageNo, Integer pageSize) throws BaseException,IOException;
 }
