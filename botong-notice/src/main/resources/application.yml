@@ -78,6 +78,3 @@ okhttp:
   botong-dang: http://192.168.10.234:23180/
   botong-third-party: http://192.168.10.234:17220/
 
-spring:
-  jackson:
-    default-property-inclusion: non_empty
