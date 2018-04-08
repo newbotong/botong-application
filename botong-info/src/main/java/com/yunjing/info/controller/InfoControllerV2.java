@@ -2,6 +2,7 @@ package com.yunjing.info.controller;
 
 import com.yunjing.info.common.ValidationUtil;
 import com.yunjing.info.config.InfoConstants;
+import com.yunjing.info.dto.InfoContentDTO;
 import com.yunjing.info.service.InfoCatalogService;
 import com.yunjing.info.service.InfoCatalogServiceV2;
 import com.yunjing.info.service.InfoContentService;
@@ -9,6 +10,7 @@ import com.yunjing.mommon.base.BaseController;
 import com.yunjing.mommon.global.exception.BaseException;
 import com.yunjing.mommon.validate.BeanFieldValidator;
 import com.yunjing.mommon.validate.ValidateUtils;
+import com.yunjing.mommon.wrapper.PageWrapper;
 import com.yunjing.mommon.wrapper.ResponseEntityWrapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.validation.ValidationUtils;
@@ -117,6 +119,54 @@ public class InfoControllerV2 extends BaseController {
         return success(infoContentService.getInfoCatalogList(orgId));
     }
 
+
+    /**
+     * 类目排序
+      * @param orgId
+     * @param parentId
+     * @param catalogId1
+     * @param catalogId2
+     * @return
+     * @throws BaseException
+     */
+    @PostMapping("/update-catalog-sort")
+    public ResponseEntityWrapper updateCatalogSort(@RequestParam Long orgId,@RequestParam Long parentId,@RequestParam Long catalogId1,@RequestParam Long catalogId2) throws BaseException{
+        return result(infoContentService.updateCatalogSort(orgId,parentId,catalogId1,catalogId2));
+    }
+
+
+    /**
+     * 资讯排序
+     * @param orgId
+     * @param id1
+     * @param id2
+     * @return
+     * @throws BaseException
+     */
+    @PostMapping("/update-info-sort")
+    public ResponseEntityWrapper updateInfoSort(@RequestParam Long orgId,@RequestParam Long id1,@RequestParam Long id2) throws BaseException{
+        return result(infoContentService.updateInfoSort(orgId,id1,id2));
+    }
+
+    /**
+     * 查询资讯父级目录下分页列表
+     * @param orgId
+     * @param catalogId
+     * @param title
+     * @param pageNo
+     * @param pageSize
+     * @return
+     * @throws BaseException
+     */
+    @GetMapping("/select-parent-page")
+    public ResponseEntityWrapper selectParentPage(@RequestParam Long orgId,
+                                       @RequestParam Long catalogId,
+                                       @RequestParam(required = false,defaultValue = "") String title,
+                                       @RequestParam(required = false, defaultValue = "1") Integer pageNo,
+                                       @RequestParam(required = false, defaultValue = "20") Integer pageSize) throws BaseException{
+        PageWrapper<InfoContentDTO> page =infoContentService.selectParentPage(orgId, catalogId, title,pageNo, pageSize);
+        return success(page);
+    }
 
 
     private ResponseEntityWrapper result(InfoConstants.StateCode stateCode) {

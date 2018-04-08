@@ -4,9 +4,11 @@ import com.baomidou.mybatisplus.service.IService;
 import com.yunjing.info.common.InfoConstant;
 import com.yunjing.info.config.InfoConstants;
 import com.yunjing.info.dto.InfoCatalogDTO;
+import com.yunjing.info.dto.InfoContentDTO;
 import com.yunjing.info.model.InfoCatalog;
 import com.yunjing.info.param.InfoCategoryParam;
 import com.yunjing.mommon.global.exception.BaseException;
+import com.yunjing.mommon.wrapper.PageWrapper;
 
 import java.util.List;
 import java.util.Map;
@@ -86,11 +88,48 @@ public interface InfoCatalogServiceV2 extends IService<InfoCatalog> {
 
 
     /**
-     * 获取一级下的所有分类
+     * 根据orgI获取一级下的所有分类
      * @param orgId
      * @return
      * @throws BaseException
      */
     List<InfoCatalogDTO> getInfoCatalogList(Long orgId) throws BaseException;
+
+
+    /**
+     * 类目排序
+     * @param orgId
+     * @param parentId
+     * @param catalogId1
+     * @param catalogId2
+     * @return
+     * @throws BaseException
+     */
+    InfoConstants.StateCode updateCatalogSort(Long orgId,Long parentId,Long catalogId1,Long catalogId2)throws BaseException;
+
+
+    /**
+     * 资讯排序
+     * @param orgId
+     * @param catalogId1
+     * @param catalogId2
+     * @return
+     * @throws BaseException
+     */
+    InfoConstants.StateCode updateInfoSort(Long orgId,Long catalogId1,Long catalogId2)throws BaseException;
+
+
+    /**
+     * web端资讯分页模糊查询
+     * @param orgId
+     * @param catalogId
+     * @param title
+     * @return
+     * @throws BaseException
+     */
+    PageWrapper<InfoContentDTO> selectParentPage(Long orgId, Long catalogId, String title, Integer pageNo, Integer pageSize) throws BaseException;
+
+
+
 
 }

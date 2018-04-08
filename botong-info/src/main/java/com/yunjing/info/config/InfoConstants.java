@@ -20,6 +20,10 @@ public interface InfoConstants {
     Integer INFO_TYPE_HIDE = 0;
 
     /**
+     * 类目排序  向上
+     */
+    Integer INFO_TYPE_ORDER_UP = 0;
+    /**
      * 最小名字长度5
      */
     Integer INFO_NAME_MIX = 6;

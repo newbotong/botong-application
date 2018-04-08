@@ -1,12 +1,17 @@
 package com.yunjing.info.service.impl;
 
 import com.alibaba.fastjson.JSON;
+import com.alibaba.fastjson.JSONObject;
+import com.alibaba.fastjson.TypeReference;
 import com.baomidou.mybatisplus.mapper.EntityWrapper;
+import com.baomidou.mybatisplus.mapper.Wrapper;
+import com.baomidou.mybatisplus.plugins.Page;
 import com.baomidou.mybatisplus.service.impl.ServiceImpl;
 import com.yunjing.info.common.InfoConstant;
 import com.yunjing.info.common.ValidationUtil;
 import com.yunjing.info.config.InfoConstants;
 import com.yunjing.info.dto.InfoCatalogDTO;
+import com.yunjing.info.dto.InfoContentDTO;
 import com.yunjing.info.mapper.InfoCatalogMapper;
 import com.yunjing.info.mapper.InfoContentMapper;
 import com.yunjing.info.model.InfoCatalog;
@@ -15,10 +20,12 @@ import com.yunjing.info.service.InfoCatalogServiceV2;
 import com.yunjing.mommon.global.exception.BaseException;
 import com.yunjing.mommon.utils.BeanUtils;
 import com.yunjing.mommon.utils.IDUtils;
+import com.yunjing.mommon.wrapper.PageWrapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.stereotype.Service;
 
+import java.lang.reflect.Type;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -41,6 +48,7 @@ public class InfoCatalogServiceImplV2 extends ServiceImpl<InfoCatalogMapper, Inf
 
     @Autowired
     private StringRedisTemplate redisTemplate;
+
 
     /**
      * 新增分类
@@ -228,36 +236,42 @@ public class InfoCatalogServiceImplV2 extends ServiceImpl<InfoCatalogMapper, Inf
      */
     @Override
     public List<InfoCatalogDTO> getInfoCatalogList(Long orgId) throws BaseException{
-        EntityWrapper<InfoCatalog> wrapper = new EntityWrapper<>();
-        wrapper.where("org_id={0}", orgId).and("level=1").and("is_delete=0").orderBy("sort",true);
-        //所有1级
-        List<InfoCatalog> infoCatalogList1 =  infoCatalogMapper.selectList(wrapper);
 
-        //所有2级
-        EntityWrapper<InfoCatalog> wrapper2 = new EntityWrapper<>();
-        wrapper2.where("org_id={0}", orgId).and("level=2").and("is_delete=0").orderBy("sort",true);
-        List<InfoCatalog> infoCataloglist2 =  infoCatalogMapper.selectList(wrapper2);
+        //方法 需要根据缓存获取
+        //1、根据orgId 获取1级目录
+        // 2、根据1级目录Id 获取2级目录
 
-        List<InfoCatalogDTO> infoCatalogDTOList1 = new ArrayList<>();
-
-        List<InfoCatalogDTO> infoCatalogDTOList2 = new ArrayList<>();
-
-        BeanUtils.copy(infoCatalogList1,infoCatalogDTOList1);
-
-        BeanUtils.copy(infoCataloglist2,infoCatalogDTOList2);
-
-        for(int i=0;i<infoCatalogDTOList1.size();i++){
-            if(!ValidationUtil.isEmpty(infoCatalogDTOList1.get(i))){
-                List<InfoCatalogDTO> infoCatalogDTOList3 = new ArrayList<>();
-                for(int j=0;j<infoCatalogDTOList2.size();j++){
-                    if(infoCatalogDTOList1.get(i).getId().equals(infoCatalogDTOList2.get(j).getParentId())){
-                        infoCatalogDTOList3.add(infoCatalogDTOList2.get(j));
-                    }
-                }
-                infoCatalogDTOList1.get(i).setLower(infoCatalogDTOList3);
-            }
-        }
-        return infoCatalogDTOList1;
+//        EntityWrapper<InfoCatalog> wrapper = new EntityWrapper<>();
+//        wrapper.where("org_id={0}", orgId).and("level=1").and("is_delete=0").orderBy("sort",true);
+//        //所有1级
+//        List<InfoCatalog> infoCatalogList1 =  infoCatalogMapper.selectList(wrapper);
+//
+//        //所有2级
+//        EntityWrapper<InfoCatalog> wrapper2 = new EntityWrapper<>();
+//        wrapper2.where("org_id={0}", orgId).and("level=2").and("is_delete=0").orderBy("sort",true);
+//        List<InfoCatalog> infoCataloglist2 =  infoCatalogMapper.selectList(wrapper2);
+//
+//        List<InfoCatalogDTO> infoCatalogDTOList1 = new ArrayList<>();
+//
+//        List<InfoCatalogDTO> infoCatalogDTOList2 = new ArrayList<>();
+//
+//        BeanUtils.copy(infoCatalogList1,infoCatalogDTOList1);
+//
+//        BeanUtils.copy(infoCataloglist2,infoCatalogDTOList2);
+//
+//        for(int i=0;i<infoCatalogDTOList1.size();i++){
+//            if(!ValidationUtil.isEmpty(infoCatalogDTOList1.get(i))){
+//                List<InfoCatalogDTO> infoCatalogDTOList3 = new ArrayList<>();
+//                for(int j=0;j<infoCatalogDTOList2.size();j++){
+//                    if(infoCatalogDTOList1.get(i).getId().equals(infoCatalogDTOList2.get(j).getParentId())){
+//                        infoCatalogDTOList3.add(infoCatalogDTOList2.get(j));
+//                    }
+//                }
+//                infoCatalogDTOList1.get(i).setLower(infoCatalogDTOList3);
+//            }
+//        }
+//        return infoCatalogDTOList1;
+        return null;
     }
 
     /**
@@ -273,7 +287,7 @@ public class InfoCatalogServiceImplV2 extends ServiceImpl<InfoCatalogMapper, Inf
         infoContentMap.put("catalog_id", id);
         InfoCatalog infoCatalog = (InfoCatalog) infoCatalogMapper.selectByMap(infoContentMap);
         if(!ValidationUtil.isEmpty(infoCatalog)){
-            //先删除
+            //先删除   botong:info:org:orgid:yijikey->object
             if (redisTemplate.hasKey(InfoConstants.BOTONG_INFO_CATALOG_LIST+orgId.toString()+InfoConstants.BOTONG_INFO_FIX+parentId.toString())) {
                 redisTemplate.opsForHash().delete(InfoConstants.BOTONG_INFO_CATALOG_LIST+orgId.toString()+InfoConstants.BOTONG_INFO_FIX+parentId.toString(),infoCatalog.getId().toString());
             }else{
@@ -281,5 +295,109 @@ public class InfoCatalogServiceImplV2 extends ServiceImpl<InfoCatalogMapper, Inf
                 redisTemplate.opsForHash().put(InfoConstants.BOTONG_INFO_CATALOG_LIST+orgId.toString()+InfoConstants.BOTONG_INFO_FIX+parentId.toString(),infoCatalog.getId().toString(), JSON.toJSONString(infoCatalog));
             }
         }
+    }
+
+    /**
+     * 类目排序
+     * @param orgId
+     * @param parentId
+     * @param catalogId1
+     * @param catalogId2
+     * @return
+     * @throws BaseException
+     */
+    @Override
+    public InfoConstants.StateCode updateCatalogSort(Long orgId, Long parentId, Long catalogId1, Long catalogId2) throws BaseException {
+
+        JSONObject jsonObject1 = JSON.parseObject((String) redisTemplate.opsForHash().get(InfoConstants.BOTONG_INFO_CATALOG_LIST+orgId.toString()+InfoConstants.BOTONG_INFO_FIX+parentId.toString(), catalogId1.toString()));
+        JSONObject jsonObject2 = JSON.parseObject((String) redisTemplate.opsForHash().get(InfoConstants.BOTONG_INFO_CATALOG_LIST+orgId.toString()+InfoConstants.BOTONG_INFO_FIX+parentId.toString(), catalogId2.toString()));
+        int falg = 0;
+        if(!ValidationUtil.isEmpty(jsonObject1) && !ValidationUtil.isEmpty(jsonObject2)){
+            EntityWrapper<InfoCatalog> wrapper1 = new EntityWrapper<>();
+            InfoCatalog infoCatalog1 = new InfoCatalog();
+            infoCatalog1.setUpdateTime(System.currentTimeMillis());
+
+            EntityWrapper<InfoCatalog> wrapper2 = new EntityWrapper<>();
+            InfoCatalog infoCatalog2 = new InfoCatalog();
+            infoCatalog2.setUpdateTime(System.currentTimeMillis());
+
+            infoCatalog1.setSort((Integer) jsonObject2.get("sort"));
+            wrapper1.where("org_id={0}", orgId).and("parent_id={0}",parentId).and("id={0}", catalogId1).and("is_delete=0");
+            falg = infoCatalogMapper.update(infoCatalog1, wrapper1);
+
+            infoCatalog2.setSort((Integer) jsonObject1.get("sort"));
+            wrapper2.where("org_id={0}", orgId).and("parent_id={0}",parentId).and("id={0}", catalogId2).and("is_delete=0");
+            falg = infoCatalogMapper.update(infoCatalog2, wrapper2);
+            //更新缓存
+            updateInfoCategoryRedis(orgId,parentId,catalogId1);
+            updateInfoCategoryRedis(orgId,parentId,catalogId2);
+        }
+        return falg > 0 ? InfoConstants.StateCode.CODE_200 : InfoConstants.StateCode.CODE_602;
+    }
+
+    /**
+     * 资讯排序
+     * @param orgId
+     * @param id1
+     * @param id2
+     * @return
+     * @throws BaseException
+     */
+    @Override
+    public InfoConstants.StateCode updateInfoSort(Long orgId, Long id1, Long id2) throws BaseException {
+        Map<String, Object> infoContentMap1 = new HashMap<>(3);
+        infoContentMap1.put("org_id", orgId);
+        infoContentMap1.put("id", id1);
+        InfoContent infoContent1 = (InfoContent) infoContentMapper.selectByMap(infoContentMap1);
+
+        Map<String, Object> infoContentMap2 = new HashMap<>(3);
+        infoContentMap2.put("org_id", orgId);
+        infoContentMap2.put("id", id2);
+        InfoContent infoContent2 = (InfoContent) infoContentMapper.selectByMap(infoContentMap2);
+        int falg = 0;
+        if(!ValidationUtil.isEmpty(infoContent1) && !ValidationUtil.isEmpty(infoContent2)){
+            EntityWrapper<InfoContent> wrapper1 = new EntityWrapper<>();
+            infoContent1.setUpdateTime(System.currentTimeMillis());
+            infoContent1.setSort(infoContent2.getSort());
+            wrapper1.where("org_id={0}", orgId).and("id={0}", id1).and("is_delete=0");
+            falg = infoContentMapper.update(infoContent1, wrapper1);
+
+            EntityWrapper<InfoContent> wrapper2 = new EntityWrapper<>();
+            infoContent2.setUpdateTime(System.currentTimeMillis());
+            infoContent2.setSort(infoContent1.getSort());
+            wrapper2.where("org_id={0}", orgId).and("id={0}", id2).and("is_delete=0");
+            falg = infoContentMapper.update(infoContent2, wrapper2);
+        }
+        return falg > 0 ? InfoConstants.StateCode.CODE_200 : InfoConstants.StateCode.CODE_602;
+    }
+
+    /**
+     * web端资讯分页模糊查询
+     * @param orgId
+     * @param catalogId
+     * @param title
+     * @param pageNo
+     * @param pageSize
+     * @return
+     * @throws BaseException
+     */
+    @Override
+    public PageWrapper<InfoContentDTO> selectParentPage(Long orgId, Long catalogId, String title,Integer pageNo, Integer pageSize) throws BaseException {
+        //统计总数
+        Wrapper<InfoContent> wrapper = new EntityWrapper<>();
+        wrapper.eq("org_id", orgId).and().eq("catalog_id",catalogId).and().eq("is_delete",InfoConstant.LOGIC_DELETE_NORMAL);
+        Integer count = infoContentMapper.selectCount(wrapper);
+        //分页查询数据
+        Page<InfoContentDTO> page = new Page<>(pageNo, pageSize);
+        List<InfoContentDTO> infoContentDTOList = new ArrayList<>();
+        if (!ValidationUtil.isEmpty(count) && count > 0) {
+            //计算分页大小
+            pageNo = (pageNo-1) * pageSize;
+            infoContentDTOList = infoContentMapper.selectParentPage(orgId,catalogId,title,pageNo,pageSize);
+        }
+        page.setRecords(infoContentDTOList);
+        page.setTotal(count);
+        PageWrapper pageWrapper = BeanUtils.mapPage(page, InfoContentDTO.class);
+        return pageWrapper;
     }
 }
