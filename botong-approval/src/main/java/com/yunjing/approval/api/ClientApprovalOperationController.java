@@ -111,6 +111,18 @@ public class ClientApprovalOperationController extends BaseController {
     }
 
     /**
+     * 修改抄送列表已读状态
+     *
+     * @param approvalId 审批主键数组
+     * @return ResponseEntityWrapper
+     * @throws Exception 抛异常
+     */
+    @PostMapping("/update-is-read")
+    public ResponseEntityWrapper updateCopyReadState(@RequestParam("approvalId") Long[] approvalId) throws Exception {
+        return success(approvalApiService.updateCopyReadState(approvalId));
+    }
+
+    /**
      * 审批发送dang提醒
      *
      * @param companyId

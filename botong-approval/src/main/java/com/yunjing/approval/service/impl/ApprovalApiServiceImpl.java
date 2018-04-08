@@ -387,6 +387,16 @@ public class ApprovalApiServiceImpl implements IApprovalApiService {
         return batchById;
     }
 
+    @Override
+    public boolean updateCopyReadState(Long[] approvalId) {
+
+        List<Copys> copysList = copySService.selectList(Condition.create().in("approval_id", approvalId));
+        copysList.forEach(copys -> {
+            copys.setIsRead(1);
+        });
+        return copySService.updateBatchById(copysList);
+    }
+
     private void convertList(List<ClientApprovalVO> clientApprovalVOS, List<ApprovalContentDTO> approvalList) {
         // 获取所有用户
         List<ApprovalUser> userList = approvalUserService.selectList(Condition.create());

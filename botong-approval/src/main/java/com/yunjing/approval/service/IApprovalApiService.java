@@ -110,4 +110,13 @@ public interface IApprovalApiService {
      */
     boolean transferApproval(Long companyId, Long memberId, Long transferredUserId, Long approvalId);
 
+    /**
+     * 修改抄送列表是否已读状态
+     *
+     * @param approvalId        审批主键数组
+     * @return
+     * @throws Exception
+     */
+    boolean updateCopyReadState(Long[] approvalId);
+
 }
