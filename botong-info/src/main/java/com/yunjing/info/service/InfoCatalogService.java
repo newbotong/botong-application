@@ -1,11 +1,13 @@
 package com.yunjing.info.service;
 
 import com.baomidou.mybatisplus.service.IService;
+import com.yunjing.info.dto.CompanyRedisCatalogDTO;
 import com.yunjing.info.model.InfoCatalog;
 import com.yunjing.info.param.InfoCategoryParam;
 import com.yunjing.mommon.global.exception.BaseException;
 
 import java.io.IOException;
+import java.util.List;
 import java.util.Map;
 
 /**
@@ -46,5 +48,13 @@ public interface InfoCatalogService extends IService<InfoCatalog> {
      * @throws BaseException
      * @throws IOException
      */
-    Map<String, Object> selectParentAll(Long orgId, Long catalogId, Long userId, Integer pageNo, Integer pageSize) throws BaseException,IOException;
+    Map<String, Object> selectParentAll(Long orgId, Long catalogId, Long userId, Integer pageNo, Integer pageSize) throws BaseException, IOException;
+
+    /**
+     * 查询企业类目
+     *
+     * @param orgId 企业类目id
+     * @return
+     */
+    List<CompanyRedisCatalogDTO> selectParentCatalog(Long orgId);
 }
