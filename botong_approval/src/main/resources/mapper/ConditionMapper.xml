@@ -1,7 +1,0 @@
-<?xml version="1.0" encoding="UTF-8"?>
-<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
-<mapper namespace="com.yunjing.approval.dao.mapper.ConditionMapper">
-    <update id="disableByModelId">
-        UPDATE approval_sets_condition SET enabled = 0 WHERE model_id = #{ modelId } and enabled = 1
-    </update>
-</mapper>

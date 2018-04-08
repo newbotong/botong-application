@@ -1,8 +1,0 @@
-<?xml version="1.0" encoding="UTF-8"?>
-<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
-<mapper namespace="com.yunjing.approval.dao.mapper.ApprovalUserMapper">
-    <select id="selectUser" resultType="com.yunjing.approval.model.entity.ApprovalUser">
-        select id,name,mobile,avatar,`dept_id`,dept_name,position,org_id
-        FROM approval_user WHERE  FIND_IN_SET(#{deptId},dept_id)
-    </select>
-</mapper>

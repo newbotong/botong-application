@@ -1,7 +1,0 @@
-<?xml version="1.0" encoding="UTF-8"?>
-<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
-<mapper namespace="com.yunjing.approval.dao.mapper.ProcessMapper">
-    <delete id="deleteProcessUser">
-        DELETE FROM approval_sets_process WHERE approver = #{uid} AND model_id IN (SELECT model_id FROM org_model WHERE org_id = #{oid} AND data_type = 2)
-    </delete>
-</mapper>
