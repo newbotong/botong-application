@@ -2,7 +2,6 @@ package com.yunjing.info.init;
 
 import com.alibaba.fastjson.JSONObject;
 import com.yunjing.info.common.InfoConstant;
-import com.yunjing.info.config.InfoConstants;
 import com.yunjing.info.dto.InfoRedisInit;
 import com.yunjing.info.model.InfoCatalog;
 import com.yunjing.info.model.InfoDictionary;
