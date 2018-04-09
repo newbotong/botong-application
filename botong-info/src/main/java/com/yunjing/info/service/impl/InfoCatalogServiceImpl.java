@@ -91,7 +91,7 @@ public class InfoCatalogServiceImpl extends ServiceImpl<InfoCatalogMapper, InfoC
     /**
      * 查询企业类目
      *
-     * @param orgId  企业类目id
+     * @param orgId 企业类目id
      * @return
      */
     @Override

@@ -61,9 +61,9 @@ public interface InfoContentService extends IService<InfoContent> {
     /**
      * 修改资讯信息
      *
-     * @param infoCategoryParam  实体入参
+     * @param infoCategoryParam 实体入参
      * @return
      * @throws BaseException
      */
-    void infoEdit(InfoCategoryParam infoCategoryParam) throws BaseException ;
+    void infoEdit(InfoCategoryParam infoCategoryParam) throws BaseException;
 }

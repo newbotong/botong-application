@@ -131,7 +131,7 @@ public class InfoContentServiceImpl extends ServiceImpl<InfoContentMapper, InfoC
         }
         if (null == infoCategoryParam.getCatalogId()) {
             parentInfoDetailDto.setCatalogId(infoCategoryParam.getOneCatalogId());
-        }else{
+        } else {
             parentInfoDetailDto.setCatalogId(infoCategoryParam.getCatalogId());
         }
         redisTemplate.opsForHash().put(InfoConstant.REDIS_HOME + ":" + infoCategoryParam.getOrgId(), infoCategoryParam.getOneCatalogId().toString(), JSON.toJSONString(parentInfoDetailDto));
@@ -177,23 +177,23 @@ public class InfoContentServiceImpl extends ServiceImpl<InfoContentMapper, InfoC
         if (null == infoCategoryParam.getId()) {
             throw new BaseException("资讯id不能为空");
         }
-        InfoContent infoContent = new InfoContent().selectOne(new EntityWrapper<InfoContent>().eq("is_delete",InfoConstant.LOGIC_DELETE_NORMAL).eq("id",infoCategoryParam.getId()));
-        if (null == infoContent){
+        InfoContent infoContent = new InfoContent().selectOne(new EntityWrapper<InfoContent>().eq("is_delete", InfoConstant.LOGIC_DELETE_NORMAL).eq("id", infoCategoryParam.getId()));
+        if (null == infoContent) {
             throw new BaseException("该资讯已经被删除");
         }
-        BeanUtils.copyProperties(infoCategoryParam,infoContent);
+        BeanUtils.copyProperties(infoCategoryParam, infoContent);
         boolean result = infoContent.updateById();
-        if (!result){
+        if (!result) {
             throw new BaseException("修改失败");
         }
         Object object = redisTemplate.opsForHash().get(InfoConstant.REDIS_HOME + ":" + infoCategoryParam.getOrgId(), infoCategoryParam.getOneCatalogId().toString());
-        ParentInfoDetailDto infoDTO = JSONObject.parseObject(object.toString(),ParentInfoDetailDto.class);
-        if (null != infoDTO){
-            if (infoCategoryParam.getId().equals( infoDTO.getId())){
-                redisTemplate.opsForHash().delete(InfoConstant.REDIS_HOME + ":" + infoCategoryParam.getOrgId(),infoCategoryParam.getOneCatalogId().toString());
+        ParentInfoDetailDto infoDTO = JSONObject.parseObject(object.toString(), ParentInfoDetailDto.class);
+        if (null != infoDTO) {
+            if (infoCategoryParam.getId().equals(infoDTO.getId())) {
+                redisTemplate.opsForHash().delete(InfoConstant.REDIS_HOME + ":" + infoCategoryParam.getOrgId(), infoCategoryParam.getOneCatalogId().toString());
                 ParentInfoDetailDto parentInfoDetailDto = new ParentInfoDetailDto();
                 BeanUtils.copyProperties(infoContent, parentInfoDetailDto);
-                redisTemplate.opsForHash().put(InfoConstant.REDIS_HOME + ":" + infoCategoryParam.getOrgId(),infoCategoryParam.getOneCatalogId().toString(),JSONObject.toJSONString(parentInfoDetailDto));
+                redisTemplate.opsForHash().put(InfoConstant.REDIS_HOME + ":" + infoCategoryParam.getOrgId(), infoCategoryParam.getOneCatalogId().toString(), JSONObject.toJSONString(parentInfoDetailDto));
             }
         }
     }
