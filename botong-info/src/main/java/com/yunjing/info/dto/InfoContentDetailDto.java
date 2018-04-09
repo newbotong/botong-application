@@ -11,7 +11,7 @@ import java.io.Serializable;
  * @date 2018/4/3 9:59
  */
 @Data
-public class InfoContentDetailDTO implements Serializable {
+public class InfoContentDetailDto implements Serializable {
     /**
      * 资讯id
      */

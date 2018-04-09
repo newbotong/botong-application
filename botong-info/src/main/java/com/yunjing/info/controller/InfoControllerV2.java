@@ -2,18 +2,13 @@ package com.yunjing.info.controller;
 
 import com.yunjing.info.common.ValidationUtil;
 import com.yunjing.info.config.InfoConstants;
-import com.yunjing.info.dto.InfoContentDTO;
-import com.yunjing.info.service.InfoCatalogService;
+import com.yunjing.info.dto.InfoContentDto;
 import com.yunjing.info.service.InfoCatalogServiceV2;
-import com.yunjing.info.service.InfoContentService;
 import com.yunjing.mommon.base.BaseController;
 import com.yunjing.mommon.global.exception.BaseException;
-import com.yunjing.mommon.validate.BeanFieldValidator;
-import com.yunjing.mommon.validate.ValidateUtils;
 import com.yunjing.mommon.wrapper.PageWrapper;
 import com.yunjing.mommon.wrapper.ResponseEntityWrapper;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.validation.ValidationUtils;
 import org.springframework.web.bind.annotation.*;
 
 /**
@@ -171,7 +166,7 @@ public class InfoControllerV2 extends BaseController {
                                        @RequestParam(required = false,defaultValue = "") String title,
                                        @RequestParam(required = false, defaultValue = "1") Integer pageNo,
                                        @RequestParam(required = false, defaultValue = "20") Integer pageSize) throws BaseException{
-        PageWrapper<InfoContentDTO> page =infoContentService.selectParentPage(orgId, catalogId, title,pageNo, pageSize);
+        PageWrapper<InfoContentDto> page =infoContentService.selectParentPage(orgId, catalogId, title,pageNo, pageSize);
         return success(page);
     }
 

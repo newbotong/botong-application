@@ -17,6 +17,11 @@ import java.io.Serializable;
 public class InfoCategoryParam implements Serializable {
 
     /**
+     * 资讯id
+     */
+    private Long id;
+
+    /**
      * 二级类目id
      */
     private Long catalogId;

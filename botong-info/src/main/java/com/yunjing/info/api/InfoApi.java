@@ -1,8 +1,8 @@
 package com.yunjing.info.api;
 
 import com.baomidou.mybatisplus.plugins.Page;
-import com.yunjing.info.dto.InfoContentDetailDTO;
-import com.yunjing.info.dto.InfoDTO;
+import com.yunjing.info.dto.InfoContentDetailDto;
+import com.yunjing.info.dto.InfoDto;
 import com.yunjing.info.param.InfoCategoryParam;
 import com.yunjing.info.service.InfoCatalogService;
 import com.yunjing.info.service.InfoContentService;
@@ -75,8 +75,8 @@ public class InfoApi extends BaseController {
      */
     @PostMapping("/detail")
     public ResponseEntityWrapper selectDetail(@RequestParam Long id, @RequestParam Long userId) throws BaseException,IOException  {
-        InfoContentDetailDTO infoContentDetailDTO = infoContentService.selectDetail(id, userId);
-        return success(infoContentDetailDTO);
+        InfoContentDetailDto infoContentDetailDto = infoContentService.selectDetail(id, userId);
+        return success(infoContentDetailDto);
     }
 
 
@@ -119,7 +119,7 @@ public class InfoApi extends BaseController {
      */
     @PostMapping("/search-page")
     public ResponseEntityWrapper searchPage(@RequestParam Long orgId, String title, @RequestParam Integer pageNo, @RequestParam Integer pageSize) {
-        Page<InfoDTO> page = infoContentService.searchPage(orgId, title, pageNo, pageSize);
+        Page<InfoDto> page = infoContentService.searchPage(orgId, title, pageNo, pageSize);
         return success(page);
     }
 }

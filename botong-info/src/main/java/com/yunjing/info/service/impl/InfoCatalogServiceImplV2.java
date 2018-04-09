@@ -9,8 +9,8 @@ import com.baomidou.mybatisplus.service.impl.ServiceImpl;
 import com.yunjing.info.common.InfoConstant;
 import com.yunjing.info.common.ValidationUtil;
 import com.yunjing.info.config.InfoConstants;
-import com.yunjing.info.dto.InfoCatalogDTO;
-import com.yunjing.info.dto.InfoContentDTO;
+import com.yunjing.info.dto.InfoCatalogDto;
+import com.yunjing.info.dto.InfoContentDto;
 import com.yunjing.info.mapper.InfoCatalogMapper;
 import com.yunjing.info.mapper.InfoContentMapper;
 import com.yunjing.info.model.InfoCatalog;
@@ -233,7 +233,7 @@ public class InfoCatalogServiceImplV2 extends ServiceImpl<InfoCatalogMapper, Inf
      * @return
      */
     @Override
-    public List<InfoCatalogDTO> getInfoCatalogList(Long orgId) throws BaseException{
+    public List<InfoCatalogDto> getInfoCatalogList(Long orgId) throws BaseException{
 
         //方法 需要根据缓存获取
         //1、根据orgId 获取1级目录
@@ -349,22 +349,22 @@ public class InfoCatalogServiceImplV2 extends ServiceImpl<InfoCatalogMapper, Inf
      * @throws BaseException
      */
     @Override
-    public PageWrapper<InfoContentDTO> selectParentPage(Long orgId, Long catalogId, String title,Integer pageNo, Integer pageSize) throws BaseException {
+    public PageWrapper<InfoContentDto> selectParentPage(Long orgId, Long catalogId, String title, Integer pageNo, Integer pageSize) throws BaseException {
         //统计总数
         Wrapper<InfoContent> wrapper = new EntityWrapper<>();
         wrapper.eq("org_id", orgId).and().eq("catalog_id",catalogId).and().eq("is_delete",InfoConstant.LOGIC_DELETE_NORMAL);
         Integer count = infoContentMapper.selectCount(wrapper);
         //分页查询数据
-        Page<InfoContentDTO> page = new Page<>(pageNo, pageSize);
-        List<InfoContentDTO> infoContentDTOList = new ArrayList<>();
+        Page<InfoContentDto> page = new Page<>(pageNo, pageSize);
+        List<InfoContentDto> infoContentDtoList = new ArrayList<>();
         if (!ValidationUtil.isEmpty(count) && count > 0) {
             //计算分页大小
             pageNo = (pageNo-1) * pageSize;
-            infoContentDTOList = infoContentMapper.selectParentPage(orgId,catalogId,title,pageNo,pageSize);
+            infoContentDtoList = infoContentMapper.selectParentPage(orgId,catalogId,title,pageNo,pageSize);
         }
-        page.setRecords(infoContentDTOList);
+        page.setRecords(infoContentDtoList);
         page.setTotal(count);
-        PageWrapper pageWrapper = BeanUtils.mapPage(page, InfoContentDTO.class);
+        PageWrapper pageWrapper = BeanUtils.mapPage(page, InfoContentDto.class);
         return pageWrapper;
     }
 }

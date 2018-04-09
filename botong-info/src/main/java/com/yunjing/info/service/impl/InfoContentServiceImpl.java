@@ -1,13 +1,14 @@
 package com.yunjing.info.service.impl;
 
 import com.alibaba.fastjson.JSON;
+import com.alibaba.fastjson.JSONObject;
 import com.baomidou.mybatisplus.mapper.EntityWrapper;
 import com.baomidou.mybatisplus.plugins.Page;
 import com.baomidou.mybatisplus.service.impl.ServiceImpl;
 import com.yunjing.info.common.InfoConstant;
-import com.yunjing.info.dto.InfoContentDetailDTO;
-import com.yunjing.info.dto.InfoDTO;
-import com.yunjing.info.dto.ParentInfoDetailDTO;
+import com.yunjing.info.dto.InfoContentDetailDto;
+import com.yunjing.info.dto.InfoDto;
+import com.yunjing.info.dto.ParentInfoDetailDto;
 import com.yunjing.info.mapper.InfoContentMapper;
 import com.yunjing.info.model.InfoCatalog;
 import com.yunjing.info.model.InfoContent;
@@ -43,6 +44,7 @@ public class InfoContentServiceImpl extends ServiceImpl<InfoContentMapper, InfoC
 
     @Autowired
     private CollectService collectService;
+
     /**
      * 查询资讯详情接口
      *
@@ -53,21 +55,21 @@ public class InfoContentServiceImpl extends ServiceImpl<InfoContentMapper, InfoC
      * @throws IOException
      */
     @Override
-    public InfoContentDetailDTO selectDetail(Long id, Long userId) throws BaseException, IOException {
+    public InfoContentDetailDto selectDetail(Long id, Long userId) throws BaseException, IOException {
         InfoContent infoContent = new InfoContent().selectOne(new EntityWrapper<InfoContent>().eq("is_delete", InfoConstant.LOGIC_DELETE_NORMAL).eq("id", id));
         if (null == infoContent) {
             throw new BaseException("该资讯已被删除");
         }
-        InfoContentDetailDTO infoContentDetailDTO = new InfoContentDetailDTO();
-        BeanUtils.copyProperties(infoContent, infoContentDetailDTO);
+        InfoContentDetailDto infoContentDetailDto = new InfoContentDetailDto();
+        BeanUtils.copyProperties(infoContent, infoContentDetailDto);
 
         //调用收藏的OKHttp
 //        Call<ResponseEntityWrapper> call =  collectService.collectState(userId, id);
 //        Response<ResponseEntityWrapper> execute = call.execute();
 //        ResponseEntityWrapper body = execute.body();
 //        Boolean result = (Boolean) body.getData();
-        infoContentDetailDTO.setFavouriteState(false);
-        return infoContentDetailDTO;
+        infoContentDetailDto.setFavouriteState(false);
+        return infoContentDetailDto;
     }
 
     /**
@@ -96,6 +98,7 @@ public class InfoContentServiceImpl extends ServiceImpl<InfoContentMapper, InfoC
      * @return
      */
     @Override
+    @Transactional(rollbackFor = Exception.class)
     public void insertInfo(InfoCategoryParam infoCategoryParam) throws BaseException {
         InfoContent infoContent = new InfoContent();
         BeanUtils.copyProperties(infoCategoryParam, infoContent);
@@ -119,15 +122,19 @@ public class InfoContentServiceImpl extends ServiceImpl<InfoContentMapper, InfoC
         if (!result) {
             throw new BaseException("新增失败");
         }
-        ParentInfoDetailDTO parentInfoDetailDTO = new ParentInfoDetailDTO();
+        ParentInfoDetailDto parentInfoDetailDto = new ParentInfoDetailDto();
         InfoCatalog infoCatalog = new InfoCatalog().selectOne(new EntityWrapper<InfoCatalog>().eq("is_delete", InfoConstant.LOGIC_DELETE_NORMAL).eq("id", infoCategoryParam.getOneCatalogId()));
-        BeanUtils.copyProperties(infoContent, parentInfoDetailDTO);
+        BeanUtils.copyProperties(infoContent, parentInfoDetailDto);
         if (null != infoCatalog) {
-            parentInfoDetailDTO.setName(infoCatalog.getName());
-            parentInfoDetailDTO.setCatalogSort(infoCatalog.getSort());
+            parentInfoDetailDto.setName(infoCatalog.getName());
+            parentInfoDetailDto.setCatalogSort(infoCatalog.getSort());
         }
-        parentInfoDetailDTO.setCatalogId(infoCategoryParam.getOneCatalogId());
-        redisTemplate.opsForHash().put(InfoConstant.REDIS_HOME + ":" + infoCategoryParam.getOrgId(), infoCategoryParam.getOneCatalogId().toString(), JSON.toJSONString(parentInfoDetailDTO));
+        if (null == infoCategoryParam.getCatalogId()) {
+            parentInfoDetailDto.setCatalogId(infoCategoryParam.getOneCatalogId());
+        }else{
+            parentInfoDetailDto.setCatalogId(infoCategoryParam.getCatalogId());
+        }
+        redisTemplate.opsForHash().put(InfoConstant.REDIS_HOME + ":" + infoCategoryParam.getOrgId(), infoCategoryParam.getOneCatalogId().toString(), JSON.toJSONString(parentInfoDetailDto));
     }
 
 
@@ -142,8 +149,8 @@ public class InfoContentServiceImpl extends ServiceImpl<InfoContentMapper, InfoC
      * @throws BaseException
      */
     @Override
-    public Page<InfoDTO> searchPage(Long orgId, String title, Integer pageNo, Integer pageSize) {
-        Page<InfoDTO> page = new Page<>(pageNo, pageSize);
+    public Page<InfoDto> searchPage(Long orgId, String title, Integer pageNo, Integer pageSize) {
+        Page<InfoDto> page = new Page<>(pageNo, pageSize);
         int i = 4;
         Map<String, Object> map = new HashMap<>(i);
         if (StringUtils.isNotEmpty(title)) {
@@ -152,8 +159,42 @@ public class InfoContentServiceImpl extends ServiceImpl<InfoContentMapper, InfoC
             return page;
         }
         map.put("orgId", orgId);
-        List<InfoDTO> infoDTOList = infoContentMapper.searchPage(map, page);
-        page.setRecords(infoDTOList);
+        List<InfoDto> infoDtoList = infoContentMapper.searchPage(map, page);
+        page.setRecords(infoDtoList);
         return page;
+    }
+
+    /**
+     * 修改资讯信息
+     *
+     * @param infoCategoryParam 实体入参
+     * @return
+     * @throws BaseException
+     */
+    @Override
+    @Transactional(rollbackFor = Exception.class)
+    public void infoEdit(InfoCategoryParam infoCategoryParam) throws BaseException {
+        if (null == infoCategoryParam.getId()) {
+            throw new BaseException("资讯id不能为空");
+        }
+        InfoContent infoContent = new InfoContent().selectOne(new EntityWrapper<InfoContent>().eq("is_delete",InfoConstant.LOGIC_DELETE_NORMAL).eq("id",infoCategoryParam.getId()));
+        if (null == infoContent){
+            throw new BaseException("该资讯已经被删除");
+        }
+        BeanUtils.copyProperties(infoCategoryParam,infoContent);
+        boolean result = infoContent.updateById();
+        if (!result){
+            throw new BaseException("修改失败");
+        }
+        Object object = redisTemplate.opsForHash().get(InfoConstant.REDIS_HOME + ":" + infoCategoryParam.getOrgId(), infoCategoryParam.getOneCatalogId().toString());
+        ParentInfoDetailDto infoDTO = JSONObject.parseObject(object.toString(),ParentInfoDetailDto.class);
+        if (null != infoDTO){
+            if (infoCategoryParam.getId().equals( infoDTO.getId())){
+                redisTemplate.opsForHash().delete(InfoConstant.REDIS_HOME + ":" + infoCategoryParam.getOrgId(),infoCategoryParam.getOneCatalogId().toString());
+                ParentInfoDetailDto parentInfoDetailDto = new ParentInfoDetailDto();
+                BeanUtils.copyProperties(infoContent, parentInfoDetailDto);
+                redisTemplate.opsForHash().put(InfoConstant.REDIS_HOME + ":" + infoCategoryParam.getOrgId(),infoCategoryParam.getOneCatalogId().toString(),JSONObject.toJSONString(parentInfoDetailDto));
+            }
+        }
     }
 }

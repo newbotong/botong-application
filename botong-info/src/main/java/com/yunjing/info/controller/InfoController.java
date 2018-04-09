@@ -1,6 +1,6 @@
 package com.yunjing.info.controller;
 
-import com.yunjing.info.dto.CompanyRedisCatalogDTO;
+import com.yunjing.info.dto.CompanyRedisCatalogDto;
 import com.yunjing.info.param.InfoCategoryParam;
 import com.yunjing.info.service.InfoCatalogService;
 import com.yunjing.info.service.InfoContentService;
@@ -12,7 +12,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
-import java.util.Map;
 
 /**
  * 资讯的Web端接口
@@ -28,6 +27,7 @@ public class InfoController extends BaseController {
 
     @Autowired
     private InfoCatalogService infoCatalogService;
+
     /**
      * 新增资讯接口
      *
@@ -48,8 +48,22 @@ public class InfoController extends BaseController {
      * @return
      */
     @PostMapping("/parent")
-    public ResponseEntityWrapper selectParent(@RequestParam Long orgId){
-        List<CompanyRedisCatalogDTO> list = infoCatalogService.selectParentCatalog(orgId);
+    public ResponseEntityWrapper selectParent(@RequestParam Long orgId) {
+        List<CompanyRedisCatalogDto> list = infoCatalogService.selectParentCatalog(orgId);
         return success(list);
+    }
+
+    /**
+     * 修改资讯信息
+     *
+     * @param infoCategoryParam  实体入参
+     * @return
+     * @throws BaseException
+     */
+    @PostMapping("/edit")
+    public ResponseEntityWrapper infoEdit(@RequestBody InfoCategoryParam infoCategoryParam) throws BaseException {
+        BeanFieldValidator.getInstance().ignore().validate(infoCategoryParam);
+        infoContentService.infoEdit(infoCategoryParam);
+        return success();
     }
 }

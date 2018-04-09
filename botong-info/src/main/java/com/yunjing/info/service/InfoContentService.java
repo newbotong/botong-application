@@ -2,12 +2,11 @@ package com.yunjing.info.service;
 
 import com.baomidou.mybatisplus.plugins.Page;
 import com.baomidou.mybatisplus.service.IService;
-import com.yunjing.info.dto.InfoContentDetailDTO;
-import com.yunjing.info.dto.InfoDTO;
+import com.yunjing.info.dto.InfoContentDetailDto;
+import com.yunjing.info.dto.InfoDto;
 import com.yunjing.info.model.InfoContent;
 import com.yunjing.info.param.InfoCategoryParam;
 import com.yunjing.mommon.global.exception.BaseException;
-import org.springframework.web.bind.annotation.RequestParam;
 
 import java.io.IOException;
 
@@ -27,7 +26,7 @@ public interface InfoContentService extends IService<InfoContent> {
      * @throws BaseException
      * @throws IOException
      */
-    InfoContentDetailDTO selectDetail(Long id, Long userId) throws BaseException, IOException;
+    InfoContentDetailDto selectDetail(Long id, Long userId) throws BaseException, IOException;
 
     /**
      * 更新阅读数量接口
@@ -57,5 +56,14 @@ public interface InfoContentService extends IService<InfoContent> {
      * @return
      * @throws BaseException
      */
-    Page<InfoDTO> searchPage(Long orgId, String title, Integer pageNo, Integer pageSize);
+    Page<InfoDto> searchPage(Long orgId, String title, Integer pageNo, Integer pageSize);
+
+    /**
+     * 修改资讯信息
+     *
+     * @param infoCategoryParam  实体入参
+     * @return
+     * @throws BaseException
+     */
+    void infoEdit(InfoCategoryParam infoCategoryParam) throws BaseException ;
 }

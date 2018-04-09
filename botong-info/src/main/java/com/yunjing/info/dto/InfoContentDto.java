@@ -13,7 +13,7 @@ import java.io.Serializable;
  */
 @Data
 @JsonInclude(JsonInclude.Include.NON_NULL)
-public class InfoContentDTO implements Serializable {
+public class InfoContentDto implements Serializable {
     /**
      * 资讯id
      */

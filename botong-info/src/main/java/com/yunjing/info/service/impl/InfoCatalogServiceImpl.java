@@ -6,10 +6,10 @@ import com.baomidou.mybatisplus.plugins.Page;
 import com.baomidou.mybatisplus.service.impl.ServiceImpl;
 import com.yunjing.info.common.InfoConstant;
 import com.yunjing.info.config.InfoConstants;
-import com.yunjing.info.dto.CompanyRedisCatalogDTO;
-import com.yunjing.info.dto.InfoDTO;
+import com.yunjing.info.dto.CompanyRedisCatalogDto;
+import com.yunjing.info.dto.InfoDto;
 import com.yunjing.info.dto.InfoRedisInit;
-import com.yunjing.info.dto.ParentInfoDetailDTO;
+import com.yunjing.info.dto.ParentInfoDetailDto;
 import com.yunjing.info.mapper.InfoCatalogMapper;
 import com.yunjing.info.model.InfoCatalog;
 import com.yunjing.info.model.InfoDictionary;
@@ -17,7 +17,6 @@ import com.yunjing.info.param.InfoCategoryParam;
 import com.yunjing.info.processor.okhttp.AuthorityService;
 import com.yunjing.info.service.InfoCatalogService;
 import com.yunjing.mommon.global.exception.BaseException;
-import com.yunjing.mommon.wrapper.ResponseEntityWrapper;
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.collections.MapUtils;
 import org.springframework.beans.BeanUtils;
@@ -26,8 +25,6 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import retrofit2.Call;
-import retrofit2.Response;
 
 import java.io.IOException;
 import java.util.*;
@@ -76,18 +73,18 @@ public class InfoCatalogServiceImpl extends ServiceImpl<InfoCatalogMapper, InfoC
         Map<String, Object> map = new HashMap<>(4);
         //查询一级分类下的首页内容
         Map<Object, Object> objectMap = redisTemplate.opsForHash().entries(InfoConstant.REDIS_HOME + ":" + orgId);
-        List<ParentInfoDetailDTO> detailDTOList = new ArrayList<>();
+        List<ParentInfoDetailDto> detailDTOList = new ArrayList<>();
         if (MapUtils.isNotEmpty(objectMap)) {
             for (Map.Entry<Object, Object> entry : objectMap.entrySet()) {
                 entry.getKey().toString();
-                ParentInfoDetailDTO parentInfoDetailDTO = JSONObject.parseObject(entry.getValue().toString(), ParentInfoDetailDTO.class);
-                detailDTOList.add(parentInfoDetailDTO);
+                ParentInfoDetailDto parentInfoDetailDto = JSONObject.parseObject(entry.getValue().toString(), ParentInfoDetailDto.class);
+                detailDTOList.add(parentInfoDetailDto);
             }
         }
         Collections.sort(detailDTOList);
         map.put("info", detailDTOList);
-        List<CompanyRedisCatalogDTO> companyRedisCatalogDTOS = this.selectParentCatalog(orgId);
-        map.put("parent", companyRedisCatalogDTOS);
+        List<CompanyRedisCatalogDto> companyRedisCatalogDtos = this.selectParentCatalog(orgId);
+        map.put("parent", companyRedisCatalogDtos);
         return map;
     }
 
@@ -98,14 +95,14 @@ public class InfoCatalogServiceImpl extends ServiceImpl<InfoCatalogMapper, InfoC
      * @return
      */
     @Override
-    public List<CompanyRedisCatalogDTO> selectParentCatalog(Long orgId) {
+    public List<CompanyRedisCatalogDto> selectParentCatalog(Long orgId) {
         //查询目录结构(一级Id)
         Map<Object, Object> mapRedis = redisTemplate.opsForHash().entries(InfoConstant.COMPANY_INFO_REDIS + orgId);
-        List<CompanyRedisCatalogDTO> companyRedisCatalogDTOS = new ArrayList<>();
+        List<CompanyRedisCatalogDto> companyRedisCatalogDtos = new ArrayList<>();
         if (MapUtils.isNotEmpty(mapRedis)) {
             for (Map.Entry<Object, Object> entry : mapRedis.entrySet()) {
-                CompanyRedisCatalogDTO companyRedisCatalogDTO = JSONObject.parseObject(entry.getValue().toString(), CompanyRedisCatalogDTO.class);
-                Map<Object, Object> towCatalogMap = redisTemplate.opsForHash().entries(InfoConstants.BOTONG_INFO_CATALOG_LIST + orgId + InfoConstants.BOTONG_INFO_FIX + companyRedisCatalogDTO.getId());
+                CompanyRedisCatalogDto companyRedisCatalogDto = JSONObject.parseObject(entry.getValue().toString(), CompanyRedisCatalogDto.class);
+                Map<Object, Object> towCatalogMap = redisTemplate.opsForHash().entries(InfoConstants.BOTONG_INFO_CATALOG_LIST + orgId + InfoConstants.BOTONG_INFO_FIX + companyRedisCatalogDto.getId());
                 if (MapUtils.isNotEmpty(towCatalogMap)) {
                     List<InfoCatalog> infoCatalogList = new ArrayList<InfoCatalog>();
                     for (Map.Entry<Object, Object> en : towCatalogMap.entrySet()) {
@@ -113,15 +110,15 @@ public class InfoCatalogServiceImpl extends ServiceImpl<InfoCatalogMapper, InfoC
                         infoCatalogList.add(infoCatalog);
                     }
                     Collections.sort(infoCatalogList);
-                    companyRedisCatalogDTO.setLower(infoCatalogList);
+                    companyRedisCatalogDto.setLower(infoCatalogList);
                 }
                 //针对二级结构排序
-                companyRedisCatalogDTOS.add(companyRedisCatalogDTO);
+                companyRedisCatalogDtos.add(companyRedisCatalogDto);
             }
             //针对一级结构排序
-            Collections.sort(companyRedisCatalogDTOS);
+            Collections.sort(companyRedisCatalogDtos);
         }
-        return companyRedisCatalogDTOS;
+        return companyRedisCatalogDtos;
     }
 
 
@@ -140,12 +137,12 @@ public class InfoCatalogServiceImpl extends ServiceImpl<InfoCatalogMapper, InfoC
     @Override
     public Map<String, Object> selectParentAll(Long orgId, Long catalogId, Long userId, Integer pageNo, Integer pageSize) throws BaseException, IOException {
         Map<String, Object> resultMap = new HashMap<>(4);
-        Page<InfoDTO> page = new Page<>(pageNo, pageSize);
+        Page<InfoDto> page = new Page<>(pageNo, pageSize);
         Map<String, Object> map = new HashMap<>(4);
         map.put("orgId", orgId);
         map.put("catalogId", catalogId);
-        List<InfoDTO> infoDTOList = infoCatalogMapper.selectInfoCatalog(map, page);
-        page.setRecords(infoDTOList);
+        List<InfoDto> infoDtoList = infoCatalogMapper.selectInfoCatalog(map, page);
+        page.setRecords(infoDtoList);
         resultMap.put("page", page);
         //OKHttp调用
 //        Call<ResponseEntityWrapper> call = authorityService.authority(appId, userId);

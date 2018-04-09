@@ -1,7 +1,5 @@
 package com.yunjing.info.dto;
 
-import com.baomidou.mybatisplus.annotations.TableField;
-import com.baomidou.mybatisplus.annotations.TableName;
 import com.common.mybatis.model.BaseModel;
 import lombok.Data;
 
@@ -14,7 +12,7 @@ import java.util.List;
  * @date 2018/3/20 17:07
  */
 @Data
-public class InfoCatalogDTO extends BaseModel<InfoCatalogDTO> {
+public class InfoCatalogDto extends BaseModel<InfoCatalogDto> {
 
     /**
      * 名称
@@ -54,5 +52,5 @@ public class InfoCatalogDTO extends BaseModel<InfoCatalogDTO> {
     /**
      * 子集
      */
-    private List<InfoCatalogDTO> lower;
+    private List<InfoCatalogDto> lower;
 }

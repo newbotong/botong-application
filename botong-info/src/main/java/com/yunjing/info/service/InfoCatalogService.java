@@ -1,7 +1,7 @@
 package com.yunjing.info.service;
 
 import com.baomidou.mybatisplus.service.IService;
-import com.yunjing.info.dto.CompanyRedisCatalogDTO;
+import com.yunjing.info.dto.CompanyRedisCatalogDto;
 import com.yunjing.info.model.InfoCatalog;
 import com.yunjing.info.param.InfoCategoryParam;
 import com.yunjing.mommon.global.exception.BaseException;
@@ -56,5 +56,5 @@ public interface InfoCatalogService extends IService<InfoCatalog> {
      * @param orgId 企业类目id
      * @return
      */
-    List<CompanyRedisCatalogDTO> selectParentCatalog(Long orgId);
+    List<CompanyRedisCatalogDto> selectParentCatalog(Long orgId);
 }

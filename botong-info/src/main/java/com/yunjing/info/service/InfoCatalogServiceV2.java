@@ -1,17 +1,14 @@
 package com.yunjing.info.service;
 
 import com.baomidou.mybatisplus.service.IService;
-import com.yunjing.info.common.InfoConstant;
 import com.yunjing.info.config.InfoConstants;
-import com.yunjing.info.dto.InfoCatalogDTO;
-import com.yunjing.info.dto.InfoContentDTO;
+import com.yunjing.info.dto.InfoCatalogDto;
+import com.yunjing.info.dto.InfoContentDto;
 import com.yunjing.info.model.InfoCatalog;
-import com.yunjing.info.param.InfoCategoryParam;
 import com.yunjing.mommon.global.exception.BaseException;
 import com.yunjing.mommon.wrapper.PageWrapper;
 
 import java.util.List;
-import java.util.Map;
 
 /**
  * 资讯目录接口
@@ -100,7 +97,7 @@ public interface InfoCatalogServiceV2 extends IService<InfoCatalog> {
      * @return
      * @throws BaseException
      */
-    List<InfoCatalogDTO> getInfoCatalogList(Long orgId) throws BaseException;
+    List<InfoCatalogDto> getInfoCatalogList(Long orgId) throws BaseException;
 
 
     /**
@@ -138,7 +135,7 @@ public interface InfoCatalogServiceV2 extends IService<InfoCatalog> {
      * @return
      * @throws BaseException
      */
-    PageWrapper<InfoContentDTO> selectParentPage(Long orgId, Long catalogId, String title, Integer pageNo, Integer pageSize) throws BaseException;
+    PageWrapper<InfoContentDto> selectParentPage(Long orgId, Long catalogId, String title, Integer pageNo, Integer pageSize) throws BaseException;
 
 
 }

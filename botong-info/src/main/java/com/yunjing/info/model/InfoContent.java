@@ -3,13 +3,14 @@ package com.yunjing.info.model;
 import com.baomidou.mybatisplus.annotations.TableField;
 import com.baomidou.mybatisplus.annotations.TableName;
 import com.common.mybatis.model.BaseModel;
+import com.yunjing.mommon.validate.annotation.NotNull;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 
 /**
  * 资讯内容实体
  *
- * @author 裴志鹏
+ * @author 李双喜
  * @date 2018/3/20 17:15
  */
 @Data
