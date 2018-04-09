@@ -129,11 +129,7 @@ public class InfoContentServiceImpl extends ServiceImpl<InfoContentMapper, InfoC
             parentInfoDetailDto.setName(infoCatalog.getName());
             parentInfoDetailDto.setCatalogSort(infoCatalog.getSort());
         }
-        if (null == infoCategoryParam.getCatalogId()) {
-            parentInfoDetailDto.setCatalogId(infoCategoryParam.getOneCatalogId());
-        } else {
-            parentInfoDetailDto.setCatalogId(infoCategoryParam.getCatalogId());
-        }
+        parentInfoDetailDto.setCatalogId(infoCategoryParam.getOneCatalogId());
         redisTemplate.opsForHash().put(InfoConstant.REDIS_HOME + ":" + infoCategoryParam.getOrgId(), infoCategoryParam.getOneCatalogId().toString(), JSON.toJSONString(parentInfoDetailDto));
     }
 
@@ -192,7 +188,13 @@ public class InfoContentServiceImpl extends ServiceImpl<InfoContentMapper, InfoC
             if (infoCategoryParam.getId().equals(infoDTO.getId())) {
                 redisTemplate.opsForHash().delete(InfoConstant.REDIS_HOME + ":" + infoCategoryParam.getOrgId(), infoCategoryParam.getOneCatalogId().toString());
                 ParentInfoDetailDto parentInfoDetailDto = new ParentInfoDetailDto();
+                InfoCatalog infoCatalog = new InfoCatalog().selectOne(new EntityWrapper<InfoCatalog>().eq("is_delete", InfoConstant.LOGIC_DELETE_NORMAL).eq("id", infoCategoryParam.getOneCatalogId()));
                 BeanUtils.copyProperties(infoContent, parentInfoDetailDto);
+                if (null != infoCatalog) {
+                    parentInfoDetailDto.setName(infoCatalog.getName());
+                    parentInfoDetailDto.setCatalogSort(infoCatalog.getSort());
+                }
+                parentInfoDetailDto.setCatalogId(infoCategoryParam.getOneCatalogId());
                 redisTemplate.opsForHash().put(InfoConstant.REDIS_HOME + ":" + infoCategoryParam.getOrgId(), infoCategoryParam.getOneCatalogId().toString(), JSONObject.toJSONString(parentInfoDetailDto));
             }
         }
