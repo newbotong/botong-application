@@ -28,12 +28,12 @@ public class LogTemplateApi extends BaseController{
     }
 
     @RequestMapping(value = "/query-all",method = RequestMethod.GET)
-    public PageWrapper<LogTemplateItemVo> queryAll(@RequestParam("orgId") long orgId, @RequestParam("pageNo") int pageNo, @RequestParam("pageSize") int pageSize){
-        return this.logTemplateService.queryAllLogTemplate(orgId,pageNo,pageSize);
+    public ResponseEntityWrapper<PageWrapper<LogTemplateItemVo>> queryAll(@RequestParam("orgId") String orgId, @RequestParam("pageNo") int pageNo, @RequestParam("pageSize") int pageSize){
+        return this.success(this.logTemplateService.queryAllLogTemplate(orgId,pageNo,pageSize));
     }
 
     @RequestMapping(value = "/query",method = RequestMethod.GET)
-    public ResponseEntityWrapper<LogTemplateVo> query(@RequestParam("id") long id){
+    public ResponseEntityWrapper<LogTemplateVo> query(@RequestParam("id") String id){
         return this.success(this.logTemplateService.queryLogTemplate(id));
     }
 
@@ -43,7 +43,7 @@ public class LogTemplateApi extends BaseController{
     }
 
     @RequestMapping(value = "/delete",method = RequestMethod.POST)
-    public ResponseEntityWrapper<Boolean> delete(@RequestParam("id") long id){
+    public ResponseEntityWrapper<Boolean> delete(@RequestParam("id") String id){
         return this.success(this.logTemplateService.deleteLogTemplate(id));
     }
 

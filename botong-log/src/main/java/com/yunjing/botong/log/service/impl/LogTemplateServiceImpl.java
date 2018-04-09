@@ -1,6 +1,7 @@
 package com.yunjing.botong.log.service.impl;
 
 import com.baomidou.mybatisplus.mapper.EntityWrapper;
+import com.baomidou.mybatisplus.toolkit.IdWorker;
 import com.yunjing.botong.log.entity.LogTemplateEntity;
 import com.yunjing.botong.log.entity.LogTemplateEnumEntity;
 import com.yunjing.botong.log.entity.LogTemplateEnumItemEntity;
@@ -48,10 +49,11 @@ public class LogTemplateServiceImpl implements LogTemplateService {
 
     @Override
     @Transactional(rollbackFor = Exception.class)
-    public long createLogTemplate(LogTemplateParam logTemplateParam) {
+    public String createLogTemplate(LogTemplateParam logTemplateParam) {
         // 插入模板
         LogTemplateEntity entity = new LogTemplateEntity();
         entity.fromParam(logTemplateParam);
+        entity.setId(IdWorker.get32UUID());
         entity.insert();
 
         // 批量插入字段
@@ -84,7 +86,7 @@ public class LogTemplateServiceImpl implements LogTemplateService {
     }
 
     @Override
-    public boolean deleteLogTemplate(long id) {
+    public boolean deleteLogTemplate(String id) {
         LogTemplateEntity logTemplateEntity = new LogTemplateEntity();
         logTemplateEntity.setId(id);
         logTemplateEntity.setDeleted(true);
@@ -93,7 +95,7 @@ public class LogTemplateServiceImpl implements LogTemplateService {
     }
 
     @Override
-    public PageWrapper<LogTemplateItemVo> queryAllLogTemplate(long orgId, int pageNo, int pageSize) {
+    public PageWrapper<LogTemplateItemVo> queryAllLogTemplate(String orgId, int pageNo, int pageSize) {
         PageWrapper<LogTemplateItemVo> result = new PageWrapper<>();
 
         int offset = (pageNo-1)*pageSize;
@@ -108,7 +110,7 @@ public class LogTemplateServiceImpl implements LogTemplateService {
     }
 
     @Override
-    public LogTemplateVo queryLogTemplate(long id) {
+    public LogTemplateVo queryLogTemplate(String id) {
         // 查询日志模板
         LogTemplateEntity entity = new LogTemplateEntity();
         entity = entity.selectOne(new EntityWrapper().eq("id",id).eq("deleted",false));
@@ -128,7 +130,7 @@ public class LogTemplateServiceImpl implements LogTemplateService {
         if(CollectionUtils.isNotEmpty(fieldEntities)){
             List<LogTemplateFieldVo> logTemplateFieldVoList = new ArrayList<>(fieldEntities.size());
 
-            List<Long> enumIdList = new ArrayList<>();
+            List<String> enumIdList = new ArrayList<>();
             for (int i = 0; i < fieldEntities.size(); i++) {
                 LogTemplateFieldVo logTemplateFieldVo = new LogTemplateFieldVo();
                 logTemplateFieldVo.fromEntity(fieldEntities.get(i));

@@ -15,7 +15,7 @@ public class LogTemplateVo {
     /**
      * ID
      */
-    private Long id;
+    private String id;
 
     /**
      * 模板名称
@@ -30,7 +30,7 @@ public class LogTemplateVo {
     /**
      * 机构ID
      */
-    private Long orgId;
+    private String orgId;
 
     /**
      * 提交类型 1每天 2 每周 3 每月 4 季度 5 年度
