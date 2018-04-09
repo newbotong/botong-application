@@ -148,12 +148,12 @@ public class InfoCatalogServiceImpl extends ServiceImpl<InfoCatalogMapper, InfoC
         page.setRecords(infoDTOList);
         resultMap.put("page", page);
         //OKHttp调用
-        Call<ResponseEntityWrapper> call = authorityService.authority(appId, userId);
-        Response<ResponseEntityWrapper> execute = call.execute();
-        ResponseEntityWrapper body = execute.body();
-        //判断是否为管理员
-        boolean results = (boolean) body.getData();
-        resultMap.put("admin", results);
+//        Call<ResponseEntityWrapper> call = authorityService.authority(appId, userId);
+//        Response<ResponseEntityWrapper> execute = call.execute();
+//        ResponseEntityWrapper body = execute.body();
+//        //判断是否为管理员
+//        boolean results = (boolean) body.getData();
+        resultMap.put("admin", true);
         return resultMap;
     }
 
