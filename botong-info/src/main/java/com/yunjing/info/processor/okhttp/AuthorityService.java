@@ -26,5 +26,5 @@ public interface AuthorityService {
      * @throws IOException
      */
     @GET("/rpc/org/admin/is-manager")
-    Call<ResponseEntityWrapper> authority(@Query("appId") String appId, @Query("memberId") Long memberId) throws BaseException, IOException;
+    Call<ResponseEntityWrapper> authority(@Query("appId") String appId, @Query("memberId") String memberId) throws BaseException, IOException;
 }

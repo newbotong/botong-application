@@ -25,7 +25,7 @@ public class InfoDictionary extends BaseModel<InfoDictionary> {
      * 父id
      */
     @TableField("parent_id")
-    private Long parentId;
+    private String parentId;
 
     /**
      * 级别

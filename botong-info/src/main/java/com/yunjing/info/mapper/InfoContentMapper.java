@@ -2,8 +2,8 @@ package com.yunjing.info.mapper;
 
 import com.baomidou.mybatisplus.plugins.Page;
 import com.common.mybatis.mapper.IBaseMapper;
-import com.yunjing.info.dto.InfoContentDTO;
-import com.yunjing.info.dto.InfoDTO;
+import com.yunjing.info.dto.InfoContentDto;
+import com.yunjing.info.dto.InfoDto;
 import com.yunjing.info.model.InfoContent;
 import org.apache.ibatis.annotations.Param;
 import org.springframework.stereotype.Repository;
@@ -28,10 +28,11 @@ public interface InfoContentMapper extends IBaseMapper<InfoContent> {
      * @param page 分页
      * @return
      */
-    List<InfoDTO> searchPage(Map<String, Object> map, Page<InfoDTO> page);
+    List<InfoDto> searchPage(Map<String, Object> map, Page<InfoDto> page);
 
     /**
      * web端资讯分页模糊查询
+     *
      * @param orgId
      * @param catalogId
      * @param title
@@ -39,6 +40,8 @@ public interface InfoContentMapper extends IBaseMapper<InfoContent> {
      * @param pageSize
      * @return
      */
-    List<InfoContentDTO> selectParentPage(@Param("orgId") Long orgId, @Param("catalogId") Long catalogId,@Param("title") String title, @Param("pageNo") Integer pageNo, @Param("pageSize") Integer pageSize);;
+    List<InfoContentDto> selectParentPage(@Param("orgId") String orgId, @Param("catalogId") String catalogId, @Param("title") String title, @Param("pageNo") Integer pageNo, @Param("pageSize") Integer pageSize);
+
+    ;
 
 }

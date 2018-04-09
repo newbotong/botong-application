@@ -26,13 +26,13 @@ public class InfoCatalog extends BaseModel<InfoCatalog> implements Comparable<In
      * 机构id
      */
     @TableField("org_id")
-    private Long orgId;
+    private String orgId;
 
     /**
      * 父id
      */
     @TableField("parent_id")
-    private Long parentId;
+    private String parentId;
 
     /**
      * 级别

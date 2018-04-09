@@ -11,16 +11,16 @@ import java.io.Serializable;
  * @date 2018/4/4 11:30
  */
 @Data
-public class ParentInfoDetailDTO implements Serializable,Comparable<ParentInfoDetailDTO>{
+public class ParentInfoDetailDto implements Serializable,Comparable<ParentInfoDetailDto>{
 
     /**
      * 资讯id
      */
-    private Long id;
+    private String id;
     /**
      * 一级目录id
      */
-    private Long catalogId;
+    private String catalogId;
     /**
      * 一级目录名称
      */
@@ -45,7 +45,7 @@ public class ParentInfoDetailDTO implements Serializable,Comparable<ParentInfoDe
     private Long createTime;
 
     @Override
-    public int compareTo(ParentInfoDetailDTO o) {
+    public int compareTo(ParentInfoDetailDto o) {
         return this.getCatalogSort()-o.getCatalogSort();
     }
 }

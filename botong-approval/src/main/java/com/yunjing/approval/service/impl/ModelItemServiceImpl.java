@@ -2,6 +2,8 @@ package com.yunjing.approval.service.impl;
 
 import com.alibaba.fastjson.JSONObject;
 import com.baomidou.mybatisplus.mapper.Condition;
+import com.baomidou.mybatisplus.mapper.EntityWrapper;
+import com.baomidou.mybatisplus.mapper.Wrapper;
 import com.common.mybatis.service.impl.BaseServiceImpl;
 import com.yunjing.approval.dao.mapper.ConditionMapper;
 import com.yunjing.approval.dao.mapper.ModelItemMapper;
@@ -9,10 +11,7 @@ import com.yunjing.approval.dao.mapper.ModelMapper;
 import com.yunjing.approval.model.entity.ModelItem;
 import com.yunjing.approval.model.entity.ModelL;
 import com.yunjing.approval.model.entity.OrgModel;
-import com.yunjing.approval.model.vo.ApprovalSetVO;
-import com.yunjing.approval.model.vo.ClientModelItemVO;
-import com.yunjing.approval.model.vo.ModelItemVO;
-import com.yunjing.approval.model.vo.ModelVO;
+import com.yunjing.approval.model.vo.*;
 import com.yunjing.approval.service.IApprovalSetsService;
 import com.yunjing.approval.service.IModelItemService;
 import com.yunjing.approval.service.IModelService;
@@ -100,9 +99,36 @@ public class ModelItemServiceImpl extends BaseServiceImpl<ModelItemMapper, Model
         ApprovalSetVO approvalSet = approvalSetsService.getApprovalSet(modelId);
         clientModelItemVO.setSet(approvalSet.getSetting());
 
+
         clientModelItemVO.setDeptId(6383142972988329992L);
         clientModelItemVO.setDeptName("互联网时代");
-
+        List<ApproverVO> approverVOS = new ArrayList<>();
+        ApproverVO approverVO = new ApproverVO();
+        approverVO.setMemberId(6384662596632449044L);
+        approverVO.setMobile("18291495378");
+        approverVO.setName("小黑");
+        approverVO.setPasspottld(6384662596632449044L);
+        approverVO.setProfile("http://a.hiphotos.baidu.com/image/pic/item/6d81800a19d8bc3e0104c2ef8e8ba61ea8d34583.jpg");
+        approverVO.setState(0);
+        ApproverVO approverVO1 = new ApproverVO();
+        approverVO1.setMemberId(6384662596632449044L);
+        approverVO1.setMobile("18291495378");
+        approverVO1.setName("小黑2");
+        approverVO1.setPasspottld(6384662596632449044L);
+        approverVO1.setProfile("http://a.hiphotos.baidu.com/image/pic/item/6d81800a19d8bc3e0104c2ef8e8ba61ea8d34583.jpg");
+        approverVO1.setState(0);
+        ApproverVO approverVO2 = new ApproverVO();
+        approverVO2.setMemberId(6384662596632449044L);
+        approverVO2.setMobile("18291495378");
+        approverVO2.setName("小黑2");
+        approverVO2.setPasspottld(6384662596632449044L);
+        approverVO2.setProfile("http://a.hiphotos.baidu.com/image/pic/item/6d81800a19d8bc3e0104c2ef8e8ba61ea8d34583.jpg");
+        approverVO2.setState(0);
+        approverVOS.add(approverVO);
+        approverVOS.add(approverVO1);
+        approverVOS.add(approverVO2);
+        clientModelItemVO.setApproverVOS(approverVOS);
+        clientModelItemVO.setCopyerVOS(approverVOS);
         return clientModelItemVO;
 
     }
@@ -128,8 +154,27 @@ public class ModelItemServiceImpl extends BaseServiceImpl<ModelItemMapper, Model
     }
 
     @Override
+    public ModelVO get(Long modelId) throws Exception {
+
+        ModelL modelL = modelService.selectById(modelId);
+        if (modelL == null) {
+            throw new BaseException("模型信息不存在");
+        }
+
+        Wrapper<ModelItem> wrapper = new EntityWrapper<>();
+        wrapper.eq("model_id", modelId).eq("item_version", modelL.getModelVersion()).orderBy("priority");
+        List<ModelItem> itemList = this.selectList(wrapper);
+
+        if (CollectionUtils.isEmpty(itemList)) {
+            throw new BaseException("字段信息不存在");
+        }
+
+        return this.getModelVO(modelL, itemList);
+    }
+
+    @Override
     @Transactional(propagation = Propagation.REQUIRED, rollbackFor = Exception.class)
-    public ModelVO saveModelItem(Long orgId, Long userId, String json) throws Exception {
+    public ModelVO saveModelItem(Long companyId, Long memberId, String json) throws Exception {
 
         if (StringUtils.isBlank(json)) {
             throw new BaseException("模型数据不存在");
@@ -169,14 +214,14 @@ public class ModelItemServiceImpl extends BaseServiceImpl<ModelItemMapper, Model
             entity.setId(modelId);
             entity.setLogo("https://web.botong.tech/resource/img/public.png");
 
-            Integer max = modelMapper.getMaxSort(orgId);
+            Integer max = modelMapper.getMaxSort(companyId);
             if (max == null) {
                 max = 0;
             }
             entity.setSort(max + 1);
             entity.setIsDisabled(0);
             entity.setIsDef(0);
-            entity.setProvider(userId);
+            entity.setProvider(memberId);
             entity.setModelType(2);
             vo.setModelId(modelId);
         }
@@ -203,7 +248,7 @@ public class ModelItemServiceImpl extends BaseServiceImpl<ModelItemMapper, Model
                 Timestamp now = new Timestamp(System.currentTimeMillis());
                 OrgModel orgModel = new OrgModel();
                 orgModel.setId(IDUtils.getID());
-                orgModel.setOrgId(orgId);
+                orgModel.setOrgId(companyId);
                 orgModel.setModelId(entity.getId());
                 orgModel.setDataType(2);
                 orgModel.setCreateTime(now.getTime());

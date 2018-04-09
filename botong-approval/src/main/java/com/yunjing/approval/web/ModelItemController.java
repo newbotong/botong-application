@@ -27,7 +27,7 @@ public class ModelItemController extends BaseController {
      */
     @GetMapping("/get")
     public ResponseEntityWrapper getItem(@RequestParam("modelId") Long modelId) throws Exception {
-        return success(modelItemService.getModelItem(modelId));
+        return success(modelItemService.get(modelId));
     }
 
     /**

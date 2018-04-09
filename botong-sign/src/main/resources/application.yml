@@ -64,5 +64,8 @@ mybatis-plus:
     logic-not-delete-value: 0
     sql-injector: com.baomidou.mybatisplus.mapper.LogicSqlInjector
 
+# 写入文件日志
+logging:
+  file: ${user.dir}/logs/${spring.application.name}.log
 okhttp:
   botong-org-structure: http://192.168.10.233:8188/

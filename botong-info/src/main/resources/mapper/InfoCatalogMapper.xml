@@ -2,7 +2,7 @@
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
 
 <mapper namespace="com.yunjing.info.mapper.InfoCatalogMapper">
-    <resultMap id="pageCatalog" type="com.yunjing.info.dto.InfoDTO">
+    <resultMap id="pageCatalog" type="com.yunjing.info.dto.InfoDto">
         <id column="id" property="id"></id>
         <result column="create_time" property="createTime"></result>
         <result column="title" property="title"></result>

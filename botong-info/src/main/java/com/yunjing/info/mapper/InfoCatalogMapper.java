@@ -2,7 +2,7 @@ package com.yunjing.info.mapper;
 
 import com.baomidou.mybatisplus.plugins.Page;
 import com.common.mybatis.mapper.IBaseMapper;
-import com.yunjing.info.dto.InfoDTO;
+import com.yunjing.info.dto.InfoDto;
 import com.yunjing.info.model.InfoCatalog;
 import org.springframework.stereotype.Repository;
 
@@ -26,5 +26,5 @@ public interface InfoCatalogMapper extends IBaseMapper<InfoCatalog> {
      * @param page 分页
      * @return
      */
-    List<InfoDTO> selectInfoCatalog(Map<String, Object> map, Page<InfoDTO> page);
+    List<InfoDto> selectInfoCatalog(Map<String, Object> map, Page<InfoDto> page);
 }

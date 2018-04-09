@@ -56,3 +56,8 @@ ali:
     accessKey: ${ali.sms.accessKey}
     secretKey: ${ali.sms.secretKey}
     signName: ${ali.sms.signName}
+
+
+# 写入文件日志
+logging:
+  file: ${user.dir}/logs/${spring.application.name}.log

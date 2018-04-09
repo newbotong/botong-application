@@ -12,11 +12,11 @@ import java.util.List;
  * @date 2018/4/8 10:34
  */
 @Data
-public class CompanyRedisCatalogDTO implements Serializable,Comparable<CompanyRedisCatalogDTO> {
+public class CompanyRedisCatalogDto implements Serializable,Comparable<CompanyRedisCatalogDto> {
     /**
      * id
      */
-    private Long id;
+    private String id;
 
     /**
      * 更新时间
@@ -34,12 +34,12 @@ public class CompanyRedisCatalogDTO implements Serializable,Comparable<CompanyRe
     /**
      * 机构id
      */
-    private Long orgId;
+    private String orgId;
 
     /**
      * 父id
      */
-    private Long parentId;
+    private String parentId;
 
     /**
      * 级别
@@ -70,7 +70,7 @@ public class CompanyRedisCatalogDTO implements Serializable,Comparable<CompanyRe
      * @return
      */
     @Override
-    public int compareTo(CompanyRedisCatalogDTO o) {
+    public int compareTo(CompanyRedisCatalogDto o) {
         return this.getSort()-(o.getSort());
     }
 }
