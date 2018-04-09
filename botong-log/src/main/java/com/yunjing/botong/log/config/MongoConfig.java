@@ -14,11 +14,11 @@ import org.springframework.context.annotation.Configuration;
 public class MongoConfig extends BaseMongoConfig {
 
     @Value("${spring.data.mongodb.uri}")
-    private String MONGO_URI;
+    private String mongoUri;
 
     @Override
     protected String getUri() {
-        return MONGO_URI;
+        return mongoUri;
     }
 
     /*@Bean

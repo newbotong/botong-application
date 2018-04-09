@@ -347,10 +347,6 @@ public class NoticeServiceImpl extends ServiceImpl<NoticeMapper, NoticeEntity> i
                 e.printStackTrace();
             }
 
-            //rpc调用【弃用】
-//            ResponseEntityWrapper responseEntityWrapper = authorityFeign.authority(appId, userId);
-//            Boolean results = JSONObject.parseObject(responseEntityWrapper.getData().toString(), Boolean.class);
-
             //判断是否为管理员
             boolean results = (boolean) body.getData();
             maps.put("admin", results);

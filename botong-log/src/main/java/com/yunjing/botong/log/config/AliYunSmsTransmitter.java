@@ -101,7 +101,7 @@ public class AliYunSmsTransmitter {
      * @throws ClientException
      */
     public SendSmsResponse send(String phone, String templateCode, String templateParam, String signName) throws ClientException {
-        String _tempSignName = StringUtils.isBlank(signName) ? this.signName : signName;
-        return SmsUtils.send(phone, templateCode, templateParam, accessKeyId, accessKeySecret, _tempSignName);
+        String tempSignName = StringUtils.isBlank(signName) ? this.signName : signName;
+        return SmsUtils.send(phone, templateCode, templateParam, accessKeyId, accessKeySecret, tempSignName);
     }
 }

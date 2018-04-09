@@ -21,12 +21,12 @@ public class SmsUtils {
     /**
      * 产品名称:云通信短信API产品,开发者无需替换
      */
-    private final static String product = "Dysmsapi";
+    private final static String PRODUCT = "Dysmsapi";
 
     /**
      * 产品域名,开发者无需替换
      */
-    private final static String domain = "dysmsapi.aliyuncs.com";
+    private final static String DOMAIN = "dysmsapi.aliyuncs.com";
 
 
     /**
@@ -50,7 +50,7 @@ public class SmsUtils {
 
         //初始化acsClient,暂不支持region化
         IClientProfile profile = DefaultProfile.getProfile("cn-hangzhou", accessKeyId, accessKeySecret);
-        DefaultProfile.addEndpoint("cn-hangzhou", "cn-hangzhou", product, domain);
+        DefaultProfile.addEndpoint("cn-hangzhou", "cn-hangzhou", PRODUCT, DOMAIN);
         IAcsClient acsClient = new DefaultAcsClient(profile);
 
         SendSmsRequest request = new SendSmsRequest();

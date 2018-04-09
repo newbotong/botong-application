@@ -1,6 +1,5 @@
 package com.yunjing.info.processor.okhttp.impl;
 
-import com.yunjing.info.processor.okhttp.AuthorityService;
 import com.yunjing.info.processor.okhttp.CollectService;
 import com.yunjing.mommon.global.exception.BaseException;
 import com.yunjing.mommon.wrapper.ResponseEntityWrapper;
@@ -22,13 +21,13 @@ import java.io.IOException;
 public class CollectServiceImpl implements CollectService {
 
     @Value("${okhttp.botong-favorite}")
-    String BASE_URL;
+    String baseUrl;
     private CollectService service;
 
     private void initRetrofit() {
         // 构建 Retrofit 对象
         Retrofit retrofit = new Retrofit.Builder()
-                .baseUrl(BASE_URL)
+                .baseUrl(baseUrl)
                 // 添加json转换器，这里使用的是gson，也可以使用fastjson的转换工厂[FastJsonConverterFactory.create()]
                 .addConverterFactory(GsonConverterFactory.create())
                 .build();
