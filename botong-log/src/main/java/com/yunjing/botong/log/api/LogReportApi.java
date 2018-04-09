@@ -31,7 +31,7 @@ public class LogReportApi extends BaseController {
      * @param orgId      企业编号
      * @param pageNo     页码
      * @param pageSize   页大小
-     * @param submitType 日报模版类型（1-日报 2-周报 3-月报）
+     * @param submitType 日报模版类型（0-全部 1-日报 2-周报 3-月报）
      * @param startDate  开始时间
      * @param endDate    结束时间
      * @return

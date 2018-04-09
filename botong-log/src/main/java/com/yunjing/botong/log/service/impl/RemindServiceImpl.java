@@ -7,10 +7,10 @@ import com.common.mybatis.service.impl.BaseServiceImpl;
 import com.google.gson.Gson;
 import com.yunjing.botong.log.config.LogConstant;
 import com.yunjing.botong.log.entity.RemindEntity;
-import com.yunjing.botong.log.processor.okhttp.AppCenterService;
 import com.yunjing.botong.log.mapper.RemindMapper;
 import com.yunjing.botong.log.params.SchedulerParam;
 import com.yunjing.botong.log.processor.mq.configuration.RemindMessageConfiguration;
+import com.yunjing.botong.log.processor.okhttp.AppCenterService;
 import com.yunjing.botong.log.service.IRemindService;
 import com.yunjing.botong.log.vo.RemindVo;
 import com.yunjing.mommon.utils.BeanUtils;
@@ -19,6 +19,9 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+
+import java.util.HashMap;
+import java.util.Map;
 
 /**
  * <p>
@@ -79,8 +82,18 @@ public class RemindServiceImpl extends BaseServiceImpl<RemindMapper, RemindEntit
     }
 
     @Override
-    public RemindVo info(String memberId, String appId) {
-        return JSON.parseObject(redisTemplate.opsForHash().get(LogConstant.LOG_SET_REMIND + appId, memberId).toString(), RemindVo.class);
+    public RemindVo info(String memberId, String appId, int submitType) {
+
+        switch (submitType) {
+            case 1:
+                return JSON.parseObject(String.valueOf(redisTemplate.opsForHash().get(LogConstant.LOG_SET_DAY_REMIND + appId, memberId)), RemindVo.class);
+            case 2:
+                return JSON.parseObject(String.valueOf(redisTemplate.opsForHash().get(LogConstant.LOG_SET_WEEK_REMIND + appId, memberId)), RemindVo.class);
+            case 3:
+                return JSON.parseObject(String.valueOf(redisTemplate.opsForHash().get(LogConstant.LOG_SET_MONTH_REMIND + appId, memberId)), RemindVo.class);
+            default:
+                return null;
+        }
     }
 
     @Override
@@ -101,12 +114,25 @@ public class RemindServiceImpl extends BaseServiceImpl<RemindMapper, RemindEntit
     private void setTask(RemindVo remind) {
         Gson gson = new Gson();
         String key = String.valueOf(remind.getMemberId());
-        String value = gson.toJson(remind);
 
         // topic
         String jobTitle = RemindMessageConfiguration.REMIND_QUEUE_NAME;
         Long taskId = null;
-        RemindVo vo = gson.fromJson(String.valueOf(redisTemplate.opsForHash().get(LogConstant.LOG_SET_REMIND + remind.getAppId(), key)), RemindVo.class);
+        RemindVo vo = null;
+        switch (remind.getSubmitType()) {
+            case 1:
+                vo = gson.fromJson(String.valueOf(redisTemplate.opsForHash().get(LogConstant.LOG_SET_DAY_REMIND + remind.getAppId(), key)), RemindVo.class);
+                break;
+            case 2:
+                vo = gson.fromJson(String.valueOf(redisTemplate.opsForHash().get(LogConstant.LOG_SET_WEEK_REMIND + remind.getAppId(), key)), RemindVo.class);
+                break;
+            case 3:
+                vo = gson.fromJson(String.valueOf(redisTemplate.opsForHash().get(LogConstant.LOG_SET_MONTH_REMIND + remind.getAppId(), key)), RemindVo.class);
+                break;
+            default:
+                break;
+        }
+
         if (vo != null) {
             taskId = vo.getTaskId();
         }
@@ -114,8 +140,11 @@ public class RemindServiceImpl extends BaseServiceImpl<RemindMapper, RemindEntit
         param.setCycle(remind.getCycle());
         param.setCycleType(remind.getCycleType());
         param.setOutKey(key);
-        param.setRecord(remind.getAppId());
-        param.setRemark(value);
+        Map<String, Object> map = new HashMap<>(2);
+        map.put("appId", remind.getAppId());
+        map.put("submitType", remind.getSubmitType());
+        param.setRecord(JSON.toJSONString(map));
+        param.setRemark("");
         param.setJobTime(remind.getJobTime());
         param.setJobTitle(jobTitle);
         if (taskId != null) {
@@ -128,8 +157,24 @@ public class RemindServiceImpl extends BaseServiceImpl<RemindMapper, RemindEntit
             boolean flag = updateByMemberIdAndAppId(taskId, remind.getMemberId(), remind.getAppId());
             if (flag) {
                 remind.setTaskId(taskId);
-                value = gson.toJson(remind);
-                redisTemplate.opsForHash().put(LogConstant.LOG_SET_REMIND + remind.getAppId(), key, value);
+                String value = gson.toJson(remind);
+
+                switch (remind.getSubmitType()) {
+                    case 1:
+                        // 日报
+                        redisTemplate.opsForHash().put(LogConstant.LOG_SET_DAY_REMIND + remind.getAppId(), key, value);
+                        break;
+                    case 2:
+                        // 周报
+                        redisTemplate.opsForHash().put(LogConstant.LOG_SET_WEEK_REMIND + remind.getAppId(), key, value);
+                        break;
+                    case 3:
+                        // 月报
+                        redisTemplate.opsForHash().put(LogConstant.LOG_SET_MONTH_REMIND + remind.getAppId(), key, value);
+                        break;
+                    default:
+                        break;
+                }
             }
         }
     }

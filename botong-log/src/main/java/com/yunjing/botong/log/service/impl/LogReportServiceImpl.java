@@ -1,7 +1,9 @@
 package com.yunjing.botong.log.service.impl;
 
+import com.alibaba.fastjson.JSON;
 import com.common.mongo.util.BeanUtils;
 import com.common.mongo.util.PageWrapper;
+import com.yunjing.botong.log.config.LogConstant;
 import com.yunjing.botong.log.dao.LogReportDao;
 import com.yunjing.botong.log.entity.LogDetail;
 import com.yunjing.botong.log.processor.okhttp.AppCenterService;
@@ -9,14 +11,16 @@ import com.yunjing.botong.log.processor.okhttp.impl.AppCenterServiceImpl;
 import com.yunjing.botong.log.service.LogReportService;
 import com.yunjing.botong.log.vo.LogDetailVO;
 import com.yunjing.botong.log.vo.MemberInfo;
+import com.yunjing.botong.log.vo.MemberVO;
+import com.yunjing.botong.log.vo.UserVO;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.collections.CollectionUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.stereotype.Service;
 
 import javax.annotation.PostConstruct;
-import java.util.ArrayList;
-import java.util.List;
+import java.util.*;
 
 /**
  * <p>
@@ -75,29 +79,49 @@ public class LogReportServiceImpl implements LogReportService, AppCenterService.
             memberIdList.add(memberId);
         }
 
+        Set<Object> set = new HashSet<>();
+        if (CollectionUtils.isNotEmpty(memberIdList)) {
+            for (Long mId : memberIdList) {
+                set.add(String.valueOf(mId));
+            }
+        }
+
+        Map<Long, UserVO> userVOMap = new HashMap<>(16);
+        List<Object> list = redisTemplate.opsForHash().multiGet(LogConstant.LOG_MEMBER_INFO, set);
+        UserVO userVO;
+        for (Object o : list) {
+            MemberVO vo = JSON.parseObject(String.valueOf(o), MemberVO.class);
+            userVO = new UserVO();
+            userVO.setMemberId(Long.parseLong(vo.getId()));
+            userVO.setUserMobile(vo.getMobile());
+            userVO.setProfile(vo.getProfile());
+            userVO.setUserNick(vo.getName());
+            userVOMap.put(userVO.getMemberId(), userVO);
+        }
+
         PageWrapper<LogDetail> report = logReportDao.report(pageNo, pageSize, orgId, memberIdList, submitType, startDate, endDate);
         PageWrapper<LogDetailVO> result = new PageWrapper<>();
         if (report.getRecords() != null && report.getSize() > 0) {
             LogDetailVO vo;
             List<LogDetailVO> resultRecord = new ArrayList<>();
+            Set<Map.Entry<Long, UserVO>> entries = userVOMap.entrySet();
             for (LogDetail detail : report.getRecords()) {
-
                 vo = BeanUtils.map(detail, LogDetailVO.class);
-                // vo.setUser();
-
-
+                for (Map.Entry<Long, UserVO> entry : entries) {
+                    if (detail.getMemberId().longValue() == entry.getKey().longValue()) {
+                        vo.setUser(entry.getValue());
+                        break;
+                    }
+                }
                 resultRecord.add(vo);
             }
-
             result.setCurrent(report.getCurrent());
             result.setPages(report.getPages());
             result.setSize(report.getSize());
             result.setTotal(report.getTotal());
             result.setRecords(resultRecord);
         }
-
-
-        return null;
+        return result;
     }
 
     @Override

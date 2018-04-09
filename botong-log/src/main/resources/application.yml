@@ -3,14 +3,6 @@ server:
   tomcat:
     uri-encoding: UTF-8
 
-## 注册eureka
-eureka:
-  client:
-    register-with-eureka: true
-    fetch-registry: true
-    serviceUrl:
-      defaultZone: ${eureka.url}
-
 ### 设置服务名称
 spring:
   application:

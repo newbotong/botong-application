@@ -10,5 +10,18 @@ package com.yunjing.botong.log.config;
  */
 public interface LogConstant {
 
-    String LOG_SET_REMIND = "botong:log:remind:";
+    /**
+     * 日报提醒
+     */
+    String LOG_SET_DAY_REMIND = "botong:log:day-remind:";
+    /**
+     * 周报提醒
+     */
+    String LOG_SET_WEEK_REMIND = "botong:log:week-remind:";
+    /**
+     * 月报提醒
+     */
+    String LOG_SET_MONTH_REMIND = "botong:log:month-remind:";
+
+    String LOG_MEMBER_INFO = "botong:org:member";
 }

@@ -29,9 +29,10 @@ public interface IRemindService extends IBaseService<RemindEntity> {
      *
      * @param memberId
      * @param appId
+     * @param submitType
      * @return
      */
-    RemindVo info(String memberId, String appId);
+    RemindVo info(String memberId, String appId, int submitType);
 
     /**
      * 根据用户id和appId 设置任务id

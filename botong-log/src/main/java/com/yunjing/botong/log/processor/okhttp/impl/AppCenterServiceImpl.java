@@ -1,10 +1,9 @@
 package com.yunjing.botong.log.processor.okhttp.impl;
 
-import com.alibaba.fastjson.JSON;
-import com.yunjing.botong.log.processor.okhttp.ApiService;
-import com.yunjing.botong.log.processor.okhttp.AppCenterService;
 import com.yunjing.botong.log.params.DangParam;
 import com.yunjing.botong.log.params.SchedulerParam;
+import com.yunjing.botong.log.processor.okhttp.ApiService;
+import com.yunjing.botong.log.processor.okhttp.AppCenterService;
 import com.yunjing.botong.log.vo.MemberInfo;
 import com.yunjing.mommon.base.PushParam;
 import com.yunjing.mommon.constant.StatusCode;
@@ -114,7 +113,7 @@ public class AppCenterServiceImpl implements AppCenterService {
 
                 if (response.isSuccessful()) {
                     if (body != null) {
-                        log.info("code:{},message:{}", body.getStatusCode(), body.getStatusMessage());
+                        log.info("调用推送结果，code:{},message:{}", body.getStatusCode(), body.getStatusMessage());
                     } else {
                         log.error("body is null");
                     }
@@ -142,7 +141,7 @@ public class AppCenterServiceImpl implements AppCenterService {
             public void onResponse(Call<ResponseEntityWrapper> call, Response<ResponseEntityWrapper> response) {
                 ResponseEntityWrapper body = response.body();
                 if (body != null) {
-                    log.info("code:{},message:{}", body.getStatusCode(), body.getStatusMessage());
+                    log.info("调用 dang 结果，code:{},message:{}", body.getStatusCode(), body.getStatusMessage());
                 } else {
                     log.error("body is null");
                 }
@@ -164,12 +163,15 @@ public class AppCenterServiceImpl implements AppCenterService {
                 // 同步方式请求
                 Response<ResponseEntityWrapper<Boolean>> response = call.execute();
                 ResponseEntityWrapper<Boolean> body = response.body();
-                if (response.isSuccessful() && body != null) {
-                    log.info("code:{},message:{}", body.getStatusCode(), body.getStatusMessage());
-                    return body.getData();
+                if (body != null) {
+                    log.info("获取是否是管理员结果，code:{},message:{}", body.getStatusCode(), body.getStatusMessage());
+                    if (response.isSuccessful() && body.getStatusCode() == StatusCode.SUCCESS.getStatusCode()) {
+                        return body.getData();
+                    }
                 } else {
-                    return false;
+                    log.error("body is null");
                 }
+                return false;
             } catch (IOException e) {
                 e.printStackTrace();
             }
@@ -202,8 +204,13 @@ public class AppCenterServiceImpl implements AppCenterService {
             try {
                 Response<ResponseEntityWrapper<List<MemberInfo>>> response = call.execute();
                 ResponseEntityWrapper<List<MemberInfo>> body = response.body();
-                if (response.isSuccessful() && body != null) {
-                    return body.getData();
+                if (body != null) {
+                    log.info("获取指定企业所有成员信息:code:{},message:{}", body.getStatusCode(), body.getStatusMessage());
+                    if (response.isSuccessful() && body.getStatusCode() == StatusCode.SUCCESS.getStatusCode()) {
+                        return body.getData();
+                    }
+                } else {
+                    log.error("body is null");
                 }
                 return null;
             } catch (IOException e) {
@@ -236,9 +243,13 @@ public class AppCenterServiceImpl implements AppCenterService {
         try {
             Response<ResponseEntityWrapper<Long>> response = apiService.setTask(param).execute();
             ResponseEntityWrapper<Long> body = response.body();
-            log.info("任务调度结果:{}", JSON.toJSONString(response));
-            if (response.isSuccessful() && body != null && body.getStatusCode() == StatusCode.SUCCESS.getStatusCode()) {
-                return body.getData();
+            if (body != null) {
+                log.info("设置任务调度结果:code:{},message:{}", body.getStatusCode(), body.getStatusMessage());
+                if (response.isSuccessful() && body.getStatusCode() == StatusCode.SUCCESS.getStatusCode()) {
+                    return body.getData();
+                }
+            } else {
+                log.error("body is null");
             }
             return null;
         } catch (IOException e) {
@@ -252,11 +263,15 @@ public class AppCenterServiceImpl implements AppCenterService {
         try {
             Response<ResponseEntityWrapper<List<MemberInfo>>> response = apiService.manageScope(appId, memberId).execute();
             ResponseEntityWrapper<List<MemberInfo>> body = response.body();
-            if (response.isSuccessful() && body != null && body.getStatusCode() == StatusCode.SUCCESS.getStatusCode()) {
-                return body.getData();
+            if (body != null) {
+                log.info("获取管理范围：code:{}，message:{}", body.getStatusCode(), body.getStatusMessage());
+                if (response.isSuccessful() && body.getStatusCode() == StatusCode.SUCCESS.getStatusCode()) {
+                    return body.getData();
+                }
+            } else {
+                log.error("body is null");
             }
             return null;
-
         } catch (IOException e) {
             e.printStackTrace();
         }
