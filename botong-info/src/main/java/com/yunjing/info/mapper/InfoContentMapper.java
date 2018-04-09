@@ -32,6 +32,7 @@ public interface InfoContentMapper extends IBaseMapper<InfoContent> {
 
     /**
      * web端资讯分页模糊查询
+     *
      * @param orgId
      * @param catalogId
      * @param title
@@ -39,6 +40,8 @@ public interface InfoContentMapper extends IBaseMapper<InfoContent> {
      * @param pageSize
      * @return
      */
-    List<InfoContentDto> selectParentPage(@Param("orgId") Long orgId, @Param("catalogId") Long catalogId, @Param("title") String title, @Param("pageNo") Integer pageNo, @Param("pageSize") Integer pageSize);;
+    List<InfoContentDto> selectParentPage(@Param("orgId") Long orgId, @Param("catalogId") Long catalogId, @Param("title") String title, @Param("pageNo") Integer pageNo, @Param("pageSize") Integer pageSize);
+
+    ;
 
 }
