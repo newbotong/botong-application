@@ -20,7 +20,7 @@ public class LogDetailVO {
     /**
      * 发送人信息
      */
-    private  UserVO user;
+    private MemberVO user;
 
     /**
      * 日志Id
@@ -41,7 +41,7 @@ public class LogDetailVO {
     /**
      * 模板id
      */
-    private Long templateId;
+    private String templateId;
 
     /**
      * 模板名称
@@ -51,7 +51,7 @@ public class LogDetailVO {
     /**
      * 企业Id
      */
-    private Long orgId;
+    private String orgId;
 
     /**
      * 日志状态，
