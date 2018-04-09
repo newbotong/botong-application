@@ -9,7 +9,7 @@ import com.yunjing.botong.log.params.UserInfoModel;
 import com.yunjing.botong.log.processor.mq.configuration.RemindMessageConfiguration;
 import com.yunjing.botong.log.processor.okhttp.AppCenterService;
 import com.yunjing.botong.log.service.ISMSService;
-import com.yunjing.botong.log.vo.MemberInfo;
+import com.yunjing.botong.log.vo.Member;
 import com.yunjing.botong.log.vo.RemindVo;
 import com.yunjing.message.annotation.MessageQueueDeclarable;
 import com.yunjing.message.declare.consumer.AbstractMessageConsumerWithQueueDeclare;
@@ -18,6 +18,7 @@ import com.yunjing.mommon.base.PushParam;
 import com.yunjing.mommon.base.SmSParam;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections.CollectionUtils;
+import org.apache.commons.lang3.time.DateFormatUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.messaging.handler.annotation.Payload;
@@ -118,7 +119,7 @@ public class RemindMessageConsumer extends AbstractMessageConsumerWithQueueDecla
         if (remind.getRemindSwitch() == 0) {
             return;
         }
-        MemberInfo memberInfo = JSON.parseObject(String.valueOf(redisTemplate.opsForHash().get(LogConstant.LOG_MEMBER_INFO, memberId)), MemberInfo.class);
+        Member memberInfo = JSON.parseObject(String.valueOf(redisTemplate.opsForHash().get(LogConstant.LOG_MEMBER_INFO, memberId)), Member.class);
 
         // 保存设置时不是管理员不需要校验管理员
         if (remind.getIsManager() == 0) {
@@ -150,18 +151,21 @@ public class RemindMessageConsumer extends AbstractMessageConsumerWithQueueDecla
             boolean isManager = appCenterService.isManager(appId, memberId, false);
             if (isManager) {
                 // 3. 如果是管理员
-                // 3.1 查询出当天所有已经发送日志的人员
-                List<Long> memberIdList = logReportDao.todaySubmitMemberIdList(Long.parseLong(memberInfo.getCompanyId()), remind.getSubmitType());
+
+                Date date = new Date();
+                String current = DateFormatUtils.format(date, "yyyy-MM-dd");
                 // 3.2 查询出所有管理的人员
-                List<MemberInfo> memberInfos = appCenterService.manageScope(remind.getAppId(), memberId);
+                List<Member> memberInfos = appCenterService.manageScope(remind.getAppId(), memberId);
                 // 3.3 3.1与3.2结果取交集，剩下的则是没有发送日志的
-                List<Long> manageScopeList = new ArrayList<>();
-                for (MemberInfo info : memberInfos) {
-                    manageScopeList.add(Long.parseLong(info.getCompanyId()));
+                List<String> manageScopeList = new ArrayList<>();
+                for (Member info : memberInfos) {
+                    manageScopeList.add(info.getId());
                 }
+                // 3.1 查询出当天所有已经发送日志的人员
+                List<String> submitList = logReportDao.submitList(memberInfo.getCompanyId(), remind.getSubmitType(), current, manageScopeList);
 
                 // 求交集
-                Collection intersection = CollectionUtils.intersection(memberIdList, manageScopeList);
+                Collection intersection = CollectionUtils.intersection(submitList, manageScopeList);
 
                 // 去除已经发送的
                 manageScopeList.removeAll(intersection);
@@ -173,7 +177,7 @@ public class RemindMessageConsumer extends AbstractMessageConsumerWithQueueDecla
                 List<String> passportIdList = new ArrayList<>();
                 List<String> phoneNumbers = new ArrayList<>();
                 for (Object o : list) {
-                    MemberInfo member = JSON.parseObject(String.valueOf(o), MemberInfo.class);
+                    Member member = JSON.parseObject(String.valueOf(o), Member.class);
                     passportIdList.add(member.getPassportId());
                     phoneNumbers.add(member.getMobile());
                 }

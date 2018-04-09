@@ -3,7 +3,6 @@ package com.yunjing.botong.log.processor.okhttp;
 import com.yunjing.botong.log.params.DangParam;
 import com.yunjing.botong.log.params.SchedulerParam;
 import com.yunjing.botong.log.vo.Member;
-import com.yunjing.botong.log.vo.MemberInfo;
 import com.yunjing.mommon.base.PushParam;
 import com.yunjing.mommon.wrapper.ResponseEntityWrapper;
 import retrofit2.Call;
@@ -22,7 +21,7 @@ import java.util.List;
 public interface ApiService {
 
     /**
-     * 服务器地址，必须以 / 结尾，别问我为啥，因为没有 / 会报错
+     * 服务器地址，必须以 / 结尾
      */
     String BASE_URL = "http://192.168.10.233:8000/";
 
@@ -66,7 +65,7 @@ public interface ApiService {
      * @return
      */
     @GET("/api/microapps/appcenter/user/find-all-org-member")
-    Call<ResponseEntityWrapper<List<MemberInfo>>> findAllOrgMember(@Query("orgId") String orgId);
+    Call<ResponseEntityWrapper<List<Member>>> findAllOrgMember(@Query("orgId") String orgId);
 
 
     /**
@@ -77,7 +76,7 @@ public interface ApiService {
      * @return
      */
     @GET("/api/microapps/appcenter/org/admin/manage-scope")
-    Call<ResponseEntityWrapper<List<MemberInfo>>> manageScope(@Query("appId") String appId, @Query("memberId") String memberId);
+    Call<ResponseEntityWrapper<List<Member>>> manageScope(@Query("appId") String appId, @Query("memberId") String memberId);
 
     /**
      * 设置任务调度
@@ -88,15 +87,4 @@ public interface ApiService {
     @POST("/api/microapps/appcenter/scheduler/set")
     @Headers({"Content-Type: application/json;charset=UTF-8"})
     Call<ResponseEntityWrapper<Long>> setTask(@Body SchedulerParam param);
-
-
-    /**
-     * 获取所有的人员id
-     * @param deptIds
-     * @param memberIds
-     * @return
-     */
-    @POST("/api/microapps/appcenter/org/find-sub-lists")
-    Call<ResponseEntityWrapper<List<Member>>> findSubLists(@Query("deptIds") String[] deptIds, @Query("memberIds") String[] memberIds);
-
 }

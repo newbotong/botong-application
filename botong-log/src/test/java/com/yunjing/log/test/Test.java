@@ -1,9 +1,14 @@
 package com.yunjing.log.test;
 
+import com.alibaba.fastjson.JSON;
 import com.google.gson.Gson;
+import com.yunjing.botong.log.params.ManagerListParam;
 import com.yunjing.botong.log.vo.RemindVo;
 import com.yunjing.mommon.utils.IDUtils;
+import sun.security.action.GetPropertyAction;
 
+import java.nio.charset.Charset;
+import java.security.AccessController;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -16,6 +21,27 @@ import java.util.List;
  * @since 2018/3/28.
  */
 public class Test {
+
+    @org.junit.Test
+    public void test2() {
+        String encName = AccessController.doPrivileged(new GetPropertyAction("file.encoding"));
+        Charset charset = Charset.defaultCharset();
+        System.out.println(charset);
+        System.out.println(encName);
+    }
+
+    @org.junit.Test
+    public void test1() {
+        ManagerListParam param = new ManagerListParam();
+        param.setAppId("");
+        param.setDate("");
+        param.setMemberId("");
+        param.setOrgId("");
+        param.setPageNo(1);
+        param.setPageSize(20);
+        param.setSubmitType(1);
+        System.out.println(JSON.toJSONString(param));
+    }
 
 
     @org.junit.Test

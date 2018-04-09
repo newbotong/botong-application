@@ -5,7 +5,6 @@ import com.yunjing.botong.log.params.SchedulerParam;
 import com.yunjing.botong.log.processor.okhttp.ApiService;
 import com.yunjing.botong.log.processor.okhttp.AppCenterService;
 import com.yunjing.botong.log.vo.Member;
-import com.yunjing.botong.log.vo.MemberInfo;
 import com.yunjing.mommon.base.PushParam;
 import com.yunjing.mommon.constant.StatusCode;
 import com.yunjing.mommon.wrapper.ResponseEntityWrapper;
@@ -199,12 +198,12 @@ public class AppCenterServiceImpl implements AppCenterService {
     }
 
     @Override
-    public List<MemberInfo> findAllOrgMember(String orgId, boolean isSync) {
-        Call<ResponseEntityWrapper<List<MemberInfo>>> call = apiService.findAllOrgMember(orgId);
+    public List<Member> findAllOrgMember(String orgId, boolean isSync) {
+        Call<ResponseEntityWrapper<List<Member>>> call = apiService.findAllOrgMember(orgId);
         if (isSync) {
             try {
-                Response<ResponseEntityWrapper<List<MemberInfo>>> response = call.execute();
-                ResponseEntityWrapper<List<MemberInfo>> body = response.body();
+                Response<ResponseEntityWrapper<List<Member>>> response = call.execute();
+                ResponseEntityWrapper<List<Member>> body = response.body();
                 if (body != null) {
                     log.info("获取指定企业所有成员信息:code:{},message:{}", body.getStatusCode(), body.getStatusMessage());
                     if (response.isSuccessful() && body.getStatusCode() == StatusCode.SUCCESS.getStatusCode()) {
@@ -218,10 +217,10 @@ public class AppCenterServiceImpl implements AppCenterService {
                 e.printStackTrace();
             }
         } else {
-            call.enqueue(new Callback<ResponseEntityWrapper<List<MemberInfo>>>() {
+            call.enqueue(new Callback<ResponseEntityWrapper<List<Member>>>() {
                 @Override
-                public void onResponse(Call<ResponseEntityWrapper<List<MemberInfo>>> call, Response<ResponseEntityWrapper<List<MemberInfo>>> response) {
-                    ResponseEntityWrapper<List<MemberInfo>> body = response.body();
+                public void onResponse(Call<ResponseEntityWrapper<List<Member>>> call, Response<ResponseEntityWrapper<List<Member>>> response) {
+                    ResponseEntityWrapper<List<Member>> body = response.body();
                     if (body != null && orgMemberCallback != null) {
                         log.info("code:{},message:{}", body.getStatusCode(), body.getStatusMessage());
                         orgMemberCallback.result(body.getData());
@@ -231,7 +230,7 @@ public class AppCenterServiceImpl implements AppCenterService {
                 }
 
                 @Override
-                public void onFailure(Call<ResponseEntityWrapper<List<MemberInfo>>> call, Throwable t) {
+                public void onFailure(Call<ResponseEntityWrapper<List<Member>>> call, Throwable t) {
                     log.error("Throwable:{}", t);
                 }
             });
@@ -260,39 +259,12 @@ public class AppCenterServiceImpl implements AppCenterService {
     }
 
     @Override
-    public List<MemberInfo> manageScope(String appId, String memberId) {
+    public List<Member> manageScope(String appId, String memberId) {
         try {
-            Response<ResponseEntityWrapper<List<MemberInfo>>> response = apiService.manageScope(appId, memberId).execute();
-            ResponseEntityWrapper<List<MemberInfo>> body = response.body();
-            if (body != null) {
-                log.info("获取管理范围：code:{}，message:{}", body.getStatusCode(), body.getStatusMessage());
-                if (response.isSuccessful() && body.getStatusCode() == StatusCode.SUCCESS.getStatusCode()) {
-                    return body.getData();
-                }
-            } else {
-                log.error("body is null");
-            }
-            return null;
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-        return null;
-    }
-
-    /**
-     * 根据部门ids和成员ids查询所有的成员信息
-     *
-     * @param deptIds       部门id集合
-     * @param memberIds     成员id集合
-     * @return
-     */
-    @Override
-    public List<Member> findSubLists(String[] deptIds, String[] memberIds) {
-        try {
-            Response<ResponseEntityWrapper<List<Member>>> response = apiService.findSubLists(deptIds, memberIds).execute();
+            Response<ResponseEntityWrapper<List<Member>>> response = apiService.manageScope(appId, memberId).execute();
             ResponseEntityWrapper<List<Member>> body = response.body();
             if (body != null) {
-                log.info("根据多部门id和成员id查询成员集合：code:{}，message:{}", body.getStatusCode(), body.getStatusMessage());
+                log.info("获取管理范围：code:{}，message:{}", body.getStatusCode(), body.getStatusMessage());
                 if (response.isSuccessful() && body.getStatusCode() == StatusCode.SUCCESS.getStatusCode()) {
                     return body.getData();
                 }

@@ -3,7 +3,6 @@ package com.yunjing.botong.log.processor.okhttp;
 import com.yunjing.botong.log.params.DangParam;
 import com.yunjing.botong.log.params.SchedulerParam;
 import com.yunjing.botong.log.vo.Member;
-import com.yunjing.botong.log.vo.MemberInfo;
 import com.yunjing.mommon.base.PushParam;
 
 import java.util.List;
@@ -52,7 +51,7 @@ public interface AppCenterService {
      * @param isSync 是否同步方式执行
      * @return
      */
-    List<MemberInfo> findAllOrgMember(String orgId, boolean isSync);
+    List<Member> findAllOrgMember(String orgId, boolean isSync);
 
 
     /**
@@ -70,7 +69,7 @@ public interface AppCenterService {
      * @param memberId
      * @return
      */
-    List<MemberInfo> manageScope(String appId, String memberId);
+    List<Member> manageScope(String appId, String memberId);
 
     /**
      * 验证管理员回调
@@ -95,7 +94,7 @@ public interface AppCenterService {
          *
          * @param infos
          */
-        void result(List<MemberInfo> infos);
+        void result(List<Member> infos);
     }
 
     /**
@@ -110,13 +109,4 @@ public interface AppCenterService {
          */
         void taskCallback(Long taskId);
     }
-
-    /**
-     * 根据部门ids和成员ids查询所有的成员信息
-     * @param deptIds
-     * @param memberIds
-     * @return
-     */
-    List<Member> findSubLists(String[] deptIds, String[] memberIds);
-
 }

@@ -1,14 +1,13 @@
 package com.yunjing.botong.log.api;
 
 import com.common.mongo.util.PageWrapper;
+import com.yunjing.botong.log.params.ManagerListParam;
 import com.yunjing.botong.log.service.LogReportService;
+import com.yunjing.botong.log.vo.UserVO;
 import com.yunjing.mommon.base.BaseController;
 import com.yunjing.mommon.wrapper.ResponseEntityWrapper;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestMethod;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 /**
  * <p>
@@ -37,9 +36,9 @@ public class LogReportApi extends BaseController {
      * @return
      */
     @RequestMapping(value = "/list", method = RequestMethod.GET)
-    public ResponseEntityWrapper list(long memberId,
-                                      long orgId,
-                                      long appId,
+    public ResponseEntityWrapper list(String memberId,
+                                      String orgId,
+                                      String appId,
                                       int pageNo,
                                       int pageSize,
                                       @RequestParam(required = false, defaultValue = "0") int submitType,
@@ -48,5 +47,30 @@ public class LogReportApi extends BaseController {
 
         PageWrapper query = logReportService.query(memberId, orgId, appId, pageNo, pageSize, submitType, startDate, endDate);
         return success(query);
+    }
+
+
+    /**
+     * 日志管理已提交列表
+     *
+     * @param param
+     * @return
+     */
+    @PostMapping("/manager-submit-list")
+    public ResponseEntityWrapper submitList(@RequestBody ManagerListParam param) {
+        PageWrapper<UserVO> wrapper = logReportService.submitList(param.getMemberId(), param.getOrgId(), param.getAppId(), param.getSubmitType(), param.getDate(), param.getPageNo(), param.getPageSize());
+        return success(wrapper);
+    }
+
+    /**
+     * 日志管理未提交列表
+     *
+     * @param param
+     * @return
+     */
+    @PostMapping("/manager-unsubmit-list")
+    public ResponseEntityWrapper unSubmitList(@RequestBody ManagerListParam param) {
+        PageWrapper<UserVO> wrapper = logReportService.unSubmitList(param.getMemberId(), param.getOrgId(), param.getAppId(), param.getSubmitType(), param.getDate(), param.getPageNo(), param.getPageSize());
+        return success(wrapper);
     }
 }

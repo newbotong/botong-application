@@ -30,36 +30,68 @@ public class LogReportDao extends BaseMongoDaoImpl<LogDetail> {
 
 
     /**
-     * 今日已经提交日志列表
+     * 根据时间分页查询指定日志已提交的列表
      *
      * @param orgId
      * @param submitType
+     * @param date
+     * @param pageNo
+     * @param pageSize
+     * @param memberIdList
      * @return
      */
-    public List<LogDetail> todaySubmit(long orgId, int submitType) {
-        Date date = new Date();
-        String current = DateFormatUtils.format(date, "yyyy-MM-dd");
+    public Page<String> submitList(String orgId, int submitType, String date, int pageNo, int pageSize, List<String> memberIdList) {
         Criteria criteria = Criteria.where("orgId").is(orgId);
-        criteria.and("submitType").is(submitType);
-        criteria.andOperator(Criteria.where("submitTime").gte(current).lte(current + "23:23:59"));
-        return find(new Query(criteria));
+        criteria.and("memberId").in(memberIdList);
+        if (submitType != 0) {
+            criteria.and("submitType").is(submitType);
+        }
+        criteria.andOperator(Criteria.where("submitTime").gte(date).lte(date + "23:23:59"));
+        Query query = new Query(criteria);
+
+        // 根据时间查询指定日志已提交的列表
+        Page<LogDetail> page = findPage(new Page<>(pageNo, pageSize), query);
+
+        List<String> list = new ArrayList<>();
+        Page<String> submitMemberIdPage = new Page<>();
+        for (LogDetail detail : page.getRows()) {
+            list.add(String.valueOf(detail.getMemberId()));
+        }
+
+        submitMemberIdPage.setRows(list);
+        submitMemberIdPage.setCurrent(page.getCurrent());
+        submitMemberIdPage.setPages(page.getPages());
+        submitMemberIdPage.setSize(page.getSize());
+        submitMemberIdPage.setTotal(page.getTotal());
+
+        return submitMemberIdPage;
     }
 
-
     /**
-     * 今日以提交集合
+     * 根据时间查询指定日志已提交的列表
      *
      * @param orgId
      * @param submitType
+     * @param date
+     * @param memberIdList
      * @return
      */
-    public List<Long> todaySubmitMemberIdList(long orgId, int submitType) {
-        List<Long> memberIdList = new ArrayList<>();
-        List<LogDetail> details = todaySubmit(orgId, submitType);
-        for (LogDetail detail : details) {
-            memberIdList.add(detail.getMemberId());
+    public List<String> submitList(String orgId, int submitType, String date, List<String> memberIdList) {
+        Criteria criteria = Criteria.where("orgId").is(orgId);
+        criteria.and("memberId").in(memberIdList);
+        if (submitType != 0) {
+            criteria.and("submitType").is(submitType);
         }
-        return memberIdList;
+        criteria.andOperator(Criteria.where("submitTime").gte(date).lte(date + "23:23:59"));
+        Query query = new Query(criteria);
+
+        List<String> list = new ArrayList<>();
+        List<LogDetail> details = find(query);
+
+        for (LogDetail detail : details) {
+            list.add(String.valueOf(detail.getMemberId()));
+        }
+        return list;
     }
 
 
@@ -75,7 +107,7 @@ public class LogReportDao extends BaseMongoDaoImpl<LogDetail> {
      * @param endDate
      * @return
      */
-    public PageWrapper<LogDetail> report(int pageNo, int pageSize, long orgId, List<Long> memberId, int submitType, long startDate, long endDate) {
+    public PageWrapper<LogDetail> report(int pageNo, int pageSize, String orgId, List<String> memberId, int submitType, long startDate, long endDate) {
         Page<LogDetail> page = new Page<>(pageNo, pageSize);
         Criteria criteria = Criteria.where("orgId").is(orgId);
         criteria.and("memberId").in(memberId);
