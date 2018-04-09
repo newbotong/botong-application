@@ -18,12 +18,12 @@ public class SignDetailParam {
     /**
      * 用户id
      */
-    private Long userId;
+    private String userId;
 
     /**
      * 组织Id
      */
-    private Long orgId;
+    private String orgId;
 
     /**
      * 统计日期

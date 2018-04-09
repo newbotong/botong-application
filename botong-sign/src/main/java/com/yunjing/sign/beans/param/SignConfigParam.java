@@ -17,7 +17,7 @@ public class SignConfigParam {
      * 组织id
      */
     @NotNullOrEmpty(message = "组织不能为空")
-    private Long orgId;
+    private String orgId;
 
 
     private int photoStatus;
@@ -56,5 +56,10 @@ public class SignConfigParam {
      * 维度
      */
     private String lat;
+
+    /**
+     * 地址
+     */
+    private String adress;
 
 }

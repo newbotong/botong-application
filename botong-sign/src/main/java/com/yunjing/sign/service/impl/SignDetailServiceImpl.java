@@ -7,6 +7,7 @@ import com.yunjing.mommon.Enum.DateStyle;
 import com.yunjing.mommon.global.exception.UpdateMessageFailureException;
 import com.yunjing.mommon.utils.BeanUtils;
 import com.yunjing.mommon.utils.DateUtil;
+import com.yunjing.mommon.utils.IDUtils;
 import com.yunjing.mommon.wrapper.PageWrapper;
 import com.yunjing.mommon.wrapper.ResponseEntityWrapper;
 import com.yunjing.sign.beans.model.SignConfigModel;
@@ -24,13 +25,17 @@ import com.yunjing.sign.excel.ExcelModel;
 import com.yunjing.sign.excel.SignExConsts;
 import com.yunjing.sign.excel.SignExModel;
 import com.yunjing.sign.processor.feign.UserRemoteService;
+import com.yunjing.sign.processor.okhttp.UserRemoteApiService;
 import com.yunjing.sign.service.ISignDetailImgService;
 import com.yunjing.sign.service.ISignDetailService;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import retrofit2.Call;
+import retrofit2.Response;
 
+import java.io.IOException;
 import java.util.*;
 
 /**
@@ -51,7 +56,7 @@ public class SignDetailServiceImpl extends ServiceImpl<SignDetailMapper, SignDet
     private SignDetailMapper signDetailMapper;
 
     @Autowired
-    private UserRemoteService userRemoteService;
+    private UserRemoteApiService userRemoteApiService;
 
     /**
      * 签到
@@ -64,6 +69,7 @@ public class SignDetailServiceImpl extends ServiceImpl<SignDetailMapper, SignDet
     public SignDetailVO toSign(SignDetailParam signDetailParam) {
         SignDetailVO result = new SignDetailVO();
         SignDetail signDetail = BeanUtils.map(signDetailParam, SignDetail.class);
+        signDetail.setId(IDUtils.uuid());
         signDetail.insert();
         result.setUserId(signDetail.getUserId());
         result.setSignDate(signDetail.getCreateTime());
@@ -74,6 +80,7 @@ public class SignDetailServiceImpl extends ServiceImpl<SignDetailMapper, SignDet
             for (String imgUrl : signDetailParam.getImgUrls().split(SignConstant.SEPARATE_STR)) {
                 detailImg = new SignDetailImg();
                 detailImg.setSignDetailId(signDetail.getId());
+                detailImg.setId(IDUtils.uuid());
                 detailImg.setSort(i);
                 detailImg.setUrl(imgUrl);
                 list.add(detailImg);
@@ -109,14 +116,22 @@ public class SignDetailServiceImpl extends ServiceImpl<SignDetailMapper, SignDet
     public SignListVO getCountInfo(UserAndDeptParam userAndDeptParam, SignBaseMapper mapper) {
         String[] deptIds = StringUtils.split(userAndDeptParam.getDeptIds(),",");
         String[] userIdCs = StringUtils.split(userAndDeptParam.getUserIds(),",");
-        ResponseEntityWrapper<List<SignUserInfoVO>> memResult = userRemoteService.findSubLists(deptIds, userIdCs);
+        //okhttp
+        Call<ResponseEntityWrapper<List<SignUserInfoVO>>> call = userRemoteApiService.findSubLists(deptIds, userIdCs);
+        ResponseEntityWrapper<List<SignUserInfoVO>> body = null;
+        try {
+            Response<ResponseEntityWrapper<List<SignUserInfoVO>>> execute = call.execute();
+            body = execute.body();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
 
-        List<SignUserInfoVO> userList =  memResult.getData();
+        List<SignUserInfoVO> userList = body.getData();
         if(userList.size() == 0) {
             return null;
         }
-        Map<Long, SignUserInfoVO> map = new HashMap<>(userList.size());
-        List<Long>  ids = new ArrayList<>();
+        Map<String, SignUserInfoVO> map = new HashMap<>(userList.size());
+        List<String>  ids = new ArrayList<>();
         for(SignUserInfoVO obj : userList) {
             map.put(obj.getMemberId(), obj);
             ids.add(obj.getMemberId());
@@ -136,8 +151,8 @@ public class SignDetailServiceImpl extends ServiceImpl<SignDetailMapper, SignDet
             map.get(vo.getMemberId()).setSignState(1);
             signList.add(map.get(vo.getMemberId()));
         }
-        for (Long key : map.keySet()) {
-            if (map.get(key).getSignState() != 1) {
+        for (String key : map.keySet()) {
+            if (map.get(key).getSignState() == null || map.get(key).getSignState() != 1) {
                 unSignList.add(map.get(key));
             }
         }
@@ -202,14 +217,29 @@ public class SignDetailServiceImpl extends ServiceImpl<SignDetailMapper, SignDet
     public PageWrapper<UserMonthListVO> staticsMonthInfo(UserAndDeptParam userAndDeptParam, SignBaseMapper mapper) {
         String[] deptIds = StringUtils.split(userAndDeptParam.getDeptIds(),",");
         String[] userIdCs = StringUtils.split(userAndDeptParam.getUserIds(),",");
-        ResponseEntityWrapper<PageWrapper<SignUserInfoVO>> memResult = userRemoteService.findMemberPage(deptIds, userIdCs, userAndDeptParam.getPageNo(), userAndDeptParam.getPageSize());
-        PageWrapper<SignUserInfoVO> page = memResult.getData();
-        List<SignUserInfoVO> userList = page.getRecords();
-        if(userList.size() == 0) {
+        //okhttp
+        Call<ResponseEntityWrapper<PageWrapper<SignUserInfoVO>>> call = userRemoteApiService.findMemberPage(deptIds, userIdCs, userAndDeptParam.getPageNo(), userAndDeptParam.getPageSize());
+        ResponseEntityWrapper<PageWrapper<SignUserInfoVO>> body = null;
+        try {
+            Response<ResponseEntityWrapper<PageWrapper<SignUserInfoVO>>> execute = call.execute();
+            body = execute.body();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+
+        PageWrapper<SignUserInfoVO> page = body.getData();
+        List<SignUserInfoVO> userList;
+        if (page != null) {
+            userList = page.getRecords();
+            if(userList.size() == 0) {
+                return null;
+            }
+        } else {
             return null;
         }
-        Map<Long, UserMonthVO> map = new HashMap<>(userList.size());
-        List<Long>  ids = new ArrayList<>();
+
+        Map<String, UserMonthVO> map = new HashMap<>(userList.size());
+        List<String>  ids = new ArrayList<>();
         Date startD = DateUtil.StringToDate(userAndDeptParam.getSignDate() + "-01", DateStyle.YYYY_MM_DD);
         Date endDate = DateUtil.getLastDayOfMonth(startD);
         int dayB = DateUtil.getIntervalDays(startD, endDate);
@@ -236,7 +266,7 @@ public class SignDetailServiceImpl extends ServiceImpl<SignDetailMapper, SignDet
                 ids.add(obj.getMemberId());
             }
         }
-        String userIds = StringUtils.join(ids, ",");
+        String userIds = SignConstant.QUOTES_STR + StringUtils.join(ids, SignConstant.SEPARATE_QUOTES_COMMA_STR) + SignConstant.QUOTES_STR;
         SignMapperParam signMapperParam = new SignMapperParam();
         signMapperParam.setUserIds(userIds);
         signMapperParam.setStartDate(startD.getTime());
@@ -249,7 +279,7 @@ public class SignDetailServiceImpl extends ServiceImpl<SignDetailMapper, SignDet
         }
         List<UserMonthListVO> list = new ArrayList<UserMonthListVO>();
         UserMonthListVO userMonthListVO;
-        for (long key : map.keySet()) {
+        for (String key : map.keySet()) {
             userMonthListVO = new UserMonthListVO();
             userMonthListVO.setDeptName(map.get(key).getDeptName());
             userMonthListVO.setPostName(map.get(key).getPostName());
@@ -272,13 +302,22 @@ public class SignDetailServiceImpl extends ServiceImpl<SignDetailMapper, SignDet
     public List<SignExcelVO> getSignInList(UserAndDeptParam userAndDeptParam, SignBaseMapper mapper){
         String[] deptIds = StringUtils.split(userAndDeptParam.getDeptIds(),",");
         String[] userIdCs = StringUtils.split(userAndDeptParam.getUserIds(),",");
-        ResponseEntityWrapper<List<SignUserInfoVO>> memResult = userRemoteService.findSubLists(deptIds, userIdCs);
-        List<SignUserInfoVO> userList =  memResult.getData();
+        //okhttp
+        Call<ResponseEntityWrapper<List<SignUserInfoVO>>> call = userRemoteApiService.findSubLists(deptIds, userIdCs);
+        ResponseEntityWrapper<List<SignUserInfoVO>> body = null;
+        try {
+            Response<ResponseEntityWrapper<List<SignUserInfoVO>>> execute = call.execute();
+            body = execute.body();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+
+        List<SignUserInfoVO> userList =  body.getData();
         if(userList.size() == 0) {
             return null;
         }
-        Map<Long, SignUserInfoVO> map = new HashMap<>(userList.size());
-        List<Long>  ids = new ArrayList<>();
+        Map<String, SignUserInfoVO> map = new HashMap<>(userList.size());
+        List<String>  ids = new ArrayList<>();
         Date startD = DateUtil.StringToDate(userAndDeptParam.getSignDate() + "-01", DateStyle.YYYY_MM_DD);
         Date endDate = DateUtil.getLastDayOfMonth(startD);
         int dayB = DateUtil.getIntervalDays(startD, endDate);
@@ -290,7 +329,7 @@ public class SignDetailServiceImpl extends ServiceImpl<SignDetailMapper, SignDet
             map.put(objS.getMemberId(), objS);
             ids.add(objS.getMemberId());
         }
-        String userIds = StringUtils.join(ids, ",");
+        String userIds = SignConstant.QUOTES_STR + StringUtils.join(ids, SignConstant.SEPARATE_QUOTES_COMMA_STR) + SignConstant.QUOTES_STR;
         SignMapperParam signMapperParam = new SignMapperParam();
         signMapperParam.setUserIds(userIds);
         signMapperParam.setStartDate(startD.getTime());

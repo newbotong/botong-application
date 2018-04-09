@@ -14,7 +14,7 @@ public class SignDetailCountVO {
     /**
      * 用户id
      */
-    private Long userId;
+    private String userId;
 
     private String userName;
 

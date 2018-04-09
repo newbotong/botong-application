@@ -10,9 +10,14 @@ apply from: "../build.gradle"
 apply plugin: 'org.springframework.boot'
 
 dependencies {
-	compile("cn.afterturn:easypoi-base:3.1.0")
-	compile("cn.afterturn:easypoi-web:3.1.0")
-	compile("cn.afterturn:easypoi-annotation:3.1.0")
+	// okhttp3 依赖
+	compile 'com.squareup.okhttp3:okhttp:3.9.1'
+	compile 'com.squareup.okio:okio:1.13.0'
+	// retrofit2
+	compile 'com.squareup.retrofit2:retrofit:2.3.0'
+	// 用于json自动转换解析
+	compile 'com.squareup.retrofit2:converter-gson:2.3.0'
+	compile 'org.ligboy.retrofit2:converter-fastjson:2.1.0'
 
 	compile('com.yunjing.botong:commons:2.0.0-SNAPSHOT'){
 		changing = true //实时更新jar包

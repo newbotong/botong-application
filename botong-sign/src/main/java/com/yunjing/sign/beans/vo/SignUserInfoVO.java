@@ -14,7 +14,7 @@ public class SignUserInfoVO {
     /**
      * 用户id
      */
-    private Long memberId;
+    private String memberId;
 
     /**
      * 姓名

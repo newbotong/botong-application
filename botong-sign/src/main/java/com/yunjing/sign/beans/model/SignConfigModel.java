@@ -23,7 +23,7 @@ public class SignConfigModel extends BaseModel<SignConfigModel> {
     private int isDelete;
 
     @TableField("org_id")
-    private Long orgId;
+    private String orgId;
 
     /**
      * 是否允许上传图片

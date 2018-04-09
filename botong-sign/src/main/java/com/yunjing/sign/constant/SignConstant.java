@@ -12,7 +12,10 @@ import java.io.Serializable;
 public class SignConstant implements Serializable {
 
     public final static String  SEPARATE_STR = ",";
+    public final static String  SEPARATE_QUOTES_COMMA_STR = "','";
+    public final static String  QUOTES_STR = "'";
     public final static String  SEPARATE_STR_SPACE = " ";
+    public final static String  EMPTY_STR = "";
 
     public final static String  CODE_STR = "code";
     public final static String  MSG_STR = "msg";
@@ -22,5 +25,8 @@ public class SignConstant implements Serializable {
 
     public final static Integer  BOTONG_SEVEN_VALUE = 7;
 
+    public final static Integer  BOTONG_ONE_VALUE = 1;
+
+    public final static Integer  BOTONG_ZERO_VALUE = 0;
 
 }

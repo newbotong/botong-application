@@ -51,8 +51,8 @@ eureka:
     serviceUrl:
       defaultZone: okhttp://${eureka.server}:${eureka.port}/eureka/
   instance:
-    lease-expiration-duration-in-seconds: 30
-    lease-renewal-interval-in-seconds: 10
+    lease-expiration-duration-in-seconds: 1
+    lease-renewal-interval-in-seconds: 1
     preferIpAddress: true
 ##配置mybatis-plus
 mybatis-plus:
@@ -64,3 +64,5 @@ mybatis-plus:
     logic-not-delete-value: 0
     sql-injector: com.baomidou.mybatisplus.mapper.LogicSqlInjector
 
+okhttp:
+  botong-org-structure: http://192.168.10.233:8188/
