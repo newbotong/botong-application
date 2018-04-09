@@ -22,6 +22,11 @@ import java.util.List;
 public class LogTemplateParam {
 
     /**
+     * 主键ID
+     */
+    private long id;
+
+    /**
      * 模板名称
      */
     private String templateName;

@@ -20,4 +20,11 @@ public interface LogTemplateFieldMapper extends BaseMapper<LogTemplateFieldEntit
      */
     void batchInsertLogTemplateFields(@Param("logTemplateFieldEntities") List<LogTemplateFieldEntity> logTemplateFieldEntities);
 
+    /**
+     * 批量跟据template Id更新Currently
+     *
+     * @param templateId
+     * @param currently
+     */
+    void updateCurrentlyByLogTemplateId(@Param("templateId") long templateId,@Param("currently") boolean currently);
 }

@@ -4,6 +4,7 @@ import com.yunjing.botong.log.params.LogTemplateParam;
 import com.yunjing.botong.log.vo.LogTemplateItemVo;
 import com.yunjing.botong.log.vo.LogTemplateVo;
 import com.yunjing.mommon.wrapper.PageWrapper;
+import com.yunjing.mommon.wrapper.ResponseEntityWrapper;
 
 /**
  * 日志模板服务
@@ -43,4 +44,11 @@ public interface LogTemplateService {
      * @return
      */
     LogTemplateVo queryLogTemplate(long id);
+
+    /**
+     * 修改日志模板
+     * @param logTemplateParam
+     * @return
+     */
+    boolean updateLogTemplate(LogTemplateParam logTemplateParam);
 }

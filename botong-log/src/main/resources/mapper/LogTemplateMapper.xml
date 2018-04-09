@@ -8,7 +8,7 @@
         FROM
             `log_template`
         WHERE
-            `deleted` = 0 AND `org_id` = #{orgId}
+            `deleted` = 0 AND `org_id` = #{orgId} AND `currently`=1
     </select>
 
     <select id="listLogTemplateByOrgId" resultType="com.yunjing.botong.log.vo.LogTemplateItemVo">
@@ -17,7 +17,7 @@
         FROM
             `log_template`
         WHERE
-            `deleted` = 0 AND `org_id` = #{orgId}
+            `deleted` = 0 AND `org_id` = #{orgId} AND `currently`=1
         ORDER BY `sort` , `create_time`
         LIMIT #{offset} , #{pageSize}
 

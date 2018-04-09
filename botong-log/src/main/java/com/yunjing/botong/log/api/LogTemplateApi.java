@@ -38,8 +38,8 @@ public class LogTemplateApi extends BaseController{
     }
 
     @RequestMapping(value = "/update",method = RequestMethod.POST)
-    public ResponseEntityWrapper<Boolean> update(@RequestParam("id") long id){
-        return null;
+    public ResponseEntityWrapper<Boolean> update(@RequestBody LogTemplateParam logTemplateParam){
+        return this.logTemplateService.updateLogTemplate(logTemplateParam)?this.success(true):this.error(500,"模板更新失败");
     }
 
     @RequestMapping(value = "/delete",method = RequestMethod.POST)

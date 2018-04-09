@@ -15,6 +15,7 @@ import com.yunjing.botong.log.vo.LogTemplateEnumItemVo;
 import com.yunjing.botong.log.vo.LogTemplateFieldVo;
 import com.yunjing.botong.log.vo.LogTemplateItemVo;
 import com.yunjing.botong.log.vo.LogTemplateVo;
+import com.yunjing.mommon.global.exception.BaseRuntimeException;
 import com.yunjing.mommon.wrapper.PageWrapper;
 import org.apache.commons.collections.CollectionUtils;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -164,5 +165,58 @@ public class LogTemplateServiceImpl implements LogTemplateService {
         }
 
         return result;
+    }
+
+    @Override
+    public boolean updateLogTemplate(LogTemplateParam logTemplateParam) {
+        //插入新记录
+        LogTemplateEntity queryEntity = new LogTemplateEntity();
+        queryEntity.setId(logTemplateParam.getId());
+        queryEntity = queryEntity.selectById();
+        if(queryEntity==null){
+            throw new BaseRuntimeException(500,"更新的记录不存在");
+        }
+
+        //更新之前的版本的currently为false
+        LogTemplateEntity updateEntity = new LogTemplateEntity();
+        updateEntity.setId(logTemplateParam.getId());
+        updateEntity.setCurrently(false);
+        updateEntity.updateById();
+        this.logTemplateFieldMapper.updateCurrentlyByLogTemplateId(logTemplateParam.getId(),false);
+
+
+        LogTemplateEntity entity = new LogTemplateEntity();
+        entity.fromParam(logTemplateParam);
+        entity.setVersion(queryEntity.getVersion()+1);
+        entity.insert();
+
+        // 批量插入字段
+        List<LogTemplateFieldEntity> fields = logTemplateParam.getLogTemplateFieldEntity();
+
+        List<LogTemplateEnumEntity> enums = new ArrayList<>();
+        List<LogTemplateEnumItemEntity> enumItems = new ArrayList<>();
+
+        for (int i = 0; i < fields.size(); i++) {
+            LogTemplateFieldEntity fieldEntity = fields.get(i);
+            fieldEntity.setVersion(queryEntity.getVersion()+1);
+            fieldEntity.setTemplateId(entity.getId());
+            if (fieldEntity.getFieldType() == 3) {
+                enums.add(fieldEntity.getLogTemplateEnumEntity());
+                enumItems.addAll(fieldEntity.getLogTemplateEnumEntity().getLogTemplateEnumItemEntities());
+            }
+        }
+        // 批量插入字段
+        this.logTemplateFieldMapper.batchInsertLogTemplateFields(fields);
+
+        // 批量插入枚举列表
+        if (!CollectionUtils.isEmpty(enums)) {
+            logTemplateEnumMapper.batchInsertLogTemplateEnums(enums);
+        }
+        // 批量插入枚举项列表
+        if (!CollectionUtils.isEmpty(enumItems)) {
+            logTemplateEnumItemMapper.batchInsertLogTemplateEnumItems(enumItems);
+        }
+
+        return true;
     }
 }

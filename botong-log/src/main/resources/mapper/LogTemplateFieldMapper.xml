@@ -13,4 +13,9 @@
         </foreach>
     </insert>
 
+    <update id="updateCurrentlyByLogTemplateId">
+        UPDATE `log_template_details` SET
+        `currently` = #{currently} WHERE `template_id` = #{templateId}
+    </update>
+
 </mapper>
