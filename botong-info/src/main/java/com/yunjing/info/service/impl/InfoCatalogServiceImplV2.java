@@ -238,37 +238,6 @@ public class InfoCatalogServiceImplV2 extends ServiceImpl<InfoCatalogMapper, Inf
         //方法 需要根据缓存获取
         //1、根据orgId 获取1级目录
         // 2、根据1级目录Id 获取2级目录
-
-//        EntityWrapper<InfoCatalog> wrapper = new EntityWrapper<>();
-//        wrapper.where("org_id={0}", orgId).and("level=1").and("is_delete=0").orderBy("sort",true);
-//        //所有1级
-//        List<InfoCatalog> infoCatalogList1 =  infoCatalogMapper.selectList(wrapper);
-//
-//        //所有2级
-//        EntityWrapper<InfoCatalog> wrapper2 = new EntityWrapper<>();
-//        wrapper2.where("org_id={0}", orgId).and("level=2").and("is_delete=0").orderBy("sort",true);
-//        List<InfoCatalog> infoCataloglist2 =  infoCatalogMapper.selectList(wrapper2);
-//
-//        List<InfoCatalogDTO> infoCatalogDTOList1 = new ArrayList<>();
-//
-//        List<InfoCatalogDTO> infoCatalogDTOList2 = new ArrayList<>();
-//
-//        BeanUtils.copy(infoCatalogList1,infoCatalogDTOList1);
-//
-//        BeanUtils.copy(infoCataloglist2,infoCatalogDTOList2);
-//
-//        for(int i=0;i<infoCatalogDTOList1.size();i++){
-//            if(!ValidationUtil.isEmpty(infoCatalogDTOList1.get(i))){
-//                List<InfoCatalogDTO> infoCatalogDTOList3 = new ArrayList<>();
-//                for(int j=0;j<infoCatalogDTOList2.size();j++){
-//                    if(infoCatalogDTOList1.get(i).getId().equals(infoCatalogDTOList2.get(j).getParentId())){
-//                        infoCatalogDTOList3.add(infoCatalogDTOList2.get(j));
-//                    }
-//                }
-//                infoCatalogDTOList1.get(i).setLower(infoCatalogDTOList3);
-//            }
-//        }
-//        return infoCatalogDTOList1;
         return null;
     }
 

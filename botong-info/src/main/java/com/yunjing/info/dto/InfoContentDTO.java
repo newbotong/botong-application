@@ -68,7 +68,7 @@ public class InfoContentDTO implements Serializable {
     /**
      * 是否删除 0：未删除；1：已删除
      */
-    private Integer is_delete;
+    private Integer isDelete;
 
     /**
      * 创建时间
@@ -78,6 +78,6 @@ public class InfoContentDTO implements Serializable {
     /**
      * 更新时间
      */
-    private Long update_time;
+    private Long updateTime;
 
 }

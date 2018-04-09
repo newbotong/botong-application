@@ -130,10 +130,11 @@ public interface InfoCatalogServiceV2 extends IService<InfoCatalog> {
 
     /**
      * web端资讯分页模糊查询
-     *
      * @param orgId
      * @param catalogId
      * @param title
+     * @param pageNo
+     * @param pageSize
      * @return
      * @throws BaseException
      */
