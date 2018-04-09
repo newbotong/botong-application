@@ -2,6 +2,7 @@ package com.yunjing.botong.log.processor.okhttp;
 
 import com.yunjing.botong.log.params.DangParam;
 import com.yunjing.botong.log.params.SchedulerParam;
+import com.yunjing.botong.log.vo.Member;
 import com.yunjing.botong.log.vo.MemberInfo;
 import com.yunjing.mommon.base.PushParam;
 
@@ -109,4 +110,13 @@ public interface AppCenterService {
          */
         void taskCallback(Long taskId);
     }
+
+    /**
+     * 根据部门ids和成员ids查询所有的成员信息
+     * @param deptIds
+     * @param memberIds
+     * @return
+     */
+    List<Member> findSubLists(String[] deptIds, String[] memberIds);
+
 }

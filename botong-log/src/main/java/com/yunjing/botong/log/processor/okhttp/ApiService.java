@@ -2,6 +2,7 @@ package com.yunjing.botong.log.processor.okhttp;
 
 import com.yunjing.botong.log.params.DangParam;
 import com.yunjing.botong.log.params.SchedulerParam;
+import com.yunjing.botong.log.vo.Member;
 import com.yunjing.botong.log.vo.MemberInfo;
 import com.yunjing.mommon.base.PushParam;
 import com.yunjing.mommon.wrapper.ResponseEntityWrapper;
@@ -87,4 +88,15 @@ public interface ApiService {
     @POST("/api/microapps/appcenter/scheduler/set")
     @Headers({"Content-Type: application/json;charset=UTF-8"})
     Call<ResponseEntityWrapper<Long>> setTask(@Body SchedulerParam param);
+
+
+    /**
+     * 获取所有的人员id
+     * @param deptIds
+     * @param memberIds
+     * @return
+     */
+    @POST("/api/microapps/appcenter/org/find-sub-lists")
+    Call<ResponseEntityWrapper<List<Member>>> findSubLists(@Query("deptIds") String[] deptIds, @Query("memberIds") String[] memberIds);
+
 }

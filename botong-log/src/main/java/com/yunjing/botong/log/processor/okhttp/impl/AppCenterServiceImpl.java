@@ -4,6 +4,7 @@ import com.yunjing.botong.log.params.DangParam;
 import com.yunjing.botong.log.params.SchedulerParam;
 import com.yunjing.botong.log.processor.okhttp.ApiService;
 import com.yunjing.botong.log.processor.okhttp.AppCenterService;
+import com.yunjing.botong.log.vo.Member;
 import com.yunjing.botong.log.vo.MemberInfo;
 import com.yunjing.mommon.base.PushParam;
 import com.yunjing.mommon.constant.StatusCode;
@@ -265,6 +266,33 @@ public class AppCenterServiceImpl implements AppCenterService {
             ResponseEntityWrapper<List<MemberInfo>> body = response.body();
             if (body != null) {
                 log.info("获取管理范围：code:{}，message:{}", body.getStatusCode(), body.getStatusMessage());
+                if (response.isSuccessful() && body.getStatusCode() == StatusCode.SUCCESS.getStatusCode()) {
+                    return body.getData();
+                }
+            } else {
+                log.error("body is null");
+            }
+            return null;
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        return null;
+    }
+
+    /**
+     * 根据部门ids和成员ids查询所有的成员信息
+     *
+     * @param deptIds       部门id集合
+     * @param memberIds     成员id集合
+     * @return
+     */
+    @Override
+    public List<Member> findSubLists(String[] deptIds, String[] memberIds) {
+        try {
+            Response<ResponseEntityWrapper<List<Member>>> response = apiService.findSubLists(deptIds, memberIds).execute();
+            ResponseEntityWrapper<List<Member>> body = response.body();
+            if (body != null) {
+                log.info("根据多部门id和成员id查询成员集合：code:{}，message:{}", body.getStatusCode(), body.getStatusMessage());
                 if (response.isSuccessful() && body.getStatusCode() == StatusCode.SUCCESS.getStatusCode()) {
                     return body.getData();
                 }
