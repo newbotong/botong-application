@@ -40,7 +40,7 @@ public interface InfoContentMapper extends IBaseMapper<InfoContent> {
      * @param pageSize
      * @return
      */
-    List<InfoContentDto> selectParentPage(@Param("orgId") Long orgId, @Param("catalogId") Long catalogId, @Param("title") String title, @Param("pageNo") Integer pageNo, @Param("pageSize") Integer pageSize);
+    List<InfoContentDto> selectParentPage(@Param("orgId") String orgId, @Param("catalogId") String catalogId, @Param("title") String title, @Param("pageNo") Integer pageNo, @Param("pageSize") Integer pageSize);
 
     ;
 

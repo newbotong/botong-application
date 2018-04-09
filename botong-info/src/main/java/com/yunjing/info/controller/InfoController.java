@@ -4,6 +4,7 @@ import com.yunjing.info.common.InfoConstant;
 import com.yunjing.info.common.ValidationUtil;
 import com.yunjing.info.dto.CompanyRedisCatalogDto;
 import com.yunjing.info.dto.InfoContentDto;
+import com.yunjing.info.param.InfoCategoryEditParam;
 import com.yunjing.info.param.InfoCategoryParam;
 import com.yunjing.info.service.InfoCatalogService;
 import com.yunjing.info.service.InfoContentService;
@@ -52,7 +53,7 @@ public class InfoController extends BaseController {
      * @return
      */
     @PostMapping("/parent")
-    public ResponseEntityWrapper selectParent(@RequestParam Long orgId) {
+    public ResponseEntityWrapper selectParent(@RequestParam String orgId) {
         List<CompanyRedisCatalogDto> list = infoCatalogService.selectParentCatalog(orgId);
         return success(list);
     }
@@ -60,12 +61,12 @@ public class InfoController extends BaseController {
     /**
      * 修改资讯信息
      *
-     * @param infoCategoryParam  实体入参
+     * @param infoCategoryParam 实体入参
      * @return
      * @throws BaseException
      */
     @PostMapping("/edit")
-    public ResponseEntityWrapper infoEdit(@RequestBody InfoCategoryParam infoCategoryParam) throws BaseException {
+    public ResponseEntityWrapper infoEdit(@RequestBody InfoCategoryEditParam infoCategoryParam) throws BaseException {
         BeanFieldValidator.getInstance().ignore().validate(infoCategoryParam);
         infoContentService.infoEdit(infoCategoryParam);
         return success();
@@ -73,67 +74,72 @@ public class InfoController extends BaseController {
 
     /**
      * 新增分类
-     * @param orgId 公司ID
+     *
+     * @param orgId    公司ID
      * @param parentId 父ID
-     * @param name 分类名称
+     * @param name     分类名称
      * @return
      * @throws BaseException
      */
     @PostMapping("/category/add")
-    public ResponseEntityWrapper insert(@RequestParam Long orgId, @RequestParam Long parentId,@RequestParam String name) throws BaseException{
+    public ResponseEntityWrapper insert(@RequestParam String orgId, @RequestParam String parentId, @RequestParam String name) throws BaseException {
         //校验分类名称，如果包含中文字符 算两个，总计不超过12个字符
-        if((ValidationUtil.trim(name).length())> InfoConstant.INFO_NAME_MAX){
+        if ((ValidationUtil.trim(name).length()) > InfoConstant.INFO_NAME_MAX) {
             return result(InfoConstant.StateCode.CODE_604);
         }
-        return result(infoCatalogService.insertInfoCategory(orgId,parentId,name));
+        return result(infoCatalogService.insertInfoCategory(orgId, parentId, name));
     }
 
 
     /**
      * 修改分类名称
-     * @param orgId
-     * @param parentId
-     * @param name
+     *
+     * @param orgId    企业id
+     * @param parentId 一级id
+     * @param name     名称
      * @return
      * @throws BaseException
      */
     @PostMapping("/category/update")
-    public ResponseEntityWrapper modify(@RequestParam Long orgId, @RequestParam Long parentId,@RequestParam Long catalogId,@RequestParam String name) throws BaseException{
+    public ResponseEntityWrapper modify(@RequestParam String orgId, @RequestParam String parentId, @RequestParam String catalogId, @RequestParam String name) throws BaseException {
         //校验分类名称，如果包含中文字符 算两个，总计不超过12个字符
-        if((ValidationUtil.trim(name)).length()>InfoConstant.INFO_NAME_MAX){
+        if ((ValidationUtil.trim(name)).length() > InfoConstant.INFO_NAME_MAX) {
             return result(InfoConstant.StateCode.CODE_604);
         }
-        return result(infoCatalogService.modifyInfoCategory(orgId,parentId,catalogId,name));
+        return result(infoCatalogService.modifyInfoCategory(orgId, parentId, catalogId, name));
     }
 
 
     /**
      * - 删除类目
-     * @param orgId
-     * @param parentId
-     * @param catalogId
+     *
+     * @param orgId     企业id
+     * @param parentId  父id
+     * @param catalogId 二级id
      * @return
      * @throws BaseException
      */
     @PostMapping("/category/delete")
-    public ResponseEntityWrapper deleteInfoCategory(@RequestParam Long orgId,@RequestParam Long parentId,@RequestParam Long catalogId) throws BaseException{
-        return result(infoCatalogService.deleteInfoCategory(orgId,parentId,catalogId));
+    public ResponseEntityWrapper deleteInfoCategory(@RequestParam String orgId, @RequestParam String parentId, @RequestParam String catalogId) throws BaseException {
+        return result(infoCatalogService.deleteInfoCategory(orgId, parentId, catalogId));
     }
 
     /**
      * 删除资讯
-     * @param orgId
-     * @param id
+     *
+     * @param orgId 企业id
+     * @param id    资讯id
      * @return
      * @throws BaseException
      */
     @PostMapping("/delete")
-    public ResponseEntityWrapper deleteInfoContent(@RequestParam Long orgId,@RequestParam Long id) throws BaseException{
-        return result(infoCatalogService.deleteInfoContent(orgId,id));
+    public ResponseEntityWrapper deleteInfoContent(@RequestParam String orgId, @RequestParam String id) throws BaseException {
+        return result(infoCatalogService.deleteInfoContent(orgId, id));
     }
 
     /**
      * 类目隐藏显示接口
+     *
      * @param orgId
      * @param parentId
      * @param catalogId
@@ -142,12 +148,13 @@ public class InfoController extends BaseController {
      * @throws BaseException
      */
     @PostMapping("/category/show-hide")
-    public ResponseEntityWrapper displayInfoCategory(@RequestParam Long orgId,@RequestParam Long parentId,@RequestParam Long catalogId,@RequestParam Integer whetherShow) throws BaseException{
-        return result(infoCatalogService.displayInfoCategory(orgId,parentId,catalogId,whetherShow));
+    public ResponseEntityWrapper displayInfoCategory(@RequestParam String orgId, @RequestParam String parentId, @RequestParam String catalogId, @RequestParam Integer whetherShow) throws BaseException {
+        return result(infoCatalogService.displayInfoCategory(orgId, parentId, catalogId, whetherShow));
     }
 
     /**
      * - 资讯隐藏显示
+     *
      * @param orgId
      * @param id
      * @param whetherShow
@@ -155,13 +162,14 @@ public class InfoController extends BaseController {
      * @throws BaseException
      */
     @PostMapping("/show-hide")
-    public ResponseEntityWrapper displayInfoContent(@RequestParam Long orgId,@RequestParam Long id,@RequestParam Integer whetherShow) throws BaseException{
-        return result(infoCatalogService.displayInfoContent(orgId,id,whetherShow));
+    public ResponseEntityWrapper displayInfoContent(@RequestParam String orgId, @RequestParam String id, @RequestParam Integer whetherShow) throws BaseException {
+        return result(infoCatalogService.displayInfoContent(orgId, id, whetherShow));
     }
 
 
     /**
      * 类目排序
+     *
      * @param orgId
      * @param parentId
      * @param catalogId1
@@ -170,13 +178,14 @@ public class InfoController extends BaseController {
      * @throws BaseException
      */
     @PostMapping("/category/sort")
-    public ResponseEntityWrapper updateCatalogSort(@RequestParam Long orgId,@RequestParam Long parentId,@RequestParam Long catalogId1,@RequestParam Long catalogId2) throws BaseException{
-        return result(infoCatalogService.updateCatalogSort(orgId,parentId,catalogId1,catalogId2));
+    public ResponseEntityWrapper updateCatalogSort(@RequestParam String orgId, @RequestParam String parentId, @RequestParam String catalogId1, @RequestParam String catalogId2) throws BaseException {
+        return result(infoCatalogService.updateCatalogSort(orgId, parentId, catalogId1, catalogId2));
     }
 
 
     /**
      * 资讯排序
+     *
      * @param orgId
      * @param id1
      * @param id2
@@ -184,12 +193,13 @@ public class InfoController extends BaseController {
      * @throws BaseException
      */
     @PostMapping("/sort")
-    public ResponseEntityWrapper updateInfoSort(@RequestParam Long orgId,@RequestParam Long id1,@RequestParam Long id2) throws BaseException{
-        return result(infoCatalogService.updateInfoSort(orgId,id1,id2));
+    public ResponseEntityWrapper updateInfoSort(@RequestParam String orgId, @RequestParam String id1, @RequestParam String id2) throws BaseException {
+        return result(infoCatalogService.updateInfoSort(orgId, id1, id2));
     }
 
     /**
      * 查询资讯父级目录下分页列表
+     *
      * @param orgId
      * @param catalogId
      * @param title
@@ -199,12 +209,12 @@ public class InfoController extends BaseController {
      * @throws BaseException
      */
     @GetMapping("/list")
-    public ResponseEntityWrapper selectParentPage(@RequestParam Long orgId,
-                                                  @RequestParam Long catalogId,
-                                                  @RequestParam(required = false,defaultValue = "") String title,
+    public ResponseEntityWrapper selectParentPage(@RequestParam String orgId,
+                                                  @RequestParam String catalogId,
+                                                  @RequestParam(required = false, defaultValue = "") String title,
                                                   @RequestParam(required = false, defaultValue = "1") Integer pageNo,
-                                                  @RequestParam(required = false, defaultValue = "20") Integer pageSize) throws BaseException{
-        PageWrapper<InfoContentDto> page =infoCatalogService.selectParentPage(orgId, catalogId, title,pageNo, pageSize);
+                                                  @RequestParam(required = false, defaultValue = "20") Integer pageSize) throws BaseException {
+        PageWrapper<InfoContentDto> page = infoCatalogService.selectParentPage(orgId, catalogId, title, pageNo, pageSize);
         return success(page);
     }
 

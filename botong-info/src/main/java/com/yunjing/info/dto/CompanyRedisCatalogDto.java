@@ -16,7 +16,7 @@ public class CompanyRedisCatalogDto implements Serializable,Comparable<CompanyRe
     /**
      * id
      */
-    private Long id;
+    private String id;
 
     /**
      * 更新时间
@@ -34,12 +34,12 @@ public class CompanyRedisCatalogDto implements Serializable,Comparable<CompanyRe
     /**
      * 机构id
      */
-    private Long orgId;
+    private String orgId;
 
     /**
      * 父id
      */
-    private Long parentId;
+    private String parentId;
 
     /**
      * 级别

@@ -15,7 +15,7 @@ public class InfoRedisInit implements Serializable {
     /**
      * 资讯目录一级id
      */
-    private Long id;
+    private String id;
     /**
      * 资讯一级名称
      */
@@ -32,6 +32,6 @@ public class InfoRedisInit implements Serializable {
     /**
      * 父级id
      */
-    private Long parentId;
+    private String parentId;
 
 }

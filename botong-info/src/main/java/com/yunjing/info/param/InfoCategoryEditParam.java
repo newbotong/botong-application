@@ -2,19 +2,22 @@ package com.yunjing.info.param;
 
 import com.yunjing.mommon.validate.annotation.Length;
 import com.yunjing.mommon.validate.annotation.NotNullOrEmpty;
-import com.yunjing.mommon.validate.annotation.Size;
 import lombok.Data;
 
 import java.io.Serializable;
 
 /**
- * 资讯新增目录入参
- *
  * @author 李双喜
- * @date 2018/3/30 16:04
+ * @date 2018/4/9 14:34
  */
 @Data
-public class InfoCategoryParam implements Serializable {
+public class InfoCategoryEditParam implements Serializable {
+    /**
+     * 资讯id
+     */
+    @NotNullOrEmpty(message = "id不能为空")
+    private String id;
+
     /**
      * 二级类目id
      */

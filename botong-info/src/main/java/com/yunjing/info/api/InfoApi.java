@@ -40,7 +40,7 @@ public class InfoApi extends BaseController {
      * @throws BaseException
      */
     @PostMapping("/parent")
-    public ResponseEntityWrapper selectParent(@RequestParam Long orgId, @RequestParam Long userId) throws BaseException {
+    public ResponseEntityWrapper selectParent(@RequestParam String orgId, @RequestParam String userId) throws BaseException {
         Map<String, Object> map = infoCatalogService.selectParent(orgId, userId);
         return success(map);
     }
@@ -58,7 +58,7 @@ public class InfoApi extends BaseController {
      * @throws IOException
      */
     @PostMapping("/parent-all")
-    public ResponseEntityWrapper selectParentAll(@RequestParam Long orgId, @RequestParam Long catalogId, @RequestParam Long userId, @RequestParam Integer pageNo, @RequestParam Integer pageSize) throws BaseException, IOException {
+    public ResponseEntityWrapper selectParentAll(@RequestParam String orgId, @RequestParam String catalogId, @RequestParam String userId, @RequestParam Integer pageNo, @RequestParam Integer pageSize) throws BaseException, IOException {
         Map<String, Object> map = infoCatalogService.selectParentAll(orgId, catalogId, userId, pageNo, pageSize);
         return success(map);
     }
@@ -74,7 +74,7 @@ public class InfoApi extends BaseController {
      * @throws IOException
      */
     @PostMapping("/detail")
-    public ResponseEntityWrapper selectDetail(@RequestParam Long id, @RequestParam Long userId) throws BaseException,IOException  {
+    public ResponseEntityWrapper selectDetail(@RequestParam String id, @RequestParam String userId) throws BaseException,IOException  {
         InfoContentDetailDto infoContentDetailDto = infoContentService.selectDetail(id, userId);
         return success(infoContentDetailDto);
     }
@@ -87,7 +87,7 @@ public class InfoApi extends BaseController {
      * @return
      */
     @PostMapping("/update")
-    public ResponseEntityWrapper updateNumber(@RequestParam Long id) throws BaseException {
+    public ResponseEntityWrapper updateNumber(@RequestParam String id) throws BaseException {
         infoContentService.updateNumber(id);
         return success();
     }
@@ -118,7 +118,7 @@ public class InfoApi extends BaseController {
      * @throws BaseException
      */
     @PostMapping("/search-page")
-    public ResponseEntityWrapper searchPage(@RequestParam Long orgId, String title, @RequestParam Integer pageNo, @RequestParam Integer pageSize) {
+    public ResponseEntityWrapper searchPage(@RequestParam String orgId, String title, @RequestParam Integer pageNo, @RequestParam Integer pageSize) {
         Page<InfoDto> page = infoContentService.searchPage(orgId, title, pageNo, pageSize);
         return success(page);
     }

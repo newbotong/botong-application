@@ -16,11 +16,11 @@ public class ParentInfoDetailDto implements Serializable,Comparable<ParentInfoDe
     /**
      * 资讯id
      */
-    private Long id;
+    private String id;
     /**
      * 一级目录id
      */
-    private Long catalogId;
+    private String catalogId;
     /**
      * 一级目录名称
      */

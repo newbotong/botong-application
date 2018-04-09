@@ -21,13 +21,13 @@ public class InfoContent extends BaseModel<InfoContent> {
      * 目录id
      */
     @TableField("catalog_id")
-    private Long catalogId;
+    private String catalogId;
 
     /**
      * 机构id
      */
     @TableField("org_id")
-    private Long orgId;
+    private String orgId;
 
     /**
      * 部门名称

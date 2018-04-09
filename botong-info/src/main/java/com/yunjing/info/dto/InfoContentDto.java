@@ -17,17 +17,17 @@ public class InfoContentDto implements Serializable {
     /**
      * 资讯id
      */
-    private Long id;
+    private String id;
 
     /**
      * 公司id
      */
-    private Long orgId;
+    private String orgId;
 
     /**
      * 目录id
      */
-    private Long catalogId;
+    private String catalogId;
 
     /**
      * 目录名称

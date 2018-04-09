@@ -22,12 +22,12 @@ public class InfoCatalogDto extends BaseModel<InfoCatalogDto> {
     /**
      * 机构id
      */
-    private Long orgId;
+    private String orgId;
 
     /**
      * 父id
      */
-    private Long parentId;
+    private String parentId;
 
     /**
      * 级别

@@ -12,10 +12,12 @@ import com.yunjing.info.dto.ParentInfoDetailDto;
 import com.yunjing.info.mapper.InfoContentMapper;
 import com.yunjing.info.model.InfoCatalog;
 import com.yunjing.info.model.InfoContent;
+import com.yunjing.info.param.InfoCategoryEditParam;
 import com.yunjing.info.param.InfoCategoryParam;
 import com.yunjing.info.processor.okhttp.CollectService;
 import com.yunjing.info.service.InfoContentService;
 import com.yunjing.mommon.global.exception.BaseException;
+import com.yunjing.mommon.utils.IDUtils;
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.lang.StringUtils;
 import org.springframework.beans.BeanUtils;
@@ -55,7 +57,7 @@ public class InfoContentServiceImpl extends ServiceImpl<InfoContentMapper, InfoC
      * @throws IOException
      */
     @Override
-    public InfoContentDetailDto selectDetail(Long id, Long userId) throws BaseException, IOException {
+    public InfoContentDetailDto selectDetail(String id, String userId) throws BaseException, IOException {
         InfoContent infoContent = new InfoContent().selectOne(new EntityWrapper<InfoContent>().eq("is_delete", InfoConstant.LOGIC_DELETE_NORMAL).eq("id", id));
         if (null == infoContent) {
             throw new BaseException("该资讯已被删除");
@@ -81,7 +83,7 @@ public class InfoContentServiceImpl extends ServiceImpl<InfoContentMapper, InfoC
      */
     @Override
     @Transactional(rollbackFor = Exception.class)
-    public void updateNumber(Long id) throws BaseException {
+    public void updateNumber(String id) throws BaseException {
         InfoContent infoContent = new InfoContent().selectOne(new EntityWrapper<InfoContent>().eq("is_delete", InfoConstant.LOGIC_DELETE_NORMAL).eq("id", id));
         if (null != infoContent) {
             infoContent.setReadNumber(infoContent.getReadNumber() + 1);
@@ -101,6 +103,7 @@ public class InfoContentServiceImpl extends ServiceImpl<InfoContentMapper, InfoC
     @Transactional(rollbackFor = Exception.class)
     public void insertInfo(InfoCategoryParam infoCategoryParam) throws BaseException {
         InfoContent infoContent = new InfoContent();
+        infoContent.setId(IDUtils.uuid());
         BeanUtils.copyProperties(infoCategoryParam, infoContent);
         if (null == infoCategoryParam.getCatalogId()) {
             infoContent.setCatalogId(infoCategoryParam.getOneCatalogId());
@@ -130,7 +133,7 @@ public class InfoContentServiceImpl extends ServiceImpl<InfoContentMapper, InfoC
             parentInfoDetailDto.setCatalogSort(infoCatalog.getSort());
         }
         parentInfoDetailDto.setCatalogId(infoCategoryParam.getOneCatalogId());
-        redisTemplate.opsForHash().put(InfoConstant.REDIS_HOME + ":" + infoCategoryParam.getOrgId(), infoCategoryParam.getOneCatalogId().toString(), JSON.toJSONString(parentInfoDetailDto));
+        redisTemplate.opsForHash().put(InfoConstant.REDIS_HOME + ":" + infoCategoryParam.getOrgId(), infoCategoryParam.getOneCatalogId(), JSON.toJSONString(parentInfoDetailDto));
     }
 
 
@@ -145,7 +148,7 @@ public class InfoContentServiceImpl extends ServiceImpl<InfoContentMapper, InfoC
      * @throws BaseException
      */
     @Override
-    public Page<InfoDto> searchPage(Long orgId, String title, Integer pageNo, Integer pageSize) {
+    public Page<InfoDto> searchPage(String orgId, String title, Integer pageNo, Integer pageSize) {
         Page<InfoDto> page = new Page<>(pageNo, pageSize);
         int i = 4;
         Map<String, Object> map = new HashMap<>(i);
@@ -169,7 +172,7 @@ public class InfoContentServiceImpl extends ServiceImpl<InfoContentMapper, InfoC
      */
     @Override
     @Transactional(rollbackFor = Exception.class)
-    public void infoEdit(InfoCategoryParam infoCategoryParam) throws BaseException {
+    public void infoEdit(InfoCategoryEditParam infoCategoryParam) throws BaseException {
         if (null == infoCategoryParam.getId()) {
             throw new BaseException("资讯id不能为空");
         }
@@ -182,11 +185,11 @@ public class InfoContentServiceImpl extends ServiceImpl<InfoContentMapper, InfoC
         if (!result) {
             throw new BaseException("修改失败");
         }
-        Object object = redisTemplate.opsForHash().get(InfoConstant.REDIS_HOME + ":" + infoCategoryParam.getOrgId(), infoCategoryParam.getOneCatalogId().toString());
+        Object object = redisTemplate.opsForHash().get(InfoConstant.REDIS_HOME + ":" + infoCategoryParam.getOrgId(), infoCategoryParam.getOneCatalogId());
         ParentInfoDetailDto infoDTO = JSONObject.parseObject(object.toString(), ParentInfoDetailDto.class);
         if (null != infoDTO) {
             if (infoCategoryParam.getId().equals(infoDTO.getId())) {
-                redisTemplate.opsForHash().delete(InfoConstant.REDIS_HOME + ":" + infoCategoryParam.getOrgId(), infoCategoryParam.getOneCatalogId().toString());
+                redisTemplate.opsForHash().delete(InfoConstant.REDIS_HOME + ":" + infoCategoryParam.getOrgId(), infoCategoryParam.getOneCatalogId());
                 ParentInfoDetailDto parentInfoDetailDto = new ParentInfoDetailDto();
                 InfoCatalog infoCatalog = new InfoCatalog().selectOne(new EntityWrapper<InfoCatalog>().eq("is_delete", InfoConstant.LOGIC_DELETE_NORMAL).eq("id", infoCategoryParam.getOneCatalogId()));
                 BeanUtils.copyProperties(infoContent, parentInfoDetailDto);
@@ -195,7 +198,7 @@ public class InfoContentServiceImpl extends ServiceImpl<InfoContentMapper, InfoC
                     parentInfoDetailDto.setCatalogSort(infoCatalog.getSort());
                 }
                 parentInfoDetailDto.setCatalogId(infoCategoryParam.getOneCatalogId());
-                redisTemplate.opsForHash().put(InfoConstant.REDIS_HOME + ":" + infoCategoryParam.getOrgId(), infoCategoryParam.getOneCatalogId().toString(), JSONObject.toJSONString(parentInfoDetailDto));
+                redisTemplate.opsForHash().put(InfoConstant.REDIS_HOME + ":" + infoCategoryParam.getOrgId(), infoCategoryParam.getOneCatalogId(), JSONObject.toJSONString(parentInfoDetailDto));
             }
         }
     }

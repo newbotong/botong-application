@@ -43,7 +43,7 @@ public class CompanyCatalogInit extends BaseController {
      * @return
      */
     @RequestMapping("/company-catalog")
-    public ResponseEntityWrapper initCompany(@RequestParam Long orgId) throws BaseException {
+    public ResponseEntityWrapper initCompany(@RequestParam String orgId) throws BaseException {
         Map<Object, Object> map = redisTemplate.opsForHash().entries(InfoConstant.REDIS_CATALOG_ONE);
         if (null == map) {
             throw new BaseException("请先初始化公共类目");
@@ -53,7 +53,7 @@ public class CompanyCatalogInit extends BaseController {
         for (Map.Entry<Object, Object> entry : map.entrySet()) {
             InfoRedisInit infoRedisInit = JSONObject.parseObject(entry.getValue().toString(), InfoRedisInit.class);
             InfoCatalog infoCatalog = new InfoCatalog();
-            infoCatalog.setId(IDUtils.getID());
+            infoCatalog.setId(IDUtils.uuid());
             infoCatalog.setIsDelete(InfoConstant.LOGIC_DELETE_NORMAL);
             infoCatalog.setLevel(infoRedisInit.getLevel());
             infoCatalog.setName(infoRedisInit.getName());
@@ -72,7 +72,7 @@ public class CompanyCatalogInit extends BaseController {
             if (CollectionUtils.isNotEmpty(objList)) {
                 for (InfoDictionary infoDictionary : objList) {
                     InfoCatalog info = new InfoCatalog();
-                    info.setId(IDUtils.getID());
+                    info.setId(IDUtils.uuid());
                     info.setWhetherShow(1);
                     info.setSort(infoDictionary.getSort());
                     info.setLevel(infoDictionary.getLevel());
@@ -82,7 +82,7 @@ public class CompanyCatalogInit extends BaseController {
                     info.setParentId(infoCatalog.getId());
                     info.setUpdateTime(System.currentTimeMillis());
                     info.setCreateTime(System.currentTimeMillis());
-                    redisTemplate.opsForHash().put(InfoConstants.BOTONG_INFO_CATALOG_LIST+orgId+InfoConstants.BOTONG_INFO_FIX+infoCatalog.getId(),info.getId().toString(),JSONObject.toJSONString(info));
+                    redisTemplate.opsForHash().put(InfoConstant.BOTONG_INFO_CATALOG_LIST+orgId+InfoConstant.BOTONG_INFO_FIX+infoCatalog.getId(),info.getId().toString(),JSONObject.toJSONString(info));
                     infoCatalogList.add(info);
                 }
             }

@@ -15,7 +15,7 @@ public class InfoDto implements Serializable {
     /**
      * 资讯id
      */
-    private Long id;
+    private String id;
     /**
      * 标题
      */

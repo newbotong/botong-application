@@ -75,7 +75,7 @@ public class InfoCatalogServiceImpl extends ServiceImpl<InfoCatalogMapper, InfoC
      * @throws BaseException
      */
     @Override
-    public Map<String, Object> selectParent(Long orgId, Long userId) throws BaseException {
+    public Map<String, Object> selectParent(String orgId, String userId) throws BaseException {
         Map<String, Object> map = new HashMap<>(4);
         //查询一级分类下的首页内容
         Map<Object, Object> objectMap = redisTemplate.opsForHash().entries(InfoConstant.REDIS_HOME + ":" + orgId);
@@ -101,7 +101,7 @@ public class InfoCatalogServiceImpl extends ServiceImpl<InfoCatalogMapper, InfoC
      * @return
      */
     @Override
-    public List<CompanyRedisCatalogDto> selectParentCatalog(Long orgId) {
+    public List<CompanyRedisCatalogDto> selectParentCatalog(String orgId) {
         //查询目录结构(一级Id)
         Map<Object, Object> mapRedis = redisTemplate.opsForHash().entries(InfoConstant.COMPANY_INFO_REDIS + orgId);
         List<CompanyRedisCatalogDto> companyRedisCatalogDtos = new ArrayList<>();
@@ -141,7 +141,7 @@ public class InfoCatalogServiceImpl extends ServiceImpl<InfoCatalogMapper, InfoC
      * @throws IOException
      */
     @Override
-    public Map<String, Object> selectParentAll(Long orgId, Long catalogId, Long userId, Integer pageNo, Integer pageSize) throws BaseException, IOException {
+    public Map<String, Object> selectParentAll(String orgId, String catalogId, String userId, Integer pageNo, Integer pageSize) throws BaseException, IOException {
         Map<String, Object> resultMap = new HashMap<>(4);
         Page<InfoDto> page = new Page<>(pageNo, pageSize);
         Map<String, Object> map = new HashMap<>(4);
@@ -173,7 +173,7 @@ public class InfoCatalogServiceImpl extends ServiceImpl<InfoCatalogMapper, InfoC
             redisTemplate.delete(InfoConstant.REDIS_CATALOG_ONE);
             List<InfoRedisInit> list = new ArrayList<>();
             //将每一个一级目录全部存到redis
-            List<Long> ids = new ArrayList<Long>();
+            List<String> ids = new ArrayList<String>();
             for (InfoDictionary infoDictionary : infoDictionaries) {
                 InfoRedisInit infoRedisInit = new InfoRedisInit();
                 BeanUtils.copyProperties(infoDictionary, infoRedisInit);
@@ -182,7 +182,7 @@ public class InfoCatalogServiceImpl extends ServiceImpl<InfoCatalogMapper, InfoC
                 redisTemplate.opsForHash().put(InfoConstant.REDIS_CATALOG_ONE, infoDictionary.getId().toString(), JSONObject.toJSONString(infoRedisInit));
             }
             if (CollectionUtils.isNotEmpty(ids)) {
-                for (Long id : ids) {
+                for (String id : ids) {
                     List<InfoDictionary> redisInitList = new InfoDictionary().selectList(new EntityWrapper<InfoDictionary>()
                             .eq("is_delete", InfoConstant.LOGIC_DELETE_NORMAL).eq("parent_id", id).orderBy("sort"));
                     if (CollectionUtils.isNotEmpty(redisInitList)) {
@@ -206,7 +206,7 @@ public class InfoCatalogServiceImpl extends ServiceImpl<InfoCatalogMapper, InfoC
      * @throws BaseException
      */
     @Override
-    public InfoConstant.StateCode insertInfoCategory(Long orgId, Long parentId, String name) throws BaseException {
+    public InfoConstant.StateCode insertInfoCategory(String orgId, String parentId, String name) throws BaseException {
         int i = 5;
         Map<String, Object> infoCatalogMap = new HashMap<>(i);
         infoCatalogMap.put("org_id", orgId);
@@ -233,38 +233,38 @@ public class InfoCatalogServiceImpl extends ServiceImpl<InfoCatalogMapper, InfoC
         infoCatalog.setIsDelete(InfoConstant.LOGIC_DELETE_NORMAL);
         infoCatalog.setCreateTime(System.currentTimeMillis());
         infoCatalog.setUpdateTime(System.currentTimeMillis());
-        infoCatalog.setId(IDUtils.getID());
-        int falg = infoCatalogMapper.insert(infoCatalog);
+        infoCatalog.setId(IDUtils.uuid());
+        int flag = infoCatalogMapper.insert(infoCatalog);
         //分类存入到缓存
-        if (falg > 0) {
+        if (flag > 0) {
             updateInfoCategoryRedis(orgId, parentId, infoCatalog.getId());
         }
-        return falg > 0 ? InfoConstant.StateCode.CODE_200 : InfoConstant.StateCode.CODE_602;
+        return flag > 0 ? InfoConstant.StateCode.CODE_200 : InfoConstant.StateCode.CODE_602;
     }
 
     /**
      * 修改分类
      *
-     * @param orgId
-     * @param parentId
-     * @param id
-     * @param name
+     * @param orgId       企业id
+     * @param parentId    父id
+     * @param id          二级id
+     * @param name        名称
      * @return
      * @throws BaseException
      */
     @Override
-    public InfoConstant.StateCode modifyInfoCategory(Long orgId, Long parentId, Long id, String name) throws BaseException {
+    public InfoConstant.StateCode modifyInfoCategory(String orgId, String parentId, String id, String name) throws BaseException {
         EntityWrapper<InfoCatalog> wrapper = new EntityWrapper<>();
         InfoCatalog infoCatalog = new InfoCatalog();
         infoCatalog.setUpdateTime(System.currentTimeMillis());
         infoCatalog.setName(name);
         wrapper.where("org_id={0}", orgId).and("parent_id={0}", parentId).and("id={0}", id).and("is_delete={0}", InfoConstant.LOGIC_DELETE_NORMAL);
-        int falg = infoCatalogMapper.update(infoCatalog, wrapper);
+        int flag = infoCatalogMapper.update(infoCatalog, wrapper);
         //更新缓存
-        if (falg > 0) {
+        if (flag > 0) {
             updateInfoCategoryRedis(orgId, parentId, id);
         }
-        return falg > 0 ? InfoConstant.StateCode.CODE_200 : InfoConstant.StateCode.CODE_602;
+        return flag > 0 ? InfoConstant.StateCode.CODE_200 : InfoConstant.StateCode.CODE_602;
     }
 
     /**
@@ -277,15 +277,15 @@ public class InfoCatalogServiceImpl extends ServiceImpl<InfoCatalogMapper, InfoC
      * @throws BaseException
      */
     @Override
-    public InfoConstant.StateCode deleteInfoCategory(Long orgId, Long parentId, Long id) throws BaseException {
+    public InfoConstant.StateCode deleteInfoCategory(String orgId, String parentId, String id) throws BaseException {
         EntityWrapper<InfoCatalog> wrapper = new EntityWrapper<>();
         InfoCatalog infoCatalog = new InfoCatalog();
         infoCatalog.setUpdateTime(System.currentTimeMillis());
         infoCatalog.setIsDelete(InfoConstant.LOGIC_DELETE_DELETE);
         wrapper.where("org_id={0}", orgId).and("parent_id={0}", parentId).and("id={0}", id);
-        int falg = infoCatalogMapper.update(infoCatalog, wrapper);
+        int flag = infoCatalogMapper.update(infoCatalog, wrapper);
         //删除成功 删除该分类下的内容
-        if (falg > 0) {
+        if (flag > 0) {
             //先查询 该分类下是否有内容
             Map<String, Object> infoContentMap = new HashMap<>(4);
             infoContentMap.put("org_id", orgId);
@@ -298,14 +298,14 @@ public class InfoCatalogServiceImpl extends ServiceImpl<InfoCatalogMapper, InfoC
                 infoContent.setUpdateTime(System.currentTimeMillis());
                 infoContent.setIsDelete(InfoConstant.LOGIC_DELETE_DELETE);
                 infoContentEntityWrapper.where("org_id={0}", orgId).and("catalog_id={0}", id);
-                falg = infoContentMapper.update(infoContent, infoContentEntityWrapper);
+                flag = infoContentMapper.update(infoContent, infoContentEntityWrapper);
             }
             //更新分类缓存
-            if (redisTemplate.hasKey(InfoConstant.BOTONG_INFO_CATALOG_LIST + orgId.toString() + InfoConstant.BOTONG_INFO_FIX + parentId.toString())) {
-                redisTemplate.opsForHash().delete(InfoConstant.BOTONG_INFO_CATALOG_LIST + orgId.toString() + InfoConstant.BOTONG_INFO_FIX + parentId.toString(), id.toString());
+            if (redisTemplate.hasKey(InfoConstant.BOTONG_INFO_CATALOG_LIST + orgId + InfoConstant.BOTONG_INFO_FIX + parentId)) {
+                redisTemplate.opsForHash().delete(InfoConstant.BOTONG_INFO_CATALOG_LIST + orgId + InfoConstant.BOTONG_INFO_FIX + parentId, id);
             }
         }
-        return falg > 0 ? InfoConstant.StateCode.CODE_200 : InfoConstant.StateCode.CODE_602;
+        return flag > 0 ? InfoConstant.StateCode.CODE_200 : InfoConstant.StateCode.CODE_602;
     }
 
     /**
@@ -317,14 +317,14 @@ public class InfoCatalogServiceImpl extends ServiceImpl<InfoCatalogMapper, InfoC
      * @throws BaseException
      */
     @Override
-    public InfoConstant.StateCode deleteInfoContent(Long orgId, Long id) throws BaseException {
+    public InfoConstant.StateCode deleteInfoContent(String orgId, String id) throws BaseException {
         EntityWrapper<InfoContent> infoContentEntityWrapper = new EntityWrapper<>();
         InfoContent infoContent = new InfoContent();
         infoContent.setUpdateTime(System.currentTimeMillis());
         infoContent.setIsDelete(InfoConstant.LOGIC_DELETE_DELETE);
         infoContentEntityWrapper.where("org_id={0}", orgId).and("id={0}", id);
-        int falg = infoContentMapper.update(infoContent, infoContentEntityWrapper);
-        return falg > 0 ? InfoConstant.StateCode.CODE_200 : InfoConstant.StateCode.CODE_602;
+        int flag = infoContentMapper.update(infoContent, infoContentEntityWrapper);
+        return flag > 0 ? InfoConstant.StateCode.CODE_200 : InfoConstant.StateCode.CODE_602;
     }
 
     /**
@@ -338,25 +338,25 @@ public class InfoCatalogServiceImpl extends ServiceImpl<InfoCatalogMapper, InfoC
      * @throws BaseException
      */
     @Override
-    public InfoConstant.StateCode displayInfoCategory(Long orgId, Long parentId, Long id, Integer displayType) throws BaseException {
+    public InfoConstant.StateCode displayInfoCategory(String orgId, String parentId, String id, Integer displayType) throws BaseException {
         EntityWrapper<InfoCatalog> wrapper = new EntityWrapper<>();
         InfoCatalog infoCatalog = new InfoCatalog();
         infoCatalog.setUpdateTime(System.currentTimeMillis());
         infoCatalog.setIsDelete(InfoConstant.LOGIC_DELETE_NORMAL);
         infoCatalog.setWhetherShow(displayType);
         wrapper.where("org_id={0}", orgId).and("parent_id={0}", parentId).and("id={0}", id);
-        int falg = infoCatalogMapper.update(infoCatalog, wrapper);
+        int flag = infoCatalogMapper.update(infoCatalog, wrapper);
         //更新缓存
         //如果是隐藏则删除缓存数据
         if (InfoConstant.INFO_TYPE_DISPLAY.equals(displayType)) {
             updateInfoCategoryRedis(orgId, parentId, id);
         } else {
-            if (redisTemplate.hasKey(InfoConstant.BOTONG_INFO_CATALOG_LIST + orgId.toString() + InfoConstant.BOTONG_INFO_FIX + parentId.toString())) {
-                redisTemplate.opsForHash().delete(InfoConstant.BOTONG_INFO_CATALOG_LIST + orgId.toString() + InfoConstant.BOTONG_INFO_FIX + parentId.toString(), id.toString());
+            if (redisTemplate.hasKey(InfoConstant.BOTONG_INFO_CATALOG_LIST + orgId + InfoConstant.BOTONG_INFO_FIX + parentId)) {
+                redisTemplate.opsForHash().delete(InfoConstant.BOTONG_INFO_CATALOG_LIST + orgId + InfoConstant.BOTONG_INFO_FIX + parentId, id);
             }
         }
         //如果是显示则添加缓存数据
-        return falg > 0 ? InfoConstant.StateCode.CODE_200 : InfoConstant.StateCode.CODE_602;
+        return flag > 0 ? InfoConstant.StateCode.CODE_200 : InfoConstant.StateCode.CODE_602;
     }
 
     /**
@@ -369,15 +369,15 @@ public class InfoCatalogServiceImpl extends ServiceImpl<InfoCatalogMapper, InfoC
      * @throws BaseException
      */
     @Override
-    public InfoConstant.StateCode displayInfoContent(Long orgId, Long id, Integer displayType) throws BaseException {
+    public InfoConstant.StateCode displayInfoContent(String orgId, String id, Integer displayType) throws BaseException {
         EntityWrapper<InfoContent> infoContentEntityWrapper = new EntityWrapper<>();
         InfoContent infoContent = new InfoContent();
         infoContent.setUpdateTime(System.currentTimeMillis());
         infoContent.setIsDelete(InfoConstant.LOGIC_DELETE_NORMAL);
         infoContent.setWhetherShow(displayType);
         infoContentEntityWrapper.where("org_id={0}", orgId).and("id={0}", id);
-        int falg = infoContentMapper.update(infoContent, infoContentEntityWrapper);
-        return falg > 0 ? InfoConstant.StateCode.CODE_200 : InfoConstant.StateCode.CODE_602;
+        int flag = infoContentMapper.update(infoContent, infoContentEntityWrapper);
+        return flag > 0 ? InfoConstant.StateCode.CODE_200 : InfoConstant.StateCode.CODE_602;
     }
 
 
@@ -389,7 +389,7 @@ public class InfoCatalogServiceImpl extends ServiceImpl<InfoCatalogMapper, InfoC
      * @param parentId
      * @param id
      */
-    private void updateInfoCategoryRedis(Long orgId, Long parentId, Long id) {
+    private void updateInfoCategoryRedis(String orgId, String parentId, String id) {
         Map<String, Object> infoContentMap = new HashMap<>(5);
         infoContentMap.put("org_id", orgId);
         infoContentMap.put("parent_id", parentId);
@@ -397,11 +397,11 @@ public class InfoCatalogServiceImpl extends ServiceImpl<InfoCatalogMapper, InfoC
         InfoCatalog infoCatalog = (InfoCatalog) infoCatalogMapper.selectByMap(infoContentMap);
         if (!ValidationUtil.isEmpty(infoCatalog)) {
             //先删除   botong:info:org:orgid:yijikey->object
-            if (redisTemplate.hasKey(InfoConstant.BOTONG_INFO_CATALOG_LIST + orgId.toString() + InfoConstant.BOTONG_INFO_FIX + parentId.toString())) {
-                redisTemplate.opsForHash().delete(InfoConstant.BOTONG_INFO_CATALOG_LIST + orgId.toString() + InfoConstant.BOTONG_INFO_FIX + parentId.toString(), infoCatalog.getId().toString());
+            if (redisTemplate.hasKey(InfoConstant.BOTONG_INFO_CATALOG_LIST + orgId + InfoConstant.BOTONG_INFO_FIX + parentId)) {
+                redisTemplate.opsForHash().delete(InfoConstant.BOTONG_INFO_CATALOG_LIST + orgId + InfoConstant.BOTONG_INFO_FIX + parentId, infoCatalog.getId());
             } else {
                 // 在更新
-                redisTemplate.opsForHash().put(InfoConstant.BOTONG_INFO_CATALOG_LIST + orgId.toString() + InfoConstant.BOTONG_INFO_FIX + parentId.toString(), infoCatalog.getId().toString(), JSON.toJSONString(infoCatalog));
+                redisTemplate.opsForHash().put(InfoConstant.BOTONG_INFO_CATALOG_LIST + orgId + InfoConstant.BOTONG_INFO_FIX + parentId, infoCatalog.getId(), JSON.toJSONString(infoCatalog));
             }
         }
     }
@@ -417,11 +417,11 @@ public class InfoCatalogServiceImpl extends ServiceImpl<InfoCatalogMapper, InfoC
      * @throws BaseException
      */
     @Override
-    public InfoConstant.StateCode updateCatalogSort(Long orgId, Long parentId, Long catalogId1, Long catalogId2) throws BaseException {
+    public InfoConstant.StateCode updateCatalogSort(String orgId, String parentId, String catalogId1, String catalogId2) throws BaseException {
 
-        JSONObject jsonObject1 = JSON.parseObject((String) redisTemplate.opsForHash().get(InfoConstant.BOTONG_INFO_CATALOG_LIST + orgId.toString() + InfoConstant.BOTONG_INFO_FIX + parentId.toString(), catalogId1.toString()));
-        JSONObject jsonObject2 = JSON.parseObject((String) redisTemplate.opsForHash().get(InfoConstant.BOTONG_INFO_CATALOG_LIST + orgId.toString() + InfoConstant.BOTONG_INFO_FIX + parentId.toString(), catalogId2.toString()));
-        int falg = 0;
+        JSONObject jsonObject1 = JSON.parseObject((String) redisTemplate.opsForHash().get(InfoConstant.BOTONG_INFO_CATALOG_LIST + orgId + InfoConstant.BOTONG_INFO_FIX + parentId, catalogId1));
+        JSONObject jsonObject2 = JSON.parseObject((String) redisTemplate.opsForHash().get(InfoConstant.BOTONG_INFO_CATALOG_LIST + orgId + InfoConstant.BOTONG_INFO_FIX + parentId, catalogId2));
+        int flag = 0;
         if (!ValidationUtil.isEmpty(jsonObject1) && !ValidationUtil.isEmpty(jsonObject2)) {
             EntityWrapper<InfoCatalog> wrapper1 = new EntityWrapper<>();
             InfoCatalog infoCatalog1 = new InfoCatalog();
@@ -433,16 +433,16 @@ public class InfoCatalogServiceImpl extends ServiceImpl<InfoCatalogMapper, InfoC
 
             infoCatalog1.setSort((Integer) jsonObject2.get("sort"));
             wrapper1.where("org_id={0}", orgId).and("parent_id={0}", parentId).and("id={0}", catalogId1).and("is_delete=0");
-            falg = infoCatalogMapper.update(infoCatalog1, wrapper1);
+            flag = infoCatalogMapper.update(infoCatalog1, wrapper1);
 
             infoCatalog2.setSort((Integer) jsonObject1.get("sort"));
             wrapper2.where("org_id={0}", orgId).and("parent_id={0}", parentId).and("id={0}", catalogId2).and("is_delete=0");
-            falg = infoCatalogMapper.update(infoCatalog2, wrapper2);
+            flag = infoCatalogMapper.update(infoCatalog2, wrapper2);
             //更新缓存
             updateInfoCategoryRedis(orgId, parentId, catalogId1);
             updateInfoCategoryRedis(orgId, parentId, catalogId2);
         }
-        return falg > 0 ? InfoConstant.StateCode.CODE_200 : InfoConstant.StateCode.CODE_602;
+        return flag > 0 ? InfoConstant.StateCode.CODE_200 : InfoConstant.StateCode.CODE_602;
     }
 
     /**
@@ -455,7 +455,7 @@ public class InfoCatalogServiceImpl extends ServiceImpl<InfoCatalogMapper, InfoC
      * @throws BaseException
      */
     @Override
-    public InfoConstant.StateCode updateInfoSort(Long orgId, Long id1, Long id2) throws BaseException {
+    public InfoConstant.StateCode updateInfoSort(String orgId, String id1, String id2) throws BaseException {
         Map<String, Object> infoContentMap1 = new HashMap<>(3);
         infoContentMap1.put("org_id", orgId);
         infoContentMap1.put("id", id1);
@@ -465,21 +465,21 @@ public class InfoCatalogServiceImpl extends ServiceImpl<InfoCatalogMapper, InfoC
         infoContentMap2.put("org_id", orgId);
         infoContentMap2.put("id", id2);
         InfoContent infoContent2 = (InfoContent) infoContentMapper.selectByMap(infoContentMap2);
-        int falg = 0;
+        int flag = 0;
         if (!ValidationUtil.isEmpty(infoContent1) && !ValidationUtil.isEmpty(infoContent2)) {
             EntityWrapper<InfoContent> wrapper1 = new EntityWrapper<>();
             infoContent1.setUpdateTime(System.currentTimeMillis());
             infoContent1.setSort(infoContent2.getSort());
             wrapper1.where("org_id={0}", orgId).and("id={0}", id1).and("is_delete=0");
-            falg = infoContentMapper.update(infoContent1, wrapper1);
+            flag = infoContentMapper.update(infoContent1, wrapper1);
 
             EntityWrapper<InfoContent> wrapper2 = new EntityWrapper<>();
             infoContent2.setUpdateTime(System.currentTimeMillis());
             infoContent2.setSort(infoContent1.getSort());
             wrapper2.where("org_id={0}", orgId).and("id={0}", id2).and("is_delete=0");
-            falg = infoContentMapper.update(infoContent2, wrapper2);
+            flag = infoContentMapper.update(infoContent2, wrapper2);
         }
-        return falg > 0 ? InfoConstant.StateCode.CODE_200 : InfoConstant.StateCode.CODE_602;
+        return flag > 0 ? InfoConstant.StateCode.CODE_200 : InfoConstant.StateCode.CODE_602;
     }
 
     /**
@@ -494,7 +494,7 @@ public class InfoCatalogServiceImpl extends ServiceImpl<InfoCatalogMapper, InfoC
      * @throws BaseException
      */
     @Override
-    public PageWrapper<InfoContentDto> selectParentPage(Long orgId, Long catalogId, String title, Integer pageNo, Integer pageSize) throws BaseException {
+    public PageWrapper<InfoContentDto> selectParentPage(String orgId, String catalogId, String title, Integer pageNo, Integer pageSize) throws BaseException {
         //统计总数
         Wrapper<InfoContent> wrapper = new EntityWrapper<>();
         wrapper.eq("org_id", orgId).and().eq("catalog_id", catalogId).and().eq("is_delete", InfoConstant.LOGIC_DELETE_NORMAL);
