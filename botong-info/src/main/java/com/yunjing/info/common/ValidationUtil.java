@@ -2,7 +2,6 @@ package com.yunjing.info.common;
 
 import org.apache.commons.lang.StringUtils;
 
-import java.text.SimpleDateFormat;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.List;
@@ -10,20 +9,20 @@ import java.util.Map;
 import java.util.regex.Pattern;
 
 /**
- *
+ * 
  * <pre>
  *  Tyrest
  *  File: ValidationUtil.java
- *
+ * 
  *  Tyrest, Inc.
  *  Copyright (C): 2016
- *
+ * 
  *  Description:
  *  TODO
- *
+ * 
  *  Notes:
- *  $Id: ValidationUtil.java  Tyrest\magintrursh $
- *
+ *  $Id: ValidationUtil.java  Tyrest\magintrursh $ 
+ * 
  *  Revision History
  *  &lt;Date&gt;,			&lt;Who&gt;,			&lt;What&gt;
  *  2016年11月1日		liushujie		Initial.
@@ -33,9 +32,14 @@ import java.util.regex.Pattern;
 
 public class ValidationUtil {
 
+	private static Pattern TIME_PATTERN = Pattern.compile("(([0][1-9])|([1][0-2]))([\\:](([0-5]\\d)|[0](\\d))){1,2}");
+
+	private static Pattern CURRENCY_PATTERN = Pattern.compile("([+]|[-])?(\\s)*(\\d){1,}([.](\\d){1,2})?");
+
+	private static Pattern NUMERIC_PATTERN = Pattern.compile("[0-9]*");
 	/**
 	 * Check whether the Object has value or not.
-	 *
+	 * 
 	 * @param aObj
 	 * @return if the obj is empty
 	 */
@@ -60,7 +64,7 @@ public class ValidationUtil {
 
 	/**
 	 * Check whether the String has value or not.
-	 *
+	 * 
 	 * @param aStr
 	 * @return if the string is empty
 	 */
@@ -74,7 +78,7 @@ public class ValidationUtil {
 
 	/**
 	 * Check whether the Long has value or not.
-	 *
+	 * 
 	 * @param aLong
 	 * @return if the Long is null
 	 */
@@ -88,7 +92,7 @@ public class ValidationUtil {
 
 	/**
 	 * Check whether a Collection object is empty.
-	 *
+	 * 
 	 * @param c:
 	 *            a java.util.Collection object
 	 * @return if the Map is empty
@@ -103,7 +107,7 @@ public class ValidationUtil {
 
 	/**
 	 * Check whether a Map object is empty.
-	 *
+	 * 
 	 * @param m:
 	 *            a java.util.Map object
 	 * @return if the Map is empty
@@ -118,7 +122,7 @@ public class ValidationUtil {
 
 	/**
 	 * Check whether the Date has value or not.
-	 *
+	 * 
 	 * @param aDate
 	 * @return if the date is null
 	 */
@@ -132,7 +136,7 @@ public class ValidationUtil {
 
 	/**
 	 * Trim the specified String.
-	 *
+	 * 
 	 * @param aStr
 	 * @return the result string,"" return if string is NULL
 	 */
@@ -179,7 +183,7 @@ public class ValidationUtil {
 
 	/**
 	 * Check whether the Object is null or not.
-	 *
+	 * 
 	 * @param oStr
 	 * @return if the object is NULL
 	 */
@@ -195,26 +199,24 @@ public class ValidationUtil {
 	/**
 	 * Validation method for time. The support time format is "hh:mm" or
 	 * "hh:mm:ss".
-	 *
+	 * 
 	 * @param text
 	 *            Input time value to be validated.
 	 * @return Return true if validation ok, otherwise return false.
 	 */
 	public static boolean isTime(String text) {
-		Pattern p = Pattern.compile("(([0][1-9])|([1][0-2]))([\\:](([0-5]\\d)|[0](\\d))){1,2}");
-		return p.matcher(text).matches();
+		return TIME_PATTERN.matcher(text).matches();
 	}
 
 	/**
 	 * Validation method for Currency format.
-	 *
+	 * 
 	 * @param text
 	 *            Input currency value to be validated.
 	 * @return Return true if validation ok, otherwise return false.
 	 */
 	public static boolean isCurrency(String text) {
-		Pattern p = Pattern.compile("([+]|[-])?(\\s)*(\\d){1,}([.](\\d){1,2})?");
-		return p.matcher(text).matches();
+		return CURRENCY_PATTERN.matcher(text).matches();
 	}
 
 	/**
@@ -236,7 +238,7 @@ public class ValidationUtil {
 
 	/**
 	 * Validation method for Number Format (decimal is excluded)
-	 *
+	 * 
 	 * @param text
 	 * @return Return true if validation ok, otherwise return false.
 	 */
@@ -244,14 +246,12 @@ public class ValidationUtil {
 		if (isEmpty(text)) {
 			return false;
 		}
-
-		Pattern p = Pattern.compile("[0-9]*");
-		return p.matcher(text.trim()).matches();
+		return NUMERIC_PATTERN.matcher(text.trim()).matches();
 	}
 
 	/**
 	 * Validation method for date. It is a very strict date validator.
-	 *
+	 * 
 	 *            Input date to be validated.
 	 *            Inputed date pattern.
 	 * @return Return true if validation ok, otherwise return false.
@@ -281,7 +281,7 @@ public class ValidationUtil {
 	// ----------------- Add by Anderson End:---------------------
 	/**
 	 * retrieve not null value.
-	 *
+	 * 
 	 * @param valueA
 	 * @param valueB
 	 * @return
@@ -299,7 +299,7 @@ public class ValidationUtil {
 
 	/**
 	 * To validate email address.
-	 *
+	 * 
 	 * @param email
 	 * @return
 	 */
@@ -317,7 +317,7 @@ public class ValidationUtil {
 
 	/**
 	 * Check if object1 equals object2.
-	 *
+	 * 
 	 * @param obj1
 	 *            object1
 	 * @param obj2
@@ -337,7 +337,7 @@ public class ValidationUtil {
 	/**
 	 * Check if trim(str1) equals trim(str2). Null is parsed to ""(empty
 	 * string).
-	 *
+	 * 
 	 * @param str1
 	 *            str1
 	 * @param str2
@@ -351,7 +351,7 @@ public class ValidationUtil {
 	/**
 	 * Check if trim(str1) equalsIgnoreCase trim(str2). Null is parsed to
 	 * ""(empty string).
-	 *
+	 * 
 	 * @param str1
 	 *            str1
 	 * @param str2
@@ -372,7 +372,7 @@ public class ValidationUtil {
 
 	/**
 	 * this method is moved from ValidatorUtil
-	 *
+	 * 
 	 * @author rocket.he
 	 * @param url
 	 * @return
@@ -384,7 +384,7 @@ public class ValidationUtil {
 
 	/**
 	 * this method is moved from ValidatorUtil
-	 *
+	 * 
 	 * @author rocket.he
 	 * @param inputObject
 	 * @return
@@ -430,7 +430,7 @@ public class ValidationUtil {
 
 	/**
 	 * is Comparison Operator
-	 *
+	 * 
 	 * @param str
 	 *            String
 	 * @return
