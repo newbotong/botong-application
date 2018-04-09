@@ -19,7 +19,7 @@ public class ApprovalExcelVO {
     /**
      * 模型主键
      */
-    private Long modelId;
+    private String modelId;
     /**
      * 审批标题
      */

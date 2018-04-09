@@ -21,7 +21,7 @@ public interface IConditionService extends IBaseService<SetsCondition> {
      * @return
      * @throws Exception
      */
-    List<ModelItemVO> getJudgeList(Long modelId) throws Exception;
+    List<ModelItemVO> getJudgeList(String modelId) throws Exception;
 
     /**
      * 保存审批条件
@@ -32,7 +32,7 @@ public interface IConditionService extends IBaseService<SetsCondition> {
      * @return
      * @throws Exception
      */
-    List<SetConditionVO> save(Long modelId, String field, String numbers) throws Exception;
+    List<SetConditionVO> save(String modelId, String field, String numbers) throws Exception;
 
     /**
      * 删除审批条件
@@ -42,7 +42,7 @@ public interface IConditionService extends IBaseService<SetsCondition> {
      * @return
      * @throws Exception
      */
-    boolean delete(Long modelId, Long conditions) throws Exception;
+    boolean delete(String modelId, String conditions) throws Exception;
 
     /**
      * 获取审批条件
@@ -51,5 +51,5 @@ public interface IConditionService extends IBaseService<SetsCondition> {
      * @return
      * @throws Exception
      */
-    List<SetConditionVO> getConditionList(Long modelId) throws Exception;
+    List<SetConditionVO> getConditionList(String modelId) throws Exception;
 }

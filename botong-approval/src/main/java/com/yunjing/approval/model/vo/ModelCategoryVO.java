@@ -14,7 +14,7 @@ public class ModelCategoryVO {
     /**
      * 分组主键
      */
-    private Long categoryId;
+    private String categoryId;
 
     /**
      * 分组名称

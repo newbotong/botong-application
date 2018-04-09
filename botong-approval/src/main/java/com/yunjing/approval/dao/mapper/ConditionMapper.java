@@ -17,5 +17,5 @@ public interface ConditionMapper extends IBaseMapper<SetsCondition> {
      * @param modelId 模型主键
      * @return
      */
-    void disableByModelId(@Param("modelId") Long modelId);
+    void disableByModelId(@Param("modelId") String modelId);
 }

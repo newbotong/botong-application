@@ -39,7 +39,7 @@ public class ApprovalRepairServiceImpl extends BaseServiceImpl<ApprovalMapper, A
     private IApprovalProcessService approvalProcessService;
 
     @Override
-    public List<Approval> repairTitle(Long oid) throws Exception {
+    public List<Approval> repairTitle(String oid) throws Exception {
         Condition condition = Condition.create();
 
         if (null != oid) {
@@ -54,8 +54,8 @@ public class ApprovalRepairServiceImpl extends BaseServiceImpl<ApprovalMapper, A
                     continue;
                 }
 
-                Long uid = approval.getUserId();
-                Long mid = approval.getModelId();
+                String uid = approval.getUserId();
+                String mid = approval.getModelId();
 
                 UserVO userVO = userRedisService.getByUserId(uid.toString());
 
@@ -94,7 +94,7 @@ public class ApprovalRepairServiceImpl extends BaseServiceImpl<ApprovalMapper, A
     }
 
     @Override
-    public List<Approval> repairFinishTime(Long oid) {
+    public List<Approval> repairFinishTime(String oid) {
         Condition condition = Condition.create();
 
         if (null != oid) {

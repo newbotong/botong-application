@@ -22,7 +22,7 @@ public interface ApprovalMapper extends IBaseMapper<Approval> {
      * @param approvalId 审批主键
      * @return
      */
-    List<ApprovalDetailDTO> getApprovalDetail(Long approvalId);
+    List<ApprovalDetailDTO> getApprovalDetail(String approvalId);
 
     /**
      * 查询审批信息
@@ -30,6 +30,6 @@ public interface ApprovalMapper extends IBaseMapper<Approval> {
      * @param approvalId 审批主键
      * @return
      */
-    ApprovalDetailDTO getApprovalById(@Param("approvalId") Long approvalId);
+    ApprovalDetailDTO getApprovalById(@Param("approvalId") String approvalId);
 
 }

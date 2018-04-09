@@ -20,7 +20,7 @@ public class ModelCategory extends BaseModel<ModelCategory> {
      * 企业主键
      */
     @TableField("org_id")
-    private Long orgId;
+    private String orgId;
 
     /**
      * 分组名称

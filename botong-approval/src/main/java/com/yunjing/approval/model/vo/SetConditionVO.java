@@ -14,12 +14,12 @@ public class SetConditionVO {
     /**
      * 条件主键
      */
-    private Long conditionId;
+    private String conditionId;
 
     /**
      * 模型主键
      */
-    private Long modelId;
+    private String modelId;
 
     /**
      * 条件描述

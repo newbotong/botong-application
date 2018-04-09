@@ -34,7 +34,7 @@ public class ApprovalSetController extends BaseController {
      * @return ResponseEntityWrapper
      */
     @PostMapping("/get")
-    public ResponseEntityWrapper getSetItem(@RequestParam("modelId") Long modelId) throws Exception {
+    public ResponseEntityWrapper getSetItem(@RequestParam("modelId") String modelId) throws Exception {
 
         return success(approvalSetsService.getApprovalSet(modelId));
     }
@@ -46,7 +46,7 @@ public class ApprovalSetController extends BaseController {
      * @return ResponseEntityWrapper
      */
     @PostMapping("/save")
-    public ResponseEntityWrapper saveSetItem(@RequestParam("modelId") Long modelId, @RequestParam("setting") int setting) throws Exception {
+    public ResponseEntityWrapper saveSetItem(@RequestParam("modelId") String modelId, @RequestParam("setting") int setting) throws Exception {
 
         return success(approvalSetsService.saveApprovalSets(modelId, setting));
     }
@@ -58,8 +58,8 @@ public class ApprovalSetController extends BaseController {
      * @return ResponseEntityWrapper
      */
     @PostMapping("/updateProcess")
-    public ResponseEntityWrapper updateProcess(@RequestParam("modelId") Long modelId,
-                                               @RequestParam(value = "conditionId", required = false) Long conditionId,
+    public ResponseEntityWrapper updateProcess(@RequestParam("modelId") String modelId,
+                                               @RequestParam(value = "conditionId", required = false) String conditionId,
                                                @RequestParam(value = "userArray", required = false) String userArray) throws Exception {
 
         return success(processService.updateProcess(modelId, conditionId, userArray));
@@ -73,7 +73,7 @@ public class ApprovalSetController extends BaseController {
      * @return ResponseEntityWrapper
      */
     @PostMapping("/deleteProcess")
-    public ResponseEntityWrapper deleteProcess(@RequestParam("modelId") Long modelId, @RequestParam(value = "conditionId", required = false) Long conditionId) throws Exception {
+    public ResponseEntityWrapper deleteProcess(@RequestParam("modelId") String modelId, @RequestParam(value = "conditionId", required = false) String conditionId) throws Exception {
         return success(processService.delete(modelId, conditionId));
     }
 
@@ -84,7 +84,7 @@ public class ApprovalSetController extends BaseController {
      * @param memberId  成员id
      */
     @PostMapping("/deleteProcessUser")
-    public void deleteProcessUser(@RequestParam("companyId") Long companyId, @RequestParam("memberId") Long memberId) {
+    public void deleteProcessUser(@RequestParam("companyId") String companyId, @RequestParam("memberId") String memberId) {
         processService.deleteProcessUser(companyId, memberId);
     }
 }

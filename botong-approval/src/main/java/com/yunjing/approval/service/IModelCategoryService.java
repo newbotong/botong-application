@@ -20,7 +20,7 @@ public interface IModelCategoryService extends IBaseService<ModelCategory> {
      * @param categoryName 分组名称
      * @return boolean
      */
-    boolean createOrEditCategory(Long companyId, Long categoryId, String categoryName);
+    boolean createOrEditCategory(String companyId, String categoryId, String categoryName);
 
     /**
      * 删除分组
@@ -29,7 +29,7 @@ public interface IModelCategoryService extends IBaseService<ModelCategory> {
      * @param categoryId 分组主键
      * @return boolean
      */
-    boolean deleteCategory(Long companyId, Long categoryId);
+    boolean deleteCategory(String companyId, String categoryId);
 
     /**
      * 分组排序
@@ -38,7 +38,7 @@ public interface IModelCategoryService extends IBaseService<ModelCategory> {
      * @param sortArray 序号数组
      * @return boolean
      */
-    boolean sortedCategory(Long companyId, String sortArray) throws Exception;
+    boolean sortedCategory(String companyId, String sortArray) throws Exception;
 
     /**
      * 查询分组列表
@@ -46,5 +46,5 @@ public interface IModelCategoryService extends IBaseService<ModelCategory> {
      * @param companyId 公司id
      * @return  List<ModelCategoryVO>
      */
-    List<ModelCategoryVO> getCategoryList(Long companyId);
+    List<ModelCategoryVO> getCategoryList(String companyId);
 }

@@ -28,7 +28,7 @@ public class ConditionController extends BaseController {
      * @throws Exception
      */
     @PostMapping("/get")
-    public ResponseEntityWrapper get(@RequestParam Long modelId) throws Exception {
+    public ResponseEntityWrapper get(@RequestParam String modelId) throws Exception {
         return success(cdnService.getJudgeList(modelId));
     }
 
@@ -42,7 +42,7 @@ public class ConditionController extends BaseController {
      * @throws Exception
      */
     @PostMapping("/save")
-    public ResponseEntityWrapper save(@RequestParam Long modelId, @RequestParam String field, @RequestParam(required = false) String numbers) throws Exception {
+    public ResponseEntityWrapper save(@RequestParam String modelId, @RequestParam String field, @RequestParam(required = false) String numbers) throws Exception {
         return success(cdnService.save(modelId, field, numbers));
     }
 
@@ -54,7 +54,7 @@ public class ConditionController extends BaseController {
      * @throws Exception
      */
     @PostMapping("/delete")
-    public ResponseEntityWrapper delete(@RequestParam Long modelId, @RequestParam(required = false) Long conditionId) throws Exception {
+    public ResponseEntityWrapper delete(@RequestParam String modelId, @RequestParam(required = false) String conditionId) throws Exception {
         return success(cdnService.delete(modelId, conditionId));
     }
 }

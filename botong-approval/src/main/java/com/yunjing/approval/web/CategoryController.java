@@ -27,7 +27,7 @@ public class CategoryController extends BaseController {
      * @return
      */
     @PostMapping("/create-or-rename")
-    public ResponseEntityWrapper createOrEdit(@RequestParam("companyId") Long companyId, Long categoryId, @RequestParam("categoryName") String categoryName) throws Exception {
+    public ResponseEntityWrapper createOrEdit(@RequestParam("companyId") String companyId, String categoryId, @RequestParam("categoryName") String categoryName) throws Exception {
 
         return success(modelCategoryService.createOrEditCategory(companyId, categoryId, categoryName));
     }
@@ -40,7 +40,7 @@ public class CategoryController extends BaseController {
      * @return
      */
     @PostMapping("/delete")
-    public ResponseEntityWrapper delete(@RequestParam("companyId") Long companyId, @RequestParam("categoryId") Long categoryId) throws Exception {
+    public ResponseEntityWrapper delete(@RequestParam("companyId") String companyId, @RequestParam("categoryId") String categoryId) throws Exception {
 
         return success(modelCategoryService.deleteCategory(companyId, categoryId));
     }
@@ -52,7 +52,7 @@ public class CategoryController extends BaseController {
      * @return
      */
     @GetMapping("/list")
-    public ResponseEntityWrapper getCategoryList(@RequestParam("companyId") Long companyId) throws Exception {
+    public ResponseEntityWrapper getCategoryList(@RequestParam("companyId") String companyId) throws Exception {
 
         return success(modelCategoryService.getCategoryList(companyId));
     }
@@ -65,7 +65,7 @@ public class CategoryController extends BaseController {
      * @return
      */
     @PostMapping("/sort")
-    public ResponseEntityWrapper sort(@RequestParam("companyId") Long companyId, @RequestParam("sortArray") String sortArray) throws Exception {
+    public ResponseEntityWrapper sort(@RequestParam("companyId") String companyId, @RequestParam("sortArray") String sortArray) throws Exception {
 
         return success(modelCategoryService.sortedCategory(companyId, sortArray));
     }

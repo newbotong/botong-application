@@ -13,7 +13,7 @@ public class CopyUserVO {
     /**
      * 抄送人主键
      */
-    private Long userId;
+    private String userId;
 
     /**
      * 抄送人姓名

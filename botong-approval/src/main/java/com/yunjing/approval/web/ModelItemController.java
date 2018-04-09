@@ -26,7 +26,7 @@ public class ModelItemController extends BaseController {
      * @throws Exception 抛异常
      */
     @GetMapping("/get")
-    public ResponseEntityWrapper getItem(@RequestParam("modelId") Long modelId) throws Exception {
+    public ResponseEntityWrapper getItem(@RequestParam("modelId") String modelId) throws Exception {
         return success(modelItemService.get(modelId));
     }
 
@@ -40,7 +40,7 @@ public class ModelItemController extends BaseController {
      * @throws Exception 抛异常
      */
     @PostMapping("/save")
-    public ResponseEntityWrapper saveItem(@RequestParam("companyId") Long companyId, @RequestParam("memberId") Long memberId, @RequestParam("json") String json) throws Exception {
+    public ResponseEntityWrapper saveItem(@RequestParam("companyId") String companyId, @RequestParam("memberId") String memberId, @RequestParam("json") String json) throws Exception {
         return success(modelItemService.saveModelItem(companyId, memberId, json));
     }
 }

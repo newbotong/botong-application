@@ -23,7 +23,7 @@ public class ModelItem extends BaseModel<ModelItem> {
      * 模型主键
      */
     @TableField("model_id")
-    private Long modelId;
+    private String modelId;
 
     /**
      * 字段
@@ -112,7 +112,7 @@ public class ModelItem extends BaseModel<ModelItem> {
      * 是否为子项
      */
     @TableField("is_child")
-    private Long    isChild;
+    private String    isChild;
 
     /**
      * 版本

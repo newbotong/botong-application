@@ -13,7 +13,7 @@ import java.sql.Timestamp;
 public class ApprovalVO {
 
     public ApprovalVO(Approval approval){
-        this.id = approval.getId();
+        this.id = String.valueOf(approval.getId());
         this.title = approval.getTitle();
         this.createTime = approval.getCreateTime();
         this.finishTime = approval.getFinishTime();
@@ -21,7 +21,7 @@ public class ApprovalVO {
         this.result = approval.getResult();
     }
 
-    private Long id;
+    private String id;
 
     private String title;
 

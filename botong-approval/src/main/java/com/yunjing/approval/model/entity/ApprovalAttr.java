@@ -20,7 +20,7 @@ public class ApprovalAttr extends BaseModel<ApprovalAttr> {
      * 审批主键
      */
     @TableField("approval_id")
-    private Long approvalId;
+    private String approvalId;
 
     /**
      * 属性名称
@@ -38,7 +38,7 @@ public class ApprovalAttr extends BaseModel<ApprovalAttr> {
      * 父级主键
      */
     @TableField("attr_parent")
-    private Long attrParent;
+    private String attrParent;
 
     /**
      * 明细内的索引号, 从1开始

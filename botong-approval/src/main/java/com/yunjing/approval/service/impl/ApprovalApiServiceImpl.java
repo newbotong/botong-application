@@ -64,7 +64,7 @@ public class ApprovalApiServiceImpl implements IApprovalApiService {
 
     @Override
     @Transactional(propagation = Propagation.REQUIRED, rollbackFor = Exception.class)
-    public List<ClientModelVO> getList(Long orgId) {
+    public List<ClientModelVO> getList(String orgId) {
         List<ModelVO> modelVOS = modelMapper.selectModelListByOrgId(orgId);
         List<ClientModelVO> list = new ArrayList<>();
         for (ModelVO modelVO : modelVOS) {
@@ -76,14 +76,14 @@ public class ApprovalApiServiceImpl implements IApprovalApiService {
 
     @Override
     @Transactional(propagation = Propagation.REQUIRED, rollbackFor = Exception.class)
-    public Page<ClientApprovalVO> getWaited(Page page, Long orgId, Long userId, FilterParam filterParam) {
+    public Page<ClientApprovalVO> getWaited(Page page, String orgId, String userId, FilterParam filterParam) {
 
         int current = page.getCurrentPage();
         int size = page.getPageSize();
         int index = (current - 1) * size;
         String deptId = filterParam.getDeptId();
         List<ApprovalUser> approvalUsers = approvalUserMapper.selectUser(deptId);
-        List<Long> userIds = approvalUsers.stream().map(ApprovalUser::getId).collect(Collectors.toList());
+        List<String> userIds = approvalUsers.stream().map(ApprovalUser::getId).collect(Collectors.toList());
         userIds.add(userId);
         Page<ClientApprovalVO> clientApprovalVOPage = new Page<>(current, size);
         List<ClientApprovalVO> clientApprovalVOS = new ArrayList<>();
@@ -96,13 +96,13 @@ public class ApprovalApiServiceImpl implements IApprovalApiService {
 
     @Override
     @Transactional(propagation = Propagation.REQUIRED, rollbackFor = Exception.class)
-    public Page<ClientApprovalVO> getCompleted(Page page, Long orgId, Long userId, FilterParam filterParam) {
+    public Page<ClientApprovalVO> getCompleted(Page page, String orgId, String userId, FilterParam filterParam) {
         int current = page.getCurrentPage();
         int size = page.getPageSize();
         int index = (current - 1) * size;
         String deptId = filterParam.getDeptId();
         List<ApprovalUser> approvalUsers = approvalUserMapper.selectUser(deptId);
-        List<Long> userIds = approvalUsers.stream().map(ApprovalUser::getId).collect(Collectors.toList());
+        List<String> userIds = approvalUsers.stream().map(ApprovalUser::getId).collect(Collectors.toList());
         userIds.add(userId);
         Page<ClientApprovalVO> clientApprovalVOPage = new Page<>(current, size);
         List<ClientApprovalVO> clientApprovalVOS = new ArrayList<>();
@@ -114,7 +114,7 @@ public class ApprovalApiServiceImpl implements IApprovalApiService {
     }
 
     @Override
-    public Page<ClientApprovalVO> getLaunched(Page page, Long orgId, Long userId, FilterParam filterParam) {
+    public Page<ClientApprovalVO> getLaunched(Page page, String orgId, String userId, FilterParam filterParam) {
         int current = page.getCurrentPage();
         int size = page.getPageSize();
         int index = (current - 1) * size;
@@ -160,7 +160,7 @@ public class ApprovalApiServiceImpl implements IApprovalApiService {
     }
 
     @Override
-    public Page<ClientApprovalVO> getCopied(Page page, Long orgId, Long userId, FilterParam filterParam) {
+    public Page<ClientApprovalVO> getCopied(Page page, String orgId, String userId, FilterParam filterParam) {
         int current = page.getCurrentPage();
         int size = page.getPageSize();
         int index = (current - 1) * size;
@@ -174,7 +174,7 @@ public class ApprovalApiServiceImpl implements IApprovalApiService {
     }
 
     @Override
-    public ClientApprovalDetailVO getApprovalDetail(Long orgId, Long userId, Long approvalId) {
+    public ClientApprovalDetailVO getApprovalDetail(String orgId, String userId, String approvalId) {
         ClientApprovalDetailVO clientApprovalDetailVO = new ClientApprovalDetailVO();
         // 获取审批详情
         List<ApproveAttrVO> detail = getDetail(approvalId);
@@ -238,7 +238,7 @@ public class ApprovalApiServiceImpl implements IApprovalApiService {
     }
 
     @Override
-    public boolean solveApproval(Long orgId, Long userId, Long approvalId, Integer state) {
+    public boolean solveApproval(String orgId, String userId, String approvalId, Integer state) {
         boolean flag = false;
         List<ApprovalProcess> processList = approvalProcessService.selectList(Condition.create().where("approval_id={0}", approvalId));
         if (processList != null && !processList.isEmpty()) {
@@ -324,7 +324,7 @@ public class ApprovalApiServiceImpl implements IApprovalApiService {
     }
 
     @Override
-    public boolean revokeApproval(Long orgId, Long userId, Long approvalId) {
+    public boolean revokeApproval(String orgId, String userId, String approvalId) {
         boolean flag = false;
         List<ApprovalProcess> processList = approvalProcessService.selectList(Condition.create().where("approval_id={0}", approvalId));
         processList.forEach(approvalProcess -> {
@@ -348,7 +348,7 @@ public class ApprovalApiServiceImpl implements IApprovalApiService {
     }
 
     @Override
-    public boolean transferApproval(Long orgId, Long userId, Long transferredUserId, Long approvalId) {
+    public boolean transferApproval(String orgId, String userId, String transferredUserId, String approvalId) {
 
         List<ApprovalProcess> processList = approvalProcessService.selectList(Condition.create().where("approval_id={0}", approvalId));
         int num = 0;
@@ -359,7 +359,7 @@ public class ApprovalApiServiceImpl implements IApprovalApiService {
                 approvalProcess.setProcessTime(System.currentTimeMillis());
                 ApprovalProcess newProcess = new ApprovalProcess();
                 newProcess.setSeq(approvalProcess.getSeq() + 1);
-                newProcess.setId(IDUtils.getID());
+                newProcess.setId(IDUtils.uuid());
                 newProcess.setUserId(transferredUserId);
                 newProcess.setProcessState(0);
                 newProcess.setApprovalId(approvalId);
@@ -388,13 +388,17 @@ public class ApprovalApiServiceImpl implements IApprovalApiService {
     }
 
     @Override
-    public boolean updateCopyReadState(Long[] approvalId) {
+    public boolean updateCopyReadState(String[] approvalId) {
+        boolean isUpdated = false;
 
         List<Copys> copysList = copySService.selectList(Condition.create().in("approval_id", approvalId));
         copysList.forEach(copys -> {
             copys.setIsRead(1);
         });
-        return copySService.updateBatchById(copysList);
+        if(!copysList.isEmpty()){
+            isUpdated = copySService.updateBatchById(copysList);
+        }
+        return isUpdated;
     }
 
     private void convertList(List<ClientApprovalVO> clientApprovalVOS, List<ApprovalContentDTO> approvalList) {
@@ -415,7 +419,7 @@ public class ApprovalApiServiceImpl implements IApprovalApiService {
         }
     }
 
-    private List<ApproveAttrVO> getDetail(Long approvalId) {
+    private List<ApproveAttrVO> getDetail(String approvalId) {
         List<ApproveAttributeVO> attrList = approvalAttrMapper.selectAttrList(approvalId);
 
         List<ApproveAttrVO> attrs = new ArrayList<>();

@@ -11,7 +11,7 @@ import java.util.List;
 @Data
 public class ModelListVO {
 
-    private Long categoryId;
+    private String categoryId;
 
     private String categroyName;
 

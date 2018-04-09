@@ -26,7 +26,7 @@ public class ModelController extends BaseController {
      * @return ResponseEntityWrapper
      */
     @GetMapping("/list")
-    public ResponseEntityWrapper getList(@RequestParam("companyId") Long companyId) throws Exception {
+    public ResponseEntityWrapper getList(@RequestParam("companyId") String companyId) throws Exception {
 
         return success(modelService.findModelList(companyId));
     }
@@ -39,7 +39,7 @@ public class ModelController extends BaseController {
      * @return ResponseEntityWrapper
      */
     @PostMapping("/sort")
-    public ResponseEntityWrapper sort(@RequestParam("categoryId") Long categoryId, @RequestParam("sortArray") String sortArray) throws Exception {
+    public ResponseEntityWrapper sort(@RequestParam("categoryId") String categoryId, @RequestParam("sortArray") String sortArray) throws Exception {
 
         return success(modelService.sortedModel(categoryId, sortArray));
     }
@@ -52,7 +52,7 @@ public class ModelController extends BaseController {
      * @return ResponseEntityWrapper
      */
     @PostMapping("/move-to")
-    public ResponseEntityWrapper moveTo(@RequestParam("categoryId") Long categoryId, @RequestParam("modelId") Long modelId) throws Exception {
+    public ResponseEntityWrapper moveTo(@RequestParam("categoryId") String categoryId, @RequestParam("modelId") String modelId) throws Exception {
 
         return success(modelService.moveModel(categoryId, modelId));
     }
@@ -65,7 +65,7 @@ public class ModelController extends BaseController {
      * @return ResponseEntityWrapper
      */
     @PostMapping("/is-disabled")
-    public ResponseEntityWrapper updateIsDisabled(@RequestParam("modelId") Long modelId,
+    public ResponseEntityWrapper updateIsDisabled(@RequestParam("modelId") String modelId,
                                                   @RequestParam("isDisabled") Integer isDisabled) throws Exception {
 
         return success(modelService.updateIsDisabled(modelId, isDisabled));
@@ -80,12 +80,22 @@ public class ModelController extends BaseController {
      * @return ResponseEntityWrapper
      */
     @PostMapping("/update-visible-range")
-    public ResponseEntityWrapper updateVisibleRange(@RequestParam("modelId") Long modelId,
+    public ResponseEntityWrapper updateVisibleRange(@RequestParam("modelId") String modelId,
                                                   @RequestParam("deptIds") String deptIds,
                                                     @RequestParam("userIds") String userIds) throws Exception {
 
         return success(modelService.updateVisibleRange(modelId, deptIds,userIds));
     }
 
+    /**
+     * 获取系统审批模板的logo列表
+     *
+     * @return ResponseEntityWrapper
+     */
+    @PostMapping("/get-logo")
+    public ResponseEntityWrapper getLogo() throws Exception {
+
+        return success(modelService.getLogo());
+    }
 
 }

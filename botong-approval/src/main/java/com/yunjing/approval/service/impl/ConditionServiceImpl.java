@@ -48,7 +48,7 @@ public class ConditionServiceImpl extends BaseServiceImpl<ConditionMapper, SetsC
     private ConditionMapper conditionMapper;
 
     @Override
-    public boolean delete(Long modelId, Long conditionId) throws Exception {
+    public boolean delete(String modelId, String conditionId) throws Exception {
 
         processService.delete(modelId, conditionId);
         Wrapper<SetsCondition> wrapper = new EntityWrapper<>();
@@ -64,7 +64,7 @@ public class ConditionServiceImpl extends BaseServiceImpl<ConditionMapper, SetsC
     }
 
     @Override
-    public List<SetConditionVO> getConditionList(Long modelId) throws Exception {
+    public List<SetConditionVO> getConditionList(String modelId) throws Exception {
         if (null == modelId) {
             throw new BaseException("模型主键不存在");
         }
@@ -92,7 +92,7 @@ public class ConditionServiceImpl extends BaseServiceImpl<ConditionMapper, SetsC
     }
 
     @Override
-    public List<ModelItemVO> getJudgeList(Long modelId) throws Exception {
+    public List<ModelItemVO> getJudgeList(String modelId) throws Exception {
         ModelL model = modelService.selectById(modelId);
         if (model == null) {
             throw new BaseException("模型不存");
@@ -122,7 +122,7 @@ public class ConditionServiceImpl extends BaseServiceImpl<ConditionMapper, SetsC
     }
 
     @Override
-    public List<SetConditionVO> save(Long modelId, String field, String numbers) throws Exception {
+    public List<SetConditionVO> save(String modelId, String field, String numbers) throws Exception {
 
         if (StringUtils.isBlank(field)) {
             throw new BaseException("字段不存在");
@@ -185,7 +185,7 @@ public class ConditionServiceImpl extends BaseServiceImpl<ConditionMapper, SetsC
                 }
 
                 SetsCondition entity = new SetsCondition();
-                entity.setId(IDUtils.getID());
+                entity.setId(IDUtils.uuid());
                 entity.setModelId(modelId);
 
                 entity.setContent(label + flag + opt);
@@ -231,7 +231,7 @@ public class ConditionServiceImpl extends BaseServiceImpl<ConditionMapper, SetsC
                 }
 
                 SetsCondition entity = new SetsCondition();
-                entity.setId(IDUtils.getID());
+                entity.setId(IDUtils.uuid());
                 entity.setModelId(modelId);
 
                 entity.setContent(content);
@@ -245,7 +245,7 @@ public class ConditionServiceImpl extends BaseServiceImpl<ConditionMapper, SetsC
 
                 if (i == vals.length - 1) {
                     SetsCondition e = new SetsCondition();
-                    e.setId(IDUtils.getID());
+                    e.setId(IDUtils.uuid());
                     e.setModelId(modelId);
 
                     flag = " ＞ ";

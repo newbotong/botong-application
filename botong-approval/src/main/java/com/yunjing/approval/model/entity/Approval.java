@@ -22,13 +22,13 @@ public class Approval extends BaseModel<Approval> {
      * 用户ID
      */
     @TableField("user_id")
-    private Long userId;
+    private String userId;
 
     /**
      * 模型ID
      */
     @TableField("model_id")
-    private Long modelId;
+    private String modelId;
 
     /**
      * 标题
@@ -64,7 +64,7 @@ public class Approval extends BaseModel<Approval> {
      * 企业ID
      */
     @TableField("org_id")
-    private Long orgId;
+    private String orgId;
 
     /**
      * 模型版本
