@@ -4,9 +4,9 @@ import com.yunjing.mommon.validate.annotation.NotNullOrEmpty;
 import com.yunjing.mommon.validate.annotation.Size;
 import lombok.Data;
 
+import java.util.List;
+
 /**
- * Dang对象参数
- *
  * @version 1.0.0
  * @author: zhangx
  * @date 2018/3/29 10:39
@@ -37,7 +37,7 @@ public class DangParam {
      * 接收人信息对象
      */
     @NotNullOrEmpty(message = "接收者对象不能为空")
-    private String receiveBody;
+    private List<UserInfoModel> receiveBody;
 
     /**
      * dang类型(1.文字 2.语音)
@@ -101,5 +101,4 @@ public class DangParam {
      * 附件大小
      */
     private String accessorySize;
-
 }

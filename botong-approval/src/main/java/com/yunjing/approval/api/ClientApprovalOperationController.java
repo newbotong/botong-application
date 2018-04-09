@@ -30,10 +30,9 @@ public class ClientApprovalOperationController extends BaseController {
     private IApprovalService approvalService;
 
     @PostMapping("/get-member-list")
-    public ResponseEntityWrapper getMember(@RequestParam("companyId") String companyId,
-                                           @RequestParam("memberId") String memberId) throws Exception {
+    public ResponseEntityWrapper getMember(@RequestParam("companyId") String companyId) throws Exception {
 
-        return success(approvalUserService.addUser(companyId, memberId));
+        return success(approvalUserService.addUser(companyId));
     }
 
 

@@ -15,11 +15,10 @@ public interface IApprovalUserService extends IBaseService<ApprovalUser> {
      * 添加用户信息
      *
      * @param companyId 公司id
-     * @param memberId  成员id
      * @return
      * @throws BaseException
      */
-    boolean addUser(String companyId, String memberId) throws BaseException;
+    boolean addUser(String companyId) throws BaseException;
 
 
 }

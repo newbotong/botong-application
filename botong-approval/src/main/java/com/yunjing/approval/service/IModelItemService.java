@@ -22,6 +22,15 @@ public interface IModelItemService extends IBaseService<ModelItem> {
     ClientModelItemVO getModelItem(Long modelId) throws Exception;
 
     /**
+     * 获取模型
+     *
+     * @param modelId 模型主键
+     * @return 模型视图
+     * @throws Exception 异常
+     */
+    ModelVO get(Long modelId) throws Exception;
+
+    /**
      * 保存模型
      *
      * @param companyId 公司id
