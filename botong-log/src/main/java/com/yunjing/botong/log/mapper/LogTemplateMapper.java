@@ -19,7 +19,7 @@ public interface LogTemplateMapper extends BaseMapper<LogTemplateEntity>{
      * @param orgId
      * @return
      */
-    long totalLogTemplateByOrgId(@Param("orgId") long orgId);
+    long totalLogTemplateByOrgId(@Param("orgId") String orgId);
 
 
     /**
@@ -29,5 +29,5 @@ public interface LogTemplateMapper extends BaseMapper<LogTemplateEntity>{
      * @param pageSize
      * @return
      */
-    List<LogTemplateItemVo> listLogTemplateByOrgId(@Param("orgId") long orgId, @Param("offset") int offset, @Param("pageSize") int pageSize);
+    List<LogTemplateItemVo> listLogTemplateByOrgId(@Param("orgId") String orgId, @Param("offset") int offset, @Param("pageSize") int pageSize);
 }

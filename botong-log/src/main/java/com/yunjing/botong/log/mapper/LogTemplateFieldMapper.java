@@ -26,5 +26,5 @@ public interface LogTemplateFieldMapper extends BaseMapper<LogTemplateFieldEntit
      * @param templateId
      * @param currently
      */
-    void updateCurrentlyByLogTemplateId(@Param("templateId") long templateId,@Param("currently") boolean currently);
+    void updateCurrentlyByLogTemplateId(@Param("templateId") String templateId,@Param("currently") boolean currently);
 }

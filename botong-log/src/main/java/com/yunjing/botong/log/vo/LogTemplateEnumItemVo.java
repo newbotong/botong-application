@@ -15,7 +15,7 @@ public class LogTemplateEnumItemVo {
     /**
      * ID
      */
-    private Long id;
+    private String id;
 
     /**
      * 枚举项值

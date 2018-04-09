@@ -16,7 +16,7 @@ public class LogTemplateFieldVo {
     /**
      * ID
      */
-    private Long id;
+    private String id;
 
     /**
      * 字段名
@@ -71,7 +71,7 @@ public class LogTemplateFieldVo {
     /**
      * 枚举ID
      */
-    private Long enumId;
+    private String enumId;
 
     /**
      * 枚举项列表
