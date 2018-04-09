@@ -14,8 +14,6 @@ import org.springframework.cloud.netflix.feign.EnableFeignClients;
  * @date 2018/3/20 9:48
  */
 @SpringBootApplication
-@EnableFeignClients
-@EnableEurekaClient
 public class SignApplication {
 
 	public static void main(String[] args) {

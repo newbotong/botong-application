@@ -15,7 +15,7 @@ import java.util.Map;
 @Data
 public class UserMonthListVO {
 
-    private Long userId;
+    private String userId;
 
     private String userName;
 

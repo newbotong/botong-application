@@ -14,7 +14,7 @@ public class SignDetailVO {
     /**
      * 用户id
      */
-    private Long userId;
+    private String userId;
 
 
     /**

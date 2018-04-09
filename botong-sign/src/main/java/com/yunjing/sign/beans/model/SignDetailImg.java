@@ -26,7 +26,7 @@ public class SignDetailImg  extends BaseModel<SignDetailImg> {
      * 签到明细id
      */
 	@TableField("sign_detail_id")
-	private Long signDetailId;
+	private String signDetailId;
     /**
      * 图片地址
      */

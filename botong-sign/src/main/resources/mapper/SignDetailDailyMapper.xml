@@ -20,6 +20,7 @@
         <result column="address_title" property="addressTitle" />
         <result column="address" property="address" />
         <result column="imgs" property="imgUrls" />
+        <result column="remark" property="remark" />
     </resultMap>
 
     <select id="queryMonthInfo" resultMap="SignDetailResultMap">
@@ -27,6 +28,7 @@
         de.user_id,
         de.address,
         de.address_title,
+        de.remark,
         de.create_time as sign_date,
         group_concat(img.url) AS imgs
         FROM
@@ -37,7 +39,8 @@
         de.user_id,
         de.address,
         de.address_title,
-        de.create_time
+        de.create_time,
+        de.remark
         ORDER BY de.create_time DESC
     </select>
 
