@@ -337,7 +337,7 @@ public class NoticeServiceImpl extends ServiceImpl<NoticeMapper, NoticeEntity> i
                         if (StringUtils.isNotEmpty(userInfoRedis.getProfile())){
                             userInfoBody.setImg(userInfoRedis.getProfile());
                         }else {
-                            userInfoBody.setImg(userInfoRedis.getColor());
+                            userInfoBody.setImg(null);
                         }
                         userInfoBody.setId(noticeUserEntity.getUserId());
                         if (StringUtils.isNotEmpty(userInfoRedis.getNick())) {
