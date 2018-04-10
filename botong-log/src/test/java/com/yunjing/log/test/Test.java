@@ -5,12 +5,16 @@ import com.google.gson.Gson;
 import com.yunjing.botong.log.params.ManagerListParam;
 import com.yunjing.botong.log.vo.RemindVo;
 import com.yunjing.mommon.utils.IDUtils;
+import redis.clients.jedis.Jedis;
+import redis.clients.jedis.Pipeline;
+import redis.clients.jedis.Response;
 import sun.security.action.GetPropertyAction;
 
 import java.nio.charset.Charset;
 import java.security.AccessController;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 
 /**
  * <p>
@@ -21,6 +25,13 @@ import java.util.List;
  * @since 2018/3/28.
  */
 public class Test {
+
+    @org.junit.Test
+    public void test3() {
+        Jedis jedis = new Jedis("192.168.10.48", 10352);
+        Map<String, String> map = jedis.hgetAll("botong:org:member");
+        System.out.println(map);
+    }
 
     @org.junit.Test
     public void test2() {
@@ -45,7 +56,7 @@ public class Test {
     public void test() {
 
         RemindVo remindVo = new RemindVo();
-        remindVo.setMemberId(IDUtils.getID());
+        remindVo.setMemberId(IDUtils.uuid());
         remindVo.setRemindSwitch(1);
         // 日 01:30，周 1-7，月 7号，一次发送：2018-03-23
         remindVo.setCycle("16:30");

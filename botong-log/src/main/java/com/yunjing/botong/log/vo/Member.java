@@ -21,6 +21,18 @@ public class Member implements Serializable {
     public Member() {
     }
 
+    public Member(String id) {
+        this.id = id;
+    }
+
+
+    public Member(String id, String memberName, String mobile, String profile) {
+        this.id = id;
+        this.memberName = memberName;
+        this.mobile = mobile;
+        this.profile = profile;
+    }
+
     @SerializedName(value = "memberId")
     protected String id;
 
@@ -42,7 +54,7 @@ public class Member implements Serializable {
     /**
      * 创建时间
      */
-    protected long createTime;
+    protected Long createTime;
 
     /**
      * 成员对应账户Id

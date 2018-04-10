@@ -7,9 +7,11 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.data.mongodb.core.MongoTemplate;
 import org.springframework.test.context.junit4.SpringRunner;
 
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.LinkedHashMap;
 import java.util.List;
 
@@ -27,6 +29,23 @@ public class SmsTest {
 
     @Autowired
     private ISMSService smsService;
+
+    @Autowired
+    private MongoTemplate mongoTemplate;
+
+
+    @Test
+    public void test1() {
+        mongoTemplate.save(new DateTest(new Date(), "测试时间"));
+
+    }
+
+    @Test
+    public void test2() {
+        List<DateTest> list = mongoTemplate.findAll(DateTest.class);
+        System.out.println(list.toString());
+    }
+
 
     @Test
     public void test() {
