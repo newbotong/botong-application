@@ -28,6 +28,7 @@ import com.yunjing.sign.processor.feign.UserRemoteService;
 import com.yunjing.sign.processor.okhttp.UserRemoteApiService;
 import com.yunjing.sign.service.ISignDetailImgService;
 import com.yunjing.sign.service.ISignDetailService;
+import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -46,6 +47,7 @@ import java.util.*;
  * @author jingwj
  * @since 2018-03-21
  */
+@Slf4j
 @Service
 public class SignDetailServiceImpl extends ServiceImpl<SignDetailMapper, SignDetail> implements ISignDetailService {
 
@@ -122,6 +124,7 @@ public class SignDetailServiceImpl extends ServiceImpl<SignDetailMapper, SignDet
         try {
             Response<ResponseEntityWrapper<List<SignUserInfoVO>>> execute = call.execute();
             body = execute.body();
+            log.info("根据多部门id和成员id查询成员集合findSubLists：code:{}，message:{}", body.getStatusCode(), body.getStatusMessage());
         } catch (IOException e) {
             e.printStackTrace();
         }
@@ -223,6 +226,8 @@ public class SignDetailServiceImpl extends ServiceImpl<SignDetailMapper, SignDet
         try {
             Response<ResponseEntityWrapper<PageWrapper<SignUserInfoVO>>> execute = call.execute();
             body = execute.body();
+            log.info("根据多部门id和成员id查询成员集合findMemberPage：code:{}，message:{}", body.getStatusCode(), body.getStatusMessage());
+
         } catch (IOException e) {
             e.printStackTrace();
         }
@@ -308,6 +313,7 @@ public class SignDetailServiceImpl extends ServiceImpl<SignDetailMapper, SignDet
         try {
             Response<ResponseEntityWrapper<List<SignUserInfoVO>>> execute = call.execute();
             body = execute.body();
+            log.info("根据多部门ids和成员id查询成员集合findSubLists：code:{}，message:{}", body.getStatusCode(), body.getStatusMessage());
         } catch (IOException e) {
             e.printStackTrace();
         }
