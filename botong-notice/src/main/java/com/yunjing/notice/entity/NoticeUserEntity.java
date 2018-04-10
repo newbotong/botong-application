@@ -23,13 +23,13 @@ public class NoticeUserEntity extends BaseModel<NoticeUserEntity> {
      * 公告id
      */
     @TableField("notice_id")
-    private Long noticeId;
+    private String noticeId;
 
     /**
      * 用户id
      */
     @TableField("user_id")
-    private Long userId;
+    private String userId;
 
     /**
      * 是否阅读 0为已读 1为未读

@@ -45,7 +45,7 @@ public class AuthorityServiceImpl implements AuthorityService {
      * @return ResponseEntityWrapper
      */
     @Override
-    public Call<ResponseEntityWrapper> authority(String appId, Long memberId) {
+    public Call<ResponseEntityWrapper> authority(String appId, String memberId) {
         if(service == null){
             initRetrofit();
         }

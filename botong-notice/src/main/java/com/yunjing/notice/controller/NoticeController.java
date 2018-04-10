@@ -57,7 +57,7 @@ public class NoticeController extends BaseController {
      * @return
      */
     @PostMapping("/page")
-    public ResponseEntityWrapper selectNoticePage(@RequestParam Long userId, Integer state, @RequestParam Integer pageNo, @RequestParam Integer pageSize) throws BaseException {
+    public ResponseEntityWrapper selectNoticePage(@RequestParam String userId, Integer state, @RequestParam Integer pageNo, @RequestParam Integer pageSize) throws BaseException {
         Map<String, Object> map = noticeService.selectNoticePage(userId, state, pageNo, pageSize);
         return success(map);
     }
@@ -70,7 +70,7 @@ public class NoticeController extends BaseController {
      * @throws BaseException
      */
     @PostMapping("/detail")
-    public ResponseEntityWrapper selectNoticeDetail(@RequestParam Long id) throws BaseException {
+    public ResponseEntityWrapper selectNoticeDetail(@RequestParam String id) throws BaseException {
         NoticeDetailsBody noticeDetailsBody = noticeService.selectCNoticeDetail(id);
         return success(noticeDetailsBody);
     }
