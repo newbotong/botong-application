@@ -25,6 +25,7 @@ import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import retrofit2.Call;
@@ -55,7 +56,7 @@ public class NoticeServiceImpl extends ServiceImpl<NoticeMapper, NoticeEntity> i
     private NoticeMapper noticeMapper;
 
     @Autowired
-    private RedisReadonly redisTemplate;
+    private RedisReadonly redisReadonly;
     /**
      * 绑定的公告appId
      */
@@ -93,10 +94,11 @@ public class NoticeServiceImpl extends ServiceImpl<NoticeMapper, NoticeEntity> i
         } else {
             throw new BaseException("选择用户不能为空");
         }
+        StringRedisTemplate readonlyTemple = redisReadonly.getTemple();
         List<NoticeUserEntity> userInfoBodyList = new ArrayList<>();
         List<ReceiveBody> receiveBodyList = new ArrayList<>();
         for (String userId : userInfoBodies) {
-            Object object = redisTemplate.getTemple().opsForHash().get(NoticeConstant.USER_INFO_REDIS, userId);
+            Object object = readonlyTemple.opsForHash().get(NoticeConstant.USER_INFO_REDIS, userId);
             ReceiveBody receiveBody = new ReceiveBody();
             receiveBody.setUserId(userId);
             if (null != object) {
@@ -154,7 +156,7 @@ public class NoticeServiceImpl extends ServiceImpl<NoticeMapper, NoticeEntity> i
             dangParam.setSendTime(System.currentTimeMillis());
             dangParam.setSendContent(noticeEntity.getTitle());
             dangParam.setVoiceTimeLength(0);
-            Object object = redisTemplate.getTemple().opsForHash().get(NoticeConstant.USER_INFO_REDIS, noticeEntity.getIssueUserId());
+            Object object = readonlyTemple.opsForHash().get(NoticeConstant.USER_INFO_REDIS, noticeEntity.getIssueUserId());
             if (null != object) {
                 UserInfoRedis userInfoRedis = JSONObject.parseObject(object.toString(), UserInfoRedis.class);
                 if (StringUtils.isNotEmpty(userInfoRedis.getMobile())) {
@@ -327,7 +329,7 @@ public class NoticeServiceImpl extends ServiceImpl<NoticeMapper, NoticeEntity> i
             for (NoticeUserEntity noticeUserEntity : list) {
                 ids.add(noticeUserEntity.getUserId());
                 if (null != noticeUserEntity.getUserId()) {
-                    Object object = redisTemplate.getTemple().opsForHash().get(NoticeConstant.USER_INFO_REDIS, noticeUserEntity.getUserId());
+                    Object object = redisReadonly.getTemple().opsForHash().get(NoticeConstant.USER_INFO_REDIS, noticeUserEntity.getUserId());
                     if (null != object) {
                         UserInfoRedis userInfoRedis = JSONObject.parseObject(object.toString(), UserInfoRedis.class);
                         UserInfoBody userInfoBody = new UserInfoBody();
@@ -373,7 +375,7 @@ public class NoticeServiceImpl extends ServiceImpl<NoticeMapper, NoticeEntity> i
         noticeDetailBody.setReadNumber(noticeEntity.getReadNum());
         noticeDetailBody.setNotReadNumber(noticeEntity.getNotReadNum());
         if (null != noticeEntity.getIssueUserId()) {
-            Object object = redisTemplate.getTemple().opsForHash().get(NoticeConstant.USER_INFO_REDIS, noticeEntity.getIssueUserId());
+            Object object = redisReadonly.getTemple().opsForHash().get(NoticeConstant.USER_INFO_REDIS, noticeEntity.getIssueUserId());
             if (null != object) {
                 UserInfoRedis userInfoRedis = JSONObject.parseObject(object.toString(), UserInfoRedis.class);
                 if (StringUtils.isNotEmpty(userInfoRedis.getNick())) {
