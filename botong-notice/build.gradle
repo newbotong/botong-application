@@ -39,4 +39,9 @@ dependencies {
     // okhttp jar包
     compile group: 'com.squareup.okhttp3', name: 'okhttp', version: '3.10.0'
 
+    //Reids jar
+    compile('com.yunjing.botong:commons-redis:2.0.0-SNAPSHOT'){
+        changing = true
+    }
+
 }

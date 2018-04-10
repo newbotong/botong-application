@@ -23,7 +23,7 @@ public class NoticeEntity extends BaseModel<NoticeEntity> {
      * 发布人用户id
      */
     @TableField("issue_user_id")
-    private Long issueUserId;
+    private String issueUserId;
 
     /**
      * 公告标题

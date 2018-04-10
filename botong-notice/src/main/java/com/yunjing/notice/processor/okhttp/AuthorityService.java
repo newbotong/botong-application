@@ -25,5 +25,5 @@ public interface AuthorityService {
      * @return Call<ResponseEntityWrapper>
      */
     @GET("/rpc/org/admin/is-manager")
-    Call<ResponseEntityWrapper> authority(@Query("appId") String appId, @Query("memberId") Long memberId);
+    Call<ResponseEntityWrapper> authority(@Query("appId") String appId, @Query("memberId") String memberId);
 }

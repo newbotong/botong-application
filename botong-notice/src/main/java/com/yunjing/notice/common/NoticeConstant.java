@@ -18,4 +18,6 @@ public interface NoticeConstant {
      */
     Integer NOTICE_READ = 0;
     Integer NOTICE_NOT_READ = 1;
+
+    String USER_INFO_REDIS = "botong:org:user";
 }

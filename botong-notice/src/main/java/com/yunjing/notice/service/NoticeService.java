@@ -33,7 +33,7 @@ public interface NoticeService extends IService<NoticeEntity> {
      * @param state  是否阅读 0为已读 1为未读
      * @throws BaseException
      */
-    void updateNoticeState(Long userId, Long id, Integer state) throws BaseException;
+    void updateNoticeState(String userId, String id, Integer state) throws BaseException;
 
     /**
      * 逻辑删除公告
@@ -53,7 +53,7 @@ public interface NoticeService extends IService<NoticeEntity> {
      * @return
      * @throws BaseException
      */
-    Map<String, Object> selectNoticePage(Long userId, Integer state, Integer pageNo, Integer pageSize) throws BaseException;
+    Map<String, Object> selectNoticePage(String userId, Integer state, Integer pageNo, Integer pageSize) throws BaseException;
 
 
     /**
@@ -66,7 +66,7 @@ public interface NoticeService extends IService<NoticeEntity> {
      * @return
      * @throws BaseException
      */
-    Page<UserInfoBody> selectNoticeUser(Long id, Integer state, Integer pageNo, Integer pageSize) throws BaseException;
+    Page<UserInfoBody> selectNoticeUser(String id, Integer state, Integer pageNo, Integer pageSize) throws BaseException;
 
     /**
      * 根据公告id查询公告详情接口
@@ -76,7 +76,7 @@ public interface NoticeService extends IService<NoticeEntity> {
      * @return
      * @throws BaseException
      */
-    NoticeDetailBody selectNoticeDetail(Long id, Long userId) throws BaseException;
+    NoticeDetailBody selectNoticeDetail(String id, String userId) throws BaseException;
 
     /**
      * web端公告id查询公告详情接口
@@ -85,6 +85,6 @@ public interface NoticeService extends IService<NoticeEntity> {
      * @return
      * @throws BaseException
      */
-    NoticeDetailsBody selectCNoticeDetail(Long id) throws BaseException;
+    NoticeDetailsBody selectCNoticeDetail(String id) throws BaseException;
 }
 

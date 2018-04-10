@@ -8,7 +8,6 @@ import com.yunjing.mommon.validate.BeanFieldValidator;
 import com.yunjing.mommon.wrapper.ResponseEntityWrapper;
 import com.yunjing.notice.body.NoticeBody;
 import com.yunjing.notice.body.NoticeDetailBody;
-import com.yunjing.notice.body.PushBody;
 import com.yunjing.notice.body.UserInfoBody;
 import com.yunjing.notice.processor.feign.param.DangParam;
 import com.yunjing.notice.processor.okhttp.AuthorityService;
@@ -22,7 +21,6 @@ import retrofit2.Call;
 import retrofit2.Response;
 
 import java.io.IOException;
-import java.util.List;
 import java.util.Map;
 
 /**
@@ -50,7 +48,7 @@ public class NoticeApi extends BaseController {
 
     @GetMapping
     public void aaa(){
-        Call<ResponseEntityWrapper> call = authorityService.authority("be61789d315b11e89a1c0242ac110004", (long) 1111111);
+        Call<ResponseEntityWrapper> call = authorityService.authority("be61789d315b11e89a1c0242ac110004", "1111111");
         try {
             Response<ResponseEntityWrapper> execute = call.execute();
             ResponseEntityWrapper body = execute.body();
@@ -108,7 +106,7 @@ public class NoticeApi extends BaseController {
      * @throws BaseException
      */
     @PostMapping("/update")
-    public ResponseEntityWrapper updateNoticeState(@RequestParam Long userId, @RequestParam Long id, @RequestParam Integer state) throws BaseException {
+    public ResponseEntityWrapper updateNoticeState(@RequestParam String userId, @RequestParam String id, @RequestParam Integer state) throws BaseException {
         noticeService.updateNoticeState(userId, id, state);
         return success();
     }
@@ -136,7 +134,7 @@ public class NoticeApi extends BaseController {
      * @throws BaseException
      */
     @PostMapping("/page")
-    public ResponseEntityWrapper selectNoticePage(@RequestParam Long userId, Integer state, @RequestParam Integer pageNo, @RequestParam Integer pageSize) throws BaseException {
+    public ResponseEntityWrapper selectNoticePage(@RequestParam String userId, Integer state, @RequestParam Integer pageNo, @RequestParam Integer pageSize) throws BaseException {
         Map<String, Object> map = noticeService.selectNoticePage(userId, state, pageNo, pageSize);
         return success(map);
     }
@@ -149,7 +147,7 @@ public class NoticeApi extends BaseController {
      * @throws BaseException
      */
     @PostMapping("/detail")
-    public ResponseEntityWrapper selectNoticeDetail(@RequestParam Long id, @RequestParam Long userId) throws BaseException {
+    public ResponseEntityWrapper selectNoticeDetail(@RequestParam String id, @RequestParam String userId) throws BaseException {
         NoticeDetailBody noticeDetailBody = noticeService.selectNoticeDetail(id, userId);
         return success(noticeDetailBody);
     }
@@ -163,7 +161,7 @@ public class NoticeApi extends BaseController {
      * @throws BaseException
      */
     @PostMapping("/user")
-    public ResponseEntityWrapper selectNoticeUser(@RequestParam Long id, @RequestParam Integer state, @RequestParam Integer pageNo, @RequestParam Integer pageSize) throws BaseException {
+    public ResponseEntityWrapper selectNoticeUser(@RequestParam String id, @RequestParam Integer state, @RequestParam Integer pageNo, @RequestParam Integer pageSize) throws BaseException {
         Page<UserInfoBody> page = noticeService.selectNoticeUser(id, state, pageNo, pageSize);
         return success(page);
     }
