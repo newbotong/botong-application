@@ -25,4 +25,7 @@ public class LogConstant implements Serializable {
     public final static String  BOTONG_ONE_STR = "1";
     public final static String  BOTONG_ZERO_STR = "0";
 
+    public final static Integer  BOTONG_ONE_NUM = 1;
+
+    public final static Integer  BOTONG_ZERO_NUM = 0;
 }

@@ -2,6 +2,7 @@ package com.yunjing.botong.log.service.impl;
 
 import com.alibaba.druid.support.json.JSONUtils;
 import com.alibaba.fastjson.JSON;
+import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 import com.alibaba.fastjson.TypeReference;
 import com.common.mongo.dao.Page;
@@ -12,8 +13,11 @@ import com.yunjing.botong.log.constant.LogConstant;
 import com.yunjing.botong.log.dao.LogDetailDao;
 import com.yunjing.botong.log.entity.LogDetail;
 import com.yunjing.botong.log.params.ReceviedParam;
+import com.yunjing.botong.log.params.SearchParam;
+import com.yunjing.botong.log.processor.okhttp.AppCenterService;
 import com.yunjing.botong.log.service.ILogSearchService;
 import com.yunjing.botong.log.vo.LogDetailVO;
+import com.yunjing.botong.log.vo.Member;
 import com.yunjing.botong.log.vo.MemberVO;
 import com.yunjing.botong.log.vo.UserVO;
 import com.yunjing.mommon.utils.ListUtils;
@@ -42,16 +46,19 @@ public class LogSearchServiceImpl implements ILogSearchService {
     @Autowired
     StringRedisTemplate redisTemplate;
 
-    private Type memberType = new TypeReference<MemberVO>() {
+    @Autowired
+    AppCenterService appCenterService;
+
+    private Type memberType = new TypeReference<List<Member>>() {
     }.getType();
 
 
 
     /**
-     * 查询签到规则
+     * 我收到的日志列表
      *
-     * @param receviedParam
-     * @return
+     * @param receviedParam         收到的参数对象
+     * @return                      分页日志列表
      */
     @Override
     public PageWrapper<LogDetailVO> receivePage(ReceviedParam receviedParam) {
@@ -80,9 +87,74 @@ public class LogSearchServiceImpl implements ILogSearchService {
      * @return 日志明细列表
      */
     @Override
-    public boolean read(String logId) {
+    public boolean read(String logId, String userId) {
+        logDetailDao.updateReadByLogId(logId, userId);
+        return true;
+    }
 
-        return false;
+    /**
+     * 未读设置为已读
+     *
+     * @param receviedParam 日志参数对象
+     * @return 成功与否
+     */
+    @Override
+    public boolean read(ReceviedParam receviedParam) {
+        logDetailDao.updateReadAll(receviedParam.getOrgId(), receviedParam.getUserId(), receviedParam.getSendUserIds());
+        return true;
+    }
+
+    /**
+     * 删除日志
+     *
+     * @param logId  日志id
+     * @param userId 用户id
+     * @return 成功与否
+     */
+    @Override
+    public boolean delete(String logId, String userId) {
+        logDetailDao.delete(logId, userId);
+        return true;
+    }
+
+    /**
+     * 根据条件查询日志列表
+     *
+     * @param searchParam 日志参数对象
+     * @return 日志明细列表
+     */
+    @Override
+    public PageWrapper<LogDetailVO> findPage(SearchParam searchParam) {
+        //当没有选择范围则查询该企业下所有的员工
+        if (searchParam.getDeptIds().length == 0 && searchParam.getUserIds().length == 0) {
+            searchParam.getDeptIds()[0] = searchParam.getOrgId();
+        }
+        List<Member> memList = appCenterService.findSubLists(searchParam.getDeptIds(), searchParam.getUserIds());
+        List<String> memIds = new ArrayList<>();
+        Map<String, Member> memberMap = new HashMap<>();
+        for(Member member : memList) {
+            memIds.add(member.getId());
+            memberMap.put(member.getId(), member);
+        }
+
+        PageWrapper<LogDetail> detailResult = logDetailDao.findByConditionPage(searchParam.getPageNo(), searchParam.getPageSize(), searchParam.getOrgId(), memIds, searchParam.getSubmitType(), searchParam.getStartDate(), searchParam.getEndDate());
+        PageWrapper<LogDetailVO> result = new PageWrapper<>();
+        if (detailResult.getRecords() != null && detailResult.getSize() > 0) {
+            LogDetailVO vo;
+            List<LogDetailVO> resultRecord = new ArrayList<>();
+            List<MemberVO> userList;
+            for (LogDetail detail : detailResult.getRecords()) {
+                vo = BeanUtils.map(detail, LogDetailVO.class);
+                vo.setUser(memberMap.get(detail.getMemberId()));
+                resultRecord.add(vo);
+            }
+            result.setCurrent(detailResult.getCurrent());
+            result.setPages(detailResult.getPages());
+            result.setSize(detailResult.getSize());
+            result.setTotal(detailResult.getTotal());
+            result.setRecords(resultRecord);
+        }
+        return result;
     }
 
     /**
@@ -96,7 +168,7 @@ public class LogSearchServiceImpl implements ILogSearchService {
         if (detailResult.getRecords() != null && detailResult.getSize() > 0) {
             LogDetailVO vo;
             List<LogDetailVO> resultRecord = new ArrayList<>();
-            MemberVO userVO;
+            Member userVO;
             Set<Object> userIds = new HashSet<>();
             for (LogDetail detail : detailResult.getRecords()) {
                 //设置读取状态
@@ -113,16 +185,20 @@ public class LogSearchServiceImpl implements ILogSearchService {
             }
 
             List listT = redisTemplate.opsForHash().multiGet(LogConstant.BOTONG_ORG_MEMBER, userIds);
-            MemberVO memberVO;
-            Map<String, MemberVO> map = new HashMap<>();
-            for (Object objVO : listT) {
+            Member memberVO;
+            List<Member> list = new ArrayList<>();
+            if (listT != null && !listT.isEmpty()) {
+                list = JSON.parseObject(listT.toString(), memberType);
+            }
+
+            Map<String, Member> map = new HashMap<>();
+            for (Member objVO : list) {
                 if (objVO == null) {
                     continue;
                 }
-                memberVO = JSON.parseObject(objVO.toString(), memberType);
-                map.put(memberVO.getId(), memberVO);
+                map.put(objVO.getId(), objVO);
             }
-            List<MemberVO> userList;
+            List<Member> userList;
             for (LogDetail detail : detailResult.getRecords()) {
                 vo = BeanUtils.map(detail, LogDetailVO.class);
                 userList = new ArrayList<>();
@@ -132,6 +208,7 @@ public class LogSearchServiceImpl implements ILogSearchService {
                         userList.add(userVO);
                     }
                 }
+                vo.setUser(map.get(detail.getMemberId().toString()));
                 vo.setReadUsers(userList);
                 resultRecord.add(vo);
             }

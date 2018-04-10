@@ -109,4 +109,13 @@ public interface AppCenterService {
          */
         void taskCallback(Long taskId);
     }
+
+    /**
+     * 根据部门ids和成员ids查询所有的成员信息
+     * @param deptIds
+     * @param memberIds
+     * @return
+     */
+    List<Member> findSubLists(String[] deptIds, String[] memberIds);
+
 }
