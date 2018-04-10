@@ -9,6 +9,7 @@ import com.yunjing.mommon.wrapper.ResponseEntityWrapper;
 import com.yunjing.notice.body.NoticeBody;
 import com.yunjing.notice.body.NoticeDetailBody;
 import com.yunjing.notice.body.UserInfoBody;
+import com.yunjing.notice.config.RedisLog;
 import com.yunjing.notice.config.RedisReadonly;
 import com.yunjing.notice.processor.feign.param.DangParam;
 import com.yunjing.notice.processor.okhttp.AuthorityService;
@@ -48,16 +49,19 @@ public class NoticeApi extends BaseController {
     @Autowired
     private AuthorityService authorityService;
 
-//    @Autowired
-//    private RedisReadonly redisReadonly;
-//
-//    @GetMapping
-//    public void aaa(){
-//        StringRedisTemplate temple = redisReadonly.getTemple();
-//        String aaa = temple.opsForValue().get("aaa");
-//        System.out.println(aaa);
-//        temple.opsForValue().set("ccc", "aasdsd");
-//    }
+    @Autowired
+    private RedisReadonly redisReadonly;
+
+    @Autowired
+    private RedisLog redisLog;
+
+    @GetMapping
+    public void aaa(){
+        StringRedisTemplate temple = redisReadonly.getTemple();
+        String aaa = temple.opsForValue().get("aaa");
+        System.out.println(aaa);
+        redisLog.getTemple().opsForValue().set("cccaaaa", "aasdsd");
+    }
 //
 //    @PostMapping("/test-dang")
 //    public void dang(){
