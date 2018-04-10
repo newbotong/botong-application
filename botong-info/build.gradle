@@ -20,4 +20,9 @@ dependencies {
     }
 
     testCompile group: 'junit', name: 'junit', version: '4.12'
+
+    //RabbitMQ
+    compile('com.yunjing.botong:commons-message:0.0.1-SNAPSHOT') {
+        changing = true //实时更新jar包
+    }
 }
