@@ -8,6 +8,8 @@ import com.yunjing.mommon.base.BaseController;
 import com.yunjing.mommon.wrapper.ResponseEntityWrapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RestController;
 
 /**
@@ -16,11 +18,13 @@ import org.springframework.web.bind.annotation.RestController;
  * @date 2018/4/9 9:44
  */
 @RestController
+@RequestMapping("/log/log")
 public class LogApi extends BaseController {
 
     @Autowired
     private LogService logService;
 
+    @RequestMapping(value = "/add",method = RequestMethod.POST)
     public ResponseEntityWrapper<Long> createLog(@RequestBody LogParam logParam){
         return this.success(this.logService.createLog(logParam));
     }
