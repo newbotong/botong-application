@@ -49,7 +49,7 @@ spring:
 eureka:
   client:
     serviceUrl:
-      defaultZone: okhttp://${eureka.server}:${eureka.port}/eureka/
+      defaultZone: http://${eureka.server}:${eureka.port}/eureka/
   instance:
     lease-expiration-duration-in-seconds: 1
     lease-renewal-interval-in-seconds: 1
