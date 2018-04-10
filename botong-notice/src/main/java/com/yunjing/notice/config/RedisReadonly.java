@@ -6,13 +6,13 @@ import org.springframework.stereotype.Component;
 import javax.annotation.Resource;
 
 /**
- * redis只读
+ * 只读reids操作类
  *
- * @author 谈东魁
+ * @author tandk
  * @date 2018/4/9 17:58
  */
 @Component
-public class RedisReadonly extends AbRedisConfiguration {
+public class RedisReadonly extends AbstractRedisConfiguration {
     @Resource(name = "redisReadonlyTemplate")
     private StringRedisTemplate temple;
 
