@@ -58,7 +58,7 @@ spring:
         min-idle: 0
 
   ##Redis配置-日志
-  redis-log:
+  redis-info:
     database: ${redis-info.dbindex}
     host: ${redis-info.host}
     port: ${redis-info.port}
