@@ -14,7 +14,6 @@ import lombok.Data;
  **/
 @Data
 public class DangParam {
-
     /**
      * 用户id，发送者
      */
