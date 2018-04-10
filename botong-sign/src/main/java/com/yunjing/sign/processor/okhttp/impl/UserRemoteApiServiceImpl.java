@@ -24,14 +24,14 @@ import java.util.List;
 public class UserRemoteApiServiceImpl implements UserRemoteApiService {
 
     @Value("${okhttp.botong-org-structure}")
-    String BASE_URL;
+    String baseUrl;
 
     private UserRemoteApiService userRemoteApiService;
 
     private void initRetrofit(){
         // 构建 Retrofit 对象
         Retrofit retrofit = new Retrofit.Builder()
-                .baseUrl(BASE_URL)
+                .baseUrl(baseUrl)
                 // 添加json转换器，这里使用的是gson，也可以使用fastjson的转换工厂[FastJsonConverterFactory.create()]
                 .addConverterFactory(GsonConverterFactory.create())
                 .build();

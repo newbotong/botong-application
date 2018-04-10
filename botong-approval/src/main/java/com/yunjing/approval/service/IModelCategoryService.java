@@ -37,6 +37,7 @@ public interface IModelCategoryService extends IBaseService<ModelCategory> {
      * @param companyId 公司id
      * @param sortArray 序号数组
      * @return boolean
+     * @throws Exception
      */
     boolean sortedCategory(String companyId, String sortArray) throws Exception;
 

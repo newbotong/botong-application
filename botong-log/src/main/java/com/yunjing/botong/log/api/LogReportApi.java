@@ -3,7 +3,7 @@ package com.yunjing.botong.log.api;
 import com.common.mongo.util.PageWrapper;
 import com.yunjing.botong.log.params.ManagerListParam;
 import com.yunjing.botong.log.service.LogReportService;
-import com.yunjing.botong.log.vo.UserVO;
+import com.yunjing.botong.log.vo.Member;
 import com.yunjing.mommon.base.BaseController;
 import com.yunjing.mommon.wrapper.ResponseEntityWrapper;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -35,15 +35,15 @@ public class LogReportApi extends BaseController {
      * @param endDate    结束时间
      * @return
      */
-    @RequestMapping(value = "/list", method = RequestMethod.GET)
-    public ResponseEntityWrapper list(String memberId,
-                                      String orgId,
-                                      String appId,
-                                      int pageNo,
-                                      int pageSize,
-                                      @RequestParam(required = false, defaultValue = "0") int submitType,
-                                      @RequestParam(required = false, defaultValue = "0") long startDate,
-                                      @RequestParam(required = false, defaultValue = "0") long endDate) {
+    @GetMapping("/list")
+    public ResponseEntityWrapper list(@RequestParam String memberId,
+                                      @RequestParam String orgId,
+                                      @RequestParam String appId,
+                                      @RequestParam Integer pageNo,
+                                      @RequestParam Integer pageSize,
+                                      @RequestParam(required = false, defaultValue = "0") Integer submitType,
+                                      @RequestParam(required = false, defaultValue = "0") Long startDate,
+                                      @RequestParam(required = false, defaultValue = "0") Long endDate) {
 
         PageWrapper query = logReportService.query(memberId, orgId, appId, pageNo, pageSize, submitType, startDate, endDate);
         return success(query);
@@ -58,7 +58,7 @@ public class LogReportApi extends BaseController {
      */
     @PostMapping("/manager-submit-list")
     public ResponseEntityWrapper submitList(@RequestBody ManagerListParam param) {
-        PageWrapper<UserVO> wrapper = logReportService.submitList(param.getMemberId(), param.getOrgId(), param.getAppId(), param.getSubmitType(), param.getDate(), param.getPageNo(), param.getPageSize());
+        PageWrapper<Member> wrapper = logReportService.submitList(param.getMemberId(), param.getOrgId(), param.getAppId(), param.getSubmitType(), param.getDate(), param.getPageNo(), param.getPageSize());
         return success(wrapper);
     }
 
@@ -70,7 +70,7 @@ public class LogReportApi extends BaseController {
      */
     @PostMapping("/manager-unsubmit-list")
     public ResponseEntityWrapper unSubmitList(@RequestBody ManagerListParam param) {
-        PageWrapper<UserVO> wrapper = logReportService.unSubmitList(param.getMemberId(), param.getOrgId(), param.getAppId(), param.getSubmitType(), param.getDate(), param.getPageNo(), param.getPageSize());
+        PageWrapper<Member> wrapper = logReportService.unSubmitList(param.getMemberId(), param.getOrgId(), param.getAppId(), param.getSubmitType(), param.getDate(), param.getPageNo(), param.getPageSize());
         return success(wrapper);
     }
 }

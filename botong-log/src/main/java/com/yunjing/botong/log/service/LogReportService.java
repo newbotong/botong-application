@@ -2,7 +2,7 @@ package com.yunjing.botong.log.service;
 
 import com.common.mongo.util.PageWrapper;
 import com.yunjing.botong.log.vo.LogDetailVO;
-import com.yunjing.botong.log.vo.UserVO;
+import com.yunjing.botong.log.vo.Member;
 
 /**
  * <p>
@@ -43,7 +43,7 @@ public interface LogReportService {
      * @param pageSize   页大小
      * @return
      */
-    PageWrapper<UserVO> submitList(String memberId, String orgId, String appId, int submitType, String date, int pageNo, int pageSize);
+    PageWrapper<Member> submitList(String memberId, String orgId, String appId, int submitType, String date, int pageNo, int pageSize);
 
     /**
      * 日志管理列表（未提交）
@@ -57,6 +57,6 @@ public interface LogReportService {
      * @param pageSize   页大小
      * @return
      */
-    PageWrapper<UserVO> unSubmitList(String memberId, String orgId, String appId, int submitType, String date, int pageNo, int pageSize);
+    PageWrapper<Member> unSubmitList(String memberId, String orgId, String appId, int submitType, String date, int pageNo, int pageSize);
 
 }

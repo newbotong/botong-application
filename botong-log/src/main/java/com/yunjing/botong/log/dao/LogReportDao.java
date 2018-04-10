@@ -7,11 +7,13 @@ import com.common.mongo.util.PageWrapper;
 import com.yunjing.botong.log.entity.LogDetail;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.time.DateFormatUtils;
+import org.apache.commons.lang3.time.DateUtils;
 import org.springframework.data.domain.Sort;
 import org.springframework.data.mongodb.core.query.Criteria;
 import org.springframework.data.mongodb.core.query.Query;
 import org.springframework.stereotype.Service;
 
+import java.text.ParseException;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
@@ -46,8 +48,8 @@ public class LogReportDao extends BaseMongoDaoImpl<LogDetail> {
         if (submitType != 0) {
             criteria.and("submitType").is(submitType);
         }
-        criteria.andOperator(Criteria.where("submitTime").gte(date).lte(date + "23:23:59"));
         Query query = new Query(criteria);
+        buildQueryDate(query, date);
 
         // 根据时间查询指定日志已提交的列表
         Page<LogDetail> page = findPage(new Page<>(pageNo, pageSize), query);
@@ -82,8 +84,8 @@ public class LogReportDao extends BaseMongoDaoImpl<LogDetail> {
         if (submitType != 0) {
             criteria.and("submitType").is(submitType);
         }
-        criteria.andOperator(Criteria.where("submitTime").gte(date).lte(date + "23:23:59"));
         Query query = new Query(criteria);
+        buildQueryDate(query, date);
 
         List<String> list = new ArrayList<>();
         List<LogDetail> details = find(query);
@@ -92,6 +94,22 @@ public class LogReportDao extends BaseMongoDaoImpl<LogDetail> {
             list.add(String.valueOf(detail.getMemberId()));
         }
         return list;
+    }
+
+    /**
+     * 查询日期转换
+     *
+     * @param query
+     * @param date
+     */
+    private void buildQueryDate(Query query, String date) {
+        try {
+            Date start = DateUtils.parseDate(date, "yyyy-MM-dd");
+            Date end = DateUtils.parseDate(date + " 23:23:59", "yyyy-MM-dd HH:mm:ss");
+            query.addCriteria(Criteria.where("submitTime").gte(start).lte(end));
+        } catch (ParseException e) {
+            e.printStackTrace();
+        }
     }
 
 

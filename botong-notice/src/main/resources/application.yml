@@ -56,12 +56,12 @@ spring:
       max-wait: -1
       max-idle: 8
       min-idle: 0
-  ##Redis配置-日志
-  redis-log:
-    database: ${redis-log.dbindex}
-    host: ${redis-log.host}
-    port: ${redis-log.port}
-    password: ${redis-log.password}
+  ##Redis配置-公告
+  redis-notice:
+    database: ${redis-notice.dbindex}
+    host: ${redis-notice.host}
+    port: ${redis-notice.port}
+    password: ${redis-notice.password}
     timeout: 0
     pool:
       max-active: 8
@@ -98,10 +98,9 @@ notice:
 #    default-property-inclusion: non_empty
 
 okhttp:
-   botong-zuul: http://192.168.10.233:8000
-#  botong-org-admin: http://192.168.10.58:23130/
-#  botong-dang: http://192.168.10.234:23180/
-#  botong-third-party: http://192.168.10.234:17220/
+  botong-org-admin: ${okhttp-botong-zuul}${okhttp-botong-org-admin}
+  botong-dang: ${okhttp-botong-zuul}${okhttp-botong-dang}
+  botong-third-party: ${okhttp-botong-zuul}${okhttp-botong-third-party}
 
 # 写入文件日志
 logging:

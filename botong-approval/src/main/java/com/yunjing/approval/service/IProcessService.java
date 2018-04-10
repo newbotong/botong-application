@@ -62,7 +62,8 @@ public interface IProcessService extends IBaseService<SetsProcess> {
      * @param deptId      部门主键
      * @param conditionId 条件
      * @param value       条件的值
-     * @return
+     * @return ApproverVO
+     * @throws Exception
      */
     ApproverVO getApprover(String companyId, String memberId, String modelId, String deptId, String conditionId, String value) throws Exception;
 }

@@ -3,6 +3,7 @@ package com.yunjing.botong.log.processor.mq.consumer;
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
 import com.yunjing.botong.log.config.LogConstant;
+import com.yunjing.botong.log.config.AbstractRedisConfiguration;
 import com.yunjing.botong.log.dao.LogReportDao;
 import com.yunjing.botong.log.params.DangParam;
 import com.yunjing.botong.log.params.UserInfoModel;
@@ -59,9 +60,8 @@ public class RemindMessageConsumer extends AbstractMessageConsumerWithQueueDecla
     @Autowired
     private ISMSService smsService;
 
-
     @Autowired
-    private StringRedisTemplate redisTemplate;
+    private AbstractRedisConfiguration redisReadonly;
 
 
     public RemindMessageConsumer(RemindMessageConfiguration configuration) {
@@ -86,6 +86,8 @@ public class RemindMessageConsumer extends AbstractMessageConsumerWithQueueDecla
 
     @Override
     public void onMessageReceive(@Payload Message message) {
+
+        StringRedisTemplate redisTemplate = redisReadonly.getTemple();
 
         log.info("接收任务调度参数:{}", JSON.toJSONString(message));
         String memberId = message.getWhat();
@@ -119,6 +121,7 @@ public class RemindMessageConsumer extends AbstractMessageConsumerWithQueueDecla
         if (remind.getRemindSwitch() == 0) {
             return;
         }
+        StringRedisTemplate redisTemplate = redisReadonly.getTemple();
         Member memberInfo = JSON.parseObject(String.valueOf(redisTemplate.opsForHash().get(LogConstant.LOG_MEMBER_INFO, memberId)), Member.class);
 
         // 保存设置时不是管理员不需要校验管理员

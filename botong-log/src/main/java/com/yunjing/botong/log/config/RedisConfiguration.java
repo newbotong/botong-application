@@ -1,4 +1,4 @@
-package com.yunjing.notice.config;
+package com.yunjing.botong.log.config;
 
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Value;
@@ -34,15 +34,15 @@ public class RedisConfiguration {
         return stringRedisTemplate;
     }
 
-    @Bean(name = "redisNoticeTemplate")
     @Primary
-    public StringRedisTemplate redisNoticeTemplate(@Value("${spring.redis-notice.database}") int index,
-                                                @Value("${spring.redis-notice.host}") String hostName,
-                                                @Value("${spring.redis-notice.port}") int port,
-                                                @Value("${spring.redis-notice.password}") String password,
-                                                @Value("${spring.redis-notice.pool.max-idle}") int maxIdle,
-                                                @Value("${spring.redis-notice.pool.max-active}") int maxTotal,
-                                                @Value("${spring.redis-notice.pool.max-wait}") long maxWaitMillis) {
+    @Bean(name = "redisLogTemplate")
+    public StringRedisTemplate redisLogTemplate(@Value("${spring.redis-log.database}") int index,
+                                                @Value("${spring.redis-log.host}") String hostName,
+                                                @Value("${spring.redis-log.port}") int port,
+                                                @Value("${spring.redis-log.password}") String password,
+                                                @Value("${spring.redis-log.pool.max-idle}") int maxIdle,
+                                                @Value("${spring.redis-log.pool.max-active}") int maxTotal,
+                                                @Value("${spring.redis-log.pool.max-wait}") long maxWaitMillis) {
         StringRedisTemplate stringRedisTemplate = new StringRedisTemplate();
         stringRedisTemplate.setConnectionFactory(
                 connectionFactory(hostName, port, password, maxIdle, maxTotal, index, maxWaitMillis));
@@ -64,9 +64,8 @@ public class RedisConfiguration {
         jedis.setPoolConfig(poolConfig(maxIdle, maxTotal, maxWaitMillis));
         // 初始化连接pool
         jedis.afterPropertiesSet();
-        RedisConnectionFactory factory = jedis;
 
-        return factory;
+        return jedis;
     }
 
     public JedisPoolConfig poolConfig(int maxIdle, int maxTotal, long maxWaitMillis) {
@@ -76,5 +75,4 @@ public class RedisConfiguration {
         poolConfig.setMaxWaitMillis(maxWaitMillis);
         return poolConfig;
     }
-
 }

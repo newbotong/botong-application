@@ -3,6 +3,7 @@ package com.yunjing.botong.log.params;
 import lombok.Data;
 
 import java.util.List;
+import java.util.Set;
 
 /**
  * 发布日志参数
@@ -16,11 +17,11 @@ public class LogParam {
     /**
      * 用户ID
      */
-    private Long memberId;
+    private String memberId;
     /**
      * 模板ID
      */
-    private Long templateId;
+    private String templateId;
     /**
      * 日志内容
      */
@@ -32,11 +33,11 @@ public class LogParam {
     /**
      * 接收人ID列表
      */
-    private List<Long> sendToUser;
+    private Set<String> sendToUser;
     /**
      * 接收群组ID列表
      */
-    private List<Long> sendToGroup;
+    private Set<String> sendToGroup;
     /**
      * 备注
      */
