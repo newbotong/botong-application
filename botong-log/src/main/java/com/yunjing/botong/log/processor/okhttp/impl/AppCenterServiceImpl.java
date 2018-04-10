@@ -1,5 +1,6 @@
 package com.yunjing.botong.log.processor.okhttp.impl;
 
+import com.alibaba.fastjson.JSON;
 import com.yunjing.botong.log.params.DangParam;
 import com.yunjing.botong.log.params.SchedulerParam;
 import com.yunjing.botong.log.processor.okhttp.ApiService;
@@ -108,17 +109,10 @@ public class AppCenterServiceImpl implements AppCenterService {
             public void onResponse(Call<ResponseEntityWrapper> call, Response<ResponseEntityWrapper> response) {
                 // 服务器响应数据
                 ResponseEntityWrapper body = response.body();
-                // 服务器响应code
-                int code = response.code();
-
-                if (response.isSuccessful()) {
-                    if (body != null) {
-                        log.info("调用推送结果，code:{},message:{}", body.getStatusCode(), body.getStatusMessage());
-                    } else {
-                        log.error("body is null");
-                    }
+                if (body != null) {
+                    log.info("调用推送结果，code:{},message:{}", body.getStatusCode(), body.getStatusMessage());
                 } else {
-                    // 这里处理非响应 200 的情况
+                    log.error("body is null");
                 }
             }
 
@@ -164,7 +158,7 @@ public class AppCenterServiceImpl implements AppCenterService {
                 Response<ResponseEntityWrapper<Boolean>> response = call.execute();
                 ResponseEntityWrapper<Boolean> body = response.body();
                 if (body != null) {
-                    log.info("获取是否是管理员结果，code:{},message:{}", body.getStatusCode(), body.getStatusMessage());
+                    log.info("获取是否是管理员结果，code:{},message:{},data:{}", body.getStatusCode(), body.getStatusMessage(), JSON.toJSON(body.getData()));
                     if (response.isSuccessful() && body.getStatusCode() == StatusCode.SUCCESS.getStatusCode()) {
                         return body.getData();
                     }
@@ -239,12 +233,12 @@ public class AppCenterServiceImpl implements AppCenterService {
     }
 
     @Override
-    public Long setTask(SchedulerParam param) {
+    public String setTask(SchedulerParam param) {
         try {
-            Response<ResponseEntityWrapper<Long>> response = apiService.setTask(param).execute();
-            ResponseEntityWrapper<Long> body = response.body();
+            Response<ResponseEntityWrapper<String>> response = apiService.setTask(param).execute();
+            ResponseEntityWrapper<String> body = response.body();
             if (body != null) {
-                log.info("设置任务调度结果:code:{},message:{}", body.getStatusCode(), body.getStatusMessage());
+                log.info("设置任务调度结果:code:{},message:{},data:{}", body.getStatusCode(), body.getStatusMessage(), body.getData());
                 if (response.isSuccessful() && body.getStatusCode() == StatusCode.SUCCESS.getStatusCode()) {
                     return body.getData();
                 }
@@ -264,7 +258,7 @@ public class AppCenterServiceImpl implements AppCenterService {
             Response<ResponseEntityWrapper<List<Member>>> response = apiService.manageScope(appId, memberId).execute();
             ResponseEntityWrapper<List<Member>> body = response.body();
             if (body != null) {
-                log.info("获取管理范围：code:{}，message:{}", body.getStatusCode(), body.getStatusMessage());
+                log.info("获取管理范围：code:{}，message:{}，data:{}", body.getStatusCode(), body.getStatusMessage(), JSON.toJSON(body.getData()));
                 if (response.isSuccessful() && body.getStatusCode() == StatusCode.SUCCESS.getStatusCode()) {
                     return body.getData();
                 }

@@ -60,7 +60,7 @@ public interface AppCenterService {
      * @param param
      * @return
      */
-    Long setTask(SchedulerParam param);
+    String setTask(SchedulerParam param);
 
     /**
      * 获取企业成员管理范围

@@ -81,7 +81,7 @@ public class TestController {
 
     @RequestMapping("/manage-scope")
     public Object manageScope() {
-        List<Member> infos = appCenterService.manageScope("22", "6386837899156918272");
+        List<Member> infos = appCenterService.manageScope("226f65e5f6b0466cbbb131b9d9308b52", "6386837899156918272");
         return infos;
     }
 

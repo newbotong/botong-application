@@ -46,7 +46,7 @@ public class RemindApi extends BaseController {
      * @return
      */
     @RequestMapping(value = "/info", method = RequestMethod.GET)
-    public ResponseEntityWrapper info(long memberId, String appId, int submitType) {
-        return success(remindService.info(String.valueOf(memberId), appId, submitType));
+    public ResponseEntityWrapper info(String memberId, String appId, int submitType) {
+        return success(remindService.info(memberId, appId, submitType));
     }
 }
