@@ -352,13 +352,13 @@ public class InfoCatalogServiceImpl extends ServiceImpl<InfoCatalogMapper, InfoC
         int flag = infoCatalogMapper.update(infoCatalog, wrapper);
         //更新缓存
         //如果是隐藏则删除缓存数据
-        if (InfoConstant.INFO_TYPE_DISPLAY.equals(displayType)) {
-            updateInfoCategoryRedis(orgId, parentId, id);
-        } else {
-            if (redisTemplate.hasKey(InfoConstant.BOTONG_INFO_CATALOG_LIST + orgId + InfoConstant.BOTONG_INFO_FIX + parentId)) {
-                redisTemplate.opsForHash().delete(InfoConstant.BOTONG_INFO_CATALOG_LIST + orgId + InfoConstant.BOTONG_INFO_FIX + parentId, id);
-            }
-        }
+        updateInfoCategoryRedis(orgId, parentId, id);
+//        if (InfoConstant.INFO_TYPE_DISPLAY.equals(displayType)) {
+//        } else {
+//            if (redisTemplate.hasKey(InfoConstant.BOTONG_INFO_CATALOG_LIST + orgId + InfoConstant.BOTONG_INFO_FIX + parentId)) {
+//                redisTemplate.opsForHash().delete(InfoConstant.BOTONG_INFO_CATALOG_LIST + orgId + InfoConstant.BOTONG_INFO_FIX + parentId, id);
+//            }
+//        }
         //如果是显示则添加缓存数据
         return flag > 0 ? InfoConstant.StateCode.CODE_200 : InfoConstant.StateCode.CODE_602;
     }
