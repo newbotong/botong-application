@@ -56,11 +56,12 @@ public class ClientModelItemVO {
     /**
      * 审批人列表
      */
-    private List<ApproverVO> approverVOS;
+    private List<UserVO> approverVOS;
 
     /**
      * 抄送人列表
      */
-    private List<ApproverVO> copyerVOS;
+    private List<UserVO> copyerVOS;
 
+    private String key;
 }

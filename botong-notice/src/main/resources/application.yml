@@ -44,13 +44,24 @@ spring:
       max-idle: 8
   # 连接池中的最小空闲连接
       min-idle: 0
-  ##Redis配置
-  # Redis数据库索引（默认为0）
+  ##Redis配置-只读库
   redis-readonly:
     database: ${redis-readonly.dbindex}
     host: ${redis-readonly.host}
     port: ${redis-readonly.port}
     password: ${redis-readonly.password}
+    timeout: 0
+    pool:
+      max-active: 8
+      max-wait: -1
+      max-idle: 8
+      min-idle: 0
+  ##Redis配置-日志
+  redis-log:
+    database: ${redis-log.dbindex}
+    host: ${redis-log.host}
+    port: ${redis-log.port}
+    password: ${redis-log.password}
     timeout: 0
     pool:
       max-active: 8
@@ -87,9 +98,10 @@ notice:
 #    default-property-inclusion: non_empty
 
 okhttp:
-  botong-org-admin: http://192.168.10.58:23130/
-  botong-dang: http://192.168.10.234:23180/
-  botong-third-party: http://192.168.10.234:17220/
+   botong-zuul: http://192.168.10.233:8000
+#  botong-org-admin: http://192.168.10.58:23130/
+#  botong-dang: http://192.168.10.234:23180/
+#  botong-third-party: http://192.168.10.234:17220/
 
 # 写入文件日志
 logging:

@@ -18,6 +18,7 @@ import com.yunjing.info.processor.okhttp.CollectService;
 import com.yunjing.info.service.InfoContentService;
 import com.yunjing.mommon.global.exception.BaseException;
 import com.yunjing.mommon.utils.IDUtils;
+import com.yunjing.mommon.wrapper.ResponseEntityWrapper;
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.lang.StringUtils;
 import org.springframework.beans.BeanUtils;
@@ -25,6 +26,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import retrofit2.Call;
+import retrofit2.Response;
 
 import java.io.IOException;
 import java.util.HashMap;
@@ -66,11 +69,11 @@ public class InfoContentServiceImpl extends ServiceImpl<InfoContentMapper, InfoC
         BeanUtils.copyProperties(infoContent, infoContentDetailDto);
 
         //调用收藏的OKHttp
-//        Call<ResponseEntityWrapper> call =  collectService.collectState(userId, id);
-//        Response<ResponseEntityWrapper> execute = call.execute();
-//        ResponseEntityWrapper body = execute.body();
-//        Boolean result = (Boolean) body.getData();
-        infoContentDetailDto.setFavouriteState(false);
+        Call<ResponseEntityWrapper> call =  collectService.collectState(userId, id);
+        Response<ResponseEntityWrapper> execute = call.execute();
+        ResponseEntityWrapper body = execute.body();
+        Boolean result = (Boolean) body.getData();
+        infoContentDetailDto.setFavouriteState(result);
         return infoContentDetailDto;
     }
 

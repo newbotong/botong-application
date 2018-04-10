@@ -2,6 +2,8 @@ package com.yunjing.approval.model.vo;
 
 import lombok.Data;
 
+import java.util.List;
+
 /**
  * 审批人视图
  *
@@ -12,32 +14,19 @@ import lombok.Data;
 public class ApproverVO {
 
     /**
-     * 成员id
+     * 条件主键
      */
-    private String memberId;
+    private String conditionId;
 
     /**
-     * 状态
+     * 部门名称
      */
-    private Integer state;
+    private String deptName;
 
     /**
-     * 审批人手机号
+     * 部门主键
      */
-    private String mobile;
+    private String deptId;
 
-    /**
-     * 审批人名称
-     */
-    private String name;
-
-    /**
-     * 账号id
-     */
-    private String passpottld;
-
-    /**
-     * 头像
-     */
-    private String profile;
+    private List<UserVO> userVOList;
 }

@@ -14,8 +14,8 @@ public interface ProcessMapper extends IBaseMapper<SetsProcess> {
     /**
      * 删除审批人
      *
-     * @param oid 企业主键
-     * @param uid 用户主键
+     * @param companyId 企业主键
+     * @param memberId 用户主键
      */
-    void deleteProcessUser(@Param("oid") String oid, @Param("uid") String uid);
+    void deleteProcessUser(@Param("companyId") String companyId, @Param("memberId") String memberId);
 }

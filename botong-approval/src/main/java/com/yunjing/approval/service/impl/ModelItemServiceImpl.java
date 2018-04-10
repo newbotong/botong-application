@@ -11,12 +11,9 @@ import com.yunjing.approval.dao.mapper.ModelMapper;
 import com.yunjing.approval.model.entity.ModelItem;
 import com.yunjing.approval.model.entity.ModelL;
 import com.yunjing.approval.model.entity.OrgModel;
+import com.yunjing.approval.model.entity.SetsCondition;
 import com.yunjing.approval.model.vo.*;
-import com.yunjing.approval.service.IApprovalSetsService;
-import com.yunjing.approval.service.IModelItemService;
-import com.yunjing.approval.service.IModelService;
-import com.yunjing.approval.service.IOrgModelService;
-import com.yunjing.approval.util.UUIDUtil;
+import com.yunjing.approval.service.*;
 import com.yunjing.mommon.global.exception.BaseException;
 import com.yunjing.mommon.utils.IDUtils;
 import org.apache.commons.collections.CollectionUtils;
@@ -50,11 +47,19 @@ public class ModelItemServiceImpl extends BaseServiceImpl<ModelItemMapper, Model
 
     @Autowired
     private ConditionMapper conditionMapper;
+    @Autowired
+    private IConditionService conditionService;
 
     @Autowired
     private ModelMapper modelMapper;
     @Autowired
     private IApprovalSetsService approvalSetsService;
+
+    @Autowired
+    private IProcessService processService;
+
+    @Autowired
+    private ICopyService copyService;
 
     /**
      * 1-多行输入框 2-数字输入框 3-单选框 4-日期 5-日期区间 6-单行输入框 7-明细 8-说明文字 9-金额 10- 图片 11-附件
@@ -100,36 +105,25 @@ public class ModelItemServiceImpl extends BaseServiceImpl<ModelItemMapper, Model
         ApprovalSetVO approvalSet = approvalSetsService.getApprovalSet(modelId);
         clientModelItemVO.setSet(approvalSet.getSetting());
 
+        // 获取预设人员筛选字段
+        if (StringUtils.isNotBlank(modelId)) {
+            SetsCondition first = conditionService.getFirstCondition(modelId);
+            if (first != null) {
+                String cdn = first.getCdn();
+                if (StringUtils.isNotBlank(cdn)) {
+                    String key = cdn.substring(0, cdn.indexOf(" "));
+                    clientModelItemVO.setKey(key);
+                }
+            }
+        }
+        // 获取默认审批人
+        List<UserVO> processUser = processService.getProcess(modelId, null);
+        clientModelItemVO.setApproverVOS(processUser);
 
-        clientModelItemVO.setDeptId("6383142972988329992");
-        clientModelItemVO.setDeptName("互联网时代");
-        List<ApproverVO> approverVOS = new ArrayList<>();
-        ApproverVO approverVO = new ApproverVO();
-        approverVO.setMemberId("6383142972988329992");
-        approverVO.setMobile("18291495378");
-        approverVO.setName("小黑");
-        approverVO.setPasspottld("6383142972988329992");
-        approverVO.setProfile("http://a.hiphotos.baidu.com/image/pic/item/6d81800a19d8bc3e0104c2ef8e8ba61ea8d34583.jpg");
-        approverVO.setState(0);
-        ApproverVO approverVO1 = new ApproverVO();
-        approverVO1.setMemberId("6383142972988329992");
-        approverVO1.setMobile("18291495378");
-        approverVO1.setName("小黑2");
-        approverVO1.setPasspottld("6383142972988329992");
-        approverVO1.setProfile("http://a.hiphotos.baidu.com/image/pic/item/6d81800a19d8bc3e0104c2ef8e8ba61ea8d34583.jpg");
-        approverVO1.setState(0);
-        ApproverVO approverVO2 = new ApproverVO();
-        approverVO2.setMemberId("6383142972988329992");
-        approverVO2.setMobile("18291495378");
-        approverVO2.setName("小黑2");
-        approverVO2.setPasspottld("6383142972988329992");
-        approverVO2.setProfile("http://a.hiphotos.baidu.com/image/pic/item/6d81800a19d8bc3e0104c2ef8e8ba61ea8d34583.jpg");
-        approverVO2.setState(0);
-        approverVOS.add(approverVO);
-        approverVOS.add(approverVO1);
-        approverVOS.add(approverVO2);
-        clientModelItemVO.setApproverVOS(approverVOS);
-        clientModelItemVO.setCopyerVOS(approverVOS);
+        // 获取默认抄送人
+        List<UserVO> userVOList = copyService.get(modelId);
+        clientModelItemVO.setCopyerVOS(userVOList);
+
         return clientModelItemVO;
 
     }
@@ -211,8 +205,8 @@ public class ModelItemServiceImpl extends BaseServiceImpl<ModelItemMapper, Model
             version = entity.getModelVersion() + 1;
         } else {
             isNew = true;
-            modelId = UUIDUtil.get();
-//            entity.setId(modelId);
+            modelId = IDUtils.uuid();
+            entity.setId(modelId);
             entity.setLogo("https://web.botong.tech/resource/img/public.png");
 
             Integer max = modelMapper.getMaxSort(companyId);
@@ -248,7 +242,7 @@ public class ModelItemServiceImpl extends BaseServiceImpl<ModelItemMapper, Model
             if (isNew) {
                 Timestamp now = new Timestamp(System.currentTimeMillis());
                 OrgModel orgModel = new OrgModel();
-//                orgModel.setId(UUIDUtil.get());
+                orgModel.setId(IDUtils.uuid());
                 orgModel.setOrgId(companyId);
                 orgModel.setModelId(entity.getId().toString());
                 orgModel.setDataType(2);
@@ -419,5 +413,4 @@ public class ModelItemServiceImpl extends BaseServiceImpl<ModelItemMapper, Model
 
         return entityList;
     }
-
 }

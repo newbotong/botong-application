@@ -17,6 +17,11 @@ import lombok.EqualsAndHashCode;
 public class ApprovalSets extends BaseModel<ApprovalSets> {
 
     /**
+     * 模型主键
+     */
+    @TableField("model_id")
+    private String modelId;
+    /**
      * 0:不分条件设置审批人 1:分条件设置审批人
      */
     @TableField("setting")

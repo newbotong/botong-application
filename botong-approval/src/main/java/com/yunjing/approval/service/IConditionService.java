@@ -27,7 +27,7 @@ public interface IConditionService extends IBaseService<SetsCondition> {
      * 保存审批条件
      *
      * @param modelId 模型编号
-     * @param field 字段
+     * @param field   字段
      * @param numbers 天数
      * @return
      * @throws Exception
@@ -37,7 +37,7 @@ public interface IConditionService extends IBaseService<SetsCondition> {
     /**
      * 删除审批条件
      *
-     * @param modelId 模型编号
+     * @param modelId    模型编号
      * @param conditions 审批条件编号
      * @return
      * @throws Exception
@@ -52,4 +52,21 @@ public interface IConditionService extends IBaseService<SetsCondition> {
      * @throws Exception
      */
     List<SetConditionVO> getConditionList(String modelId) throws Exception;
+
+    /**
+     * 获取审批条件
+     *
+     * @param modelId 模型主键
+     * @param value   条件的值
+     * @return
+     */
+    String getCondition(String modelId, String value);
+
+    /**
+     * 获取第一条件
+     *
+     * @param modelId 模型主键
+     * @return
+     */
+    SetsCondition getFirstCondition(String modelId);
 }
