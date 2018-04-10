@@ -10,6 +10,8 @@ import org.springframework.data.redis.core.StringRedisTemplate;
 import redis.clients.jedis.JedisPoolConfig;
 
 /**
+ * redis只读配置类
+ *
  * @author 谈东魁
  * @date 2018/4/9 17:19
  */

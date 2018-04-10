@@ -6,6 +6,8 @@ import org.springframework.stereotype.Component;
 import javax.annotation.Resource;
 
 /**
+ * redis只读
+ *
  * @author 谈东魁
  * @date 2018/4/9 17:58
  */
