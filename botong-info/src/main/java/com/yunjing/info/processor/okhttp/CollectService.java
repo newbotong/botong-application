@@ -25,6 +25,6 @@ public interface CollectService {
      * @throws BaseException
      * @throws IOException
      */
-    @POST("/rpc/favourite/verification")
+    @POST("/api/microapps/appcenter/user/verification")
     Call<ResponseEntityWrapper> collectState(@Query("userId") String userId, @Query("originId") String originId) throws BaseException,IOException;
 }

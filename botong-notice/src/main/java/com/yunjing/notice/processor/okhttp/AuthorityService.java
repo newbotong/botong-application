@@ -25,6 +25,6 @@ public interface AuthorityService {
      * @return Call<ResponseEntityWrapper>
      */
 
-    @GET("/rpc/org/admin/is-manager")
+    @GET("/api/microapps/appcenter/org/verify-manager")
     Call<ResponseEntityWrapper> authority(@Query("appId") String appId, @Query("memberId") String memberId);
 }

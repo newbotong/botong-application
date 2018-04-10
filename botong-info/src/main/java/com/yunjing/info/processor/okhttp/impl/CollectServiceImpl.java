@@ -20,7 +20,7 @@ import java.io.IOException;
 @Service
 public class CollectServiceImpl implements CollectService {
 
-    @Value("${okhttp.botong-favorite}")
+    @Value("${okhttp.botong-zuul}")
     String baseUrl;
     private CollectService service;
 

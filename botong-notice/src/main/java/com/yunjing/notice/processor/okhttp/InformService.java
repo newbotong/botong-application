@@ -20,6 +20,6 @@ public interface InformService {
      * @return
      */
 
-    @POST("/rpc/push/push-all-target-user")
+    @POST("/api/microapps/appcenter/push/push-target-user")
     Call<ResponseEntityWrapper> pushAllTargetByUser(@Body PushParam pushParam);
 }

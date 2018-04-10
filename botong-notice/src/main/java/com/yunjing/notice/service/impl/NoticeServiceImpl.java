@@ -4,7 +4,6 @@ import com.alibaba.fastjson.JSONObject;
 import com.baomidou.mybatisplus.mapper.EntityWrapper;
 import com.baomidou.mybatisplus.plugins.Page;
 import com.baomidou.mybatisplus.service.impl.ServiceImpl;
-import com.google.gson.JsonObject;
 import com.yunjing.mommon.base.PushParam;
 import com.yunjing.mommon.global.exception.BaseException;
 import com.yunjing.mommon.utils.IDUtils;
@@ -26,7 +25,6 @@ import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import retrofit2.Call;
@@ -232,7 +230,6 @@ public class NoticeServiceImpl extends ServiceImpl<NoticeMapper, NoticeEntity> i
             throw new BaseException("公告id不能为空");
         }
         String[] idArrays = ids.split(",");
-        //String数组转Long数组
         //查询公告是否存在
         List<NoticeEntity> noticeEntityList = new NoticeEntity().selectList(new EntityWrapper<NoticeEntity>()
                 .eq("logic_delete", NoticeConstant.LOGIC_DELETE_NOMAL).in("id", Arrays.asList(idArrays)));
@@ -287,17 +284,16 @@ public class NoticeServiceImpl extends ServiceImpl<NoticeMapper, NoticeEntity> i
             } catch (IOException e) {
                 e.printStackTrace();
             }
-
             //判断是否为管理员
             boolean results = (boolean) body.getData();
-            maps.put("admin", true);
+            maps.put("admin", results);
             map.put("userId", userId);
             List<NoticePageBody> noticePageBodyList = new ArrayList<>();
             if (state == 0 || state == 1) {
                 map.put("state", state);
                 noticePageBodyList = noticeMapper.selectNoticePage(map, page);
             }
-            if (true == true) {
+            if (results) {
                 int i = 2;
                 if (state == i) {
                     noticePageBodyList = noticeMapper.selectMangerNoticePage(map, page);
