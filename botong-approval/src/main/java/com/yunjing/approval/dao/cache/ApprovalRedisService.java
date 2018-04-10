@@ -12,7 +12,7 @@ import org.springframework.stereotype.Service;
 @Service
 public class ApprovalRedisService extends BaseRedisService<ApprovalExData> {
 
-    private static final String REDIS_KEY = "APPROVAL_TEMP";
+    private static final String REDIS_KEY = "botong:approval:temp";
 
     @Override
     protected String getRedisKey() {

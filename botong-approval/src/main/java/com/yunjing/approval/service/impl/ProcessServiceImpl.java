@@ -5,17 +5,12 @@ import com.baomidou.mybatisplus.mapper.Wrapper;
 import com.common.mybatis.service.impl.BaseServiceImpl;
 import com.yunjing.approval.dao.mapper.ConditionMapper;
 import com.yunjing.approval.dao.mapper.ProcessMapper;
-import com.yunjing.approval.model.entity.ApprovalSets;
-import com.yunjing.approval.model.entity.ApprovalUser;
-import com.yunjing.approval.model.entity.SetsCondition;
-import com.yunjing.approval.model.entity.SetsProcess;
+import com.yunjing.approval.model.entity.*;
 import com.yunjing.approval.model.vo.ApproverVO;
 import com.yunjing.approval.model.vo.UserVO;
-import com.yunjing.approval.service.IApprovalSetsService;
-import com.yunjing.approval.service.IApprovalUserService;
-import com.yunjing.approval.service.IConditionService;
-import com.yunjing.approval.service.IProcessService;
+import com.yunjing.approval.service.*;
 import com.yunjing.approval.util.ApproConstants;
+import com.yunjing.approval.util.Colors;
 import com.yunjing.mommon.global.exception.BaseException;
 import com.yunjing.mommon.utils.IDUtils;
 import org.apache.commons.lang.StringUtils;
@@ -52,6 +47,8 @@ public class ProcessServiceImpl extends BaseServiceImpl<ProcessMapper, SetsProce
     private ProcessMapper processMapper;
     @Autowired
     private IApprovalUserService approvalUserService;
+    @Autowired
+    private ICopyService copyService;
 
     @Override
     public boolean delete(String modelId, String conditions) throws Exception {
@@ -156,7 +153,7 @@ public class ProcessServiceImpl extends BaseServiceImpl<ProcessMapper, SetsProce
     }
 
     @Override
-    public ApproverVO getApprover(String companyId, String memberId, String modelId, String deptId, String conditionId, String value) throws Exception {
+    public ApproverVO getApprover(String companyId, String memberId, String modelId, String deptId, String conditionId, String field,String value) throws Exception {
         ApproverVO result = new ApproverVO();
         // 获取审批流程设置类型，set=0:不分条件设置审批人 set=1:分条件设置审批人
         ApprovalSets sets = approvalSetsService.selectOne(Condition.create().where("model_id={0}", modelId));
@@ -173,9 +170,12 @@ public class ProcessServiceImpl extends BaseServiceImpl<ProcessMapper, SetsProce
                 }
 
                 if (StringUtils.isBlank(conditionId)) {
-                    SetsCondition first = conditionService.getFirstCondition(modelId);
-                    if (first != null) {
-                        cdnId = first.getId();
+                    List<SetsCondition> conditionSet = conditionService.getFirstCondition(modelId);
+                    for (SetsCondition sc : conditionSet) {
+                        String s = sc.getCdn().substring(0, sc.getCdn().indexOf(" "));
+                        if (sc != null && s.equals(field)) {
+                            cdnId = sc.getId();
+                        }
                     }
                 } else {
                     cdnId = conditionId;
@@ -215,8 +215,11 @@ public class ProcessServiceImpl extends BaseServiceImpl<ProcessMapper, SetsProce
                 }
             }
             if (list != null && list.size() > 0) {
-                result.setUserVOList(list);
+                result.setApproverList(list);
             }
+            // 获取抄送人
+            result.setCopyList(copyService.getCopy(companyId,memberId,modelId));
+
             return result;
         }
         return null;
@@ -235,4 +238,5 @@ public class ProcessServiceImpl extends BaseServiceImpl<ProcessMapper, SetsProce
     public List<UserVO> getAdmins(String deptId, int num) {
         return null;
     }
+
 }

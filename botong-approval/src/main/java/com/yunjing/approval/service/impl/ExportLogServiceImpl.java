@@ -3,14 +3,12 @@ package com.yunjing.approval.service.impl;
 import com.baomidou.mybatisplus.mapper.Condition;
 import com.baomidou.mybatisplus.plugins.Page;
 import com.common.mybatis.service.impl.BaseServiceImpl;
-import com.yunjing.approval.dao.cache.UserRedisService;
 import com.yunjing.approval.dao.mapper.ExportLogMapper;
 import com.yunjing.approval.model.entity.ApprovalUser;
 import com.yunjing.approval.model.entity.ExportLog;
 import com.yunjing.approval.model.vo.ExportLogVO;
 import com.yunjing.approval.model.vo.LogPageVO;
 import com.yunjing.approval.model.vo.ModelVO;
-import com.yunjing.approval.model.vo.UserVO;
 import com.yunjing.approval.service.IApprovalUserService;
 import com.yunjing.approval.service.IExportLogService;
 import com.yunjing.approval.service.IModelService;
@@ -29,8 +27,6 @@ import java.util.stream.Collectors;
 @Service
 public class ExportLogServiceImpl extends BaseServiceImpl<ExportLogMapper, ExportLog> implements IExportLogService {
 
-    @Autowired
-    private UserRedisService userRedisService;
     @Autowired
     private IModelService modelService;
     @Autowired
