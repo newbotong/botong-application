@@ -73,7 +73,6 @@ public class LogDetail {
     /**
      * 日志内容
      */
-    @DBRef
     private List<LogConentVO> contents;
 
     /**
