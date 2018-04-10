@@ -20,7 +20,7 @@ public class LogDetailVO {
     /**
      * 发送人信息
      */
-    private MemberVO user;
+    private Member user;
 
     /**
      * 日志Id
@@ -71,17 +71,17 @@ public class LogDetailVO {
     /**
      * 发送人
      */
-    private List<MemberVO> sendToUsers;
+    private List<Member> sendToUsers;
 
     /**
      * 已读人
      */
-    private List<MemberVO> readUsers;
+    private List<Member> readUsers;
 
     /**
      * 未读人
      */
-    private List<MemberVO> unReadUsers;
+    private List<Member> unReadUsers;
 
     /**
      * submitTIme

@@ -27,7 +27,7 @@ public class LogDetail {
     /**
      * 日志Id
      */
-    @Field("_id")
+    @Field("logId")
     private String logId;
 
     /**

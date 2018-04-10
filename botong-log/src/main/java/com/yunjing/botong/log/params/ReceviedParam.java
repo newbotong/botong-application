@@ -14,17 +14,22 @@ public class ReceviedParam {
     /**
      * 人员Id
      */
-    private Long userId;
+    private String userId;
+
+    /**
+     * 日志id
+     */
+    private String logId;
 
     /**
      * 组织Id
      */
-    private Long orgId;
+    private String orgId;
 
     /**
      * 发送人集合，逗号间隔
      */
-    private Long[] sendUserIds;
+    private String[] sendUserIds;
 
     /**
      * 未读已读
