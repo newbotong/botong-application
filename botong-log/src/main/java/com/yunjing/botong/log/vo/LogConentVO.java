@@ -34,6 +34,11 @@ public class LogConentVO {
     private Integer type;
 
     /**
+     * 唯一英文表示
+     */
+    private String key;
+
+    /**
      * 枚举ID,单选和复选
      */
     private String enumId;
@@ -68,6 +73,7 @@ public class LogConentVO {
                 this.name = items.get(i).getFieldName();
                 this.value = logItemParam.getValue();
                 this.type = items.get(i).getType();
+                this.key = items.get(i).getKey();
                 this.enumId = items.get(i).getEnumId();
                 if(items.get(i).getType() == 3){
                     List<LogEnumItemEntity> logEnumItemEntities = new ArrayList<>();
