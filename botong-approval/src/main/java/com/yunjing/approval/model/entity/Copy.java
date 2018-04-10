@@ -20,7 +20,7 @@ public class Copy extends BaseModel<Copy> {
      * 模型主键
      */
     @TableField("model_id")
-    private Long modelId;
+    private String modelId;
 
     /**
      * 用户主键

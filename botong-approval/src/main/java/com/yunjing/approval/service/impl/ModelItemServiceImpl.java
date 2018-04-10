@@ -16,6 +16,7 @@ import com.yunjing.approval.service.IApprovalSetsService;
 import com.yunjing.approval.service.IModelItemService;
 import com.yunjing.approval.service.IModelService;
 import com.yunjing.approval.service.IOrgModelService;
+import com.yunjing.approval.util.UUIDUtil;
 import com.yunjing.mommon.global.exception.BaseException;
 import com.yunjing.mommon.utils.IDUtils;
 import org.apache.commons.collections.CollectionUtils;
@@ -62,7 +63,7 @@ public class ModelItemServiceImpl extends BaseServiceImpl<ModelItemMapper, Model
 
     @Override
     @Transactional(propagation = Propagation.REQUIRED, rollbackFor = Exception.class)
-    public ClientModelItemVO getModelItem(Long modelId) throws Exception {
+    public ClientModelItemVO getModelItem(String modelId) throws Exception {
         ModelL modelL = modelService.selectById(modelId);
         List<ModelItem> itemList = this.selectList(Condition.create().where("model_id={0}", modelId).and("item_version={0}", modelL.getModelVersion()).orderBy("priority"));
         ModelVO modelVO = new ModelVO();
@@ -100,28 +101,28 @@ public class ModelItemServiceImpl extends BaseServiceImpl<ModelItemMapper, Model
         clientModelItemVO.setSet(approvalSet.getSetting());
 
 
-        clientModelItemVO.setDeptId(6383142972988329992L);
+        clientModelItemVO.setDeptId("6383142972988329992");
         clientModelItemVO.setDeptName("互联网时代");
         List<ApproverVO> approverVOS = new ArrayList<>();
         ApproverVO approverVO = new ApproverVO();
-        approverVO.setMemberId(6384662596632449044L);
+        approverVO.setMemberId("6383142972988329992");
         approverVO.setMobile("18291495378");
         approverVO.setName("小黑");
-        approverVO.setPasspottld(6384662596632449044L);
+        approverVO.setPasspottld("6383142972988329992");
         approverVO.setProfile("http://a.hiphotos.baidu.com/image/pic/item/6d81800a19d8bc3e0104c2ef8e8ba61ea8d34583.jpg");
         approverVO.setState(0);
         ApproverVO approverVO1 = new ApproverVO();
-        approverVO1.setMemberId(6384662596632449044L);
+        approverVO1.setMemberId("6383142972988329992");
         approverVO1.setMobile("18291495378");
         approverVO1.setName("小黑2");
-        approverVO1.setPasspottld(6384662596632449044L);
+        approverVO1.setPasspottld("6383142972988329992");
         approverVO1.setProfile("http://a.hiphotos.baidu.com/image/pic/item/6d81800a19d8bc3e0104c2ef8e8ba61ea8d34583.jpg");
         approverVO1.setState(0);
         ApproverVO approverVO2 = new ApproverVO();
-        approverVO2.setMemberId(6384662596632449044L);
+        approverVO2.setMemberId("6383142972988329992");
         approverVO2.setMobile("18291495378");
         approverVO2.setName("小黑2");
-        approverVO2.setPasspottld(6384662596632449044L);
+        approverVO2.setPasspottld("6383142972988329992");
         approverVO2.setProfile("http://a.hiphotos.baidu.com/image/pic/item/6d81800a19d8bc3e0104c2ef8e8ba61ea8d34583.jpg");
         approverVO2.setState(0);
         approverVOS.add(approverVO);
@@ -154,7 +155,7 @@ public class ModelItemServiceImpl extends BaseServiceImpl<ModelItemMapper, Model
     }
 
     @Override
-    public ModelVO get(Long modelId) throws Exception {
+    public ModelVO get(String modelId) throws Exception {
 
         ModelL modelL = modelService.selectById(modelId);
         if (modelL == null) {
@@ -174,7 +175,7 @@ public class ModelItemServiceImpl extends BaseServiceImpl<ModelItemMapper, Model
 
     @Override
     @Transactional(propagation = Propagation.REQUIRED, rollbackFor = Exception.class)
-    public ModelVO saveModelItem(Long companyId, Long memberId, String json) throws Exception {
+    public ModelVO saveModelItem(String companyId, String memberId, String json) throws Exception {
 
         if (StringUtils.isBlank(json)) {
             throw new BaseException("模型数据不存在");
@@ -197,7 +198,7 @@ public class ModelItemServiceImpl extends BaseServiceImpl<ModelItemMapper, Model
             throw new BaseException("字段数据不存在");
         }
 
-        Long modelId = vo.getModelId();
+        String modelId = vo.getModelId();
         int version = 1;
 
         ModelL entity = new ModelL();
@@ -210,8 +211,8 @@ public class ModelItemServiceImpl extends BaseServiceImpl<ModelItemMapper, Model
             version = entity.getModelVersion() + 1;
         } else {
             isNew = true;
-            modelId = IDUtils.getID();
-            entity.setId(modelId);
+            modelId = UUIDUtil.get();
+//            entity.setId(modelId);
             entity.setLogo("https://web.botong.tech/resource/img/public.png");
 
             Integer max = modelMapper.getMaxSort(companyId);
@@ -247,9 +248,9 @@ public class ModelItemServiceImpl extends BaseServiceImpl<ModelItemMapper, Model
             if (isNew) {
                 Timestamp now = new Timestamp(System.currentTimeMillis());
                 OrgModel orgModel = new OrgModel();
-                orgModel.setId(IDUtils.getID());
+//                orgModel.setId(UUIDUtil.get());
                 orgModel.setOrgId(companyId);
-                orgModel.setModelId(entity.getId());
+                orgModel.setModelId(entity.getId().toString());
                 orgModel.setDataType(2);
                 orgModel.setCreateTime(now.getTime());
                 result = orgModelService.insert(orgModel);
@@ -276,7 +277,7 @@ public class ModelItemServiceImpl extends BaseServiceImpl<ModelItemMapper, Model
      * @return 字段结婚
      * @throws Exception 异常
      */
-    private List<ModelItem> getModelItemList(List<ModelItemVO> itemVOS, Long modelId, int version, boolean flag, ModelItem parent) throws Exception {
+    private List<ModelItem> getModelItemList(List<ModelItemVO> itemVOS, String modelId, int version, boolean flag, ModelItem parent) throws Exception {
         List<ModelItem> entityList = new ArrayList<>();
         int i = 1;
         for (ModelItemVO itemVO : itemVOS) {
@@ -287,7 +288,7 @@ public class ModelItemServiceImpl extends BaseServiceImpl<ModelItemMapper, Model
 
             ModelItem item = new ModelItem();
 
-            Long modelItemId = IDUtils.getID();
+            String modelItemId = IDUtils.uuid();
             item.setId(modelItemId);
             item.setModelId(modelId);
 
@@ -398,7 +399,7 @@ public class ModelItemServiceImpl extends BaseServiceImpl<ModelItemMapper, Model
 
             // 子字段
             if (flag) {
-                item.setIsChild(parent.getId());
+                item.setIsChild(parent.getId().toString());
             }
             entityList.add(item);
 

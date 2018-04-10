@@ -24,7 +24,7 @@ public class LogTemplateParam {
     /**
      * 主键ID
      */
-    private long id;
+    private String id;
 
     /**
      * 模板名称
@@ -37,7 +37,7 @@ public class LogTemplateParam {
     /**
      * 所属机构ID
      */
-    private long orgId;
+    private String orgId;
     /**
      * 提交周期（1每天 2 每周 3 每月 4 季度 5 年度）
      */
@@ -61,7 +61,7 @@ public class LogTemplateParam {
         for (int i = 0; i < this.details.size(); i++) {
             LogTemplateFieldEntity it = new LogTemplateFieldEntity();
             LogTemplateFieldParam par = this.details.get(i);
-            it.setId(IdWorker.getId());
+            it.setId(IdWorker.get32UUID());
             it.setFieldName(par.getFieldName());
             it.setFieldLabel(par.getFieldLabel());
             it.setFieldType(par.getFieldType());
@@ -79,7 +79,7 @@ public class LogTemplateParam {
             it.setDeleted(false);
             if(par.getFieldType() == 3){
                 LogTemplateEnumEntity enumEntity = new LogTemplateEnumEntity();
-                enumEntity.setId(IdWorker.getId());
+                enumEntity.setId(IdWorker.get32UUID());
                 enumEntity.setEnumLabel(par.getFieldName()+"_enum");
                 enumEntity.setCreateTime(System.currentTimeMillis());
                 enumEntity.setUpdateTime(System.currentTimeMillis());
@@ -88,7 +88,7 @@ public class LogTemplateParam {
                 List<LogTemplateEnumItemEntity> enumItems = new ArrayList<>();
                 for (int j = 0; j < enumItemPars.size(); j++) {
                     LogTemplateEnumItemEntity itemEntity = new LogTemplateEnumItemEntity();
-                    itemEntity.setId(IdWorker.getId());
+                    itemEntity.setId(IdWorker.get32UUID());
                     itemEntity.setItemKey(enumItemPars.get(j).getName());
                     itemEntity.setItemValue(enumItemPars.get(j).getValue());
                     itemEntity.setEnumId(enumEntity.getId());

@@ -13,7 +13,7 @@ public class ApprovalDetailDTO {
     /**
      * 审批模型主键
      */
-    private Long modelId;
+    private String modelId;
 
     /**
      * 审批模型名称
@@ -33,7 +33,7 @@ public class ApprovalDetailDTO {
     /**
      * 审批项主键
      */
-    private Long modelItemId;
+    private String modelItemId;
 
     /**
      * 排序
@@ -48,7 +48,7 @@ public class ApprovalDetailDTO {
     /**
      * 审批项子项
      */
-    private Long isChild;
+    private String isChild;
 
     /**
      * 审批属性值
@@ -73,7 +73,7 @@ public class ApprovalDetailDTO {
     /**
      * 用户主键
      */
-    private Long userId;
+    private String userId;
 
     /**
      * 用户名

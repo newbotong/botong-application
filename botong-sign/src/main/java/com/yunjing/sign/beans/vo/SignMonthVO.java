@@ -13,7 +13,7 @@ public class SignMonthVO {
 
     private Long signTime;
 
-    private Long userId;
+    private String userId;
 
     private String signDate;
 

@@ -19,7 +19,7 @@ public interface ApprovalAttrMapper extends IBaseMapper<ApprovalAttr> {
      * @param orgId 企业主键
      * @return
      */
-    List<ApprovalAttr> selectAttrByOrgId(Long orgId);
+    List<ApprovalAttr> selectAttrByOrgId(String orgId);
 
     /**
      * 查询企业下审批数据的详细信息
@@ -27,7 +27,7 @@ public interface ApprovalAttrMapper extends IBaseMapper<ApprovalAttr> {
      * @param approvalId 审批主键
      * @return
      */
-    List<ApproveAttributeVO> selectAttrList(Long approvalId);
+    List<ApproveAttributeVO> selectAttrList(String approvalId);
 
     /**
      * 查询企业下审批数据的详细信息
@@ -35,6 +35,6 @@ public interface ApprovalAttrMapper extends IBaseMapper<ApprovalAttr> {
      * @param orgId 企业主键
      * @return
      */
-    List<ApproveAttributeVO> selectAttrListByOrgId(Long orgId);
+    List<ApproveAttributeVO> selectAttrListByOrgId(String orgId);
 
 }

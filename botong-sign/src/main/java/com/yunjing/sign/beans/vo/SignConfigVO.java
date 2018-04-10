@@ -16,7 +16,7 @@ public class SignConfigVO {
     /**
      * 组织id
      */
-    private Long orgId;
+    private String orgId;
 
 
     private Integer photoStatus;
@@ -55,5 +55,10 @@ public class SignConfigVO {
      * 维度
      */
     private String lat;
+
+    /**
+     * 地址
+     */
+    private String adress;
 
 }

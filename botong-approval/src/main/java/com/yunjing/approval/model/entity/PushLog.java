@@ -20,13 +20,13 @@ public class PushLog extends BaseModel<PushLog>{
      * 企业主键
      */
     @TableField("org_id")
-    private Long orgId;
+    private String orgId;
 
     /**
      * 用户主键
      */
     @TableField("user_id")
-    private Long userId;
+    private String userId;
 
     /**
      * 推送类型
@@ -38,7 +38,7 @@ public class PushLog extends BaseModel<PushLog>{
      * 推送内容主键
      */
     @TableField("info_id")
-    private Long infoId;
+    private String infoId;
 
     /**
      * 推送消息

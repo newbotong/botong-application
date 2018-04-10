@@ -53,7 +53,7 @@ public class CopyServiceImpl extends BaseServiceImpl<CopyMapper, Copy> implement
      * @throws Exception
      */
     @Override
-    public List<UserVO> get(Long modelId) throws Exception {
+    public List<UserVO> get(String modelId) throws Exception {
         List<Copy> copyList = this.selectList(Condition.create().where("model_id={0}", modelId).orderBy("sort", true));
         List<UserVO> userVOList = new ArrayList<>();
         List<Long> ids = new ArrayList<>(copyList.size());
@@ -91,7 +91,7 @@ public class CopyServiceImpl extends BaseServiceImpl<CopyMapper, Copy> implement
      * @throws Exception
      */
     @Override
-    public boolean save(Long modelId, String userIds) throws Exception {
+    public boolean save(String modelId, String userIds) throws Exception {
 
         if (null == modelId) {
             throw new BaseException("模型主键不存在");
@@ -122,7 +122,7 @@ public class CopyServiceImpl extends BaseServiceImpl<CopyMapper, Copy> implement
             } else {
                 entity.setType(0);
             }
-            entity.setId(IDUtils.getID());
+            entity.setId(IDUtils.uuid());
             entity.setModelId(modelId);
             entity.setUserId(id);
             entity.setSort(i);
@@ -140,7 +140,7 @@ public class CopyServiceImpl extends BaseServiceImpl<CopyMapper, Copy> implement
     }
 
     @Override
-    public boolean deleteCopyUser(Long companyId, Long memberId) {
+    public boolean deleteCopyUser(String companyId, String memberId) {
         return copyMapper.deleteCopyUser(companyId, memberId);
     }
 }

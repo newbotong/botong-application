@@ -27,8 +27,8 @@ public interface CopysMapper extends IBaseMapper<Copys> {
      * @param filterParam 搜索参数
      * @return
      */
-    List<ApprovalContentDTO> getCopiedApprovalList(@Param("index") Integer index, @Param("size") Integer pageSize, @Param("orgId") Long orgId,
-                                                   @Param("userId") Long userId, @Param("filterParam") FilterParam filterParam);
+    List<ApprovalContentDTO> getCopiedApprovalList(@Param("index") Integer index, @Param("size") Integer pageSize, @Param("orgId") String orgId,
+                                                   @Param("userId") String userId, @Param("filterParam") FilterParam filterParam);
 
     /**
      * 查询抄送人列表
@@ -36,5 +36,5 @@ public interface CopysMapper extends IBaseMapper<Copys> {
      * @param approvalId 审批主键
      * @return
      */
-    List<CopyUserVO> getCopyUserList(Long approvalId);
+    List<CopyUserVO> getCopyUserList(String approvalId);
 }

@@ -28,7 +28,7 @@ public class LogTemplateEntity extends BaseModel<LogTemplateEntity> {
      * 所属机构ID
      */
     @TableField("org_id")
-    private Long  orgId;
+    private String  orgId;
     /**
      * 提交周期（1每天 2 每周 3 每月 4 季度 5 年度）
      */

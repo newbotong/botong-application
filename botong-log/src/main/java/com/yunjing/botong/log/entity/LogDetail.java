@@ -1,11 +1,7 @@
 package com.yunjing.botong.log.entity;
 
-import com.fasterxml.jackson.annotation.JsonInclude;
 import com.yunjing.botong.log.vo.LogConentVO;
-import com.yunjing.botong.log.vo.UserVO;
-import com.yunjing.mommon.validate.annotation.NotNullOrEmpty;
 import lombok.Data;
-import org.springframework.data.annotation.Id;
 import org.springframework.data.mongodb.core.mapping.DBRef;
 import org.springframework.data.mongodb.core.mapping.Field;
 
@@ -26,7 +22,7 @@ public class LogDetail {
      * 发送人信息
      */
 
-    private Long memberId;
+    private String memberId;
 
     /**
      * 日志Id

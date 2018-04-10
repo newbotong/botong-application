@@ -24,13 +24,13 @@ public class OrgModel extends BaseModel<OrgModel> {
      * 企业(组织)主键
      */
     @TableField("org_id")
-    private Long orgId;
+    private String orgId;
 
     /**
      * 模型主键
      */
     @TableField("model_id")
-    private Long modelId;
+    private String modelId;
 
     /**
      * 类型 1:日志 2:审批

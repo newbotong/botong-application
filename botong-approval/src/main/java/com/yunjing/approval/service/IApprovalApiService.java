@@ -20,7 +20,7 @@ public interface IApprovalApiService {
      * @param companyId 公司id
      * @return
      */
-    List<ClientModelVO> getList(Long companyId);
+    List<ClientModelVO> getList(String companyId);
 
     /**
      * 获取待审批列表
@@ -31,7 +31,7 @@ public interface IApprovalApiService {
      * @param filterParam 搜索参数
      * @return
      */
-    Page<ClientApprovalVO> getWaited(Page page, Long companyId, Long memberId, FilterParam filterParam);
+    Page<ClientApprovalVO> getWaited(Page page, String companyId, String memberId, FilterParam filterParam);
 
     /**
      * 获取已审批列表
@@ -42,7 +42,7 @@ public interface IApprovalApiService {
      * @param filterParam 搜索参数
      * @return
      */
-    Page<ClientApprovalVO> getCompleted(Page page, Long companyId, Long memberId, FilterParam filterParam);
+    Page<ClientApprovalVO> getCompleted(Page page, String companyId, String memberId, FilterParam filterParam);
 
     /**
      * 获取我发起的审批列表
@@ -53,7 +53,7 @@ public interface IApprovalApiService {
      * @param filterParam 搜索参数
      * @return
      */
-    Page<ClientApprovalVO> getLaunched(Page page, Long companyId, Long memberId, FilterParam filterParam);
+    Page<ClientApprovalVO> getLaunched(Page page, String companyId, String memberId, FilterParam filterParam);
 
     /**
      * 获取抄送我的审批列表
@@ -64,7 +64,7 @@ public interface IApprovalApiService {
      * @param filterParam 搜索参数
      * @return
      */
-    Page<ClientApprovalVO> getCopied(Page page, Long companyId, Long memberId, FilterParam filterParam);
+    Page<ClientApprovalVO> getCopied(Page page, String companyId, String memberId, FilterParam filterParam);
 
     /**
      * 获取审批详情
@@ -74,7 +74,7 @@ public interface IApprovalApiService {
      * @param approvalId 审批主键
      * @return
      */
-    ClientApprovalDetailVO getApprovalDetail(Long companyId, Long memberId, Long approvalId);
+    ClientApprovalDetailVO getApprovalDetail(String companyId, String memberId, String approvalId);
 
     /**
      * 审批同意操作
@@ -85,7 +85,7 @@ public interface IApprovalApiService {
      * @param state      审批状态
      * @return
      */
-    boolean solveApproval(Long companyId, Long memberId, Long approvalId, Integer state);
+    boolean solveApproval(String companyId, String memberId, String approvalId, Integer state);
 
     /**
      * 审批撤销操作
@@ -96,7 +96,7 @@ public interface IApprovalApiService {
      * @return
      * @throws Exception
      */
-    boolean revokeApproval(Long companyId, Long memberId, Long approvalId);
+    boolean revokeApproval(String companyId, String memberId, String approvalId);
 
     /**
      * 审批转让操作
@@ -108,7 +108,7 @@ public interface IApprovalApiService {
      * @return
      * @throws Exception
      */
-    boolean transferApproval(Long companyId, Long memberId, Long transferredUserId, Long approvalId);
+    boolean transferApproval(String companyId, String memberId, String transferredUserId, String approvalId);
 
     /**
      * 修改抄送列表是否已读状态
@@ -117,6 +117,6 @@ public interface IApprovalApiService {
      * @return
      * @throws Exception
      */
-    boolean updateCopyReadState(Long[] approvalId);
+    boolean updateCopyReadState(String[] approvalId);
 
 }

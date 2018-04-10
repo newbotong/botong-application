@@ -3,7 +3,7 @@ package com.yunjing.botong.log.api;
 import com.yunjing.botong.log.params.DangParam;
 import com.yunjing.botong.log.params.UserInfoModel;
 import com.yunjing.botong.log.processor.okhttp.AppCenterService;
-import com.yunjing.botong.log.vo.MemberInfo;
+import com.yunjing.botong.log.vo.Member;
 import com.yunjing.mommon.base.PushParam;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -81,7 +81,7 @@ public class TestController {
 
     @RequestMapping("/manage-scope")
     public Object manageScope() {
-        List<MemberInfo> infos = appCenterService.manageScope("22", "6386837899156918272");
+        List<Member> infos = appCenterService.manageScope("22", "6386837899156918272");
         return infos;
     }
 

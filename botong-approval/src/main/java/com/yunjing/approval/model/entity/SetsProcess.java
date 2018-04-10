@@ -20,19 +20,19 @@ public class SetsProcess extends BaseModel<SetsProcess> {
      * 模型主键
      */
     @TableField("model_id")
-    private Long modelId;
+    private String modelId;
 
     /**
      * 条件主键
      */
     @TableField("condition_id")
-    private Long conditionId;
+    private String conditionId;
 
     /**
      * 审批人
      */
     @TableField("approver")
-    private Long approver;
+    private String approver;
 
     /**
      * 顺序

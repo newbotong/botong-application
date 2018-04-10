@@ -57,7 +57,7 @@ public class ModelL extends BaseModel<ModelL> {
      * 提供者
      */
     @TableField("provider")
-    private Long provider;
+    private String provider;
 
     /**
      * 模型类型
@@ -75,7 +75,7 @@ public class ModelL extends BaseModel<ModelL> {
      * 所属分组
      */
     @TableField("category_id")
-    private Long categoryId;
+    private String categoryId;
 
     /**
      * 可见范围

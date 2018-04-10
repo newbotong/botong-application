@@ -22,13 +22,13 @@ public class ApprovalProcess extends BaseModel<ApprovalProcess> {
      * 审批主键
      */
     @TableField("approval_id")
-    private Long approvalId;
+    private String approvalId;
 
     /**
      * 审批人主键
      */
     @TableField("user_id")
-    private Long userId;
+    private String userId;
 
     /**
      * 状态 0:未处理 1:同意 2:拒绝 3:转交 4.撤回

@@ -27,7 +27,7 @@ public class ApprovalUser extends BaseModel<ApprovalUser>{
      * 企业主键
      */
     @TableField("org_id")
-    private Long orgId;
+    private String orgId;
 
     /**
      * 用户头像

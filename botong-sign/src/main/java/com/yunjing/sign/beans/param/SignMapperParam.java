@@ -14,7 +14,7 @@ public class SignMapperParam {
 
     private String userIds;
 
-    private Long userId;
+    private String userId;
 
     private Long startDate;
 

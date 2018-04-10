@@ -15,7 +15,7 @@ public class LogTemplateItemVo {
     /**
      * 主键ID
      */
-    private Long id;
+    private String id;
     /**
      * 模板名称
      */
@@ -27,6 +27,6 @@ public class LogTemplateItemVo {
     /**
      * 提交周期（1每天 2 每周 3 每月 4 季度 5 年度）
      */
-    private Long submitType;
+    private Integer submitType;
 
 }

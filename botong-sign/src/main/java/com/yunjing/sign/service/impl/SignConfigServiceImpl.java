@@ -37,7 +37,7 @@ public class SignConfigServiceImpl extends ServiceImpl<SignConfigMapper, SignCon
     @Transactional(rollbackFor = Exception.class)
     public boolean setSignConfig(SignConfigParam signConfigParam) {
         SignConfigModel signConfig = BeanUtils.map(signConfigParam, SignConfigModel.class);
-        signConfig.setId(IDUtils.getID());
+        signConfig.setId(IDUtils.uuid());
         boolean result = signConfig.insert();
         return result;
     }

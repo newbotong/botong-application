@@ -42,7 +42,7 @@ public class ExportController extends BaseController {
      * @return 分页列表
      */
     @PostMapping("/list")
-    public ResponseEntityWrapper page(@ModelAttribute(value = "page") Page<Approval> page, @RequestParam("companyId") Long companyId, Long modelId, Integer state, String title, String createTimeStart, String createTimeEnd, String finishTimeStart, String finishTimeEnd) throws Exception {
+    public ResponseEntityWrapper page(@ModelAttribute(value = "page") Page<Approval> page, @RequestParam("companyId") String companyId, String modelId, Integer state, String title, String createTimeStart, String createTimeEnd, String finishTimeStart, String finishTimeEnd) throws Exception {
         return success(approvalService.page(page, companyId, modelId, state, title, createTimeStart, createTimeEnd, finishTimeStart, finishTimeEnd));
     }
 
@@ -53,7 +53,7 @@ public class ExportController extends BaseController {
      * @return ResponseEntityWrapper
      */
     @PostMapping("/delete")
-    public ResponseEntityWrapper deleteApproval(@RequestParam("approvalId") Long approvalId) throws Exception {
+    public ResponseEntityWrapper deleteApproval(@RequestParam("approvalId") String approvalId) throws Exception {
 
         return success(approvalService.delete(approvalId));
     }
@@ -66,7 +66,7 @@ public class ExportController extends BaseController {
      * @return ResponseEntityWrapper
      */
     @PostMapping("/log")
-    public ResponseEntityWrapper getExportLog(@ModelAttribute(value = "page") Page page, @RequestParam("companyId") Long companyId) {
+    public ResponseEntityWrapper getExportLog(@ModelAttribute(value = "page") Page page, @RequestParam("companyId") String companyId) {
 
         return success(exportLogService.findExportLogPage(page, companyId));
     }
@@ -87,7 +87,7 @@ public class ExportController extends BaseController {
      * @throws Exception 抛异常
      */
     @GetMapping("/export")
-    public ResponseEntityWrapper exportData(@RequestParam("companyId") Long companyId, @RequestParam("memberId") Long memberId, Long modelId, Integer state, String title, String createTimeStart,
+    public ResponseEntityWrapper exportData(@RequestParam("companyId") String companyId, @RequestParam("memberId") String memberId, String modelId, Integer state, String title, String createTimeStart,
                                             String createTimeEnd, String finishTimeStart, String finishTimeEnd, HttpServletResponse response) throws Exception {
         BaseExModel excel = approvalService.createApprovalExcel(companyId, memberId, modelId, state, title, createTimeStart, createTimeEnd, finishTimeStart, finishTimeEnd);
         String fileName = excel.getFileName();

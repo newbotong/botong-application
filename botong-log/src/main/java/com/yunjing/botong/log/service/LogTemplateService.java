@@ -19,14 +19,14 @@ public interface LogTemplateService {
      * @param logTemplateParam  日志模板参数
      * @return
      */
-    long createLogTemplate(LogTemplateParam logTemplateParam);
+    String createLogTemplate(LogTemplateParam logTemplateParam);
 
     /**
      * 删除日志模板
      * @param id
      * @return
      */
-    boolean deleteLogTemplate(long id);
+    boolean deleteLogTemplate(String id);
 
     /**
      * 查询日志模板列表
@@ -35,7 +35,7 @@ public interface LogTemplateService {
      * @param pageSize
      * @return
      */
-    PageWrapper<LogTemplateItemVo> queryAllLogTemplate(long orgId, int pageNo, int pageSize);
+    PageWrapper<LogTemplateItemVo> queryAllLogTemplate(String orgId, int pageNo, int pageSize);
 
 
     /**
@@ -43,7 +43,7 @@ public interface LogTemplateService {
      * @param id
      * @return
      */
-    LogTemplateVo queryLogTemplate(long id);
+    LogTemplateVo queryLogTemplate(String id);
 
     /**
      * 修改日志模板

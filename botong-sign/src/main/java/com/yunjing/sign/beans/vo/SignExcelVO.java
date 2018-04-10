@@ -13,7 +13,7 @@ import java.util.List;
 @Data
 public class SignExcelVO {
 
-    private Long userId;
+    private String userId;
 
     /**
      * 姓名

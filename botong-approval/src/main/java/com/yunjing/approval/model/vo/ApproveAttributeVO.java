@@ -12,16 +12,16 @@ public class ApproveAttributeVO {
     /**
      * 审批信息主键
      */
-    private Long id;
+    private String id;
     /**
      * 审批主键
      */
-    private Long approvalId;
+    private String approvalId;
 
     /**
      * 父属性主键
      */
-    private Long attrParent;
+    private String attrParent;
 
     /**
      * 属性名称
@@ -65,7 +65,7 @@ public class ApproveAttributeVO {
     /**
      * 企业主键
      */
-    private Long orgId;
+    private String orgId;
 
     /**
      * 时间格式

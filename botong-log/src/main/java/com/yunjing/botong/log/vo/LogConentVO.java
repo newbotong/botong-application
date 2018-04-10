@@ -31,12 +31,12 @@ public class LogConentVO {
     /**
      * 枚举ID,单选和复选
      */
-    private Long enumId;
+    private String enumId;
 
     /**
      * 枚举值ID,单选和复选
      */
-    private Long enumValueId;
+    private String enumValueId;
 
     /**
      * 枚举值

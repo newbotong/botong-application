@@ -6,6 +6,7 @@ import com.yunjing.mommon.Enum.DateStyle;
 import com.yunjing.mommon.global.exception.UpdateMessageFailureException;
 import com.yunjing.mommon.utils.BeanUtils;
 import com.yunjing.mommon.utils.DateUtil;
+import com.yunjing.mommon.utils.IDUtils;
 import com.yunjing.mommon.wrapper.PageWrapper;
 import com.yunjing.mommon.wrapper.ResponseEntityWrapper;
 import com.yunjing.sign.beans.model.SignConfigDaily;
@@ -23,6 +24,7 @@ import com.yunjing.sign.excel.ExcelModel;
 import com.yunjing.sign.excel.SignExConsts;
 import com.yunjing.sign.excel.SignExModel;
 import com.yunjing.sign.processor.feign.UserRemoteService;
+import com.yunjing.sign.processor.okhttp.UserRemoteApiService;
 import com.yunjing.sign.service.ISignDetailDailyService;
 import com.yunjing.sign.service.ISignDetailImgDailyService;
 import com.yunjing.sign.service.ISignDetailService;
@@ -53,9 +55,6 @@ public class SignDetailDailyServiceImpl extends ServiceImpl<SignDetailDailyMappe
     @Autowired
     private SignDetailDailyMapper signDetailDailyMapper;
 
-    @Autowired
-    private UserRemoteService userRemoteService;
-
     /**
      * 签到
      *
@@ -78,6 +77,7 @@ public class SignDetailDailyServiceImpl extends ServiceImpl<SignDetailDailyMappe
         }
         SignDetailDaily signDetail = BeanUtils.map(signDetailParam, SignDetailDaily.class);
         result.setUserId(signDetail.getUserId());
+        signDetail.setId(IDUtils.uuid());
         signDetail.insert();
         result.setSignDate(signDetail.getCreateTime());
         if (StringUtils.isNotBlank(signDetailParam.getImgUrls())) {
@@ -87,6 +87,7 @@ public class SignDetailDailyServiceImpl extends ServiceImpl<SignDetailDailyMappe
             for (String imgUrl : signDetailParam.getImgUrls().split(SignConstant.SEPARATE_STR)) {
                 detailImg = new SignDetailImgDaily();
                 detailImg.setSignDetailId(signDetail.getId());
+                detailImg.setId(IDUtils.uuid());
                 detailImg.setSort(i);
                 detailImg.setUrl(imgUrl);
                 list.add(detailImg);
@@ -201,7 +202,7 @@ public class SignDetailDailyServiceImpl extends ServiceImpl<SignDetailDailyMappe
     public List<SignDetailDaily> queryDetailList(SignDetailParam signDetailParam) {
         Date nowStart = DateUtil.stringToDate(signDetailParam.getSignDate());
         Date nowEnd = DateUtil.addDay(nowStart, 1);
-        List<SignDetailDaily> list = new SignDetailDaily().selectList(new EntityWrapper<SignDetailDaily>().eq("user_id", signDetailParam.getUserId()).lt("create_time", nowEnd.getTime()).ge("create_time", nowStart.getTime()));
+        List<SignDetailDaily> list = new SignDetailDaily().selectList(new EntityWrapper<SignDetailDaily>().eq("user_id", signDetailParam.getUserId()).lt("create_time", nowEnd.getTime()).ge("create_time", nowStart.getTime()).orderBy("create_time", false));
         return list;
     }
 }

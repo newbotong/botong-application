@@ -2,7 +2,9 @@ package com.yunjing.approval.api;
 
 import com.common.mybatis.page.Page;
 import com.yunjing.approval.model.vo.ClientModelVO;
+import com.yunjing.approval.model.vo.MemberInfo;
 import com.yunjing.approval.param.FilterParam;
+import com.yunjing.approval.processor.okhttp.AppCenterService;
 import com.yunjing.approval.service.IApprovalApiService;
 import com.yunjing.approval.service.IModelItemService;
 import com.yunjing.mommon.base.BaseController;
@@ -36,7 +38,7 @@ public class ClientApprovalController extends BaseController {
      * @return
      */
     @GetMapping("/index")
-    public ResponseEntityWrapper index(@RequestParam("companyId") Long companyId) throws Exception {
+    public ResponseEntityWrapper index(@RequestParam("companyId") String companyId) throws Exception {
         List<ClientModelVO> list = approvalApiService.getList(companyId);
         return success(list);
     }
@@ -49,7 +51,7 @@ public class ClientApprovalController extends BaseController {
      * @throws Exception
      */
     @GetMapping("/model-item-detail")
-    public ResponseEntityWrapper getItem(@RequestParam("modelId") Long modelId) throws Exception {
+    public ResponseEntityWrapper getItem(@RequestParam("modelId") String modelId) throws Exception {
         return success(modelItemService.getModelItem(modelId));
     }
 
@@ -65,8 +67,8 @@ public class ClientApprovalController extends BaseController {
      */
     @PostMapping("/waited-approval")
     public ResponseEntityWrapper waitedApproval(@ModelAttribute(value = "page") Page page,
-                                                @RequestParam("companyId") Long companyId,
-                                                @RequestParam("memberId") Long memberId,
+                                                @RequestParam("companyId") String companyId,
+                                                @RequestParam("memberId") String memberId,
                                                 FilterParam filterParam) {
 
         return success(approvalApiService.getWaited(page, companyId, memberId, filterParam));
@@ -83,8 +85,8 @@ public class ClientApprovalController extends BaseController {
      */
     @PostMapping("/completed-approval")
     public ResponseEntityWrapper completedApproval(@ModelAttribute(value = "page") Page page,
-                                                   @RequestParam("companyId") Long companyId,
-                                                   @RequestParam("memberId") Long memberId,
+                                                   @RequestParam("companyId") String companyId,
+                                                   @RequestParam("memberId") String memberId,
                                                    FilterParam filterParam) {
         return success(approvalApiService.getCompleted(page, companyId, memberId, filterParam));
     }
@@ -100,8 +102,8 @@ public class ClientApprovalController extends BaseController {
      */
     @PostMapping("/launched-approval")
     public ResponseEntityWrapper launchedApproval(@ModelAttribute(value = "page") Page page,
-                                                  @RequestParam("companyId") Long companyId,
-                                                  @RequestParam("memberId") Long memberId,
+                                                  @RequestParam("companyId") String companyId,
+                                                  @RequestParam("memberId") String memberId,
                                                   FilterParam filterParam) {
 
         return success(approvalApiService.getLaunched(page, companyId, memberId, filterParam));
@@ -118,8 +120,8 @@ public class ClientApprovalController extends BaseController {
      */
     @PostMapping("/copied-approval")
     public ResponseEntityWrapper copiedApproval(@ModelAttribute(value = "page") Page page,
-                                                @RequestParam("companyId") Long companyId,
-                                                @RequestParam("memberId") Long memberId,
+                                                @RequestParam("companyId") String companyId,
+                                                @RequestParam("memberId") String memberId,
                                                 FilterParam filterParam) {
 
         return success(approvalApiService.getCopied(page, companyId, memberId, filterParam));
@@ -134,9 +136,17 @@ public class ClientApprovalController extends BaseController {
      * @return
      */
     @PostMapping("/approval-detail")
-    public ResponseEntityWrapper approvalDetail(@RequestParam("companyId") Long companyId,
-                                                @RequestParam("memberId") Long memberId,
-                                                @RequestParam("approvalId") Long approvalId) {
+    public ResponseEntityWrapper approvalDetail(@RequestParam("companyId") String companyId,
+                                                @RequestParam("memberId") String memberId,
+                                                @RequestParam("approvalId") String approvalId) {
         return success(approvalApiService.getApprovalDetail(companyId, memberId, approvalId));
+    }
+
+    @Autowired
+    private AppCenterService appCenterService;
+    @GetMapping("/test")
+    public ResponseEntityWrapper test(String[] deptIds,String[] memberIds){
+        List<MemberInfo> subList = appCenterService.findSubList(deptIds, memberIds, true);
+        return success(subList);
     }
 }

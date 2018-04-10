@@ -42,7 +42,7 @@ public class ModelServiceImpl extends BaseServiceImpl<ModelMapper, ModelL> imple
 
     @Override
     @Transactional(propagation = Propagation.REQUIRED, rollbackFor = Exception.class)
-    public List<ModelListVO> findModelList(Long orgId) {
+    public List<ModelListVO> findModelList(String orgId) {
         List<ModelVO> modelVOList = modelMapper.selectModelListByOrgId(orgId);
         List<ModelListVO> modelListVOList = new ArrayList<>();
         List<ModelCategory> list = modelCategoryService.selectList(Condition.create().where("org_id={0}", orgId));
@@ -80,7 +80,7 @@ public class ModelServiceImpl extends BaseServiceImpl<ModelMapper, ModelL> imple
 
     @Override
     @Transactional(propagation = Propagation.REQUIRED, rollbackFor = Exception.class)
-    public boolean sortedModel(Long categoryId, String sortArray) throws Exception {
+    public boolean sortedModel(String categoryId, String sortArray) throws Exception {
         boolean isUpdated = false;
         Map<Long, Integer> modelSortMap = null;
         try {
@@ -116,7 +116,7 @@ public class ModelServiceImpl extends BaseServiceImpl<ModelMapper, ModelL> imple
 
     @Override
     @Transactional(propagation = Propagation.REQUIRED, rollbackFor = Exception.class)
-    public boolean moveModel(Long categoryId, Long modelId) throws Exception {
+    public boolean moveModel(String categoryId, String modelId) throws Exception {
 
         ModelL modelL = this.selectById(modelId);
         if (modelL == null) {
@@ -129,7 +129,7 @@ public class ModelServiceImpl extends BaseServiceImpl<ModelMapper, ModelL> imple
 
     @Override
     @Transactional(propagation = Propagation.REQUIRED, rollbackFor = Exception.class)
-    public List<ModelVO> findModelListByOrgId(Long orgId) {
+    public List<ModelVO> findModelListByOrgId(String orgId) {
         List<ModelVO> modelVOList = modelMapper.selectModelListByOrgId(orgId);
         for (ModelVO modelVO : modelVOList) {
             // 获取每个审批项的抄送人数量
@@ -141,7 +141,7 @@ public class ModelServiceImpl extends BaseServiceImpl<ModelMapper, ModelL> imple
 
     @Override
     @Transactional(propagation = Propagation.REQUIRED, rollbackFor = Exception.class)
-    public boolean updateVisibleRange(Long modelId, String deptIds, String userIds) throws Exception {
+    public boolean updateVisibleRange(String modelId, String deptIds, String userIds) throws Exception {
         // TODO 调用rpc接口处理可见范围权限业务
 
         ModelL modelL = this.selectById(modelId);
@@ -151,7 +151,7 @@ public class ModelServiceImpl extends BaseServiceImpl<ModelMapper, ModelL> imple
 
     @Override
     @Transactional(propagation = Propagation.REQUIRED, rollbackFor = Exception.class)
-    public boolean updateIsDisabled(Long modelId, Integer isDisabled) throws Exception {
+    public boolean updateIsDisabled(String modelId, Integer isDisabled) throws Exception {
         ModelL modelL = this.selectById(modelId);
         if (modelL == null) {
             throw new BaseException("该模型不存在");
@@ -162,6 +162,13 @@ public class ModelServiceImpl extends BaseServiceImpl<ModelMapper, ModelL> imple
             throw new BaseException("设置模型是否禁用失败");
         }
         return isUpdated;
+    }
+
+    @Override
+    public List<String> getLogo() throws Exception {
+        List<ModelL> list = this.selectList(Condition.create().where("is_def={0}", 1));
+        List<String> logo = list.stream().map(ModelL::getLogo).collect(Collectors.toList());
+        return logo;
     }
 
 }

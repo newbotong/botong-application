@@ -25,7 +25,7 @@ public interface IApprovalService extends IBaseService<Approval> {
      * @return
      * @throws Exception
      */
-    boolean submit(Long companyId, Long memberId, Long modelId, String jsonData, String sendUserIds, String sendCopyIds) throws Exception;
+    boolean submit(String companyId, String memberId, String modelId, String jsonData, String sendUserIds, String sendCopyIds) throws Exception;
 
     /**
      * 获取审批数据列表
@@ -42,7 +42,7 @@ public interface IApprovalService extends IBaseService<Approval> {
      * @return 分页列表
      * @throws Exception 异常
      */
-    ApprovalPageVO page(Page<Approval> page, Long companyId, Long modelId, Integer state, String title, String createTimeStart, String createTimeEnd, String finishTimeStart, String finishTimeEnd) throws Exception;
+    ApprovalPageVO page(Page<Approval> page, String companyId, String modelId, Integer state, String title, String createTimeStart, String createTimeEnd, String finishTimeStart, String finishTimeEnd) throws Exception;
 
     /**
      * 删除审批数据
@@ -51,7 +51,7 @@ public interface IApprovalService extends IBaseService<Approval> {
      * @return
      * @throws Exception
      */
-    boolean delete(Long approvalId) throws Exception;
+    boolean delete(String approvalId) throws Exception;
 
     /**
      * 审批数据导出
@@ -68,6 +68,6 @@ public interface IApprovalService extends IBaseService<Approval> {
      * @return
      * @throws Exception
      */
-    BaseExModel createApprovalExcel(Long companyId, Long memberId, Long modelId, Integer state, String title, String createTimeStart,
+    BaseExModel createApprovalExcel(String companyId, String memberId, String modelId, Integer state, String title, String createTimeStart,
                                     String createTimeEnd, String finishTimeStart, String finishTimeEnd) throws Exception;
 }

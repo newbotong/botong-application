@@ -37,7 +37,7 @@ public class ExportLogServiceImpl extends BaseServiceImpl<ExportLogMapper, Expor
     private IApprovalUserService approvalUserService;
 
     @Override
-    public LogPageVO findExportLogPage(Page page, Long orgId) {
+    public LogPageVO findExportLogPage(Page page, String orgId) {
         LogPageVO logPage = new LogPageVO();
         Page<ExportLog> page1 = this.selectPage(page, Condition.create().where("org_id={0}", orgId).orderBy("create_time", false).and("is_delete=0"));
         List<ExportLog> records = page1.getRecords();

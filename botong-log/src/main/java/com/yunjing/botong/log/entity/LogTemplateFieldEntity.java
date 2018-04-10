@@ -18,7 +18,7 @@ public class LogTemplateFieldEntity extends BaseModel<LogTemplateFieldEntity >{
      *模板ID
      */
     @TableField("template_id")
-    private Long templateId ;
+    private String templateId ;
 
     /**
      *字段名
@@ -60,7 +60,7 @@ public class LogTemplateFieldEntity extends BaseModel<LogTemplateFieldEntity >{
      *枚举值ID
      */
     @TableField("enum_id")
-    private Long enumId;
+    private String enumId;
 
     /**
      *帮助信息

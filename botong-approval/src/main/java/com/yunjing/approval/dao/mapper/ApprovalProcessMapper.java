@@ -25,8 +25,8 @@ public interface ApprovalProcessMapper extends IBaseMapper<ApprovalProcess> {
      * @param filterParam 搜索参数
      * @return
      */
-    List<ApprovalContentDTO> getWaitedMeApprovalList(@Param("index") Integer index, @Param("size") Integer pageSize, @Param("orgId") Long orgId,
-                                                     @Param("userIds") List<Long> userIds, @Param("filterParam") FilterParam filterParam);
+    List<ApprovalContentDTO> getWaitedMeApprovalList(@Param("index") Integer index, @Param("size") Integer pageSize, @Param("orgId") String orgId,
+                                                     @Param("userIds") List<String> userIds, @Param("filterParam") FilterParam filterParam);
 
     /**
      * 查询-已审批
@@ -38,8 +38,8 @@ public interface ApprovalProcessMapper extends IBaseMapper<ApprovalProcess> {
      * @param filterParam 搜索参数
      * @return
      */
-    List<ApprovalContentDTO> getCompletedApprovalList(@Param("index") Integer index, @Param("size") Integer pageSize, @Param("orgId") Long orgId,
-                                                      @Param("userIds") List<Long> userIds, @Param("filterParam") FilterParam filterParam);
+    List<ApprovalContentDTO> getCompletedApprovalList(@Param("index") Integer index, @Param("size") Integer pageSize, @Param("orgId") String orgId,
+                                                      @Param("userIds") List<String> userIds, @Param("filterParam") FilterParam filterParam);
 
     /**
      * 查询-我发起的审批
@@ -51,8 +51,8 @@ public interface ApprovalProcessMapper extends IBaseMapper<ApprovalProcess> {
      * @param filterParam 搜索参数
      * @return
      */
-    List<ApprovalContentDTO> getLaunchedApprovalList(@Param("index") Integer index, @Param("size") Integer pageSize, @Param("orgId") Long orgId,
-                                                     @Param("userId") Long userId, @Param("filterParam") FilterParam filterParam);
+    List<ApprovalContentDTO> getLaunchedApprovalList(@Param("index") Integer index, @Param("size") Integer pageSize, @Param("orgId") String orgId,
+                                                     @Param("userId") String userId, @Param("filterParam") FilterParam filterParam);
 
 
     /**
@@ -61,5 +61,5 @@ public interface ApprovalProcessMapper extends IBaseMapper<ApprovalProcess> {
      * @param approvalId 审批主键
      * @return
      */
-    List<ApprovalUserVO> getApprovalUserList(Long approvalId);
+    List<ApprovalUserVO> getApprovalUserList(String approvalId);
 }

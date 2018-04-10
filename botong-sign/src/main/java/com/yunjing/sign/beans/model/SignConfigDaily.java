@@ -28,7 +28,7 @@ public class SignConfigDaily extends BaseModel<SignConfigDaily>  {
 	private int isDelete;
 
 	@TableField("org_id")
-	private Long orgId;
+	private String orgId;
 
 	/**
 	 * 是否允许上传图片
@@ -71,5 +71,10 @@ public class SignConfigDaily extends BaseModel<SignConfigDaily>  {
 	 * 维度
 	 */
 	private String lat;
+
+	/**
+	 * 地址
+	 */
+	private String adress;
 
 }

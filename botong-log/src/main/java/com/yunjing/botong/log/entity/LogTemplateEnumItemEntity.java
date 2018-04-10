@@ -28,7 +28,7 @@ public class LogTemplateEnumItemEntity extends BaseModel<LogTemplateEnumItemEnti
      *枚举值ID
      */
     @TableField("enum_id")
-    private Long enumId;
+    private String enumId;
 
     /**
      * 排序

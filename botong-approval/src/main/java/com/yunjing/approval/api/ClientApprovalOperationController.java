@@ -49,9 +49,9 @@ public class ClientApprovalOperationController extends BaseController {
      * @throws Exception
      */
     @PostMapping("/submit")
-    public ResponseEntityWrapper submit(@RequestParam("companyId") Long companyId,
-                                        @RequestParam("memberId") Long memberId,
-                                        @RequestParam("modelId") Long modelId,
+    public ResponseEntityWrapper submit(@RequestParam("companyId") String companyId,
+                                        @RequestParam("memberId") String memberId,
+                                        @RequestParam("modelId") String modelId,
                                         @RequestParam("jsonData") String jsonData,
                                         @RequestParam("sendUserIds") String sendUserIds,
                                         @RequestParam("sendCopyIds") String sendCopyIds) throws Exception {
@@ -69,9 +69,9 @@ public class ClientApprovalOperationController extends BaseController {
      * @throws Exception
      */
     @PostMapping("/solve")
-    public ResponseEntityWrapper solve(@RequestParam("companyId") Long companyId,
-                                       @RequestParam("memberId") Long memberId,
-                                       @RequestParam("approvalId") Long approvalId,
+    public ResponseEntityWrapper solve(@RequestParam("companyId") String companyId,
+                                       @RequestParam("memberId") String memberId,
+                                       @RequestParam("approvalId") String approvalId,
                                        @RequestParam("state") Integer state) throws Exception {
         return success(approvalApiService.solveApproval(companyId, memberId, approvalId, state));
     }
@@ -86,9 +86,9 @@ public class ClientApprovalOperationController extends BaseController {
      * @throws Exception
      */
     @PostMapping("/revoke")
-    public ResponseEntityWrapper revoke(@RequestParam("companyId") Long companyId,
-                                        @RequestParam("memberId") Long memberId,
-                                        @RequestParam("approvalId") Long approvalId) throws Exception {
+    public ResponseEntityWrapper revoke(@RequestParam("companyId") String companyId,
+                                        @RequestParam("memberId") String memberId,
+                                        @RequestParam("approvalId") String approvalId) throws Exception {
         return success(approvalApiService.revokeApproval(companyId, memberId, approvalId));
     }
 
@@ -102,10 +102,10 @@ public class ClientApprovalOperationController extends BaseController {
      * @throws Exception
      */
     @PostMapping("/transfer")
-    public ResponseEntityWrapper transfer(@RequestParam("companyId") Long companyId,
-                                          @RequestParam("memberId") Long memberId,
-                                          @RequestParam("userId") Long userId,
-                                          @RequestParam("approvalId") Long approvalId) throws Exception {
+    public ResponseEntityWrapper transfer(@RequestParam("companyId") String companyId,
+                                          @RequestParam("memberId") String memberId,
+                                          @RequestParam("userId") String userId,
+                                          @RequestParam("approvalId") String approvalId) throws Exception {
         return success(approvalApiService.transferApproval(companyId, memberId, userId, approvalId));
     }
 
@@ -117,7 +117,7 @@ public class ClientApprovalOperationController extends BaseController {
      * @throws Exception 抛异常
      */
     @PostMapping("/update-is-read")
-    public ResponseEntityWrapper updateCopyReadState(@RequestParam("approvalId") Long[] approvalId) throws Exception {
+    public ResponseEntityWrapper updateCopyReadState(@RequestParam("approvalId") String[] approvalId) throws Exception {
         return success(approvalApiService.updateCopyReadState(approvalId));
     }
 

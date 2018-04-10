@@ -1,7 +1,7 @@
 package com.yunjing.botong.log.vo;
 
-import com.baomidou.mybatisplus.annotations.TableField;
 import com.fasterxml.jackson.annotation.JsonInclude;
+import com.google.gson.annotations.SerializedName;
 import lombok.Data;
 
 import java.io.Serializable;
@@ -21,6 +21,7 @@ public class Member implements Serializable {
     public Member() {
     }
 
+    @SerializedName(value = "memberId")
     protected String id;
 
     /**
@@ -42,7 +43,7 @@ public class Member implements Serializable {
      * 创建时间
      */
     protected long createTime;
-    
+
     /**
      * 成员对应账户Id
      */
@@ -85,6 +86,4 @@ public class Member implements Serializable {
      * 头像颜色
      */
     private String color;
-
-
 }

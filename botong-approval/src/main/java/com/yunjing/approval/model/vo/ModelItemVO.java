@@ -92,7 +92,7 @@ public class ModelItemVO {
     /**
      * 模型项主键
      */
-    private Long modelItemId;
+    private String modelItemId;
 
     /**
      * 子项

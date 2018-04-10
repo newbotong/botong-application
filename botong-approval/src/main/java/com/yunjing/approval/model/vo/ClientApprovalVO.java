@@ -27,12 +27,13 @@ public class ClientApprovalVO {
         this.title = contentDTO.getTitle();
         this.createTime = contentDTO.getCreateTime();
         this.approvalId = contentDTO.getApprovalId();
+        this.isRead = contentDTO.getIsRead();
     }
 
     /**
      * 审批主键
      */
-    private Long approvalId;
+    private String approvalId;
 
     /**
      * 审批标题
@@ -47,7 +48,7 @@ public class ClientApprovalVO {
     /**
      * 审批模型主键
      */
-    private Long modelId;
+    private String modelId;
     /**
      * 审批名称
      */
@@ -81,7 +82,7 @@ public class ClientApprovalVO {
     /**
      * 审批人主键
      */
-    private Long userId;
+    private String userId;
 
     /**
      * 审批结果信息
@@ -93,4 +94,8 @@ public class ClientApprovalVO {
      */
     private Long createTime;
 
+    /**
+     * 抄送人是否已读
+     */
+    private Integer isRead;
 }

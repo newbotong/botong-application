@@ -1,4 +1,4 @@
-package com.yunjing.botong.log.vo;
+package com.yunjing.approval.model.vo;
 
 import lombok.Data;
 

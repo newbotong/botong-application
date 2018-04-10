@@ -8,6 +8,7 @@ import com.yunjing.sign.beans.model.SignConfigDaily;
 import com.yunjing.sign.beans.model.SignConfigModel;
 import com.yunjing.sign.beans.param.SignConfigParam;
 import com.yunjing.sign.beans.vo.SignConfigVO;
+import com.yunjing.sign.constant.SignConstant;
 import com.yunjing.sign.dao.mapper.SignConfigDailyMapper;
 import com.yunjing.sign.service.ISignConfigDailyService;
 import org.springframework.stereotype.Service;
@@ -38,8 +39,13 @@ public class SignConfigDailyServiceImpl extends ServiceImpl<SignConfigDailyMappe
         boolean result = false;
         if (signConfigModel != null) {
             signConfig.setId(signConfigModel.getId());
+            if (signConfig.getTimeStatus() == SignConstant.BOTONG_ZERO_VALUE.intValue()) {
+                signConfig.setStartTime(SignConstant.EMPTY_STR);
+                signConfig.setEndTime(SignConstant.EMPTY_STR);
+            }
             result = signConfig.updateById();
         } else {
+            signConfig.setId(IDUtils.uuid());
             result = signConfig.insert();
         }
         return result;

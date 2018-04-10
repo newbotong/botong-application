@@ -14,7 +14,7 @@ public class ApprovalContentDTO {
     /**
      * 审批主键
      */
-    private Long approvalId;
+    private String approvalId;
 
     /**
      * 审批标题
@@ -29,7 +29,7 @@ public class ApprovalContentDTO {
     /**
      * 审批模型主键
      */
-    private Long modelId;
+    private String modelId;
     /**
      * 审批名称
      */
@@ -68,7 +68,7 @@ public class ApprovalContentDTO {
     /**
      * 审批人or抄送人主键
      */
-    private Long userId;
+    private String userId;
 
     /**
      * 手机号
@@ -89,5 +89,10 @@ public class ApprovalContentDTO {
      * 审批抄送时间
      */
     private Long copysTime;
+
+    /**
+     * 抄送人是否已读
+     */
+    private Integer isRead;
 
 }

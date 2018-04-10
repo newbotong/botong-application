@@ -49,7 +49,7 @@ public class ProcessServiceImpl extends BaseServiceImpl<ProcessMapper, SetsProce
     private IApprovalUserService approvalUserService;
 
     @Override
-    public boolean delete(Long modelId, Long conditions) throws Exception {
+    public boolean delete(String modelId, String conditions) throws Exception {
 
         if (null == modelId) {
             throw new BaseException("模型主键不存在");
@@ -69,7 +69,7 @@ public class ProcessServiceImpl extends BaseServiceImpl<ProcessMapper, SetsProce
     }
 
     @Override
-    public List<UserVO> getProcess(Long modelId, Long conditions) throws Exception {
+    public List<UserVO> getProcess(String modelId, String conditions) throws Exception {
         List<UserVO> users = new ArrayList<>();
         List<SetsProcess> list;
         if (null == conditions) {
@@ -79,7 +79,7 @@ public class ProcessServiceImpl extends BaseServiceImpl<ProcessMapper, SetsProce
         }
         List<ApprovalUser> userList = approvalUserService.selectList(Condition.create());
         for (SetsProcess process : list) {
-            Long userId = process.getApprover();
+            String userId = process.getApprover();
             String userNick = "";
             String userAvatar = null;
             if (String.valueOf(userId).indexOf("admin_") != -1) {
@@ -105,7 +105,7 @@ public class ProcessServiceImpl extends BaseServiceImpl<ProcessMapper, SetsProce
     }
 
     @Override
-    public boolean updateProcess(Long modelId, Long conditionId, String userArray) throws Exception {
+    public boolean updateProcess(String modelId, String conditionId, String userArray) throws Exception {
         String[] userIds = userArray.split(",");
         int setting = ApproConstants.SET_TYPE_0;
         if (null != conditionId) {
@@ -131,10 +131,10 @@ public class ProcessServiceImpl extends BaseServiceImpl<ProcessMapper, SetsProce
         List<SetsProcess> list = new ArrayList<>();
         for (int i = 0; i < userIds.length; i++) {
             SetsProcess process = new SetsProcess();
-            process.setId(IDUtils.getID());
+            process.setId(IDUtils.uuid());
             process.setModelId(modelId);
             process.setConditionId(conditionId);
-            process.setApprover(Long.valueOf(userIds[i]));
+            process.setApprover(userIds[i]);
             process.setSort(i + 1);
             list.add(process);
         }
@@ -146,7 +146,7 @@ public class ProcessServiceImpl extends BaseServiceImpl<ProcessMapper, SetsProce
     }
 
     @Override
-    public void deleteProcessUser(Long oid, Long uid) {
+    public void deleteProcessUser(String oid, String uid) {
         processMapper.deleteProcessUser(oid, uid);
     }
 }

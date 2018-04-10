@@ -21,7 +21,7 @@ public interface IProcessService extends IBaseService<SetsProcess> {
      * @return
      * @throws Exception
      */
-    boolean delete(Long modelId, Long conditions) throws Exception;
+    boolean delete(String modelId, String conditions) throws Exception;
 
     /**
      * 获取审批流程
@@ -31,7 +31,7 @@ public interface IProcessService extends IBaseService<SetsProcess> {
      * @return
      * @throws Exception
      */
-    List<UserVO> getProcess(Long modelId, Long conditionId) throws Exception;
+    List<UserVO> getProcess(String modelId, String conditionId) throws Exception;
 
     /**
      * 设置审批流程信息
@@ -42,7 +42,7 @@ public interface IProcessService extends IBaseService<SetsProcess> {
      * @return
      * @throws Exception
      */
-    boolean updateProcess(Long modelId, Long conditionId, String userArray) throws Exception;
+    boolean updateProcess(String modelId, String conditionId, String userArray) throws Exception;
 
     /**
      * 删除审批流程人
@@ -50,6 +50,6 @@ public interface IProcessService extends IBaseService<SetsProcess> {
      * @param companyId 公司id
      * @param memberId  成员id
      */
-    void deleteProcessUser(Long companyId, Long memberId);
+    void deleteProcessUser(String companyId, String memberId);
 
 }

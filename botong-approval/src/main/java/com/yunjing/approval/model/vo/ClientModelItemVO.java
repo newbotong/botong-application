@@ -26,7 +26,7 @@ public class ClientModelItemVO {
     /**
      * 模型主键
      */
-    private Long modelId;
+    private String modelId;
 
     /**
      * 模型名称
@@ -41,7 +41,7 @@ public class ClientModelItemVO {
     /**
      * 部门主键
      */
-    private Long deptId;
+    private String deptId;
 
     /**
      * 部门名称
@@ -53,5 +53,14 @@ public class ClientModelItemVO {
      */
     private Integer set;
 
+    /**
+     * 审批人列表
+     */
+    private List<ApproverVO> approverVOS;
+
+    /**
+     * 抄送人列表
+     */
+    private List<ApproverVO> copyerVOS;
 
 }

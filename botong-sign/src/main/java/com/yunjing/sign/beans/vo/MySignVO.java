@@ -14,7 +14,7 @@ import java.util.List;
 @Data
 public class MySignVO {
 
-    private Long userId;
+    private String userId;
 
     private String userName;
 

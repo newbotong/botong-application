@@ -16,7 +16,7 @@ public class ModelVO {
     }
 
     public ModelVO(ModelL modelL) {
-        this.modelId = modelL.getId();
+        this.modelId = String.valueOf(modelL.getId());
         this.modelName = modelL.getModelName();
         this.logo = modelL.getLogo();
         this.visibleRange = modelL.getVisibleRange();
@@ -29,7 +29,7 @@ public class ModelVO {
     /**
      * 模型主键
      */
-    private Long modelId;
+    private String modelId;
 
     /**
      * 模型名称
@@ -59,7 +59,7 @@ public class ModelVO {
     /**
      * 分组主键
      */
-    private Long categoryId;
+    private String categoryId;
 
     /**
      * 分组名称

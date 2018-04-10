@@ -12,7 +12,7 @@ public class ApprovalUserVO {
     /**
      * 审批人主键
      */
-    private Long userId;
+    private String userId;
     /**
      * 审批人姓名
      */

@@ -5,6 +5,7 @@ import com.baomidou.mybatisplus.annotations.TableName;
 import com.common.mybatis.model.BaseModel;
 import com.common.mybatis.utils.Constant;
 import lombok.Data;
+import lombok.EqualsAndHashCode;
 
 /**
  * <p>
@@ -16,6 +17,7 @@ import lombok.Data;
  */
 @Data
 @TableName("remind")
+@EqualsAndHashCode(callSuper = true)
 public class RemindEntity extends BaseModel<RemindEntity> {
 
     /**

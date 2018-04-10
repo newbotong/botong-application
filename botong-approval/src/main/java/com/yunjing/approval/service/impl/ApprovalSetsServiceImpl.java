@@ -38,7 +38,7 @@ public class ApprovalSetsServiceImpl extends ServiceImpl<ApprovalSetsMapper, App
     private IConditionService conditionService;
 
     @Override
-    public ApprovalSetVO getApprovalSet(Long modelId) throws Exception {
+    public ApprovalSetVO getApprovalSet(String modelId) throws Exception {
         ApprovalSetVO approvalSetVO = new ApprovalSetVO();
         ModelL modelL = modelService.selectById(modelId);
         approvalSetVO.setModelL(modelL);
@@ -64,7 +64,7 @@ public class ApprovalSetsServiceImpl extends ServiceImpl<ApprovalSetsMapper, App
     }
 
     @Override
-    public boolean saveApprovalSets(Long modelId, Integer setting) throws Exception {
+    public boolean saveApprovalSets(String modelId, Integer setting) throws Exception {
         ApprovalSets approvalSets = this.selectById(modelId);
         if (setting == ApproConstants.SET_TYPE_2) {
             if (approvalSets != null) {

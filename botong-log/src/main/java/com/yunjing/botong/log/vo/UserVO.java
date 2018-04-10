@@ -11,7 +11,7 @@ public class UserVO {
     /**
      * 成员id
      */
-    private Long memberId;
+    private String memberId;
 
     /**
      * 用户电话

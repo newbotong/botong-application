@@ -34,16 +34,16 @@ public class ModelCategoryServiceImpl extends BaseServiceImpl<ModelCategoryMappe
     private IModelService modelService;
 
     @Override
-    public boolean createOrEditCategory(Long orgId, Long categoryId, String categoryName) {
+    public boolean createOrEditCategory(String orgId, String categoryId, String categoryName) {
         ModelCategory modelCategory = new ModelCategory();
         if (categoryId == null) {
-            modelCategory.setId(IDUtils.getID());
+            modelCategory.setId(IDUtils.uuid());
             modelCategory.setCreateTime(DateUtil.getCurrentTime().getTime());
         } else {
             modelCategory = this.selectById(categoryId);
             if (modelCategory == null) {
                 modelCategory = new ModelCategory();
-                modelCategory.setId(IDUtils.getID());
+                modelCategory.setId(IDUtils.uuid());
                 modelCategory.setCreateTime(DateUtil.getCurrentTime().getTime());
             }
         }
@@ -56,7 +56,7 @@ public class ModelCategoryServiceImpl extends BaseServiceImpl<ModelCategoryMappe
     }
 
     @Override
-    public boolean deleteCategory(Long orgId, Long categoryId) {
+    public boolean deleteCategory(String orgId, String categoryId) {
         boolean flag = false;
         List<ModelVO> modelList = modelService.findModelListByOrgId(orgId);
         List<ModelVO> modelVOList = modelList.stream().filter(modelVO -> categoryId.equals(modelVO.getCategoryId())).collect(Collectors.toList());
@@ -64,7 +64,7 @@ public class ModelCategoryServiceImpl extends BaseServiceImpl<ModelCategoryMappe
             flag = this.delete(Condition.create().where("id={0}", categoryId));
         } else {
             // 如果删除的分组中有审批模型，则把这些审批模型的所属分组批量改为其他分组
-            List<Long> modelIds = new ArrayList<>();
+            List<String> modelIds = new ArrayList<>();
             for (ModelVO modelVO : modelVOList) {
                 modelIds.add(modelVO.getModelId());
             }
@@ -82,7 +82,7 @@ public class ModelCategoryServiceImpl extends BaseServiceImpl<ModelCategoryMappe
     }
 
     @Override
-    public boolean sortedCategory(Long orgId, String sortArray) throws BaseException {
+    public boolean sortedCategory(String orgId, String sortArray) throws BaseException {
         boolean isUpdated = false;
         try {
             // 解析排序数据
@@ -114,7 +114,7 @@ public class ModelCategoryServiceImpl extends BaseServiceImpl<ModelCategoryMappe
     }
 
     @Override
-    public List<ModelCategoryVO> getCategoryList(Long orgId) {
+    public List<ModelCategoryVO> getCategoryList(String orgId) {
         List<ModelCategoryVO> modelCategoryVOList = new ArrayList<>();
         List<ModelListVO> modelList = modelService.findModelList(orgId);
         for (ModelListVO modelListVO : modelList) {

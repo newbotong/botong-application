@@ -53,17 +53,17 @@ public class ApprovalPushTask extends BaseTask {
     /**
      * 审批主键
      */
-    private Long approvalId;
+    private String approvalId;
 
     /**
      * 企业主键
      */
-    private Long orgId;
+    private String orgId;
 
     /**
      * 用户主键
      */
-    private Long userId;
+    private String userId;
 
     /**
      * 任务名称
@@ -78,7 +78,7 @@ public class ApprovalPushTask extends BaseTask {
      * @param userId     部门编号
      * @return
      */
-    public ApprovalPushTask init(Long approvalId, Long orgId, Long userId) {
+    public ApprovalPushTask init(String approvalId, String orgId, String userId) {
         //设置线程名称
         super.setTaskName(TASK_NAME);
         //设置任务所需参数
@@ -109,7 +109,7 @@ public class ApprovalPushTask extends BaseTask {
      * @param orgId      企业主键
      * @param userId     用户主键
      */
-    public void submitApproval(Long approvalId, Long orgId, Long userId) {
+    public void submitApproval(String approvalId, String orgId, String userId) {
         Approval approval = approvalService.selectById(approvalId);
         ApprovalUser user = approvalUserService.selectById(userId);
         if (orgId != null && userId != null) {
@@ -161,7 +161,7 @@ public class ApprovalPushTask extends BaseTask {
                     phones[0] = user.getMobile();
                     pushLog.setDatatype(30);
                     pushLog.setCopyNum(0);
-                    pushLog.setInfoId(approval.getId());
+                    pushLog.setInfoId(String.valueOf(approval.getId()));
                     pushLog.setUserId(approval.getUserId());
                     pushLog.setOrgId(orgId);
                     pushLog.setCreateTime(DateUtil.getCurrentTime().getTime());
