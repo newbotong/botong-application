@@ -2,6 +2,7 @@ group 'com.yunjing.botong'
 version '1.0-SNAPSHOT'
 
 apply from: "../common_service.gradle"
+apply plugin: 'org.springframework.boot'
 
 dependencies {
     compile('com.yunjing.botong:commons:2.0.0-SNAPSHOT') {
