@@ -13,6 +13,8 @@ import retrofit2.converter.gson.GsonConverterFactory;
 import java.io.IOException;
 
 /**
+ * 收藏OKHttp
+ *
  * @author 李双喜
  * @date 2018/4/8 16:17
  */
@@ -20,7 +22,7 @@ import java.io.IOException;
 @Service
 public class CollectServiceImpl implements CollectService {
 
-    @Value("${okhttp.botong-zuul}")
+    @Value("${{okhttp.botong-favorite}}")
     String baseUrl;
     private CollectService service;
 
