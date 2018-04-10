@@ -117,67 +117,67 @@ public class NoticeServiceImpl extends ServiceImpl<NoticeMapper, NoticeEntity> i
         }
         noticeEntity.insert();
         noticeUserService.insertBatch(userInfoBodyList);
-        //推送
-        Map<String, String> map = new HashMap<>(32);
-        if (StringUtils.isNotEmpty(noticeEntity.getCover())) {
-            map.put("cover", noticeEntity.getCover());
-        } else {
-            map.put("cover", null);
-        }
-        map.put("title", noticeEntity.getTitle());
-        map.put("id", noticeEntity.getId());
-        map.put("content", noticeEntity.getContent());
-        map.put("createTime", noticeEntity.getCreateTime().toString());
-        map.put("author", noticeEntity.getAuthor());
-        if (StringUtils.isNotEmpty(noticeEntity.getPicture())) {
-            String[] pictureArrays = noticeEntity.getPicture().split(",");
-            map.put("accessory", pictureArrays.length + "");
-        } else {
-            map.put("accessory", null);
-        }
-        PushParam pushParam = new PushParam();
-        pushParam.setTitle("公告");
-        pushParam.setNotificationTitle(noticeEntity.getTitle());
-        pushParam.setAlias(userIdList.toArray(new String[0]));
-        pushParam.setMap(map);
-        pushParam.setMsg("");
-        // okhttp调用工作通知
-        informService.pushAllTargetByUser(pushParam);
-        if (noticeEntity.getDangState() == 0) {
-            DangParam dangParam = new DangParam();
-            dangParam.setUserId(noticeEntity.getIssueUserId());
-            dangParam.setBizId(noticeEntity.getId());
-            dangParam.setBizType(1);
-            dangParam.setReceiveBody(JSONObject.toJSONString(receiveBodyList));
-            dangParam.setDangType(1);
-            dangParam.setRemindType(1);
-            dangParam.setSendType(1);
-            dangParam.setSendTime(System.currentTimeMillis());
-            dangParam.setSendContent(noticeEntity.getTitle());
-            dangParam.setVoiceTimeLength(0);
-            Object object = redisTemplate.opsForHash().get(NoticeConstant.USER_INFO_REDIS,noticeEntity.getIssueUserId());
-            if (null != object){
-                UserInfoRedis userInfoRedis = JSONObject.parseObject(object.toString(),UserInfoRedis.class);
-                if (StringUtils.isNotEmpty(userInfoRedis.getMobile())) {
-                    dangParam.setSendTelephone(Long.parseLong(userInfoRedis.getMobile()));
-                }
-            }
-            if (!StringUtils.isAnyBlank(noticeBody.getPicture(), noticeBody.getPictureName(), noticeBody.getSize())) {
-                dangParam.setIsAccessory(1);
-                dangParam.setAccessoryType(1);
-                dangParam.setAccessoryName(noticeBody.getPictureName());
-                dangParam.setAccessoryUrl(noticeBody.getPicture());
-                dangParam.setAccessorySize(noticeBody.getSize());
-            } else {
-                dangParam.setIsAccessory(0);
-                dangParam.setAccessoryType(0);
-                dangParam.setAccessoryName("");
-                dangParam.setAccessoryUrl("");
-                dangParam.setAccessorySize("");
-            }
-            // okhttp调用发送dang消息
-            dangService.sendDang(dangParam);
-        }
+//        //推送
+//        Map<String, String> map = new HashMap<>(32);
+//        if (StringUtils.isNotEmpty(noticeEntity.getCover())) {
+//            map.put("cover", noticeEntity.getCover());
+//        } else {
+//            map.put("cover", null);
+//        }
+//        map.put("title", noticeEntity.getTitle());
+//        map.put("id", noticeEntity.getId());
+//        map.put("content", noticeEntity.getContent());
+//        map.put("createTime", noticeEntity.getCreateTime().toString());
+//        map.put("author", noticeEntity.getAuthor());
+//        if (StringUtils.isNotEmpty(noticeEntity.getPicture())) {
+//            String[] pictureArrays = noticeEntity.getPicture().split(",");
+//            map.put("accessory", pictureArrays.length + "");
+//        } else {
+//            map.put("accessory", null);
+//        }
+//        PushParam pushParam = new PushParam();
+//        pushParam.setTitle("公告");
+//        pushParam.setNotificationTitle(noticeEntity.getTitle());
+//        pushParam.setAlias(userIdList.toArray(new String[0]));
+//        pushParam.setMap(map);
+//        pushParam.setMsg("");
+//        // okhttp调用工作通知
+//        informService.pushAllTargetByUser(pushParam);
+//        if (noticeEntity.getDangState() == 0) {
+//            DangParam dangParam = new DangParam();
+//            dangParam.setUserId(noticeEntity.getIssueUserId());
+//            dangParam.setBizId(noticeEntity.getId());
+//            dangParam.setBizType(1);
+//            dangParam.setReceiveBody(JSONObject.toJSONString(receiveBodyList));
+//            dangParam.setDangType(1);
+//            dangParam.setRemindType(1);
+//            dangParam.setSendType(1);
+//            dangParam.setSendTime(System.currentTimeMillis());
+//            dangParam.setSendContent(noticeEntity.getTitle());
+//            dangParam.setVoiceTimeLength(0);
+//            Object object = redisTemplate.opsForHash().get(NoticeConstant.USER_INFO_REDIS,noticeEntity.getIssueUserId());
+//            if (null != object){
+//                UserInfoRedis userInfoRedis = JSONObject.parseObject(object.toString(),UserInfoRedis.class);
+//                if (StringUtils.isNotEmpty(userInfoRedis.getMobile())) {
+//                    dangParam.setSendTelephone(Long.parseLong(userInfoRedis.getMobile()));
+//                }
+//            }
+//            if (!StringUtils.isAnyBlank(noticeBody.getPicture(), noticeBody.getPictureName(), noticeBody.getSize())) {
+//                dangParam.setIsAccessory(1);
+//                dangParam.setAccessoryType(1);
+//                dangParam.setAccessoryName(noticeBody.getPictureName());
+//                dangParam.setAccessoryUrl(noticeBody.getPicture());
+//                dangParam.setAccessorySize(noticeBody.getSize());
+//            } else {
+//                dangParam.setIsAccessory(0);
+//                dangParam.setAccessoryType(0);
+//                dangParam.setAccessoryName("");
+//                dangParam.setAccessoryUrl("");
+//                dangParam.setAccessorySize("");
+//            }
+//            // okhttp调用发送dang消息
+//            dangService.sendDang(dangParam);
+//        }
     }
 
     /**
@@ -296,7 +296,7 @@ public class NoticeServiceImpl extends ServiceImpl<NoticeMapper, NoticeEntity> i
                 map.put("state", state);
                 noticePageBodyList = noticeMapper.selectNoticePage(map, page);
             }
-            if (results == true) {
+            if (true == true) {
                 int i = 2;
                 if (state == i) {
                     noticePageBodyList = noticeMapper.selectMangerNoticePage(map, page);
