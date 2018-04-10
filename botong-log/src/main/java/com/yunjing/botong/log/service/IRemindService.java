@@ -42,5 +42,5 @@ public interface IRemindService extends IBaseService<RemindEntity> {
      * @param appId
      * @return
      */
-    boolean updateByMemberIdAndAppId(Long taskId, Long memberId, String appId);
+    boolean updateByMemberIdAndAppId(String taskId, String memberId, String appId);
 }

@@ -24,10 +24,7 @@ public class Test {
 
     @org.junit.Test
     public void test2() {
-        String encName = AccessController.doPrivileged(new GetPropertyAction("file.encoding"));
-        Charset charset = Charset.defaultCharset();
-        System.out.println(charset);
-        System.out.println(encName);
+        System.out.println(JSON.toJSONString(null));
     }
 
     @org.junit.Test

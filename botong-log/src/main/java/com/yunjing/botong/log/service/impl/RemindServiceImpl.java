@@ -97,7 +97,7 @@ public class RemindServiceImpl extends BaseServiceImpl<RemindMapper, RemindEntit
     }
 
     @Override
-    public boolean updateByMemberIdAndAppId(Long taskId, Long memberId, String appId) {
+    public boolean updateByMemberIdAndAppId(String taskId, String memberId, String appId) {
         RemindEntity entity = new RemindEntity();
         entity.setAppId(appId);
         entity.setMemberId(memberId);
@@ -117,7 +117,7 @@ public class RemindServiceImpl extends BaseServiceImpl<RemindMapper, RemindEntit
 
         // topic
         String jobTitle = RemindMessageConfiguration.REMIND_QUEUE_NAME;
-        Long taskId = null;
+        String taskId = null;
         RemindVo vo = null;
         switch (remind.getSubmitType()) {
             case 1:

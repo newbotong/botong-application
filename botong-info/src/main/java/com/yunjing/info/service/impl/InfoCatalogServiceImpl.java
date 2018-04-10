@@ -456,15 +456,15 @@ public class InfoCatalogServiceImpl extends ServiceImpl<InfoCatalogMapper, InfoC
      */
     @Override
     public InfoConstant.StateCode updateInfoSort(String orgId, String id1, String id2) throws BaseException {
-        Map<String, Object> infoContentMap1 = new HashMap<>(3);
-        infoContentMap1.put("org_id", orgId);
-        infoContentMap1.put("id", id1);
-        InfoContent infoContent1 = (InfoContent) infoContentMapper.selectByMap(infoContentMap1);
+        InfoContent infoContent1 = new InfoContent();
+        infoContent1.setOrgId(orgId);
+        infoContent1.setId(id1);
+        infoContent1 = infoContentMapper.selectOne(infoContent1);
 
-        Map<String, Object> infoContentMap2 = new HashMap<>(3);
-        infoContentMap2.put("org_id", orgId);
-        infoContentMap2.put("id", id2);
-        InfoContent infoContent2 = (InfoContent) infoContentMapper.selectByMap(infoContentMap2);
+        InfoContent infoContent2 = new InfoContent();
+        infoContent2.setOrgId(orgId);
+        infoContent2.setId(id2);
+        infoContent2 =  infoContentMapper.selectOne(infoContent2);
         int flag = 0;
         if (!ValidationUtil.isEmpty(infoContent1) && !ValidationUtil.isEmpty(infoContent2)) {
             EntityWrapper<InfoContent> wrapper1 = new EntityWrapper<>();

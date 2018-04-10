@@ -20,12 +20,12 @@ public class RemindVo {
      * 用户所有企业的成员id
      */
     @NotNullOrEmpty
-    private Long memberId;
+    private String memberId;
 
     /**
      * 任务id
      */
-    private Long taskId;
+    private String taskId;
 
     /**
      * 应用id
