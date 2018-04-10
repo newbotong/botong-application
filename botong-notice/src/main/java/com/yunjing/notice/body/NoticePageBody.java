@@ -15,7 +15,7 @@ public class NoticePageBody implements Serializable {
     /**
      * 公告id
      */
-    private Long id;
+    private String id;
     /**
      * 标题
      */

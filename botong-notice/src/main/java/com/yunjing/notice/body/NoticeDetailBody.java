@@ -18,7 +18,7 @@ public class NoticeDetailBody implements Serializable{
     /**
      * 公告id
      */
-    private Long id;
+    private String id;
     /**
      * 标题
      */

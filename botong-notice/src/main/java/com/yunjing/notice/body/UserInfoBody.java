@@ -15,7 +15,7 @@ public class UserInfoBody implements Serializable {
     /**
      * 用户id
      */
-    private Long id;
+    private String id;
     /**
      * 用户头像
      */

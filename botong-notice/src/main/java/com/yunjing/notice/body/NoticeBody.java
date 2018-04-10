@@ -21,13 +21,7 @@ public class NoticeBody implements Serializable {
      * 发布人用户id
      */
     @NotNullOrEmpty(message = "发布人不能为空")
-    private Long issueUserId;
-
-    /**
-     * 发布人手机号码
-     */
-    @NotNullOrEmpty(message = "手机号码不能为空")
-    private Long phone;
+    private String issueUserId;
 
     /**
      * 封面图地址
@@ -86,17 +80,5 @@ public class NoticeBody implements Serializable {
      */
     @NotNullOrEmpty(message = "公告作者不能为空")
     private String author;
-
-    /**
-     * 发布人的头像地址
-     */
-    @NotNullOrEmpty(message = "发布人头像不能为空")
-    private String img;
-
-    /**
-     * 发布人的名称
-     */
-    @NotNullOrEmpty(message = "发布人名称不能为空")
-    private String name;
 
 }
