@@ -29,6 +29,16 @@ public class LogTemplateFieldVo {
     private String fieldLabel;
 
     /**
+     * 模板id
+     */
+    private String templateId;
+
+    /**
+     * 模板名称
+     */
+    private String templateName;
+
+    /**
      * 类型1-多行输入框 2-数字输入框 3-单选框 4-日期 5-日期区间 6-单行输入框 7-明细 8-说明文字 9-金额 10- 图片 11-附件
      */
     private Integer type;
@@ -72,6 +82,11 @@ public class LogTemplateFieldVo {
      * 枚举ID
      */
     private String enumId;
+
+    /**
+     * 唯一标识
+     */
+    private String key;
 
     /**
      * 枚举项列表
