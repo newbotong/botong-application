@@ -35,18 +35,3 @@ CREATE TABLE `notice_user` (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 
-DROP TABLE
-IF EXISTS userInfo;
-
-CREATE TABLE `user_info` (
-  `id` bigint(22) NOT NULL COMMENT '用户id',
-  `img` varchar(255) DEFAULT NULL COMMENT '用户头像地址',
-  `name` varchar(32) DEFAULT NULL COMMENT '用户名称',
-  `phone` bigint(11) DEFAULT NULL COMMENT '手机号',
-  `logic_delete` tinyint(1) DEFAULT '0' COMMENT '逻辑删除 0正常 1删除',
-  `update_time` bigint(22) DEFAULT NULL COMMENT '更新时间',
-  `create_time` bigint(22) DEFAULT NULL COMMENT '创建日期',
-  PRIMARY KEY (`id`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
-
-
