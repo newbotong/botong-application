@@ -14,6 +14,7 @@ import java.util.List;
  */
 @Data
 public class UserInfoRedis implements Serializable {
+
     /**
      * 账户id
      */

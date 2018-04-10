@@ -25,7 +25,6 @@ public class DangServiceImpl implements DangService {
     String baseUrl;
 
     private DangService service;
-
     private void initRetrofit(){
         // 构建 Retrofit 对象
         Retrofit retrofit = new Retrofit.Builder()

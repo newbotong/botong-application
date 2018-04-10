@@ -16,7 +16,6 @@ import java.io.Serializable;
  */
 @Data
 public class NoticeBody implements Serializable {
-
     /**
      * 发布人用户id
      */

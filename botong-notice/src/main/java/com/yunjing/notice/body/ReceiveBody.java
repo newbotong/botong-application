@@ -12,6 +12,7 @@ import java.io.Serializable;
  */
 @Data
 public class ReceiveBody implements Serializable {
+
     /**
      * userId 用户id
      */

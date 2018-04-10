@@ -18,6 +18,7 @@ import java.util.Map;
  */
 @Repository
 public interface NoticeMapper extends BaseMapper<NoticeEntity> {
+
     /**
      * 分页查询（客户端）
      * @param map  map入参
