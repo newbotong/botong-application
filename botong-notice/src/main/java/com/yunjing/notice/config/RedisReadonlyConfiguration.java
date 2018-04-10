@@ -42,7 +42,7 @@ public class RedisReadonlyConfiguration {
         if (index != 0) {
             jedis.setDatabase(index);
         }
-        jedis.setPoolConfig(poolCofig(maxIdle, maxTotal, maxWaitMillis));
+        jedis.setPoolConfig(poolConfig(maxIdle, maxTotal, maxWaitMillis));
         // 初始化连接pool
         jedis.afterPropertiesSet();
         RedisConnectionFactory factory = jedis;
@@ -50,12 +50,12 @@ public class RedisReadonlyConfiguration {
         return factory;
     }
 
-    public JedisPoolConfig poolCofig(int maxIdle, int maxTotal, long maxWaitMillis) {
-        JedisPoolConfig poolCofig = new JedisPoolConfig();
-        poolCofig.setMaxIdle(maxIdle);
-        poolCofig.setMaxTotal(maxTotal);
-        poolCofig.setMaxWaitMillis(maxWaitMillis);
-        return poolCofig;
+    public JedisPoolConfig poolConfig(int maxIdle, int maxTotal, long maxWaitMillis) {
+        JedisPoolConfig poolConfig = new JedisPoolConfig();
+        poolConfig.setMaxIdle(maxIdle);
+        poolConfig.setMaxTotal(maxTotal);
+        poolConfig.setMaxWaitMillis(maxWaitMillis);
+        return poolConfig;
     }
 
 }
