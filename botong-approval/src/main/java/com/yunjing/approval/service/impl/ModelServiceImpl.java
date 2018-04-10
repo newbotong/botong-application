@@ -82,7 +82,7 @@ public class ModelServiceImpl extends BaseServiceImpl<ModelMapper, ModelL> imple
     @Transactional(propagation = Propagation.REQUIRED, rollbackFor = Exception.class)
     public boolean sortedModel(String categoryId, String sortArray) throws Exception {
         boolean isUpdated = false;
-        Map<Long, Integer> modelSortMap = null;
+        Map<String, Integer> modelSortMap = null;
         try {
             // 解析排序数据
             JSONArray sortJSONArray = JSONArray.parseArray(sortArray);
@@ -90,7 +90,7 @@ public class ModelServiceImpl extends BaseServiceImpl<ModelMapper, ModelL> imple
             modelSortMap = new HashMap<>(sortJSONArray.size());
             for (int i = 0; i < sortJSONArray.size(); i++) {
                 JSONObject sortJSON = sortJSONArray.getJSONObject(i);
-                modelSortMap.put(sortJSON.getLong("modelId"), sortJSON.getInteger("sort"));
+                modelSortMap.put(sortJSON.getString("modelId"), sortJSON.getInteger("sort"));
             }
         } catch (Exception e) {
             throw new BaseException("解析分组排序数据错误");

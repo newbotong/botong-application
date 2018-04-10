@@ -88,10 +88,10 @@ public class ModelCategoryServiceImpl extends BaseServiceImpl<ModelCategoryMappe
             // 解析排序数据
             JSONArray sortJSONArray = JSONArray.parseArray(sortArray);
             // 封装排序集合为KEY-VALUE以部门编号为KEY，位置为VALUE
-            Map<Long, Integer> categorySortMap = new HashMap<>(sortJSONArray.size());
+            Map<String, Integer> categorySortMap = new HashMap<>(sortJSONArray.size());
             for (int i = 0; i < sortJSONArray.size(); i++) {
                 JSONObject sortJSON = sortJSONArray.getJSONObject(i);
-                categorySortMap.put(Long.valueOf(sortJSON.getString("categoryId")), sortJSON.getInteger("sort"));
+                categorySortMap.put(sortJSON.getString("categoryId"), sortJSON.getInteger("sort"));
             }
             // 查询当前企业的所有分组
             List<ModelCategory> modelCategoryList = this.selectList(Condition.create().where("org_id = {0}", orgId));

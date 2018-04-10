@@ -6,8 +6,11 @@ import com.yunjing.approval.model.vo.MemberInfo;
 import com.yunjing.approval.param.FilterParam;
 import com.yunjing.approval.processor.okhttp.AppCenterService;
 import com.yunjing.approval.service.IApprovalApiService;
+import com.yunjing.approval.service.ICopyService;
 import com.yunjing.approval.service.IModelItemService;
+import com.yunjing.approval.service.IProcessService;
 import com.yunjing.mommon.base.BaseController;
+import com.yunjing.mommon.utils.IDUtils;
 import com.yunjing.mommon.wrapper.ResponseEntityWrapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
@@ -30,6 +33,10 @@ public class ClientApprovalController extends BaseController {
 
     @Autowired
     private IModelItemService modelItemService;
+    @Autowired
+    private IProcessService processService;
+    @Autowired
+    private ICopyService copyService;
 
     /**
      * 获取审批列表
@@ -142,11 +149,44 @@ public class ClientApprovalController extends BaseController {
         return success(approvalApiService.getApprovalDetail(companyId, memberId, approvalId));
     }
 
+    /**
+     * 获取审批人
+     *
+     * @param modelId     模型主键
+     * @param deptId      部门主键
+     * @param conditionId 条件主键
+     * @param value       审批条件的值
+     * @return
+     */
+    @PostMapping("/get-approver")
+    public ResponseEntityWrapper getApprovalMember(@RequestParam("companyId") String companyId, @RequestParam("memberId") String memberId,
+                                                   @RequestParam("modelId") String modelId,@RequestParam(value = "deptId",required = false) String deptId,
+                                                   @RequestParam(value = "conditionId",required = false) String conditionId,
+                                                   @RequestParam(value = "value",required = false) String value) throws Exception {
+        return success(processService.getApprover(companyId, memberId, modelId, deptId, conditionId, value));
+    }
+
+    /**
+     * 获取抄送人
+     *
+     * @param companyId 公司主键
+     * @param memberId  成员主键
+     * @param modelId   模型主键
+     * @return
+     */
+    @PostMapping("/get-copy")
+    public ResponseEntityWrapper getCopyMember(@RequestParam("companyId") String companyId, @RequestParam("memberId") String memberId,
+                                               @RequestParam("modelId") String modelId) throws Exception {
+        return success(copyService.getCopy(companyId, memberId, modelId));
+    }
+
     @Autowired
     private AppCenterService appCenterService;
+
     @GetMapping("/test")
-    public ResponseEntityWrapper test(String[] deptIds,String[] memberIds){
+    public ResponseEntityWrapper test(String[] deptIds, String[] memberIds) {
         List<MemberInfo> subList = appCenterService.findSubList(deptIds, memberIds, true);
         return success(subList);
     }
+
 }

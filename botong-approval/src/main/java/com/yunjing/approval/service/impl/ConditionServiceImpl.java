@@ -1,5 +1,6 @@
 package com.yunjing.approval.service.impl;
 
+import com.baomidou.mybatisplus.mapper.Condition;
 import com.baomidou.mybatisplus.mapper.EntityWrapper;
 import com.baomidou.mybatisplus.mapper.Wrapper;
 import com.common.mybatis.service.impl.BaseServiceImpl;
@@ -89,6 +90,75 @@ public class ConditionServiceImpl extends BaseServiceImpl<ConditionMapper, SetsC
             list.add(setConditionVO);
         }
         return list;
+    }
+
+    @Override
+    public String getCondition(String modelId, String value) {
+        if (StringUtils.isBlank(value)) {
+            return null;
+        }
+
+        List<SetsCondition> list = this.selectList(Condition.create().where("model_id={0}", modelId));
+
+        if (list != null && list.size() > 0) {
+
+            boolean isEquals = false;
+
+            for (SetsCondition condition : list) {
+                String cdn = condition.getCdn();
+                String[] temp = cdn.split(" ");
+
+                if (cdn.indexOf("=") != -1) {
+                    isEquals = true;
+                }
+
+                if (isEquals) {
+                    if (StringUtils.isNotBlank(temp[2])) {
+                        if (value.equals(temp[2])) {
+                            return condition.getId();
+                        }
+                    }
+                } else {
+                    int length = temp.length;
+                    double val = 0;
+
+                    try {
+                        val = Double.parseDouble(value);
+                    } catch (Exception e) {
+
+                    }
+
+                    if (length == 3) {
+                        double num = Double.parseDouble(temp[2]);
+
+                        if ("≤".equals(temp[1])) {
+                            if (val <= num) {
+                                return condition.getId();
+                            }
+                        }
+
+                        if ("＞".equals(temp[1])) {
+                            if (val > num) {
+                                return condition.getId();
+                            }
+                        }
+                    } else if (length == 5) {
+                        double num1 = Double.parseDouble(temp[0]);
+                        double num2 = Double.parseDouble(temp[4]);
+
+                        if (num1 < val && val <= num2) {
+                            return condition.getId();
+                        }
+                    }
+                }
+            }
+        }
+        return null;
+    }
+
+    @Override
+    public SetsCondition getFirstCondition(String modelId) {
+        return this.selectOne(Condition.create().where("model_id={0}", modelId).and("enabled=1").and("sort=1"));
     }
 
     @Override

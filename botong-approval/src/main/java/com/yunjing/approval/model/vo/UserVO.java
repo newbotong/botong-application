@@ -12,18 +12,37 @@ import java.io.Serializable;
 public class UserVO implements Serializable{
 
     /**
-     * 用户主键
+     * 成员id
      */
-    private String userId;
+    private String memberId;
 
     /**
-     * 用户头像
+     * 状态
      */
-    private String userAvatar;
+    private Integer state;
 
     /**
-     * 用户昵称
+     * 审批人手机号
      */
-    private String userNick;
+    private String mobile;
+
+    /**
+     * 审批人名称
+     */
+    private String name;
+
+    /**
+     * 账号id
+     */
+    private String passpottld;
+
+    /**
+     * 头像
+     */
+    private String profile;
+    /**
+     * 头像颜色
+     */
+    private String color;
 
 }

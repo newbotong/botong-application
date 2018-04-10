@@ -14,6 +14,7 @@ import com.yunjing.approval.service.IModelService;
 import com.yunjing.approval.service.IProcessService;
 import com.yunjing.approval.util.ApproConstants;
 import com.yunjing.mommon.global.exception.BaseException;
+import com.yunjing.mommon.utils.IDUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Propagation;
@@ -52,7 +53,7 @@ public class ApprovalSetsServiceImpl extends ServiceImpl<ApprovalSetsMapper, App
         approvalSetVO.setList(conditionList);
 
         // 设置
-        ApprovalSets approvalSets = this.selectOne(Condition.create().where("id={0}", modelId));
+        ApprovalSets approvalSets = this.selectOne(Condition.create().where("model_id={0}", modelId));
         if (approvalSets != null && approvalSets.getSetting() == ApproConstants.SET_TYPE_1) {
             approvalSetVO.setSetting(ApproConstants.SET_TYPE_1);
         } else if (approvalSets != null && approvalSets.getSetting() == ApproConstants.SET_TYPE_0) {
@@ -68,12 +69,13 @@ public class ApprovalSetsServiceImpl extends ServiceImpl<ApprovalSetsMapper, App
         ApprovalSets approvalSets = this.selectById(modelId);
         if (setting == ApproConstants.SET_TYPE_2) {
             if (approvalSets != null) {
-                this.delete(Condition.create().where("id={0}", modelId));
+                this.delete(Condition.create().where("model_id={0}", modelId));
             }
         } else {
             if (approvalSets == null) {
                 approvalSets = new ApprovalSets();
-                approvalSets.setId(modelId);
+                approvalSets.setModelId(modelId);
+                approvalSets.setId(IDUtils.uuid());
             }
             approvalSets.setSetting(setting);
             boolean insertOrUpdate = this.insertOrUpdate(approvalSets);
