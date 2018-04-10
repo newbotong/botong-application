@@ -54,22 +54,5 @@ public class InformServiceImpl implements InformService {
             e.printStackTrace();
         }
         return null;
-
-        //异步请求
-//        authorityService.authority(appId, memberId).enqueue(new Callback<ResponseEntityWrapper>() {
-//            @Override
-//            public void onResponse(Call<ResponseEntityWrapper> call, Response<ResponseEntityWrapper> response) {
-//                ResponseEntityWrapper body = response.body();
-//                if (body != null) {
-//                    log.info("code:{},message:{},data{}", body.getStatusCode(), body.getStatusMessage(), body.getData());
-//                } else {
-//                    log.error("body is null");
-//                }
-//            }
-//            @Override
-//            public void onFailure(Call<ResponseEntityWrapper> call, Throwable t) {
-//                log.error("Throwable:{}", t);
-//            }
-//        });
     }
 }
