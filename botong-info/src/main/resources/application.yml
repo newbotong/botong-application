@@ -59,10 +59,10 @@ spring:
 
   ##Redis配置-日志
   redis-log:
-    database: ${redis-log.dbindex}
-    host: ${redis-log.host}
-    port: ${redis-log.port}
-    password: ${redis-log.password}
+    database: ${redis-info.dbindex}
+    host: ${redis-info.host}
+    port: ${redis-info.port}
+    password: ${redis-info.password}
     timeout: 0
     pool:
       max-active: 8
