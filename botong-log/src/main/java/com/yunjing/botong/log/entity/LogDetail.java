@@ -33,7 +33,7 @@ public class LogDetail {
     /**
      * 模板id
      */
-    private Long templateId;
+    private String templateId;
 
     /**
      * 模板名称
@@ -43,7 +43,7 @@ public class LogDetail {
     /**
      * 企业Id
      */
-    private Long orgId;
+    private String orgId;
 
     /**
      * 日志头像
