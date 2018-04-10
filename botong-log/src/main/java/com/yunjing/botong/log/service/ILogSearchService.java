@@ -37,6 +37,7 @@ public interface ILogSearchService  {
     /**
      * 未读设置为已读
      * @param logId             日志Id
+     * @param userId            用户id
      * @return                  日志明细列表
      */
     boolean read(String logId, String userId);

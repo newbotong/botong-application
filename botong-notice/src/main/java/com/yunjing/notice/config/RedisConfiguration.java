@@ -21,12 +21,12 @@ public class RedisConfiguration {
 
     @Bean(name = "redisReadonlyTemplate")
     public StringRedisTemplate redisReadonlyTemplate(@Value("${spring.redis-readonly.database}") int index,
-                                             @Value("${spring.redis-readonly.host}") String hostName,
-                                             @Value("${spring.redis-readonly.port}") int port,
-                                             @Value("${spring.redis-readonly.password}") String password,
-                                             @Value("${spring.redis-readonly.pool.max-idle}") int maxIdle,
-                                             @Value("${spring.redis-readonly.pool.max-active}") int maxTotal,
-                                             @Value("${spring.redis-readonly.pool.max-wait}") long maxWaitMillis) {
+                                                     @Value("${spring.redis-readonly.host}") String hostName,
+                                                     @Value("${spring.redis-readonly.port}") int port,
+                                                     @Value("${spring.redis-readonly.password}") String password,
+                                                     @Value("${spring.redis-readonly.pool.max-idle}") int maxIdle,
+                                                     @Value("${spring.redis-readonly.pool.max-active}") int maxTotal,
+                                                     @Value("${spring.redis-readonly.pool.max-wait}") long maxWaitMillis) {
         StringRedisTemplate stringRedisTemplate = new StringRedisTemplate();
         stringRedisTemplate.setConnectionFactory(
                 connectionFactory(hostName, port, password, maxIdle, maxTotal, index, maxWaitMillis));
@@ -34,15 +34,15 @@ public class RedisConfiguration {
         return stringRedisTemplate;
     }
 
-    @Bean(name = "redisLogTemplate")
+    @Bean(name = "redisNoticeTemplate")
     @Primary
-    public StringRedisTemplate redisLogTemplate(@Value("${spring.redis-log.database}") int index,
-                                             @Value("${spring.redis-log.host}") String hostName,
-                                             @Value("${spring.redis-log.port}") int port,
-                                             @Value("${spring.redis-log.password}") String password,
-                                             @Value("${spring.redis-log.pool.max-idle}") int maxIdle,
-                                             @Value("${spring.redis-log.pool.max-active}") int maxTotal,
-                                             @Value("${spring.redis-log.pool.max-wait}") long maxWaitMillis) {
+    public StringRedisTemplate redisNoticeTemplate(@Value("${spring.redis-notice.database}") int index,
+                                                @Value("${spring.redis-notice.host}") String hostName,
+                                                @Value("${spring.redis-notice.port}") int port,
+                                                @Value("${spring.redis-notice.password}") String password,
+                                                @Value("${spring.redis-notice.pool.max-idle}") int maxIdle,
+                                                @Value("${spring.redis-notice.pool.max-active}") int maxTotal,
+                                                @Value("${spring.redis-notice.pool.max-wait}") long maxWaitMillis) {
         StringRedisTemplate stringRedisTemplate = new StringRedisTemplate();
         stringRedisTemplate.setConnectionFactory(
                 connectionFactory(hostName, port, password, maxIdle, maxTotal, index, maxWaitMillis));

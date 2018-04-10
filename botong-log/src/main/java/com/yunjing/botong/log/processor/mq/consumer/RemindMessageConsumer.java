@@ -3,7 +3,7 @@ package com.yunjing.botong.log.processor.mq.consumer;
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
 import com.yunjing.botong.log.config.LogConstant;
-import com.yunjing.botong.log.config.RedisReadonly;
+import com.yunjing.botong.log.config.AbstractRedisConfiguration;
 import com.yunjing.botong.log.dao.LogReportDao;
 import com.yunjing.botong.log.params.DangParam;
 import com.yunjing.botong.log.params.UserInfoModel;
@@ -61,7 +61,7 @@ public class RemindMessageConsumer extends AbstractMessageConsumerWithQueueDecla
     private ISMSService smsService;
 
     @Autowired
-    private RedisReadonly redisReadonly;
+    private AbstractRedisConfiguration redisReadonly;
 
 
     public RemindMessageConsumer(RemindMessageConfiguration configuration) {

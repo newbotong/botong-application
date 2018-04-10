@@ -12,7 +12,7 @@ import javax.annotation.Resource;
  * @date 2018/4/9 17:58
  */
 @Component
-public class RedisLog extends AbRedisConfiguration {
+public class RedisLog extends AbstractRedisConfiguration {
     @Resource(name = "redisLogTemplate")
     private StringRedisTemplate temple;
 

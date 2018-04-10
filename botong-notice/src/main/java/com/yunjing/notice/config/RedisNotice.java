@@ -6,14 +6,14 @@ import org.springframework.stereotype.Component;
 import javax.annotation.Resource;
 
 /**
- * 日志reids操作类
+ * 公告reids操作类
  *
  * @author tandk
  * @date 2018/4/9 17:58
  */
 @Component
-public class RedisLog extends AbstractRedisConfiguration {
-    @Resource(name = "redisLogTemplate")
+public class RedisNotice extends AbstractRedisConfiguration {
+    @Resource(name = "redisNoticeTemplate")
     private StringRedisTemplate temple;
 
     @Override

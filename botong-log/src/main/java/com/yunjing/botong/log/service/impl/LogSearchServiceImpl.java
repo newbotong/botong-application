@@ -131,7 +131,7 @@ public class LogSearchServiceImpl implements ILogSearchService {
         }
         List<Member> memList = appCenterService.findSubLists(searchParam.getDeptIds(), searchParam.getUserIds());
         List<String> memIds = new ArrayList<>();
-        Map<String, Member> memberMap = new HashMap<>();
+        Map<String, Member> memberMap = new HashMap<>(16);
         for(Member member : memList) {
             memIds.add(member.getId());
             memberMap.put(member.getId(), member);
@@ -191,7 +191,7 @@ public class LogSearchServiceImpl implements ILogSearchService {
                 list = JSON.parseObject(listT.toString(), memberType);
             }
 
-            Map<String, Member> map = new HashMap<>();
+            Map<String, Member> map = new HashMap<>(16);
             for (Member objVO : list) {
                 if (objVO == null) {
                     continue;
