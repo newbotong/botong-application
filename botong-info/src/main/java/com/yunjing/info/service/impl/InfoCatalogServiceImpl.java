@@ -218,10 +218,10 @@ public class InfoCatalogServiceImpl extends ServiceImpl<InfoCatalogMapper, InfoC
         infoCatalogMap.put("parent_id", parentId);
         List<InfoCatalog> infoCatalogList = infoCatalogMapper.selectByMap(infoCatalogMap);
         //每个公司的分类不能超过6个
-        if (ValidationUtil.isEmpty(infoCatalogList)) {
-            //没有初始化 一级分类
-            return InfoConstant.StateCode.CODE_400;
-        }
+//        if (ValidationUtil.isEmpty(infoCatalogList)) {
+//            //没有初始化 一级分类
+//            return InfoConstant.StateCode.CODE_400;
+//        }
 
         if (infoCatalogList.size() >= InfoConstant.INFO_NAME_MIX) {
             return InfoConstant.StateCode.CODE_604;
@@ -394,11 +394,12 @@ public class InfoCatalogServiceImpl extends ServiceImpl<InfoCatalogMapper, InfoC
      * @param id
      */
     private void updateInfoCategoryRedis(String orgId, String parentId, String id) {
-        Map<String, Object> infoContentMap = new HashMap<>(5);
-        infoContentMap.put("org_id", orgId);
-        infoContentMap.put("parent_id", parentId);
-        infoContentMap.put("catalog_id", id);
-        InfoCatalog infoCatalog = (InfoCatalog) infoCatalogMapper.selectByMap(infoContentMap);
+//        Map<String, Object> infoContentMap = new HashMap<>(5);
+        InfoCatalog infoCatalog = new InfoCatalog();
+        infoCatalog.setOrgId(orgId);
+        infoCatalog.setParentId(parentId);
+        infoCatalog.setId(id);
+        infoCatalog =  infoCatalogMapper.selectOne(infoCatalog);
         if (!ValidationUtil.isEmpty(infoCatalog)) {
             //先删除   botong:info:org:orgid:yijikey->object
             if (redisTemplate.hasKey(InfoConstant.BOTONG_INFO_CATALOG_LIST + orgId + InfoConstant.BOTONG_INFO_FIX + parentId)) {
