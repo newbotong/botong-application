@@ -19,7 +19,7 @@ public class DangParam {
      * 用户id，发送者
      */
     @NotNullOrEmpty(message = "发送者编号不能为空")
-    private Long userId;
+    private String userId;
 
     /**
      * 业务类型(0 Dang 1 公告)
@@ -31,11 +31,12 @@ public class DangParam {
      * 业务ID
      */
     @NotNullOrEmpty(message = "业务编号不能为空")
-    private Long bizId;
+    private String bizId;
 
     /**
      * 接收人信息对象
      */
+
     @NotNullOrEmpty(message = "接收者对象不能为空")
     private String receiveBody;
 
