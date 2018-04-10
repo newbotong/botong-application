@@ -90,7 +90,5 @@ info:
 
 #okHttp调用
 okhttp:
-   botong-zuul: http://${notice-okhttp.ip}:${notice-okhttp.port}
-#  botong-org-admin: http://192.168.10.58:23130/
-#  botong-dang: http://192.168.10.234:23180/
-#  botong-third-party: http://192.168.10.234:17220/
+  botong-org-admin: ${okhttp-botong-zuul}${okhttp-botong-org-admin}
+  botong-favorite: ${okhttp-botong-zuul}${okhttp-botong-favorite}
