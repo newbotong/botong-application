@@ -24,6 +24,7 @@ public interface AuthorityService {
      * @param memberId 企业成员编号
      * @return Call<ResponseEntityWrapper>
      */
+
     @GET("/rpc/org/admin/is-manager")
     Call<ResponseEntityWrapper> authority(@Query("appId") String appId, @Query("memberId") String memberId);
 }

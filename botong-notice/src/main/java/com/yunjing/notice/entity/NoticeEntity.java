@@ -25,6 +25,7 @@ public class NoticeEntity extends BaseModel<NoticeEntity> {
     @TableField("issue_user_id")
     private String issueUserId;
 
+
     /**
      * 公告标题
      */

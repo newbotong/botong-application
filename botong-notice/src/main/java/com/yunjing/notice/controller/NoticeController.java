@@ -20,6 +20,7 @@ import java.util.Map;
 @RestController
 @RequestMapping("/web/notice")
 public class NoticeController extends BaseController {
+
     @Autowired
     private NoticeService noticeService;
 

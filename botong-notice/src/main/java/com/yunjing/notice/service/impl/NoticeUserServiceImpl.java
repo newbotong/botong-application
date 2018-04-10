@@ -15,5 +15,4 @@ import org.springframework.stereotype.Service;
 @Service
 public class NoticeUserServiceImpl extends ServiceImpl<NoticeUserMapper, NoticeUserEntity> implements NoticeUserService {
 
-
 }

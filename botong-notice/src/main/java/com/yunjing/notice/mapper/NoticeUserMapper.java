@@ -12,5 +12,4 @@ import org.springframework.stereotype.Repository;
  */
 @Repository
 public interface NoticeUserMapper extends BaseMapper<NoticeUserEntity> {
-
 }

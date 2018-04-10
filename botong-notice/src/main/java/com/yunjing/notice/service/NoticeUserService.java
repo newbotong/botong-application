@@ -12,6 +12,5 @@ import com.yunjing.notice.entity.NoticeUserEntity;
 public interface NoticeUserService extends IService<NoticeUserEntity> {
 
 
-
 }
 

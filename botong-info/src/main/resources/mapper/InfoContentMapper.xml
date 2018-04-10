@@ -19,6 +19,7 @@
         c.name catalogName,
         r.org_id orgId,
         r.title title,
+        r.sort sort,
         r.read_number readNumber,
         r.whether_show whetherShow,
         r.create_time createTime,
@@ -53,7 +54,7 @@
             AND r.title LIKE CONCAT(CONCAT('%',#{title}),'%')
         </if>
         ORDER BY
-        c.sort
+        r.sort
         LIMIT #{pageNo},#{pageSize}
     </select>
 

@@ -50,8 +50,7 @@ public interface ApiService {
      * 校验用户权限
      *
      * @param appId
-     * @param memberId 测试数据：【611564163546121654982
-     *                 6384302108069335040】
+     * @param memberId
      * @return
      */
     @GET("/api/microapps/appcenter/org/verify-manager")
@@ -61,7 +60,7 @@ public interface ApiService {
     /**
      * 获取指定企业所有成员信息
      *
-     * @param orgId 6384295807801102336
+     * @param orgId
      * @return
      */
     @GET("/api/microapps/appcenter/user/find-all-org-member")
@@ -86,11 +85,12 @@ public interface ApiService {
      */
     @POST("/api/microapps/appcenter/scheduler/set")
     @Headers({"Content-Type: application/json;charset=UTF-8"})
-    Call<ResponseEntityWrapper<Long>> setTask(@Body SchedulerParam param);
+    Call<ResponseEntityWrapper<String>> setTask(@Body SchedulerParam param);
 
 
     /**
      * 获取所有的人员id
+     *
      * @param deptIds
      * @param memberIds
      * @return

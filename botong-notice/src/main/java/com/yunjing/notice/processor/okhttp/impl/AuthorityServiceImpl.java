@@ -25,7 +25,6 @@ public class AuthorityServiceImpl implements AuthorityService {
     String baseUrl;
 
     private AuthorityService service;
-
     private void initRetrofit() {
         // 构建 Retrofit 对象
         Retrofit retrofit = new Retrofit.Builder()

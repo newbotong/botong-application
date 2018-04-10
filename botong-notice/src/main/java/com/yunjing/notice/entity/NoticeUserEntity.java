@@ -37,6 +37,7 @@ public class NoticeUserEntity extends BaseModel<NoticeUserEntity> {
     @TableField("state")
     private Integer state;
 
+
     /**
      * 逻辑删除 0正常  1删除
      */

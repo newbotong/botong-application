@@ -19,7 +19,7 @@ public interface NoticeService extends IService<NoticeEntity> {
     /**
      * 增加公告
      *
-     * @param noticeBody    新增入参
+     * @param noticeBody 新增入参
      * @throws BaseException
      */
     void insertNotice(NoticeBody noticeBody) throws BaseException;

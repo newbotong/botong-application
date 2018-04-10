@@ -19,6 +19,7 @@ public interface InformService {
      * @param pushParam 入参
      * @return
      */
+
     @POST("/rpc/push/push-all-target-user")
     Call<ResponseEntityWrapper> pushAllTargetByUser(@Body PushParam pushParam);
 }

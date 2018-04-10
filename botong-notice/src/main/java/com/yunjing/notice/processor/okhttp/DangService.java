@@ -25,6 +25,7 @@ public interface DangService {
      * @param dangParam dang数据
      * @return Call<ResponseEntityWrapper>
      */
+
     @POST("/rpc/dang/send")
     Call<ResponseEntityWrapper> sendDang(@Body DangParam dangParam);
 

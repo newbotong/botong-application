@@ -9,6 +9,7 @@ import com.yunjing.mommon.wrapper.ResponseEntityWrapper;
 import com.yunjing.notice.body.NoticeBody;
 import com.yunjing.notice.body.NoticeDetailBody;
 import com.yunjing.notice.body.UserInfoBody;
+import com.yunjing.notice.config.RedisReadonly;
 import com.yunjing.notice.processor.feign.param.DangParam;
 import com.yunjing.notice.processor.okhttp.AuthorityService;
 import com.yunjing.notice.processor.okhttp.DangService;
@@ -16,6 +17,7 @@ import com.yunjing.notice.processor.okhttp.InformService;
 import com.yunjing.notice.service.NoticeService;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.web.bind.annotation.*;
 import retrofit2.Call;
 import retrofit2.Response;
@@ -46,43 +48,43 @@ public class NoticeApi extends BaseController {
     @Autowired
     private AuthorityService authorityService;
 
-    @GetMapping
-    public void aaa(){
-        Call<ResponseEntityWrapper> call = authorityService.authority("be61789d315b11e89a1c0242ac110004", "1111111");
-        try {
-            Response<ResponseEntityWrapper> execute = call.execute();
-            ResponseEntityWrapper body = execute.body();
-            log.info("code:{},message:{},data:{}", body.getStatusCode(), body.getStatusMessage(), body.getData());
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-    }
+//    @Autowired
+//    private RedisReadonly redisReadonly;
+//
+//    @GetMapping
+//    public void aaa(){
+//        StringRedisTemplate temple = redisReadonly.getTemple();
+//        String aaa = temple.opsForValue().get("aaa");
+//        System.out.println(aaa);
+//        temple.opsForValue().set("ccc", "aasdsd");
+//    }
+//
+//    @PostMapping("/test-dang")
+//    public void dang(){
+//        DangParam dangParam = new DangParam();
+//        Call<ResponseEntityWrapper> call = dangService.sendDang(dangParam);
+//        try {
+//            Response<ResponseEntityWrapper> execute = call.execute();
+//            ResponseEntityWrapper body = execute.body();
+//            log.info("code:{},message:{},data:{}", body.getStatusCode(), body.getStatusMessage(), body.getData());
+//        } catch (IOException e) {
+//            e.printStackTrace();
+//        }
+//    }
+//
+//    @PostMapping("/test-push")
+//    public void push(){
+//        PushParam dangParam = new PushParam();
+//        Call<ResponseEntityWrapper> call = informService.pushAllTargetByUser(dangParam);
+//        try {
+//            Response<ResponseEntityWrapper> execute = call.execute();
+//            ResponseEntityWrapper body = execute.body();
+//            log.info("code:{},message:{},data:{}", body.getStatusCode(), body.getStatusMessage(), body.getData());
+//        } catch (IOException e) {
+//            e.printStackTrace();
+//        }
+//    }
 
-    @PostMapping("/test-dang")
-    public void dang(){
-        DangParam dangParam = new DangParam();
-        Call<ResponseEntityWrapper> call = dangService.sendDang(dangParam);
-        try {
-            Response<ResponseEntityWrapper> execute = call.execute();
-            ResponseEntityWrapper body = execute.body();
-            log.info("code:{},message:{},data:{}", body.getStatusCode(), body.getStatusMessage(), body.getData());
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-    }
-
-    @PostMapping("/test-push")
-    public void push(){
-        PushParam dangParam = new PushParam();
-        Call<ResponseEntityWrapper> call = informService.pushAllTargetByUser(dangParam);
-        try {
-            Response<ResponseEntityWrapper> execute = call.execute();
-            ResponseEntityWrapper body = execute.body();
-            log.info("code:{},message:{},data:{}", body.getStatusCode(), body.getStatusMessage(), body.getData());
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-    }
 
     /**
      * 新增公告接口

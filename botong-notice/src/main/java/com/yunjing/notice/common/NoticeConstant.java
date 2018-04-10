@@ -7,6 +7,7 @@ package com.yunjing.notice.common;
  * @date 2018/3/21 13:45
  */
 public interface NoticeConstant {
+
     /**
      * 是否逻辑删除（0正常 1删除）
      */

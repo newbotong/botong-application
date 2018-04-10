@@ -11,6 +11,7 @@ import com.yunjing.mommon.utils.IDUtils;
 import com.yunjing.mommon.wrapper.ResponseEntityWrapper;
 import com.yunjing.notice.body.*;
 import com.yunjing.notice.common.NoticeConstant;
+import com.yunjing.notice.config.RedisReadonly;
 import com.yunjing.notice.entity.NoticeEntity;
 import com.yunjing.notice.entity.NoticeUserEntity;
 import com.yunjing.notice.mapper.NoticeMapper;
@@ -56,7 +57,7 @@ public class NoticeServiceImpl extends ServiceImpl<NoticeMapper, NoticeEntity> i
     private NoticeMapper noticeMapper;
 
     @Autowired
-    private StringRedisTemplate redisTemplate;
+    private RedisReadonly redisTemplate;
     /**
      * 绑定的公告appId
      */
@@ -72,7 +73,7 @@ public class NoticeServiceImpl extends ServiceImpl<NoticeMapper, NoticeEntity> i
     /**
      * 新增公告
      *
-     * @param noticeBody    新增入参
+     * @param noticeBody 新增入参
      * @throws BaseException
      */
     @Override
@@ -80,9 +81,9 @@ public class NoticeServiceImpl extends ServiceImpl<NoticeMapper, NoticeEntity> i
     public void insertNotice(NoticeBody noticeBody) throws BaseException {
         NoticeEntity noticeEntity = new NoticeEntity();
         noticeEntity.setId(IDUtils.uuid());
-        BeanUtils.copyProperties(noticeBody,noticeEntity);
+        BeanUtils.copyProperties(noticeBody, noticeEntity);
         noticeEntity.setLogicDelete(NoticeConstant.LOGIC_DELETE_NOMAL);
-        String [] userIds = noticeBody.getUserInfo().split(",");
+        String[] userIds = noticeBody.getUserInfo().split(",");
         List<String> userIdList = Arrays.asList(userIds);
         //去重复
         Set<String> set = new HashSet<String>(userIdList);
@@ -91,17 +92,17 @@ public class NoticeServiceImpl extends ServiceImpl<NoticeMapper, NoticeEntity> i
         if (CollectionUtils.isNotEmpty(userInfoBodies)) {
             noticeEntity.setNotReadNum(userInfoBodies.size());
             noticeEntity.setReadNum(0);
-        }else {
-           throw new BaseException("选择用户不能为空");
+        } else {
+            throw new BaseException("选择用户不能为空");
         }
         List<NoticeUserEntity> userInfoBodyList = new ArrayList<>();
         List<ReceiveBody> receiveBodyList = new ArrayList<>();
-        for (String userId : userInfoBodies){
-            Object object = redisTemplate.opsForHash().get(NoticeConstant.USER_INFO_REDIS,userId);
+        for (String userId : userInfoBodies) {
+            Object object = redisTemplate.getTemple().opsForHash().get(NoticeConstant.USER_INFO_REDIS, userId);
             ReceiveBody receiveBody = new ReceiveBody();
             receiveBody.setUserId(userId);
-            if (null != object){
-                UserInfoRedis userInfoRedis = JSONObject.parseObject(object.toString(),UserInfoRedis.class);
+            if (null != object) {
+                UserInfoRedis userInfoRedis = JSONObject.parseObject(object.toString(), UserInfoRedis.class);
                 if (StringUtils.isNotEmpty(userInfoRedis.getMobile())) {
                     receiveBody.setUserTelephone(Long.parseLong(userInfoRedis.getMobile()));
                 }
@@ -117,67 +118,67 @@ public class NoticeServiceImpl extends ServiceImpl<NoticeMapper, NoticeEntity> i
         }
         noticeEntity.insert();
         noticeUserService.insertBatch(userInfoBodyList);
-//        //推送
-//        Map<String, String> map = new HashMap<>(32);
-//        if (StringUtils.isNotEmpty(noticeEntity.getCover())) {
-//            map.put("cover", noticeEntity.getCover());
-//        } else {
-//            map.put("cover", null);
-//        }
-//        map.put("title", noticeEntity.getTitle());
-//        map.put("id", noticeEntity.getId());
-//        map.put("content", noticeEntity.getContent());
-//        map.put("createTime", noticeEntity.getCreateTime().toString());
-//        map.put("author", noticeEntity.getAuthor());
-//        if (StringUtils.isNotEmpty(noticeEntity.getPicture())) {
-//            String[] pictureArrays = noticeEntity.getPicture().split(",");
-//            map.put("accessory", pictureArrays.length + "");
-//        } else {
-//            map.put("accessory", null);
-//        }
-//        PushParam pushParam = new PushParam();
-//        pushParam.setTitle("公告");
-//        pushParam.setNotificationTitle(noticeEntity.getTitle());
-//        pushParam.setAlias(userIdList.toArray(new String[0]));
-//        pushParam.setMap(map);
-//        pushParam.setMsg("");
-//        // okhttp调用工作通知
-//        informService.pushAllTargetByUser(pushParam);
-//        if (noticeEntity.getDangState() == 0) {
-//            DangParam dangParam = new DangParam();
-//            dangParam.setUserId(noticeEntity.getIssueUserId());
-//            dangParam.setBizId(noticeEntity.getId());
-//            dangParam.setBizType(1);
-//            dangParam.setReceiveBody(JSONObject.toJSONString(receiveBodyList));
-//            dangParam.setDangType(1);
-//            dangParam.setRemindType(1);
-//            dangParam.setSendType(1);
-//            dangParam.setSendTime(System.currentTimeMillis());
-//            dangParam.setSendContent(noticeEntity.getTitle());
-//            dangParam.setVoiceTimeLength(0);
-//            Object object = redisTemplate.opsForHash().get(NoticeConstant.USER_INFO_REDIS,noticeEntity.getIssueUserId());
-//            if (null != object){
-//                UserInfoRedis userInfoRedis = JSONObject.parseObject(object.toString(),UserInfoRedis.class);
-//                if (StringUtils.isNotEmpty(userInfoRedis.getMobile())) {
-//                    dangParam.setSendTelephone(Long.parseLong(userInfoRedis.getMobile()));
-//                }
-//            }
-//            if (!StringUtils.isAnyBlank(noticeBody.getPicture(), noticeBody.getPictureName(), noticeBody.getSize())) {
-//                dangParam.setIsAccessory(1);
-//                dangParam.setAccessoryType(1);
-//                dangParam.setAccessoryName(noticeBody.getPictureName());
-//                dangParam.setAccessoryUrl(noticeBody.getPicture());
-//                dangParam.setAccessorySize(noticeBody.getSize());
-//            } else {
-//                dangParam.setIsAccessory(0);
-//                dangParam.setAccessoryType(0);
-//                dangParam.setAccessoryName("");
-//                dangParam.setAccessoryUrl("");
-//                dangParam.setAccessorySize("");
-//            }
-//            // okhttp调用发送dang消息
-//            dangService.sendDang(dangParam);
-//        }
+        //推送
+        Map<String, String> map = new HashMap<>(32);
+        if (StringUtils.isNotEmpty(noticeEntity.getCover())) {
+            map.put("cover", noticeEntity.getCover());
+        } else {
+            map.put("cover", null);
+        }
+        map.put("title", noticeEntity.getTitle());
+        map.put("id", noticeEntity.getId());
+        map.put("content", noticeEntity.getContent());
+        map.put("createTime", noticeEntity.getCreateTime().toString());
+        map.put("author", noticeEntity.getAuthor());
+        if (StringUtils.isNotEmpty(noticeEntity.getPicture())) {
+            String[] pictureArrays = noticeEntity.getPicture().split(",");
+            map.put("accessory", pictureArrays.length + "");
+        } else {
+            map.put("accessory", null);
+        }
+        PushParam pushParam = new PushParam();
+        pushParam.setTitle("公告");
+        pushParam.setNotificationTitle(noticeEntity.getTitle());
+        pushParam.setAlias(userIdList.toArray(new String[0]));
+        pushParam.setMap(map);
+        pushParam.setMsg("");
+        // okhttp调用工作通知
+        informService.pushAllTargetByUser(pushParam);
+        if (noticeEntity.getDangState() == 0) {
+            DangParam dangParam = new DangParam();
+            dangParam.setUserId(noticeEntity.getIssueUserId());
+            dangParam.setBizId(noticeEntity.getId());
+            dangParam.setBizType(1);
+            dangParam.setReceiveBody(JSONObject.toJSONString(receiveBodyList));
+            dangParam.setDangType(1);
+            dangParam.setRemindType(1);
+            dangParam.setSendType(1);
+            dangParam.setSendTime(System.currentTimeMillis());
+            dangParam.setSendContent(noticeEntity.getTitle());
+            dangParam.setVoiceTimeLength(0);
+            Object object = redisTemplate.getTemple().opsForHash().get(NoticeConstant.USER_INFO_REDIS, noticeEntity.getIssueUserId());
+            if (null != object) {
+                UserInfoRedis userInfoRedis = JSONObject.parseObject(object.toString(), UserInfoRedis.class);
+                if (StringUtils.isNotEmpty(userInfoRedis.getMobile())) {
+                    dangParam.setSendTelephone(Long.parseLong(userInfoRedis.getMobile()));
+                }
+            }
+            if (!StringUtils.isAnyBlank(noticeBody.getPicture(), noticeBody.getPictureName(), noticeBody.getSize())) {
+                dangParam.setIsAccessory(1);
+                dangParam.setAccessoryType(1);
+                dangParam.setAccessoryName(noticeBody.getPictureName());
+                dangParam.setAccessoryUrl(noticeBody.getPicture());
+                dangParam.setAccessorySize(noticeBody.getSize());
+            } else {
+                dangParam.setIsAccessory(0);
+                dangParam.setAccessoryType(0);
+                dangParam.setAccessoryName("");
+                dangParam.setAccessoryUrl("");
+                dangParam.setAccessorySize("");
+            }
+            // okhttp调用发送dang消息
+            dangService.sendDang(dangParam);
+        }
     }
 
     /**
@@ -326,18 +327,18 @@ public class NoticeServiceImpl extends ServiceImpl<NoticeMapper, NoticeEntity> i
                 .eq("logic_delete", NoticeConstant.LOGIC_DELETE_NOMAL).eq("notice_id", id).eq("state", state));
         List<UserInfoBody> userInfoBodyList = new ArrayList<>();
         if (!CollectionUtils.isEmpty(list)) {
-            List<String> ids =  new ArrayList<>();
+            List<String> ids = new ArrayList<>();
             for (NoticeUserEntity noticeUserEntity : list) {
                 ids.add(noticeUserEntity.getUserId());
                 if (null != noticeUserEntity.getUserId()) {
-                    Object object = redisTemplate.opsForHash().get(NoticeConstant.USER_INFO_REDIS,noticeUserEntity.getUserId());
-                    if (null != object){
-                        UserInfoRedis userInfoRedis = JSONObject.parseObject(object.toString(),UserInfoRedis.class);
+                    Object object = redisTemplate.getTemple().opsForHash().get(NoticeConstant.USER_INFO_REDIS, noticeUserEntity.getUserId());
+                    if (null != object) {
+                        UserInfoRedis userInfoRedis = JSONObject.parseObject(object.toString(), UserInfoRedis.class);
                         UserInfoBody userInfoBody = new UserInfoBody();
-                        if (StringUtils.isNotEmpty(userInfoRedis.getProfile())){
+                        if (StringUtils.isNotEmpty(userInfoRedis.getProfile())) {
                             userInfoBody.setImg(userInfoRedis.getProfile());
-                        }else {
-                            userInfoBody.setImg(userInfoRedis.getColor());
+                        } else {
+                            userInfoBody.setImg(null);
                         }
                         userInfoBody.setId(noticeUserEntity.getUserId());
                         if (StringUtils.isNotEmpty(userInfoRedis.getNick())) {
@@ -376,9 +377,9 @@ public class NoticeServiceImpl extends ServiceImpl<NoticeMapper, NoticeEntity> i
         noticeDetailBody.setReadNumber(noticeEntity.getReadNum());
         noticeDetailBody.setNotReadNumber(noticeEntity.getNotReadNum());
         if (null != noticeEntity.getIssueUserId()) {
-            Object object = redisTemplate.opsForHash().get(NoticeConstant.USER_INFO_REDIS,noticeEntity.getIssueUserId());
-            if (null != object){
-                UserInfoRedis userInfoRedis = JSONObject.parseObject(object.toString(),UserInfoRedis.class);
+            Object object = redisTemplate.getTemple().opsForHash().get(NoticeConstant.USER_INFO_REDIS, noticeEntity.getIssueUserId());
+            if (null != object) {
+                UserInfoRedis userInfoRedis = JSONObject.parseObject(object.toString(), UserInfoRedis.class);
                 if (StringUtils.isNotEmpty(userInfoRedis.getNick())) {
                     noticeDetailBody.setIssueUserName(userInfoRedis.getNick());
                 }
