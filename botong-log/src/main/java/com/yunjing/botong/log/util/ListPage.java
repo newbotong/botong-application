@@ -1,5 +1,6 @@
 package com.yunjing.botong.log.util;
 
+import com.yunjing.mommon.global.exception.ParameterErrorException;
 import lombok.Getter;
 import org.apache.commons.collections.CollectionUtils;
 
@@ -34,7 +35,7 @@ public class ListPage<T> {
 
     public ListPage(List<T> data, int pageSize) {
         if (CollectionUtils.isEmpty(data)) {
-            throw new IllegalArgumentException("data must be not empty!");
+            throw new ParameterErrorException("data must be not empty!");
         }
         this.data = data;
         this.pageSize = pageSize;

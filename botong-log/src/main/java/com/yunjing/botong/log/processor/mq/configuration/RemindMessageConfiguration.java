@@ -14,8 +14,7 @@ import org.springframework.stereotype.Component;
 @Component
 public class RemindMessageConfiguration extends DefaultQueueConfiguration {
 
-    // TODO 修改
-    public final static String REMIND_QUEUE_NAME = "botong.log-remind.queue-test";
+    public final static String REMIND_QUEUE_NAME = "botong.log-remind.queue";
 
     @Override
     public String queueName() {

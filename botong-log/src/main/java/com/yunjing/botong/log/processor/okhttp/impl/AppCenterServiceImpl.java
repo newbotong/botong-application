@@ -191,6 +191,7 @@ public class AppCenterServiceImpl implements AppCenterService {
         return false;
     }
 
+
     @Override
     public List<Member> findAllOrgMember(String orgId, boolean isSync) {
         Call<ResponseEntityWrapper<List<Member>>> call = apiService.findAllOrgMember(orgId);
@@ -275,8 +276,8 @@ public class AppCenterServiceImpl implements AppCenterService {
     /**
      * 根据部门ids和成员ids查询所有的成员信息
      *
-     * @param deptIds       部门id集合
-     * @param memberIds     成员id集合
+     * @param deptIds   部门id集合
+     * @param memberIds 成员id集合
      * @return
      */
     @Override

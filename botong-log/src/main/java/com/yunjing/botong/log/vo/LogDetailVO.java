@@ -92,4 +92,9 @@ public class LogDetailVO {
      * 删除状态
      */
     private Integer deleteStatus;
+
+    /**
+     * 提交类型
+     */
+    private Integer submitType;
 }
