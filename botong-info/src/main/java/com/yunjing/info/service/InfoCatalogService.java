@@ -162,8 +162,8 @@ public interface InfoCatalogService extends IService<InfoCatalog> {
      * web端资讯分页模糊查询
      *
      * @param orgId
-     * @param catalogId1
-     * @param catalogId2
+     * @param parentId
+     * @param catalogId
      * @param title
      * @param pageNo
      * @param pageSize
