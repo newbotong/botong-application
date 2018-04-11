@@ -104,3 +104,6 @@ okhttp:
 # 写入文件日志
 logging:
   file: ${user.dir}/logs/${spring.application.name}.log
+
+#H5分享地址
+H5Address: ${H5Address-notice}
