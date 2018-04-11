@@ -62,6 +62,8 @@ public class ModelItemServiceImpl extends BaseServiceImpl<ModelItemMapper, Model
 
     @Autowired
     private ICopyService copyService;
+    @Autowired
+    private ModelItemMapper modelItemMapper;
 
     /**
      * 1-多行输入框 2-数字输入框 3-单选框 4-日期 5-日期区间 6-单行输入框 7-明细 8-说明文字 9-金额 10- 图片 11-附件
@@ -266,6 +268,12 @@ public class ModelItemServiceImpl extends BaseServiceImpl<ModelItemMapper, Model
         }
 
         return this.getModelVO(entity, entityList);
+    }
+
+    @Override
+    public boolean deleteModelItemListByOrgId(String orgId) {
+        return modelItemMapper.deleteModelItemListByOrgId(orgId);
+
     }
 
     /**

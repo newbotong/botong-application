@@ -9,6 +9,18 @@ public class ApproConstants {
     public final static String  BOTONG_ORG_MEMBER = "botong:org:dept:member";
 
     /**
+     * 审批完成 （状态 0:审批中 1: 审批完成 2:已撤回）
+     */
+    public static final int APPROVAL_STATE_1 = 1;
+    /**
+     * 是系统默认模型
+     */
+    public static final int IS_SYSTEM_MODEL_1 = 1;
+    /**
+     * 不是系统默认模型
+     */
+    public static final int IS_SYSTEM_MODEL_0 = 0;
+    /**
      * 不分条件设置审批
      */
     public static final int SET_TYPE_0 = 0;

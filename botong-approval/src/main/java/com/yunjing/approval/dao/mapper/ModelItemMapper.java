@@ -3,6 +3,7 @@ package com.yunjing.approval.dao.mapper;
 
 import com.common.mybatis.mapper.IBaseMapper;
 import com.yunjing.approval.model.entity.ModelItem;
+import org.apache.ibatis.annotations.Param;
 
 import java.util.List;
 
@@ -22,4 +23,11 @@ public interface ModelItemMapper extends IBaseMapper<ModelItem> {
      */
     List<ModelItem> selectAll(String orgId);
 
+
+    /**
+     * 删除企业下的所有审批模板子项
+     * @param orgId 企业Id
+     * @return
+     */
+    boolean deleteModelItemListByOrgId(@Param("orgId") String orgId);
 }

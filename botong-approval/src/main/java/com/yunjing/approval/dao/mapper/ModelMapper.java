@@ -29,4 +29,19 @@ public interface ModelMapper extends IBaseMapper<ModelL> {
      * @return 最大值
      */
     Integer getMaxSort(@Param("orgId") String orgId);
+
+    /**
+     * 查询企业下的所有审批模板
+     * @param orgId 企业Id
+     * @param isDef
+     * @return
+     */
+    List<ModelL> selectModelListByOrgId(@Param("orgId") String orgId, @Param("isDef") Integer isDef);
+
+    /**
+     * 删除企业下的所有审批模板
+     * @param orgId 企业Id
+     * @return
+     */
+    boolean deleteModelListByOrgId(@Param("orgId") String orgId);
 }
