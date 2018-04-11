@@ -1,8 +1,7 @@
 package com.yunjing.notice.processor.okhttp.impl;
 
-import com.yunjing.mommon.base.PushParam;
 import com.yunjing.mommon.wrapper.ResponseEntityWrapper;
-import com.yunjing.notice.processor.okhttp.InformService;
+import com.yunjing.notice.processor.okhttp.OrgStructureService;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
@@ -13,19 +12,19 @@ import retrofit2.converter.gson.GsonConverterFactory;
 import java.io.IOException;
 
 /**
- * okhttp调用第三方服务
+ * okhttp调用组织机构
  *
  * @author tandk
- * @date 2018/4/4 14:04
+ * @date 2018/4/3 15:58
  */
 @Slf4j
 @Service
-public class InformServiceImpl implements InformService {
+public class OrgStructureServiceImpl implements OrgStructureService {
 
-    @Value("${okhttp.botong-third-party}")
+    @Value("${okhttp.botong-org-structure}")
     String baseUrl;
 
-    private InformService service;
+    private OrgStructureService service;
 
     private void initRetrofit() {
         // 构建 Retrofit 对象
@@ -35,22 +34,23 @@ public class InformServiceImpl implements InformService {
                 .addConverterFactory(GsonConverterFactory.create())
                 .build();
         // 构建请求对象
-        service = retrofit.create(InformService.class);
+        service = retrofit.create(OrgStructureService.class);
     }
 
     /**
-     * 发送推送消息
+     * 获取部门下的成员列表
      *
-     * @param pushParam 推送消息
-     * @return ResponseEntityWrapper
+     * @param deptIds   部门id集合,逗号隔开
+     * @param memberIds 成员id集合,逗号隔开
+     * @return Call<ResponseEntityWrapper>
      */
     @Override
-    public Call<ResponseEntityWrapper> pushAllTargetByUser(PushParam pushParam) {
+    public Call<ResponseEntityWrapper> findSubLists(String deptIds, String memberIds) {
         if (service == null) {
             initRetrofit();
         }
         try {
-            Call<ResponseEntityWrapper> call = service.pushAllTargetByUser(pushParam);
+            Call<ResponseEntityWrapper> call = service.findSubLists(deptIds, memberIds);
             call.execute();
             return call.clone();
         } catch (IOException e) {

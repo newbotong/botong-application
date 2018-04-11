@@ -14,7 +14,7 @@ import java.io.IOException;
 /**
  * okhttp调用权限验证
  *
- * @author 谈东魁
+ * @author tandk
  * @date 2018/4/3 15:58
  */
 @Slf4j
@@ -25,6 +25,7 @@ public class AuthorityServiceImpl implements AuthorityService {
     String baseUrl;
 
     private AuthorityService service;
+
     private void initRetrofit() {
         // 构建 Retrofit 对象
         Retrofit retrofit = new Retrofit.Builder()
@@ -45,7 +46,7 @@ public class AuthorityServiceImpl implements AuthorityService {
      */
     @Override
     public Call<ResponseEntityWrapper> authority(String appId, String memberId) {
-        if(service == null){
+        if (service == null) {
             initRetrofit();
         }
         try {

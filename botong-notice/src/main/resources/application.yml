@@ -101,6 +101,7 @@ okhttp:
   botong-org-admin: ${okhttp-botong-zuul}${okhttp-botong-org-admin}
   botong-dang: ${okhttp-botong-zuul}${okhttp-botong-dang}
   botong-third-party: ${okhttp-botong-zuul}${okhttp-botong-third-party}
+  botong-org-structure: ${okhttp-botong-zuul}${okhttp-botong-org-structure}
 
 # 写入文件日志
 logging:

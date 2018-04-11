@@ -14,7 +14,8 @@ import java.io.IOException;
 
 /**
  * okhttp调用dang服务
- * @author 谈东魁
+ *
+ * @author tandk
  * @date 2018/4/3 15:58
  */
 @Slf4j
@@ -25,7 +26,8 @@ public class DangServiceImpl implements DangService {
     String baseUrl;
 
     private DangService service;
-    private void initRetrofit(){
+
+    private void initRetrofit() {
         // 构建 Retrofit 对象
         Retrofit retrofit = new Retrofit.Builder()
                 .baseUrl(baseUrl)
@@ -39,12 +41,12 @@ public class DangServiceImpl implements DangService {
     /**
      * 发送dang消息
      *
-     * @param dangParam    当消息
+     * @param dangParam 当消息
      * @return ResponseEntityWrapper
      */
     @Override
     public Call<ResponseEntityWrapper> sendDang(DangParam dangParam) {
-        if(service == null){
+        if (service == null) {
             initRetrofit();
         }
         try {
