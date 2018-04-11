@@ -10,7 +10,6 @@ import com.yunjing.approval.service.ICopyService;
 import com.yunjing.approval.service.IModelItemService;
 import com.yunjing.approval.service.IProcessService;
 import com.yunjing.mommon.base.BaseController;
-import com.yunjing.mommon.utils.IDUtils;
 import com.yunjing.mommon.wrapper.ResponseEntityWrapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
@@ -155,16 +154,15 @@ public class ClientApprovalController extends BaseController {
      * @param modelId     模型主键
      * @param deptId      部门主键
      * @param conditionId 条件主键
-     * @param value       审批条件的值
-     * @param value       审批条件的值
+     * @param judge       审批条件的值
      * @return
      */
     @PostMapping("/get-approver")
     public ResponseEntityWrapper getApprovalMember(@RequestParam("companyId") String companyId, @RequestParam("memberId") String memberId,
                                                    @RequestParam("modelId") String modelId,@RequestParam(value = "deptId",required = false) String deptId,
-                                                   @RequestParam(value = "conditionId",required = false) String conditionId,@RequestParam(value = "field",required = false) String field,
-                                                   @RequestParam(value = "value",required = false) String value) throws Exception {
-        return success(processService.getApprover(companyId, memberId, modelId, deptId, conditionId, field,value));
+                                                   @RequestParam(value = "conditionId",required = false) String conditionId,
+                                                   @RequestParam(value = "judge",required = false) String judge) throws Exception {
+        return success(processService.getApprover(companyId, memberId, modelId, deptId, conditionId, judge));
     }
 
     @Autowired

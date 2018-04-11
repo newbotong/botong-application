@@ -28,11 +28,11 @@ public interface IProcessService extends IBaseService<SetsProcess> {
      * 获取审批流程
      *
      * @param modelId     模型主键
-     * @param conditionId 条件主键
+     * @param conditionIds 条件主键
      * @return
      * @throws Exception
      */
-    List<UserVO> getProcess(String modelId, String conditionId) throws Exception;
+    List<UserVO> getProcess(String modelId, List<String> conditionIds) throws Exception;
 
     /**
      * 设置审批流程信息
@@ -61,9 +61,9 @@ public interface IProcessService extends IBaseService<SetsProcess> {
      * @param modelId     模型主键
      * @param deptId      部门主键
      * @param conditionId 条件
-     * @param value       条件的值
+     * @param judge       条件的值
      * @return ApproverVO
      * @throws Exception
      */
-    ApproverVO getApprover(String companyId, String memberId, String modelId, String deptId, String conditionId, String field,String value) throws Exception;
+    ApproverVO getApprover(String companyId, String memberId, String modelId, String deptId, String conditionId, String judge) throws Exception;
 }

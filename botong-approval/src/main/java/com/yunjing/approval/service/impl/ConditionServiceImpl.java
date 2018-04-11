@@ -77,9 +77,11 @@ public class ConditionServiceImpl extends BaseServiceImpl<ConditionMapper, SetsC
 
         List<SetsCondition> listCondition = this.selectList(wrapper);
         List<SetConditionVO> list = new ArrayList<>();
+        List<String> conditonIds = new ArrayList<>();
         for (SetsCondition setsCondition : listCondition) {
             SetConditionVO setConditionVO = new SetConditionVO();
-            List<UserVO> userVoList = processService.getProcess(modelId, setsCondition.getId());
+            conditonIds.add(setsCondition.getId());
+            List<UserVO> userVoList = processService.getProcess(modelId, conditonIds);
             setConditionVO.setConditionId(setsCondition.getId());
             setConditionVO.setCdn(setsCondition.getCdn());
             setConditionVO.setContent(setsCondition.getContent());

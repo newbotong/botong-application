@@ -32,8 +32,7 @@ import java.util.stream.Collectors;
  * @author liuxiaopeng
  * @date 2018/02/28
  */
-@Service
-
+@Service("approvalApiService")
 public class ApprovalApiServiceImpl implements IApprovalApiService {
 
     @Autowired

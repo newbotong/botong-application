@@ -42,6 +42,7 @@ public class ClientApprovalOperationController extends BaseController {
      * @param companyId   公司id
      * @param memberId    成员id
      * @param modelId     模型主键
+     * @param deptId      部门主键
      * @param jsonData    要提交的审批数据
      * @param sendUserIds 要推送的审批人主键，多个以英文，隔开
      * @param sendCopyIds 要推送的抄送人主键，多个以英文，隔开
@@ -53,8 +54,9 @@ public class ClientApprovalOperationController extends BaseController {
                                         @RequestParam("memberId") String memberId,
                                         @RequestParam("modelId") String modelId,
                                         @RequestParam("jsonData") String jsonData,
+                                        @RequestParam("deptId") String deptId,
                                         @RequestParam("sendUserIds") String sendUserIds,
-                                        @RequestParam(value = "sendCopyIds",required = false) String sendCopyIds) throws Exception {
+                                        @RequestParam(value = "sendCopyIds", required = false) String sendCopyIds) throws Exception {
         return success(approvalService.submit(companyId, memberId, modelId, jsonData, sendUserIds, sendCopyIds));
     }
 

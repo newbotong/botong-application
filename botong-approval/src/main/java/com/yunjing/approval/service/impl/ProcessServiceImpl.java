@@ -1,16 +1,21 @@
 package com.yunjing.approval.service.impl;
 
+import com.alibaba.fastjson.JSON;
+import com.alibaba.fastjson.JSONArray;
+import com.alibaba.fastjson.JSONObject;
 import com.baomidou.mybatisplus.mapper.Condition;
 import com.baomidou.mybatisplus.mapper.Wrapper;
 import com.common.mybatis.service.impl.BaseServiceImpl;
 import com.yunjing.approval.dao.mapper.ConditionMapper;
 import com.yunjing.approval.dao.mapper.ProcessMapper;
-import com.yunjing.approval.model.entity.*;
+import com.yunjing.approval.model.entity.ApprovalSets;
+import com.yunjing.approval.model.entity.ApprovalUser;
+import com.yunjing.approval.model.entity.SetsCondition;
+import com.yunjing.approval.model.entity.SetsProcess;
 import com.yunjing.approval.model.vo.ApproverVO;
 import com.yunjing.approval.model.vo.UserVO;
 import com.yunjing.approval.service.*;
 import com.yunjing.approval.util.ApproConstants;
-import com.yunjing.approval.util.Colors;
 import com.yunjing.mommon.global.exception.BaseException;
 import com.yunjing.mommon.utils.IDUtils;
 import org.apache.commons.lang.StringUtils;
@@ -19,9 +24,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Set;
+import java.util.*;
 import java.util.stream.Collectors;
 
 /**
@@ -71,13 +74,13 @@ public class ProcessServiceImpl extends BaseServiceImpl<ProcessMapper, SetsProce
     }
 
     @Override
-    public List<UserVO> getProcess(String modelId, String conditionId) throws Exception {
+    public List<UserVO> getProcess(String modelId, List<String> conditionIds) throws Exception {
         List<UserVO> users = new ArrayList<>();
         List<SetsProcess> list;
-        if (StringUtils.isBlank(conditionId)) {
-            list = this.selectList(Condition.create().where("model_id={0}", modelId).and("(condition_id is null or condition_id='')").orderBy(true, "sort", true));
+        if (conditionIds != null && !conditionIds.isEmpty()) {
+            list = this.selectList(Condition.create().where("model_id={0}", modelId).in("condition_id", conditionIds).orderBy(true, "sort", true));
         } else {
-            list = this.selectList(Condition.create().where("model_id={0}", modelId).and("condition_id={0}", conditionId).orderBy(true, "sort", true));
+            list = this.selectList(Condition.create().where("model_id={0}", modelId).and("(condition_id is null or condition_id='')").orderBy(true, "sort", true));
         }
         List<ApprovalUser> userList = approvalUserService.selectList(Condition.create());
         for (SetsProcess process : list) {
@@ -153,41 +156,58 @@ public class ProcessServiceImpl extends BaseServiceImpl<ProcessMapper, SetsProce
     }
 
     @Override
-    public ApproverVO getApprover(String companyId, String memberId, String modelId, String deptId, String conditionId, String field,String value) throws Exception {
+    public ApproverVO getApprover(String companyId, String memberId, String modelId, String deptId, String conditionId, String judge) throws Exception {
+        // 解析
+        Map<String, String> param = new HashMap<>(1);
+        JSONArray jsonArray = JSON.parseArray(judge);
+        Iterator<Object> it = jsonArray.iterator();
+        while (it.hasNext()) {
+            JSONObject obj = (JSONObject) it.next();
+            String field = obj.getString("field");
+            String value = obj.getString("value");
+            param.put(field, value);
+        }
         ApproverVO result = new ApproverVO();
         // 获取审批流程设置类型，set=0:不分条件设置审批人 set=1:分条件设置审批人
         ApprovalSets sets = approvalSetsService.selectOne(Condition.create().where("model_id={0}", modelId));
         if (sets != null) {
-            String cdnId = "";
+            List<String> cdnIds = new ArrayList<>();
             // 分条件审批
             if (sets.getSetting() == 1) {
                 if (StringUtils.isBlank(deptId)) {
                     //rpc获取成员所在的根部门信息
                     result.setDeptName("互联网时代");
                 }
-                if (StringUtils.isNotBlank(value)) {
-                    conditionId = conditionService.getCondition(modelId, value);
+                List<String> conditionIds = new ArrayList<>();
+                for (Map.Entry<String, String> m : param.entrySet()) {
+                    String id = conditionService.getCondition(modelId, m.getValue());
+                    conditionIds.add(id);
                 }
 
-                if (StringUtils.isBlank(conditionId)) {
+                if (conditionIds.isEmpty()) {
                     List<SetsCondition> conditionSet = conditionService.getFirstCondition(modelId);
                     for (SetsCondition sc : conditionSet) {
-                        String s = sc.getCdn().substring(0, sc.getCdn().indexOf(" "));
-                        if (sc != null && s.equals(field)) {
-                            cdnId = sc.getId();
+                        String field = sc.getCdn().substring(0, sc.getCdn().indexOf(" "));
+                        String value = sc.getCdn().substring(sc.getCdn().lastIndexOf(" "), sc.getCdn().length()).trim();
+                        for (Map.Entry<String, String> m : param.entrySet()) {
+                            if (sc != null && field.equals(m.getKey()) && value.equals(m.getValue())) {
+                                cdnIds.add(sc.getId());
+                            }
+
                         }
+
                     }
                 } else {
-                    cdnId = conditionId;
+                    cdnIds.addAll(conditionIds);
                 }
 
-                if (StringUtils.isBlank(cdnId)) {
+                if (cdnIds.isEmpty()) {
                     return null;
                 }
-                result.setConditionId(cdnId);
+                result.setConditionId(cdnIds);
             }
 
-            List<UserVO> users = processService.getProcess(modelId, cdnId);
+            List<UserVO> users = processService.getProcess(modelId, cdnIds);
 
             List<UserVO> list = new ArrayList<>();
 
@@ -215,10 +235,10 @@ public class ProcessServiceImpl extends BaseServiceImpl<ProcessMapper, SetsProce
                 }
             }
             if (list != null && list.size() > 0) {
-                result.setApproverList(list);
+                result.setApprovers(list);
             }
             // 获取抄送人
-            result.setCopyList(copyService.getCopy(companyId,memberId,modelId));
+            result.setCopys(copyService.getCopy(companyId, memberId, modelId));
 
             return result;
         }
