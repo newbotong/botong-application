@@ -151,6 +151,19 @@ public class LogDetailDao extends BaseMongoDaoImpl<LogDetail> {
     }
 
     /**
+     * 批量删除日志
+     * @param logIds    日志Ids
+     * @return
+     */
+    public WriteResult deleteByIds(String[] logIds) {
+        Query query = new Query(Criteria.where("logId").in(logIds));
+        BasicDBObject basicDBObject = new BasicDBObject();
+        basicDBObject.put("$set", new BasicDBObject("deleteStatus", LogConstant.BOTONG_ONE_NUM));
+        Update update = new BasicUpdate(basicDBObject);
+        return update(query, update);
+    }
+
+    /**
      * web端查询日志列表
      *
      * @param pageNo
@@ -206,15 +219,12 @@ public class LogDetailDao extends BaseMongoDaoImpl<LogDetail> {
         if (StringUtils.isNotBlank(startDate) && StringUtils.isNotBlank(endDate)) {
             Date start = DateUtil.stringToDate(startDate);
             Date end = DateUtil.stringToDate(endDate);
-            criteria.andOperator(Criteria.where("submitTime").lte(end.getTime()).gte(start.getTime()));
+            criteria.andOperator(Criteria.where("submitTime").lte(end).gte(start));
         }
         Query query = new Query(criteria);
         query.with(new Sort(Sort.Direction.DESC, "submitTime"));
         return query;
     }
-
-
-
 
     public WriteResult remove(String passportId) {
         Query query = new Query(Criteria.where("_id").is(passportId));

@@ -12,18 +12,25 @@ import com.netflix.discovery.converters.Auto;
 import com.yunjing.botong.log.constant.LogConstant;
 import com.yunjing.botong.log.dao.LogDetailDao;
 import com.yunjing.botong.log.entity.LogDetail;
+import com.yunjing.botong.log.excel.BaseExModel;
+import com.yunjing.botong.log.excel.ExcelModel;
+import com.yunjing.botong.log.excel.LogExConsts;
+import com.yunjing.botong.log.excel.LogExModel;
+import com.yunjing.botong.log.mapper.LogTemplateFieldMapper;
 import com.yunjing.botong.log.params.ReceviedParam;
 import com.yunjing.botong.log.params.SearchParam;
 import com.yunjing.botong.log.processor.okhttp.AppCenterService;
 import com.yunjing.botong.log.service.ILogSearchService;
-import com.yunjing.botong.log.vo.LogDetailVO;
-import com.yunjing.botong.log.vo.Member;
-import com.yunjing.botong.log.vo.MemberVO;
-import com.yunjing.botong.log.vo.UserVO;
+import com.yunjing.botong.log.service.LogTemplateService;
+import com.yunjing.botong.log.vo.*;
+import com.yunjing.mommon.Enum.DateStyle;
+import com.yunjing.mommon.utils.DateUtil;
 import com.yunjing.mommon.utils.ListUtils;
+import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.ArrayUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.mongodb.core.query.Criteria;
 import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.stereotype.Service;
 
@@ -37,6 +44,7 @@ import java.util.stream.Collectors;
  * @author jingwj
  * @date 2018/4/2 10:55
  */
+@Slf4j
 @Service
 public class LogSearchServiceImpl implements ILogSearchService {
 
@@ -48,6 +56,9 @@ public class LogSearchServiceImpl implements ILogSearchService {
 
     @Autowired
     AppCenterService appCenterService;
+
+    @Autowired
+    LogTemplateService logTemplateService;
 
     private Type memberType = new TypeReference<List<Member>>() {
     }.getType();
@@ -113,7 +124,9 @@ public class LogSearchServiceImpl implements ILogSearchService {
      */
     @Override
     public boolean delete(String logId, String userId) {
-        logDetailDao.delete(logId, userId);
+        if (StringUtils.isNotBlank(logId)) {
+            logDetailDao.delete(logId, userId);
+        }
         return true;
     }
 
@@ -155,6 +168,20 @@ public class LogSearchServiceImpl implements ILogSearchService {
             result.setRecords(resultRecord);
         }
         return result;
+    }
+
+    /**
+     * 删除日志
+     *
+     * @param logIds 日志ids
+     * @return 成功与否
+     */
+    @Override
+    public boolean batchDelete(String[] logIds) {
+        if (logIds != null && logIds.length > 0) {
+            logDetailDao.deleteByIds(logIds);
+        }
+        return true;
     }
 
     /**
@@ -221,4 +248,124 @@ public class LogSearchServiceImpl implements ILogSearchService {
         return result;
     }
 
+
+    /**
+     * 查询所有的日志列表
+     *
+     * @param searchParam
+     * @return
+     */
+    @Override
+    public List<LogExcelVO> findAll(SearchParam searchParam) {
+        //当没有选择范围则查询该企业下所有的员工
+        if (searchParam.getDeptIds() != null && searchParam.getDeptIds().length == 0 && searchParam.getUserIds() != null && searchParam.getUserIds().length == 0) {
+            String[] deptIds = {searchParam.getOrgId()};
+            searchParam.setDeptIds(deptIds);
+        }
+        List<Member> memList = appCenterService.findSubLists(searchParam.getDeptIds(), searchParam.getUserIds());
+        List<String> memIds = new ArrayList<>();
+        Map<String, Member> memberMap = new HashMap<>();
+        for(Member member : memList) {
+            memIds.add(member.getId());
+            memberMap.put(member.getId(), member);
+        }
+        List<LogExcelVO> resultRecord = new ArrayList<>();
+        List<LogDetail> detailResult = logDetailDao.findByConditionAll(searchParam.getOrgId(), memIds, searchParam.getSubmitType(), searchParam.getStartDate(), searchParam.getEndDate());
+        if (detailResult != null && !detailResult.isEmpty()) {
+            LogExcelVO logExcelVO;
+            List<AttrValueVO> logData;
+            AttrValueVO attrValueVO;
+            for (LogDetail detail : detailResult) {
+                logExcelVO = new LogExcelVO();
+                logExcelVO.setSender(memberMap.get(detail.getMemberId()).getMemberName());
+                logExcelVO.setSendTime(DateUtil.DateToString(detail.getSubmitTime(), DateStyle.YYYY_MM_DD_HH_MM_SS));
+                logExcelVO.setDeptName(StringUtils.join(memberMap.get(detail.getMemberId()).getDeptNames(), LogConstant.SEPARATE_STR));
+                logExcelVO.setLogId(detail.getLogId());
+                logExcelVO.setType(detail.getSubmitType().toString());
+                logData = new ArrayList<>();
+                attrValueVO = new AttrValueVO();
+                for (LogConentVO conentVO : detail.getContents()) {
+                    attrValueVO.setEkey(conentVO.getKey());
+                    attrValueVO.setCkey(conentVO.getName());
+                    attrValueVO.setAttrVal(conentVO.getValue());
+                    logData.add(attrValueVO);
+                }
+                AttrValueVO attrValueVO1 = new AttrValueVO();
+                attrValueVO1.setCkey("图片地址");
+                String logImgs = StringUtils.join(detail.getLogImages(), " \r\n");
+                attrValueVO1.setAttrVal(logImgs);
+                logData.add(attrValueVO1);
+                logExcelVO.setListValue(logData);
+                resultRecord.add(logExcelVO);
+            }
+        }
+        return resultRecord;
+    }
+
+    /**
+     * 根据条件执行导出日志信息
+     *
+     * @param searchParam 参数对象
+     * @return excel包装类
+     * @throws Exception
+     */
+    @Override
+    public BaseExModel createLogExcel(SearchParam searchParam) throws Exception {
+        Date time = new Date();
+        List<LogExcelVO> logExcelVOList = findAll(searchParam);
+        List<ExcelModel> excelModelList = new ArrayList<>();
+        LogExModel logExModel = new LogExModel();
+        Date time2 = new Date();
+        log.info("从mongo查询到处理完毕总耗时：" + DateUtil.calculateIntervalSecond(time, time2));
+        Map<String, List<LogTemplateFieldVo>> model = logTemplateService.queryFields(searchParam);
+        StringBuilder fileName = new StringBuilder().append(LogExConsts.NOTICE).append(LogExConsts.SEPARATOR_POINT).append(LogExConsts.TYPE_XLSX);
+        String TABLE_HEADER = "报表生成日期："+ DateUtil.getDateTime(new Date());
+        for (String key : model.keySet()) {
+            if (searchParam.getSubmitType() != 0) {
+                if (model.get(key).get(0).getType() != searchParam.getSubmitType().intValue()) {
+                    continue;
+                }
+            }
+
+            ExcelModel excelModel = new ExcelModel();
+            // 注入工作表名称
+            excelModel.setSheetName(key);
+
+            // 注入文件名
+            excelModel.setFileName(fileName.toString());
+
+            // 注入表头
+            String statisticDate = "统计日期：";
+            if (StringUtils.isNotBlank(searchParam.getStartDate()) && StringUtils.isNotBlank(searchParam.getEndDate())) {
+                statisticDate = statisticDate + searchParam.getStartDate() + " —— " + searchParam.getEndDate() + "       ";
+            }
+            excelModel.setTableHeader(statisticDate + TABLE_HEADER);
+
+            // 注入数据项名称
+            List<LogTemplVO> logTemplVOList = new ArrayList<>();
+            for (LogTemplateFieldVo modelItem : model.get(key)) {
+                LogTemplVO logTemplVO = new LogTemplVO();
+                logTemplVO.setCKey(modelItem.getFieldLabel());
+                logTemplVO.setVal(modelItem.getFieldLabel());
+                logTemplVO.setEKey(modelItem.getFieldName());
+                logTemplVOList.add(logTemplVO);
+            }
+            LogTemplVO logTemplVO2 = new LogTemplVO();
+            logTemplVO2.setCKey("图片地址");
+            logTemplVO2.setEKey(LogExConsts.CELL_NAME_IMG_EN);
+            logTemplVOList.add(logTemplVO2);
+            excelModel.setTitles(logTemplVOList);
+
+            // 注入日志数据
+            List<LogExcelVO> collect = logExcelVOList.stream().filter(logExcelVO -> logExcelVO.getType().equals(model.get(key).get(0).getType().toString()))
+                    .collect(Collectors.toList());
+            excelModel.setLogList(collect);
+            excelModelList.add(excelModel);
+        }
+        logExModel.setExcelModelList(excelModelList);
+        logExModel.setFileName(fileName.toString());
+        Date time3 = new Date();
+        log.info("数据注入excel表耗时：" + DateUtil.calculateIntervalSecond(time, time2));
+        return logExModel;
+    }
 }

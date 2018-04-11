@@ -18,4 +18,35 @@
         `currently` = #{currently} WHERE `template_id` = #{templateId}
     </update>
 
+    <resultMap id="TemplateFieldResultMap" type="com.yunjing.botong.log.vo.LogTemplateFieldVo">
+        <result column="field_name" property="fieldName" />
+        <result column="field_label" property="fieldLabel" />
+        <result column="submit_type" property="type" />
+        <result column="template_name" property="templateName" />
+    </resultMap>
+
+    <select id="queryFields" resultMap="TemplateFieldResultMap">
+        SELECT DISTINCT
+            de.field_name,
+            de.field_label,
+            lt.template_name,
+            lt.submit_type
+        FROM
+            log_template_details de
+        LEFT JOIN log_template lt ON de.template_id = lt.id
+        WHERE
+            lt.deleted = 0
+        AND de.deleted = 0
+        <if test="startDate!= null and startDate != ''">
+            AND lt.create_time >= #{startDate} and lt.create_time <![CDATA[ < ]]> #{endDate}
+        </if>
+        <if test="type!= null and type != ''">
+            AND lt.submit_type = #{type}
+        </if>
+        <if test="last!= null and last != ''">
+            AND lt.currently = #{last}
+        </if>
+        order by lt.submit_type, de.sort;
+    </select>
+
 </mapper>

@@ -2,9 +2,11 @@ package com.yunjing.botong.log.service;
 
 import com.baomidou.mybatisplus.service.IService;
 import com.common.mongo.util.PageWrapper;
+import com.yunjing.botong.log.excel.BaseExModel;
 import com.yunjing.botong.log.params.ReceviedParam;
 import com.yunjing.botong.log.params.SearchParam;
 import com.yunjing.botong.log.vo.LogDetailVO;
+import com.yunjing.botong.log.vo.LogExcelVO;
 
 import java.util.List;
 
@@ -64,4 +66,28 @@ public interface ILogSearchService  {
      */
     PageWrapper<LogDetailVO> findPage(SearchParam searchParam);
 
+
+    /**
+     * 删除日志
+     * @param logIds        日志ids
+     * @return              成功与否
+     */
+    boolean batchDelete(String[] logIds);
+
+    /**
+     * 查询所有的日志列表
+     * @param searchParam
+     * @return
+     */
+    List<LogExcelVO> findAll(SearchParam searchParam);
+
+
+    /**
+     * 根据条件执行导出日志信息
+     *
+     * @param searchParam       参数对象
+     * @return                  对象
+     * @throws Exception        异常
+     */
+    BaseExModel createLogExcel(SearchParam searchParam) throws Exception;
 }

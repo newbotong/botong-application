@@ -2,6 +2,7 @@ package com.yunjing.botong.log.mapper;
 
 import com.baomidou.mybatisplus.mapper.BaseMapper;
 import com.yunjing.botong.log.entity.LogTemplateFieldEntity;
+import com.yunjing.botong.log.vo.LogTemplateFieldVo;
 import org.apache.ibatis.annotations.Param;
 
 import java.util.List;
@@ -27,4 +28,14 @@ public interface LogTemplateFieldMapper extends BaseMapper<LogTemplateFieldEntit
      * @param currently
      */
     void updateCurrentlyByLogTemplateId(@Param("templateId") String templateId,@Param("currently") boolean currently);
+
+    /**
+     * 查询所有的列头
+     * @param startDate 开始时间
+     * @param endDate   结束时间
+     * @param type      类别
+     * @param last      是否最新
+     * @return          集合
+     */
+    List<LogTemplateFieldVo> queryFields(@Param("startDate") Long startDate, @Param("endDate") Long endDate, @Param("type") String type, @Param("last") String last);
 }
