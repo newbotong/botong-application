@@ -69,7 +69,7 @@ public class InfoContentServiceImpl extends ServiceImpl<InfoContentMapper, InfoC
         BeanUtils.copyProperties(infoContent, infoContentDetailDto);
 
         //调用收藏的OKHttp
-        Call<ResponseEntityWrapper> call =  collectService.collectState(userId, id);
+        Call<ResponseEntityWrapper> call = collectService.collectState(userId, id);
         Response<ResponseEntityWrapper> execute = call.execute();
         ResponseEntityWrapper body = execute.body();
         Boolean result = (Boolean) body.getData();
@@ -204,5 +204,21 @@ public class InfoContentServiceImpl extends ServiceImpl<InfoContentMapper, InfoC
                 redisTemplate.opsForHash().put(InfoConstant.REDIS_HOME + ":" + infoCategoryParam.getOrgId(), infoCategoryParam.getOneCatalogId(), JSONObject.toJSONString(parentInfoDetailDto));
             }
         }
+    }
+
+    /**
+     * 根据id查询详情
+     *
+     * @param id  根据id查询详情
+     * @return
+     * @throws BaseException
+     */
+    @Override
+    public InfoContent selectWebDetail(String id) throws BaseException {
+        InfoContent infoContent = new InfoContent().selectOne(new EntityWrapper<InfoContent>().eq("is_delete",InfoConstant.LOGIC_DELETE_NORMAL).eq("id",id));
+        if (null == infoContent){
+            throw new BaseException("该资讯已被删除");
+        }
+        return infoContent;
     }
 }

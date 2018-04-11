@@ -4,6 +4,7 @@ import com.yunjing.info.common.InfoConstant;
 import com.yunjing.info.common.ValidationUtil;
 import com.yunjing.info.dto.CompanyRedisCatalogDto;
 import com.yunjing.info.dto.InfoContentDto;
+import com.yunjing.info.model.InfoContent;
 import com.yunjing.info.param.InfoCategoryEditParam;
 import com.yunjing.info.param.InfoCategoryParam;
 import com.yunjing.info.service.InfoCatalogService;
@@ -48,6 +49,7 @@ public class InfoController extends BaseController {
 
     /**
      * 查询企业类目
+     *
      * @param orgId 企业类目id
      * @return
      */
@@ -138,9 +140,10 @@ public class InfoController extends BaseController {
 
     /**
      * 类目隐藏显示接口
-     * @param orgId 企业id
-     * @param parentId 一级级类目id
-     * @param catalogId 目录id 存在二级传二级目录id,不存在传一级目录id
+     *
+     * @param orgId       企业id
+     * @param parentId    一级级类目id
+     * @param catalogId   目录id 存在二级传二级目录id,不存在传一级目录id
      * @param whetherShow 是否显示0：否，1：是
      * @return
      * @throws BaseException
@@ -153,9 +156,9 @@ public class InfoController extends BaseController {
     /**
      * - 资讯隐藏显示
      *
-     * @param orgId 企业id
-     * @param id  资讯id
-     * @param whetherShow  是否显示0：否，1：是
+     * @param orgId       企业id
+     * @param id          资讯id
+     * @param whetherShow 是否显示0：否，1：是
      * @return
      * @throws BaseException
      */
@@ -167,8 +170,9 @@ public class InfoController extends BaseController {
 
     /**
      * 类目排序
-     * @param orgId 企业id
-     * @param parentId 一级级类目id
+     *
+     * @param orgId      企业id
+     * @param parentId   一级级类目id
      * @param catalogId1 分类id,第一个分类ID
      * @param catalogId2 分类id,第二个分类ID
      * @return
@@ -182,9 +186,10 @@ public class InfoController extends BaseController {
 
     /**
      * 资讯排序
+     *
      * @param orgId 企业id
-     * @param id1 资讯id,第一个资讯ID
-     * @param id2 资讯id,第二个资讯ID
+     * @param id1   资讯id,第一个资讯ID
+     * @param id2   资讯id,第二个资讯ID
      * @return
      * @throws BaseException
      */
@@ -196,11 +201,11 @@ public class InfoController extends BaseController {
     /**
      * 查询资讯父级目录下分页列表
      *
-     * @param orgId 企业id
+     * @param orgId     企业id
      * @param catalogId 第二级目录id 若没有二级目录传一级目录
-     * @param title 标题
-     * @param pageNo 页码 ，默认1
-     * @param pageSize 页大小 ，默认20
+     * @param title     标题
+     * @param pageNo    页码 ，默认1
+     * @param pageSize  页大小 ，默认20
      * @return
      * @throws BaseException
      */
@@ -218,4 +223,18 @@ public class InfoController extends BaseController {
     private ResponseEntityWrapper result(InfoConstant.StateCode stateCode) {
         return (new ResponseEntityWrapper.Builder()).statusCode(stateCode.getCode()).statusMessage(stateCode.getMessage()).build();
     }
+
+    /**
+     * 根据id查询详情接口
+     *
+     * @param id  资讯id
+     * @return
+     * @throws BaseException
+     */
+    @PostMapping("/detail")
+    public ResponseEntityWrapper selectWebDetail(@RequestParam String id) throws BaseException {
+        InfoContent infoContent = infoContentService.selectWebDetail(id);
+        return success(infoContent);
+    }
+
 }
