@@ -22,7 +22,7 @@ import java.io.IOException;
 @Service
 public class DangServiceImpl implements DangService {
 
-    @Value("${okhttp.botong-dang}")
+    @Value("${okhttp.botong.zuul}")
     String baseUrl;
 
     private DangService service;

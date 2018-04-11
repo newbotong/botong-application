@@ -21,7 +21,7 @@ import java.io.IOException;
 @Service
 public class OrgStructureServiceImpl implements OrgStructureService {
 
-    @Value("${okhttp.botong-org-structure}")
+    @Value("${okhttp.botong.zuul}")
     String baseUrl;
 
     private OrgStructureService service;
