@@ -5,6 +5,7 @@ import com.yunjing.mommon.constant.StatusCode;
 import com.yunjing.mommon.wrapper.PageWrapper;
 import com.yunjing.mommon.wrapper.ResponseEntityWrapper;
 import com.yunjing.sign.beans.vo.SignUserInfoVO;
+import com.yunjing.sign.constant.SignConstant;
 import com.yunjing.sign.processor.okhttp.UserApiService;
 import com.yunjing.sign.processor.okhttp.UserRemoteApiService;
 import lombok.extern.slf4j.Slf4j;
@@ -57,7 +58,7 @@ public class UserRemoteApiServiceImpl implements UserRemoteApiService {
         }
 
         try {
-            Response<ResponseEntityWrapper<List<SignUserInfoVO>>> response = userRemoteApiService.findSubLists(deptIds, memberIds).execute();
+            Response<ResponseEntityWrapper<List<SignUserInfoVO>>> response = userRemoteApiService.findSubLists(deptIds, memberIds, SignConstant.BOTONG_ZERO_VALUE).execute();
             ResponseEntityWrapper<List<SignUserInfoVO>> body = response.body();
             if (body != null) {
                 log.info("根据部门id和用户id查询成员信息：code:{}，message:{}，data:{}", body.getStatusCode(), body.getStatusMessage(), JSON.toJSON(body.getData()));

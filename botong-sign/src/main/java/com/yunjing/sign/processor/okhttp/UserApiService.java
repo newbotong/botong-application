@@ -27,7 +27,7 @@ public interface UserApiService {
      * @return
      */
     @GET("/api/microapps/appcenter/org/find-sub-lists")
-    Call<ResponseEntityWrapper<List<SignUserInfoVO>>> findSubLists(@Query("deptIds") String[] deptIds, @Query("memberIds") String[] memberIds);
+    Call<ResponseEntityWrapper<List<SignUserInfoVO>>> findSubLists(@Query("deptIds") String[] deptIds, @Query("memberIds") String[] memberIds, @Query("simplify") int simplify);
 
     /**
      * 获取企业成员管理范围

@@ -202,7 +202,8 @@ public class InfoController extends BaseController {
      * 查询资讯父级目录下分页列表
      *
      * @param orgId     企业id
-     * @param catalogId 第二级目录id 若没有二级目录传一级目录
+     * @param parentId 一级目录
+     * @param catalogId 第二级目录id
      * @param title     标题
      * @param pageNo    页码 ，默认1
      * @param pageSize  页大小 ，默认20
@@ -211,11 +212,12 @@ public class InfoController extends BaseController {
      */
     @GetMapping("/list")
     public ResponseEntityWrapper selectParentPage(@RequestParam String orgId,
-                                                  @RequestParam String catalogId,
+                                                  @RequestParam(required = false) String parentId,
+                                                  @RequestParam(required = false) String catalogId,
                                                   @RequestParam(required = false, defaultValue = "") String title,
                                                   @RequestParam(required = false, defaultValue = "1") Integer pageNo,
                                                   @RequestParam(required = false, defaultValue = "20") Integer pageSize) throws BaseException {
-        PageWrapper<InfoContentDto> page = infoCatalogService.selectParentPage(orgId, catalogId, title, pageNo, pageSize);
+        PageWrapper<InfoContentDto> page = infoCatalogService.selectParentPage(orgId, parentId,catalogId,title, pageNo, pageSize);
         return success(page);
     }
 
