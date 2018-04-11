@@ -162,14 +162,15 @@ public interface InfoCatalogService extends IService<InfoCatalog> {
      * web端资讯分页模糊查询
      *
      * @param orgId
-     * @param catalogId
+     * @param catalogId1
+     * @param catalogId2
      * @param title
      * @param pageNo
      * @param pageSize
      * @return
      * @throws BaseException
      */
-    PageWrapper<InfoContentDto> selectParentPage(String orgId, String catalogId, String title, Integer pageNo, Integer pageSize) throws BaseException;
+    PageWrapper<InfoContentDto> selectParentPage(String orgId, String parentId, String catalogId,String title, Integer pageNo, Integer pageSize) throws BaseException;
 
 
 }

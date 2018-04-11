@@ -47,6 +47,9 @@
         WHERE r.catalog_id=c.id
         AND r.org_id = #{orgId}
         AND r.is_delete=0
+        <if test="parentId!= null and parentId != ''">
+            AND c.parent_id = #{parentId}
+        </if>
         <if test="catalogId!= null and catalogId != ''">
             AND r.catalog_id = #{catalogId}
         </if>
@@ -55,7 +58,9 @@
         </if>
         ORDER BY
         r.sort
-        LIMIT #{pageNo},#{pageSize}
+        <if test="pageNo!= null and pageSize != null">
+            LIMIT #{pageNo},#{pageSize}
+        </if>
     </select>
 
 
