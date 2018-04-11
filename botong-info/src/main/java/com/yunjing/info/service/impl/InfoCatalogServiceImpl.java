@@ -218,11 +218,6 @@ public class InfoCatalogServiceImpl extends ServiceImpl<InfoCatalogMapper, InfoC
         infoCatalogMap.put("parent_id", parentId);
         List<InfoCatalog> infoCatalogList = infoCatalogMapper.selectByMap(infoCatalogMap);
         //每个公司的分类不能超过6个
-//        if (ValidationUtil.isEmpty(infoCatalogList)) {
-//            //没有初始化 一级分类
-//            return InfoConstant.StateCode.CODE_400;
-//        }
-
         if (infoCatalogList.size() >= InfoConstant.INFO_NAME_MIX) {
             return InfoConstant.StateCode.CODE_604;
         }
@@ -351,15 +346,7 @@ public class InfoCatalogServiceImpl extends ServiceImpl<InfoCatalogMapper, InfoC
         wrapper.where("org_id={0}", orgId).and("parent_id={0}", parentId).and("id={0}", id);
         int flag = infoCatalogMapper.update(infoCatalog, wrapper);
         //更新缓存
-        //如果是隐藏则删除缓存数据
         updateInfoCategoryRedis(orgId, parentId, id);
-//        if (InfoConstant.INFO_TYPE_DISPLAY.equals(displayType)) {
-//        } else {
-//            if (redisTemplate.hasKey(InfoConstant.BOTONG_INFO_CATALOG_LIST + orgId + InfoConstant.BOTONG_INFO_FIX + parentId)) {
-//                redisTemplate.opsForHash().delete(InfoConstant.BOTONG_INFO_CATALOG_LIST + orgId + InfoConstant.BOTONG_INFO_FIX + parentId, id);
-//            }
-//        }
-        //如果是显示则添加缓存数据
         return flag > 0 ? InfoConstant.StateCode.CODE_200 : InfoConstant.StateCode.CODE_602;
     }
 
@@ -404,8 +391,10 @@ public class InfoCatalogServiceImpl extends ServiceImpl<InfoCatalogMapper, InfoC
             //先删除   botong:info:org:orgid:yijikey->object
             if (redisTemplate.hasKey(InfoConstant.BOTONG_INFO_CATALOG_LIST + orgId + InfoConstant.BOTONG_INFO_FIX + parentId)) {
                 redisTemplate.opsForHash().delete(InfoConstant.BOTONG_INFO_CATALOG_LIST + orgId + InfoConstant.BOTONG_INFO_FIX + parentId, infoCatalog.getId());
-            } else {
                 // 在更新
+                redisTemplate.opsForHash().put(InfoConstant.BOTONG_INFO_CATALOG_LIST + orgId + InfoConstant.BOTONG_INFO_FIX + parentId, infoCatalog.getId(), JSON.toJSONString(infoCatalog));
+            }else {
+                //不存在放入缓存
                 redisTemplate.opsForHash().put(InfoConstant.BOTONG_INFO_CATALOG_LIST + orgId + InfoConstant.BOTONG_INFO_FIX + parentId, infoCatalog.getId(), JSON.toJSONString(infoCatalog));
             }
         }
