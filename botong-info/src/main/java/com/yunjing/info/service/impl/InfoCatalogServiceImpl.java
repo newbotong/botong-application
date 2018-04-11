@@ -488,18 +488,30 @@ public class InfoCatalogServiceImpl extends ServiceImpl<InfoCatalogMapper, InfoC
      * @throws BaseException
      */
     @Override
-    public PageWrapper<InfoContentDto> selectParentPage(String orgId, String catalogId, String title, Integer pageNo, Integer pageSize) throws BaseException {
-        //统计总数
-        Wrapper<InfoContent> wrapper = new EntityWrapper<>();
-        wrapper.eq("org_id", orgId).and().eq("catalog_id", catalogId).and().eq("is_delete", InfoConstant.LOGIC_DELETE_NORMAL);
-        Integer count = infoContentMapper.selectCount(wrapper);
+    public PageWrapper<InfoContentDto> selectParentPage(String orgId, String parentId, String catalogId,String title, Integer pageNo, Integer pageSize) throws BaseException {
+
+        Integer count=0;
+        //根据以及查询二级内容
+        if(!ValidationUtil.isEmpty(parentId)){
+            //一级查询资讯总数量
+            count = infoContentMapper.selectParentPage(orgId, parentId, null, null, null, null).size();
+            //一级内容下的内容
+            catalogId =null;
+        }else{
+            //统计二级资讯内容总数
+            Wrapper<InfoContent> wrapper = new EntityWrapper<>();
+            wrapper.eq("org_id", orgId).and().eq("catalog_id", catalogId).and().eq("is_delete", InfoConstant.LOGIC_DELETE_NORMAL);
+            count = infoContentMapper.selectCount(wrapper);
+            //二级目录下的内容列表
+            parentId = null;
+        }
         //分页查询数据
         Page<InfoContentDto> page = new Page<>(pageNo, pageSize);
         List<InfoContentDto> infoContentDtoList = new ArrayList<>();
         if (!ValidationUtil.isEmpty(count) && count > 0) {
             //计算分页大小
             pageNo = (pageNo - 1) * pageSize;
-            infoContentDtoList = infoContentMapper.selectParentPage(orgId, catalogId, title, pageNo, pageSize);
+            infoContentDtoList = infoContentMapper.selectParentPage(orgId, parentId, catalogId, title, pageNo, pageSize);
         }
         page.setRecords(infoContentDtoList);
         page.setTotal(count);

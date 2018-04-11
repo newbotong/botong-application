@@ -21,6 +21,11 @@ public class UserInfoBody implements Serializable {
      * 用户头像
      */
     private String img;
+
+    /**
+     * 用户颜色
+     */
+    private String color;
     /**
      * 用户名称
      */

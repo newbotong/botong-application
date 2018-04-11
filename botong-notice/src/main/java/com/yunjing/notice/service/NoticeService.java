@@ -50,10 +50,11 @@ public interface NoticeService extends IService<NoticeEntity> {
      * @param state    是否阅读 0为已读 1为未读
      * @param pageNo   当前页码
      * @param pageSize 每页显示条数
+     * @param orgId    企业id
      * @return
      * @throws BaseException
      */
-    Map<String, Object> selectNoticePage(String userId, Integer state, Integer pageNo, Integer pageSize) throws BaseException;
+    Map<String, Object> selectNoticePage(String userId, Integer state, String orgId, Integer pageNo, Integer pageSize) throws BaseException;
 
 
     /**

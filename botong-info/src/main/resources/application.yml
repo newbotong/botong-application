@@ -90,5 +90,5 @@ info:
 
 #okHttp调用
 okhttp:
-  botong-org-admin: ${okhttp-botong-zuul}${okhttp-botong-org-admin}
-  botong-favorite: ${okhttp-botong-zuul}${okhttp-botong-favorite}
+  botong:
+    zuul: ${okhttp.botong.zuul}

@@ -22,7 +22,7 @@ import java.io.IOException;
 @Service
 public class InformServiceImpl implements InformService {
 
-    @Value("${okhttp.botong-third-party}")
+    @Value("${okhttp.botong.zuul}")
     String baseUrl;
 
     private InformService service;

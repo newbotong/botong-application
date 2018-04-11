@@ -92,4 +92,10 @@ public class NoticeEntity extends BaseModel<NoticeEntity> {
      */
     @TableField("not_read_num")
     private Integer notReadNum;
+
+    /**
+     * 企业id
+     */
+    @TableField("org_id")
+    private String orgId;
 }

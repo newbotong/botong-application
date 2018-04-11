@@ -22,5 +22,5 @@ public interface OrgStructureService {
      */
 
     @POST("/api/microapps/appcenter/org/find-sub-lists")
-    Call<ResponseEntityWrapper> findSubLists(@Query("deptIds") String deptIds, @Query("memberIds") String memberIds);
+    Call<ResponseEntityWrapper> findSubLists(@Query("deptIds") String deptIds, @Query("memberIds") String memberIds, @Query("simplify") Integer simplify);
 }
