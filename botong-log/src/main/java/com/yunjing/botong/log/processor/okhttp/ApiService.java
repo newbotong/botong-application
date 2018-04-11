@@ -96,6 +96,6 @@ public interface ApiService {
      * @return
      */
     @GET("/api/microapps/appcenter/org/find-sub-lists")
-    Call<ResponseEntityWrapper<List<Member>>> findSubLists(@Query("deptIds") String[] deptIds, @Query("memberIds") String[] memberIds);
+    Call<ResponseEntityWrapper<List<Member>>> findSubLists(@Query("deptIds") String[] deptIds, @Query("memberIds") String[] memberIds, @Query("simplify") int simplify);
 
 }

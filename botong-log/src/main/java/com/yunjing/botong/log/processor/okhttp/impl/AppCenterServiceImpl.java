@@ -1,6 +1,7 @@
 package com.yunjing.botong.log.processor.okhttp.impl;
 
 import com.alibaba.fastjson.JSON;
+import com.yunjing.botong.log.constant.LogConstant;
 import com.yunjing.botong.log.params.DangParam;
 import com.yunjing.botong.log.params.SchedulerParam;
 import com.yunjing.botong.log.processor.okhttp.ApiService;
@@ -283,7 +284,7 @@ public class AppCenterServiceImpl implements AppCenterService {
     @Override
     public List<Member> findSubLists(String[] deptIds, String[] memberIds) {
         try {
-            Response<ResponseEntityWrapper<List<Member>>> response = apiService.findSubLists(deptIds, memberIds).execute();
+            Response<ResponseEntityWrapper<List<Member>>> response = apiService.findSubLists(deptIds, memberIds, LogConstant.BOTONG_ZERO_NUM).execute();
             ResponseEntityWrapper<List<Member>> body = response.body();
             if (body != null) {
                 log.info("根据多部门id和成员id查询成员集合：code:{}，message:{}", body.getStatusCode(), body.getStatusMessage());
