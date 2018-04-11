@@ -1,5 +1,6 @@
 package com.yunjing.botong.log.vo;
 
+import com.alibaba.fastjson.annotation.JSONField;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.google.gson.annotations.SerializedName;
 import lombok.Data;
@@ -27,9 +28,9 @@ public class Member implements Serializable {
     }
 
 
-    public Member(String id, String memberName, String mobile, String profile) {
+    public Member(String id, String name, String mobile, String profile) {
         this.id = id;
-        this.memberName = memberName;
+        this.name = name;
         this.mobile = mobile;
         this.profile = profile;
     }
@@ -50,8 +51,8 @@ public class Member implements Serializable {
     /**
      * 成员名称
      */
-    @Field("name")
-    protected String memberName;
+    @SerializedName(value = "memberName")
+    protected String name;
 
     /**
      * 创建时间

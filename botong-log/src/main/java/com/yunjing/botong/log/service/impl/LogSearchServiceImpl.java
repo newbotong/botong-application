@@ -250,7 +250,7 @@ public class LogSearchServiceImpl implements ILogSearchService {
     private List<Member> getUsersList(SearchParam searchParam) {
         List<Member> memList = new ArrayList<>();
         //如果没有选择范围
-        if (searchParam.getDeptIds() != null && searchParam.getDeptIds().length == 0 && searchParam.getUserIds() != null && searchParam.getUserIds().length == 0) {
+        if (searchParam.getDeptIds() == null && searchParam.getUserIds() == null) {
             // 校验是否是管理员
             boolean manager1 = appCenterService.isManager(searchParam.getAppId(), searchParam.getMemberId(), true);
             if (manager1) {
@@ -260,7 +260,7 @@ public class LogSearchServiceImpl implements ILogSearchService {
                     throw new ParameterErrorException(StatusCode.NOT_ADMIN_AUTH);
                 }
             } else {
-                Member user = memberRedisOperator.getMember(searchParam.getMemberId());
+                Member user = memberRedisOperator.getMember(searchParam.getMemberId());;
                 // 不是管理员查自己的
                 memList.add(user);
             }
@@ -294,7 +294,7 @@ public class LogSearchServiceImpl implements ILogSearchService {
             AttrValueVO attrValueVO;
             for (LogDetail detail : detailResult) {
                 logExcelVO = new LogExcelVO();
-                logExcelVO.setSender(memberMap.get(detail.getMemberId()).getMemberName());
+                logExcelVO.setSender(memberMap.get(detail.getMemberId()).getName());
                 logExcelVO.setSendTime(DateUtil.DateToString(detail.getSubmitTime(), DateStyle.YYYY_MM_DD_HH_MM_SS));
                 logExcelVO.setDeptName(StringUtils.join(memberMap.get(detail.getMemberId()).getDeptNames(), LogConstant.SEPARATE_STR));
                 logExcelVO.setLogId(detail.getLogId());

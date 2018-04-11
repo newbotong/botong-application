@@ -1,5 +1,7 @@
 package com.yunjing.sign.beans.vo;
 
+import com.alibaba.fastjson.annotation.JSONField;
+import com.google.gson.annotations.SerializedName;
 import lombok.Data;
 
 /**
@@ -19,6 +21,7 @@ public class SignUserInfoVO {
     /**
      * 姓名
      */
+    @SerializedName(value = "memberName")
     private String name;
 
     /**

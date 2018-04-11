@@ -68,6 +68,8 @@ public class LogSearchController extends BaseController {
                          @RequestParam(value = "startDate", required = false) String startDate,
                          @RequestParam(value = "endDate", required = false) String endDate,
                          @RequestParam(value = "orgId") String orgId,
+                         @RequestParam(value = "appId", required = false) String appId,
+                         @RequestParam(value = "memberId", required = false) String memberId,
                          @RequestParam(value = "userIds", required = false) String[] userIds,
                          @RequestParam(value = "deptIds", required = false) String[] deptIds) throws Exception {
 
@@ -79,6 +81,8 @@ public class LogSearchController extends BaseController {
         searchParam.setStartDate(startDate);
         searchParam.setOrgId(orgId);
         searchParam.setEndDate(endDate);
+        searchParam.setMemberId(memberId);
+        searchParam.setAppId(appId);
         BaseExModel excel = iLogSearchService.createLogExcel(searchParam);
         String fileName = excel.getFileName();
         //设置响应类型，告知浏览器输出的是图片

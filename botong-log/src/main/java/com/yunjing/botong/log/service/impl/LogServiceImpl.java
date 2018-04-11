@@ -46,7 +46,7 @@ public class LogServiceImpl implements LogService {
             throw new BaseRuntimeException(500,"用户信息不存在！");
         }
         PushParam param = new PushParam();
-        param.setTitle((member==null?"有同事":member.getMemberName())+"向你提交了日志："+vo.getName()+"，请及时查阅！");
+        param.setTitle((member==null?"有同事":member.getName())+"向你提交了日志："+vo.getName()+"，请及时查阅！");
         param.setNotificationTitle("伯通");
         String[] userIdArray = new String[logParam.getSendToUser().size()];
         logParam.getSendToUser().toArray(userIdArray);
