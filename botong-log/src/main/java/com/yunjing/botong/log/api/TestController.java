@@ -3,7 +3,6 @@ package com.yunjing.botong.log.api;
 import com.yunjing.botong.log.params.DangParam;
 import com.yunjing.botong.log.params.UserInfoModel;
 import com.yunjing.botong.log.processor.okhttp.AppCenterService;
-import com.yunjing.botong.log.vo.Member;
 import com.yunjing.mommon.base.PushParam;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -14,6 +13,7 @@ import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import javax.annotation.PostConstruct;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -35,6 +35,10 @@ public class TestController {
 
     @Autowired
     private StringRedisTemplate redisTemplate;
+
+    @PostConstruct
+    public void init() {
+    }
 
 
     @RequestMapping("/push")
@@ -68,7 +72,7 @@ public class TestController {
 
     @RequestMapping("/is-manager")
     public String isManager() {
-        appCenterService.isManager("611564163546121654982", "6384302108069335040", true);
+        appCenterService.isManager("611564163546121654982", "6386505038969180166", true);
         return "success";
     }
 
@@ -81,8 +85,7 @@ public class TestController {
 
     @RequestMapping("/manage-scope")
     public Object manageScope() {
-        List<Member> infos = appCenterService.manageScope("226f65e5f6b0466cbbb131b9d9308b52", "6386837899156918272");
-        return infos;
+        return appCenterService.manageScope("226f65e5f6b0466cbbb131b9d9308b52", "6386505038969180166");
     }
 
 

@@ -2,9 +2,8 @@ package com.yunjing.botong.log.dao;
 
 import com.common.mongo.dao.Page;
 import com.common.mongo.dao.impl.BaseMongoDaoImpl;
-import com.common.mongo.util.BeanUtils;
-import com.common.mongo.util.PageWrapper;
 import com.yunjing.botong.log.entity.LogDetail;
+import com.yunjing.mommon.global.exception.ParameterErrorException;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.time.DateFormatUtils;
 import org.apache.commons.lang3.time.DateUtils;
@@ -108,7 +107,7 @@ public class LogReportDao extends BaseMongoDaoImpl<LogDetail> {
             Date end = DateUtils.parseDate(date + " 23:23:59", "yyyy-MM-dd HH:mm:ss");
             query.addCriteria(Criteria.where("submitTime").gte(start).lte(end));
         } catch (ParseException e) {
-            e.printStackTrace();
+            throw new ParameterErrorException("日期格式错误，请传入(yyyy-MM-dd)");
         }
     }
 
@@ -125,8 +124,7 @@ public class LogReportDao extends BaseMongoDaoImpl<LogDetail> {
      * @param endDate
      * @return
      */
-    public PageWrapper<LogDetail> report(int pageNo, int pageSize, String orgId, List<String> memberId, int submitType, long startDate, long endDate) {
-        Page<LogDetail> page = new Page<>(pageNo, pageSize);
+    public Page<LogDetail> report(int pageNo, int pageSize, String orgId, List<String> memberId, int submitType, long startDate, long endDate) {
         Criteria criteria = Criteria.where("orgId").is(orgId);
         criteria.and("memberId").in(memberId);
 
@@ -141,6 +139,6 @@ public class LogReportDao extends BaseMongoDaoImpl<LogDetail> {
         }
         Query query = new Query(criteria);
         query.with(new Sort(Sort.Direction.DESC, "submitTime"));
-        return BeanUtils.mapPage(findPage(page, query), LogDetail.class);
+        return findPage(new Page<>(pageNo, pageSize), query);
     }
 }

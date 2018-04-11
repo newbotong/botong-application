@@ -5,8 +5,8 @@ import com.baomidou.mybatisplus.mapper.EntityWrapper;
 import com.baomidou.mybatisplus.mapper.Wrapper;
 import com.common.mybatis.service.impl.BaseServiceImpl;
 import com.google.gson.Gson;
+import com.yunjing.botong.log.config.AbstractRedisConfiguration;
 import com.yunjing.botong.log.config.LogConstant;
-import com.yunjing.botong.log.config.RedisLog;
 import com.yunjing.botong.log.entity.RemindEntity;
 import com.yunjing.botong.log.mapper.RemindMapper;
 import com.yunjing.botong.log.params.SchedulerParam;
@@ -17,7 +17,6 @@ import com.yunjing.botong.log.vo.RemindVo;
 import com.yunjing.mommon.utils.BeanUtils;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -38,7 +37,7 @@ import java.util.Map;
 public class RemindServiceImpl extends BaseServiceImpl<RemindMapper, RemindEntity> implements IRemindService {
 
     @Autowired
-    private RedisLog redisLog;
+    private AbstractRedisConfiguration redisLog;
 
     @Autowired
     private AppCenterService appCenterService;

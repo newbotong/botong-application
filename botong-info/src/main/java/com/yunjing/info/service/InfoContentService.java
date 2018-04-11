@@ -2,6 +2,7 @@ package com.yunjing.info.service;
 
 import com.baomidou.mybatisplus.plugins.Page;
 import com.baomidou.mybatisplus.service.IService;
+import com.yunjing.info.common.InfoConstant;
 import com.yunjing.info.dto.InfoContentDetailDto;
 import com.yunjing.info.dto.InfoDto;
 import com.yunjing.info.model.InfoContent;
@@ -67,4 +68,14 @@ public interface InfoContentService extends IService<InfoContent> {
      * @throws BaseException
      */
     void infoEdit(InfoCategoryEditParam infoCategoryParam) throws BaseException;
+
+
+    /**
+     * 根据id查询详情
+     *
+     * @param id  根据id查询详情
+     * @return
+     * @throws BaseException
+     */
+    InfoContent selectWebDetail(String id) throws BaseException;
 }
