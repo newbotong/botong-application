@@ -45,12 +45,12 @@ public class OrgStructureServiceImpl implements OrgStructureService {
      * @return Call<ResponseEntityWrapper>
      */
     @Override
-    public Call<ResponseEntityWrapper> findSubLists(String deptIds, String memberIds) {
+    public Call<ResponseEntityWrapper> findSubLists(String deptIds, String memberIds, Integer simplify) {
         if (service == null) {
             initRetrofit();
         }
         try {
-            Call<ResponseEntityWrapper> call = service.findSubLists(deptIds, memberIds);
+            Call<ResponseEntityWrapper> call = service.findSubLists(deptIds, memberIds, simplify);
             call.execute();
             return call.clone();
         } catch (IOException e) {

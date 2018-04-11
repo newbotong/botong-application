@@ -48,7 +48,7 @@ public class DangParam {
     /**
      * dang提醒类型(1.应用内 2.短信 )
      */
-    @Size(max = 2, min = 1, message = "Dang提醒类型错误")
+    @Size(max = 2, min = 1, message = "Dang提醒类型")
     private int remindType;
 
     /**

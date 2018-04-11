@@ -58,13 +58,13 @@ public class NoticeController extends BaseController {
      * @return
      */
     @PostMapping("/page")
-    public ResponseEntityWrapper selectNoticePage(@RequestParam String userId, Integer state, @RequestParam Integer pageNo, @RequestParam Integer pageSize) throws BaseException {
-        Map<String, Object> map = noticeService.selectNoticePage(userId, state, pageNo, pageSize);
+    public ResponseEntityWrapper selectNoticePage(@RequestParam String userId, Integer state, @RequestParam String orgId, @RequestParam Integer pageNo, @RequestParam Integer pageSize) throws BaseException {
+        Map<String, Object> map = noticeService.selectNoticePage(userId, state, orgId, pageNo, pageSize);
         return success(map);
     }
 
     /**
-     * web根据id查询公告id
+     * web根据id查询公告
      *
      * @param id
      * @return

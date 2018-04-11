@@ -43,10 +43,14 @@ public class NoticeBody implements Serializable {
     private String size;
 
     /**
-     * 多个用户属性,用逗号隔开
+     * 多个成员id,用逗号隔开
      */
-    @NotNullOrEmpty(message = "成员不能为空")
-    private String userInfo;
+    private String memberIds;
+
+    /**
+     * 部门id,用逗号隔开
+     */
+    private String departmentIds;
 
     /**
      * 保密状态 0为保密 1为不保密
@@ -79,5 +83,11 @@ public class NoticeBody implements Serializable {
      */
     @NotNullOrEmpty(message = "公告作者不能为空")
     private String author;
+
+    /**
+     * 企业id
+     */
+    @NotNullOrEmpty(message = "企业id不能为空")
+    private String orgId;
 
 }
