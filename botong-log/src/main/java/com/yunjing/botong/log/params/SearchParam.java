@@ -13,6 +13,12 @@ import lombok.Data;
 public class SearchParam {
 
     /**
+     * 成员id
+     *
+     */
+    private String memberId;
+
+    /**
      * 成员ids
      */
     private String[] userIds;
@@ -51,5 +57,10 @@ public class SearchParam {
     private Integer pageSize;
 
     private Integer pageNo;
+
+    /**
+     * 应用id
+     */
+    private String appId;
 
 }

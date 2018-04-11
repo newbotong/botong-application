@@ -25,9 +25,12 @@ import com.yunjing.botong.log.service.ILogSearchService;
 import com.yunjing.botong.log.service.LogTemplateService;
 import com.yunjing.botong.log.vo.*;
 import com.yunjing.mommon.Enum.DateStyle;
+import com.yunjing.mommon.constant.StatusCode;
+import com.yunjing.mommon.global.exception.ParameterErrorException;
 import com.yunjing.mommon.utils.DateUtil;
 import com.yunjing.mommon.utils.ListUtils;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.lang3.ArrayUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -51,9 +54,6 @@ public class LogSearchServiceImpl implements ILogSearchService {
 
     @Autowired
     private LogDetailDao logDetailDao;
-
-    @Autowired
-    StringRedisTemplate redisTemplate;
 
     @Autowired
     AppCenterService appCenterService;
@@ -139,12 +139,7 @@ public class LogSearchServiceImpl implements ILogSearchService {
      */
     @Override
     public PageWrapper<LogDetailVO> findPage(SearchParam searchParam) {
-        //当没有选择范围则查询该企业下所有的员工
-        if (searchParam.getDeptIds() != null && searchParam.getDeptIds().length == 0 && searchParam.getUserIds() != null && searchParam.getUserIds().length == 0) {
-            String[] deptIds = {searchParam.getOrgId()};
-            searchParam.setDeptIds(deptIds);
-        }
-        List<Member> memList = appCenterService.findSubLists(searchParam.getDeptIds(), searchParam.getUserIds());
+        List<Member> memList = getUsersList(searchParam);
         List<String> memIds = new ArrayList<>();
         Map<String, Member> memberMap = new HashMap<>(16);
         for(Member member : memList) {
@@ -247,7 +242,34 @@ public class LogSearchServiceImpl implements ILogSearchService {
         return result;
     }
 
-
+    /**
+     * 根据条件查询人员列表
+     * @param searchParam   参数
+     * @return              人员列表
+     */
+    private List<Member> getUsersList(SearchParam searchParam) {
+        List<Member> memList = new ArrayList<>();
+        //如果没有选择范围
+        if (searchParam.getDeptIds() != null && searchParam.getDeptIds().length == 0 && searchParam.getUserIds() != null && searchParam.getUserIds().length == 0) {
+            // 校验是否是管理员
+            boolean manager1 = appCenterService.isManager(searchParam.getAppId(), searchParam.getMemberId(), true);
+            if (manager1) {
+                // 管理员查询他所在企业的管理的memberId
+                memList = appCenterService.manageScope(searchParam.getAppId(), searchParam.getMemberId());
+                if (CollectionUtils.isEmpty(memList)) {
+                    throw new ParameterErrorException(StatusCode.NOT_ADMIN_AUTH);
+                }
+            } else {
+                Member user = memberRedisOperator.getMember(searchParam.getMemberId());
+                // 不是管理员查自己的
+                memList.add(user);
+            }
+        } else {
+            //选择了发送人范围
+            memList = appCenterService.findSubLists(searchParam.getDeptIds(), searchParam.getUserIds());
+        }
+        return memList;
+    }
     /**
      * 查询所有的日志列表
      *
@@ -256,12 +278,8 @@ public class LogSearchServiceImpl implements ILogSearchService {
      */
     @Override
     public List<LogExcelVO> findAll(SearchParam searchParam) {
-        //当没有选择范围则查询该企业下所有的员工
-        if (searchParam.getDeptIds() != null && searchParam.getDeptIds().length == 0 && searchParam.getUserIds() != null && searchParam.getUserIds().length == 0) {
-            String[] deptIds = {searchParam.getOrgId()};
-            searchParam.setDeptIds(deptIds);
-        }
-        List<Member> memList = appCenterService.findSubLists(searchParam.getDeptIds(), searchParam.getUserIds());
+        List<Member> memList = getUsersList(searchParam);
+
         List<String> memIds = new ArrayList<>();
         Map<String, Member> memberMap = new HashMap<>(memList.size());
         for(Member member : memList) {
