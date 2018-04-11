@@ -102,6 +102,9 @@ public class NoticeServiceImpl extends ServiceImpl<NoticeMapper, NoticeEntity> i
         } catch (IOException e) {
             e.printStackTrace();
         }
+        if (null == body){
+           throw new BaseException("调用失败");
+        }
         List<Member> memberList = body.getData();
         String[] passportIds = memberList.stream().map(Member::getPassportId).toArray(String[]::new);
         String[] memberIds = memberList.stream().map(Member::getId).toArray(String[]::new);
