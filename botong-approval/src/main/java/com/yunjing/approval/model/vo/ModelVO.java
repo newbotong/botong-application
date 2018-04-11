@@ -89,5 +89,5 @@ public class ModelVO {
     /**
      * 字段
      */
-    private List<ModelItemVO> modelItems;
+    private List<ModelItemVO> items;
 }

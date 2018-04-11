@@ -25,8 +25,8 @@ public class ModelItemVO {
         this.help = item.getHelp();
         this.unit = item.getUnit();
         this.format = item.getDateFormat();
-        this.isDisplay = item.getIsDisplay();
-        this.isRequired = item.getIsRequired();
+        this.display = item.getIsDisplay();
+        this.required = item.getIsRequired();
         this.isJudge = item.getIsJudge();
     }
 
@@ -77,12 +77,12 @@ public class ModelItemVO {
     /**
      * 是否显示
      */
-    private Integer isDisplay;
+    private Integer display;
 
     /**
      * 是否必填
      */
-    private Integer isRequired;
+    private Integer required;
 
     /**
      * 是否为审批条件
@@ -101,5 +101,5 @@ public class ModelItemVO {
     /**
      * 子项
      */
-    private List<ModelItem> modelItems;
+    private List<ModelItem> items;
 }

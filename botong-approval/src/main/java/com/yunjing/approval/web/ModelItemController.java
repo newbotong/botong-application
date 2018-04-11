@@ -12,7 +12,7 @@ import org.springframework.web.bind.annotation.*;
  * @date 2018/03/22
  */
 @RestController
-@RequestMapping("/approval/model/item")
+@RequestMapping("/approval/edit-model")
 public class ModelItemController extends BaseController {
 
     @Autowired

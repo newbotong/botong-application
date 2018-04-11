@@ -6,6 +6,8 @@ package com.yunjing.approval.util;
  */
 public class ApproConstants {
 
+    public final static String  BOTONG_ORG_MEMBER = "botong:org:dept:member";
+
     /**
      * 不分条件设置审批
      */
@@ -75,4 +77,8 @@ public class ApproConstants {
      * 11-附件
      */
     public static final int ENCLOSURE_TYPE_11 = 11;
+
+    public final static Integer  BOTONG_ONE_NUM = 1;
+
+    public final static Integer  BOTONG_ZERO_NUM = 0;
 }
