@@ -99,7 +99,7 @@ notice:
 
 okhttp:
   botong:
-    zuul: ${okhttp-botong-zuul}
+    zuul: ${okhttp.botong.zuul}
 
 # 写入文件日志
 logging:
