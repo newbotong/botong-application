@@ -10,5 +10,10 @@ import com.yunjing.botong.log.params.LogParam;
  */
 public interface LogService {
 
-    Long createLog(LogParam logParam);
+    /**
+     * 新增日志
+     * @param logParam
+     * @return
+     */
+    String createLog(LogParam logParam);
 }

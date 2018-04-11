@@ -124,7 +124,8 @@ public class LogTemplateServiceImpl implements LogTemplateService {
 
         // 查询日志模板字段
         LogTemplateFieldEntity logTemplateFieldEntity = new LogTemplateFieldEntity();
-        List<LogTemplateFieldEntity> fieldEntities = logTemplateFieldEntity.selectList(new EntityWrapper().eq("template_id",id).eq("deleted",false));
+        List<LogTemplateFieldEntity> fieldEntities = logTemplateFieldEntity.selectList(
+                new EntityWrapper().eq("template_id",id).eq("deleted",false).orderBy("sort"));
 
         //组织字段列表返回值
         if(CollectionUtils.isNotEmpty(fieldEntities)){
@@ -143,7 +144,8 @@ public class LogTemplateServiceImpl implements LogTemplateService {
             // 查询日志模板字段枚举项
             if(CollectionUtils.isNotEmpty(enumIdList)){
                 LogTemplateEnumItemEntity logTemplateEnumItemEntity = new LogTemplateEnumItemEntity();
-                List<LogTemplateEnumItemEntity> logTemplateEnumItemEntities = logTemplateEnumItemEntity.selectList(new EntityWrapper().in("enum_id",enumIdList).eq("deleted",false));
+                List<LogTemplateEnumItemEntity> logTemplateEnumItemEntities = logTemplateEnumItemEntity.selectList(
+                        new EntityWrapper().in("enum_id",enumIdList).eq("deleted",false));
 
                 // 循环日志字段列表，初始化枚举类型数据的枚举项
                 for (int i = 0; i < logTemplateFieldVoList.size(); i++) {
