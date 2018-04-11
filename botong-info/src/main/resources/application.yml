@@ -91,4 +91,4 @@ info:
 #okHttp调用
 okhttp:
   botong:
-    zuul: ${okhttp-botong-zuul}
+    zuul: ${okhttp.botong.zuul}
