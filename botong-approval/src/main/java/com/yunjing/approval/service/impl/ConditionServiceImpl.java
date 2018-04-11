@@ -157,8 +157,9 @@ public class ConditionServiceImpl extends BaseServiceImpl<ConditionMapper, SetsC
     }
 
     @Override
-    public SetsCondition getFirstCondition(String modelId) {
-        return this.selectOne(Condition.create().where("model_id={0}", modelId).and("enabled=1").and("sort=1"));
+    public List<SetsCondition> getFirstCondition(String modelId) {
+        List<SetsCondition> setsCondition = this.selectList(Condition.create().where("model_id={0}", modelId).and("enabled=1"));
+        return setsCondition;
     }
 
     @Override
@@ -214,7 +215,7 @@ public class ConditionServiceImpl extends BaseServiceImpl<ConditionMapper, SetsC
 
         ModelItem item = modelItemService.selectOne(wrapper);
 
-        if (item == null || null == item.getId()) {
+        if (item == null || StringUtils.isBlank(item.getId())) {
             throw new BaseException("字段类型错误");
         }
 

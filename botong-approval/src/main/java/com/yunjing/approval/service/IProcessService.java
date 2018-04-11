@@ -65,5 +65,5 @@ public interface IProcessService extends IBaseService<SetsProcess> {
      * @return ApproverVO
      * @throws Exception
      */
-    ApproverVO getApprover(String companyId, String memberId, String modelId, String deptId, String conditionId, String value) throws Exception;
+    ApproverVO getApprover(String companyId, String memberId, String modelId, String deptId, String conditionId, String field,String value) throws Exception;
 }

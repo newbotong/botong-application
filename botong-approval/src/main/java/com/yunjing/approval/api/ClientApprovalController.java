@@ -156,28 +156,15 @@ public class ClientApprovalController extends BaseController {
      * @param deptId      部门主键
      * @param conditionId 条件主键
      * @param value       审批条件的值
+     * @param value       审批条件的值
      * @return
      */
     @PostMapping("/get-approver")
     public ResponseEntityWrapper getApprovalMember(@RequestParam("companyId") String companyId, @RequestParam("memberId") String memberId,
                                                    @RequestParam("modelId") String modelId,@RequestParam(value = "deptId",required = false) String deptId,
-                                                   @RequestParam(value = "conditionId",required = false) String conditionId,
+                                                   @RequestParam(value = "conditionId",required = false) String conditionId,@RequestParam(value = "field",required = false) String field,
                                                    @RequestParam(value = "value",required = false) String value) throws Exception {
-        return success(processService.getApprover(companyId, memberId, modelId, deptId, conditionId, value));
-    }
-
-    /**
-     * 获取抄送人
-     *
-     * @param companyId 公司主键
-     * @param memberId  成员主键
-     * @param modelId   模型主键
-     * @return
-     */
-    @PostMapping("/get-copy")
-    public ResponseEntityWrapper getCopyMember(@RequestParam("companyId") String companyId, @RequestParam("memberId") String memberId,
-                                               @RequestParam("modelId") String modelId) throws Exception {
-        return success(copyService.getCopy(companyId, memberId, modelId));
+        return success(processService.getApprover(companyId, memberId, modelId, deptId, conditionId, field,value));
     }
 
     @Autowired

@@ -58,11 +58,11 @@ spring:
         min-idle: 0
 
   ##Redis配置-日志
-  redis-log:
-    database: ${redis-log.dbindex}
-    host: ${redis-log.host}
-    port: ${redis-log.port}
-    password: ${redis-log.password}
+  redis-info:
+    database: ${redis-info.dbindex}
+    host: ${redis-info.host}
+    port: ${redis-info.port}
+    password: ${redis-info.password}
     timeout: 0
     pool:
       max-active: 8
@@ -90,7 +90,5 @@ info:
 
 #okHttp调用
 okhttp:
-   botong-zuul: http://${notice-okhttp.ip}:${notice-okhttp.port}
-#  botong-org-admin: http://192.168.10.58:23130/
-#  botong-dang: http://192.168.10.234:23180/
-#  botong-third-party: http://192.168.10.234:17220/
+  botong-org-admin: ${okhttp-botong-zuul}${okhttp-botong-org-admin}
+  botong-favorite: ${okhttp-botong-zuul}${okhttp-botong-favorite}

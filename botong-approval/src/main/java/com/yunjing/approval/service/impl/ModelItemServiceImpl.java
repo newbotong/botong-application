@@ -26,7 +26,9 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.sql.Timestamp;
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 import static java.util.Comparator.comparing;
@@ -106,23 +108,27 @@ public class ModelItemServiceImpl extends BaseServiceImpl<ModelItemMapper, Model
         clientModelItemVO.setSet(approvalSet.getSetting());
 
         // 获取预设人员筛选字段
+        Set<String> keys = new HashSet<>();
         if (StringUtils.isNotBlank(modelId)) {
-            SetsCondition first = conditionService.getFirstCondition(modelId);
-            if (first != null) {
-                String cdn = first.getCdn();
-                if (StringUtils.isNotBlank(cdn)) {
-                    String key = cdn.substring(0, cdn.indexOf(" "));
-                    clientModelItemVO.setKey(key);
+            List<SetsCondition> first = conditionService.getFirstCondition(modelId);
+            for (SetsCondition setsCondition : first) {
+                if (setsCondition != null) {
+                    String cdn = setsCondition.getCdn();
+                    if (StringUtils.isNotBlank(cdn)) {
+                        String key = cdn.substring(0, cdn.indexOf(" "));
+                        keys.add(key);
+                    }
                 }
             }
         }
+        clientModelItemVO.setField(keys);
         // 获取默认审批人
         List<UserVO> processUser = processService.getProcess(modelId, null);
         clientModelItemVO.setApproverVOS(processUser);
 
         // 获取默认抄送人
         List<UserVO> userVOList = copyService.get(modelId);
-        clientModelItemVO.setCopyerVOS(userVOList);
+        clientModelItemVO.setCopyerVOS(new ArrayList<>());
 
         return clientModelItemVO;
 

@@ -22,7 +22,7 @@ import java.io.IOException;
 @Service
 public class AuthorityServiceImpl implements AuthorityService {
 
-    @Value("${{okhttp.botong-org-admin}}")
+    @Value("${okhttp.botong-org-admin}")
     String baseUrl;
 
     private AuthorityService service;

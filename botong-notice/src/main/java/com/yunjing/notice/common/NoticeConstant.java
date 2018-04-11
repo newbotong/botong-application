@@ -11,7 +11,7 @@ public interface NoticeConstant {
     /**
      * 是否逻辑删除（0正常 1删除）
      */
-    Integer LOGIC_DELETE_NOMAL = 0;
+    Integer LOGIC_DELETE_NORMAL = 0;
     Integer LOGIC_DELETE_DELETE = 1;
 
     /**

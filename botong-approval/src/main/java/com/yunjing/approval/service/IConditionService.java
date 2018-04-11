@@ -63,10 +63,10 @@ public interface IConditionService extends IBaseService<SetsCondition> {
     String getCondition(String modelId, String value);
 
     /**
-     * 获取第一条件
+     * 获取条件
      *
      * @param modelId 模型主键
      * @return
      */
-    SetsCondition getFirstCondition(String modelId);
+    List<SetsCondition> getFirstCondition(String modelId);
 }
