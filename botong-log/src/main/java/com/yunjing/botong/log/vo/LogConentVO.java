@@ -70,10 +70,10 @@ public class LogConentVO {
 
         for (int i = 0; i < items.size(); i++) {
             if(items.get(i).getId().equals(logItemParam.getFiledId())){
-                this.name = items.get(i).getFieldName();
+                this.key = items.get(i).getFieldName();
+                this.name = items.get(i).getFieldLabel();
                 this.value = logItemParam.getValue();
                 this.type = items.get(i).getType();
-                this.key = items.get(i).getKey();
                 this.enumId = items.get(i).getEnumId();
                 if(items.get(i).getType() == 3){
                     List<LogEnumItemEntity> logEnumItemEntities = new ArrayList<>();
