@@ -8,6 +8,7 @@ import org.springframework.cloud.netflix.feign.FeignClient;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import retrofit2.Call;
+import retrofit2.http.GET;
 import retrofit2.http.POST;
 import retrofit2.http.Query;
 
@@ -27,8 +28,7 @@ public interface UserRemoteApiService {
      * @param memberIds
      * @return
      */
-    @POST("/appcenter/org/find-sub-lists")
-    Call<ResponseEntityWrapper<List<SignUserInfoVO>>> findSubLists(@Query("deptIds") String[] deptIds, @Query("memberIds") String[] memberIds);
+    List<SignUserInfoVO> findSubLists(@Query("deptIds") String[] deptIds, @Query("memberIds") String[] memberIds);
 
     /**
      * 分页获取人员id
@@ -38,7 +38,17 @@ public interface UserRemoteApiService {
      * @param pageSize
      * @return
      */
-    @POST("/appcenter/org/find-member-page")
-    Call<ResponseEntityWrapper<PageWrapper<SignUserInfoVO>>> findMemberPage(@Query("deptIds") String[] deptIds, @Query("memberIds") String[] memberIds,
+    PageWrapper<SignUserInfoVO> findMemberPage(@Query("deptIds") String[] deptIds, @Query("memberIds") String[] memberIds,
                                                                             @Query("pageNo") int pageNo, @Query("pageSize")int pageSize);
+
+    /**
+     * 获取企业成员管理范围
+     *
+     * @param appId
+     * @param memberId
+     * @return
+     */
+    List<SignUserInfoVO> manageScope(@Query("appId") String appId, @Query("memberId") String memberId);
+
+
 }

@@ -68,4 +68,4 @@ mybatis-plus:
 logging:
   file: ${user.dir}/logs/${spring.application.name}.log
 okhttp:
-  botong-org-structure: http://192.168.10.233:8188/
+  zuul: ${okhttp-botong-zuul}

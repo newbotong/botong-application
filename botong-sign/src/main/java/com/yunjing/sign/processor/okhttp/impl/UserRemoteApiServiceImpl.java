@@ -1,13 +1,17 @@
 package com.yunjing.sign.processor.okhttp.impl;
 
+import com.alibaba.fastjson.JSON;
+import com.yunjing.mommon.constant.StatusCode;
 import com.yunjing.mommon.wrapper.PageWrapper;
 import com.yunjing.mommon.wrapper.ResponseEntityWrapper;
 import com.yunjing.sign.beans.vo.SignUserInfoVO;
+import com.yunjing.sign.processor.okhttp.UserApiService;
 import com.yunjing.sign.processor.okhttp.UserRemoteApiService;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import retrofit2.Call;
+import retrofit2.Response;
 import retrofit2.Retrofit;
 import retrofit2.converter.gson.GsonConverterFactory;
 
@@ -23,10 +27,10 @@ import java.util.List;
 @Service
 public class UserRemoteApiServiceImpl implements UserRemoteApiService {
 
-    @Value("${okhttp.botong-org-structure}")
+    @Value("${okhttp.zuul}")
     String baseUrl;
 
-    private UserRemoteApiService userRemoteApiService;
+    private UserApiService userRemoteApiService;
 
     private void initRetrofit(){
         // 构建 Retrofit 对象
@@ -36,7 +40,7 @@ public class UserRemoteApiServiceImpl implements UserRemoteApiService {
                 .addConverterFactory(GsonConverterFactory.create())
                 .build();
         // 构建请求对象
-        userRemoteApiService = retrofit.create(UserRemoteApiService.class);
+        userRemoteApiService = retrofit.create(UserApiService.class);
     }
 
     /**
@@ -47,14 +51,23 @@ public class UserRemoteApiServiceImpl implements UserRemoteApiService {
      * @return
      */
     @Override
-    public Call<ResponseEntityWrapper<List<SignUserInfoVO>>> findSubLists(String[] deptIds, String[] memberIds) {
+    public List<SignUserInfoVO> findSubLists(String[] deptIds, String[] memberIds) {
         if(userRemoteApiService == null){
             initRetrofit();
         }
+
         try {
-            Call<ResponseEntityWrapper<List<SignUserInfoVO>>> call = userRemoteApiService.findSubLists(deptIds, memberIds);
-            call.execute();
-            return call.clone();
+            Response<ResponseEntityWrapper<List<SignUserInfoVO>>> response = userRemoteApiService.findSubLists(deptIds, memberIds).execute();
+            ResponseEntityWrapper<List<SignUserInfoVO>> body = response.body();
+            if (body != null) {
+                log.info("根据部门id和用户id查询成员信息：code:{}，message:{}，data:{}", body.getStatusCode(), body.getStatusMessage(), JSON.toJSON(body.getData()));
+                if (response.isSuccessful() && body.getStatusCode() == StatusCode.SUCCESS.getStatusCode()) {
+                    return body.getData();
+                }
+            } else {
+                log.error("body is null");
+            }
+            return null;
         } catch (IOException e) {
             e.printStackTrace();
         }
@@ -71,14 +84,52 @@ public class UserRemoteApiServiceImpl implements UserRemoteApiService {
      * @return
      */
     @Override
-    public Call<ResponseEntityWrapper<PageWrapper<SignUserInfoVO>>> findMemberPage(String[] deptIds, String[] memberIds, int pageNo, int pageSize) {
+    public PageWrapper<SignUserInfoVO> findMemberPage(String[] deptIds, String[] memberIds, int pageNo, int pageSize) {
         if(userRemoteApiService == null){
             initRetrofit();
         }
         try {
-            Call<ResponseEntityWrapper<PageWrapper<SignUserInfoVO>>> call = userRemoteApiService.findMemberPage(deptIds, memberIds, pageNo, pageSize);
-            call.execute();
-            return call.clone();
+            Response<ResponseEntityWrapper<PageWrapper<SignUserInfoVO>>> response = userRemoteApiService.findMemberPage(deptIds, memberIds, pageNo, pageSize).execute();
+            ResponseEntityWrapper<PageWrapper<SignUserInfoVO>> body = response.body();
+            if (body != null) {
+                log.info("分页查询用户：code:{}，message:{}，data:{}", body.getStatusCode(), body.getStatusMessage(), JSON.toJSON(body.getData()));
+                if (response.isSuccessful() && body.getStatusCode() == StatusCode.SUCCESS.getStatusCode()) {
+                    return body.getData();
+                }
+            } else {
+                log.error("body is null");
+            }
+            return null;
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        return null;
+    }
+
+    /**
+     * 获取企业成员管理范围
+     *
+     * @param appId
+     * @param memberId
+     * @return
+     */
+    @Override
+    public List<SignUserInfoVO> manageScope(String appId, String memberId) {
+        if(userRemoteApiService == null){
+            initRetrofit();
+        }
+        try {
+            Response<ResponseEntityWrapper<List<SignUserInfoVO>>> response = userRemoteApiService.manageScope(appId, memberId).execute();
+            ResponseEntityWrapper<List<SignUserInfoVO>> body = response.body();
+            if (body != null) {
+                log.info("获取管理范围：code:{}，message:{}，data:{}", body.getStatusCode(), body.getStatusMessage(), JSON.toJSON(body.getData()));
+                if (response.isSuccessful() && body.getStatusCode() == StatusCode.SUCCESS.getStatusCode()) {
+                    return body.getData();
+                }
+            } else {
+                log.error("body is null");
+            }
+            return null;
         } catch (IOException e) {
             e.printStackTrace();
         }

@@ -119,17 +119,7 @@ public class SignDetailServiceImpl extends ServiceImpl<SignDetailMapper, SignDet
         String[] deptIds = StringUtils.split(userAndDeptParam.getDeptIds(),",");
         String[] userIdCs = StringUtils.split(userAndDeptParam.getUserIds(),",");
         //okhttp
-        Call<ResponseEntityWrapper<List<SignUserInfoVO>>> call = userRemoteApiService.findSubLists(deptIds, userIdCs);
-        ResponseEntityWrapper<List<SignUserInfoVO>> body = null;
-        try {
-            Response<ResponseEntityWrapper<List<SignUserInfoVO>>> execute = call.execute();
-            body = execute.body();
-            log.info("根据多部门id和成员id查询成员集合findSubLists：code:{}，message:{}", body.getStatusCode(), body.getStatusMessage());
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-
-        List<SignUserInfoVO> userList = body.getData();
+        List<SignUserInfoVO> userList = userRemoteApiService.findSubLists(deptIds, userIdCs);
         if(userList.size() == 0) {
             return null;
         }
@@ -220,19 +210,9 @@ public class SignDetailServiceImpl extends ServiceImpl<SignDetailMapper, SignDet
     public PageWrapper<UserMonthListVO> staticsMonthInfo(UserAndDeptParam userAndDeptParam, SignBaseMapper mapper) {
         String[] deptIds = StringUtils.split(userAndDeptParam.getDeptIds(),",");
         String[] userIdCs = StringUtils.split(userAndDeptParam.getUserIds(),",");
-        //okhttp
-        Call<ResponseEntityWrapper<PageWrapper<SignUserInfoVO>>> call = userRemoteApiService.findMemberPage(deptIds, userIdCs, userAndDeptParam.getPageNo(), userAndDeptParam.getPageSize());
-        ResponseEntityWrapper<PageWrapper<SignUserInfoVO>> body = null;
-        try {
-            Response<ResponseEntityWrapper<PageWrapper<SignUserInfoVO>>> execute = call.execute();
-            body = execute.body();
-            log.info("根据多部门id和成员id查询成员集合findMemberPage：code:{}，message:{}", body.getStatusCode(), body.getStatusMessage());
 
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
+        PageWrapper<SignUserInfoVO> page  = userRemoteApiService.findMemberPage(deptIds, userIdCs, userAndDeptParam.getPageNo(), userAndDeptParam.getPageSize());
 
-        PageWrapper<SignUserInfoVO> page = body.getData();
         List<SignUserInfoVO> userList;
         if (page != null) {
             userList = page.getRecords();
@@ -308,17 +288,7 @@ public class SignDetailServiceImpl extends ServiceImpl<SignDetailMapper, SignDet
         String[] deptIds = StringUtils.split(userAndDeptParam.getDeptIds(),",");
         String[] userIdCs = StringUtils.split(userAndDeptParam.getUserIds(),",");
         //okhttp
-        Call<ResponseEntityWrapper<List<SignUserInfoVO>>> call = userRemoteApiService.findSubLists(deptIds, userIdCs);
-        ResponseEntityWrapper<List<SignUserInfoVO>> body = null;
-        try {
-            Response<ResponseEntityWrapper<List<SignUserInfoVO>>> execute = call.execute();
-            body = execute.body();
-            log.info("根据多部门ids和成员id查询成员集合findSubLists：code:{}，message:{}", body.getStatusCode(), body.getStatusMessage());
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-
-        List<SignUserInfoVO> userList =  body.getData();
+        List<SignUserInfoVO> userList = userRemoteApiService.findSubLists(deptIds, userIdCs);
         if(userList.size() == 0) {
             return null;
         }

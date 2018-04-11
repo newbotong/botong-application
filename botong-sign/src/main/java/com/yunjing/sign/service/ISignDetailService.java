@@ -83,5 +83,4 @@ public interface ISignDetailService extends IService<SignDetail> {
      * @return
      */
     List<SignDetail> queryDetailList(SignDetailParam signDetailParam);
-
 }
