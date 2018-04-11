@@ -3,6 +3,7 @@ package com.yunjing.botong.log.vo;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.google.gson.annotations.SerializedName;
 import lombok.Data;
+import org.springframework.data.mongodb.core.mapping.Field;
 
 import java.io.Serializable;
 import java.util.List;
@@ -49,6 +50,7 @@ public class Member implements Serializable {
     /**
      * 成员名称
      */
+    @Field("name")
     protected String memberName;
 
     /**

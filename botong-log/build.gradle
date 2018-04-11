@@ -18,6 +18,8 @@ repositories {
 }
 
 dependencies {
+
+
     compile('com.yunjing.botong:commons:2.0.0-SNAPSHOT') {
         changing = true //实时更新jar包
     }
@@ -48,6 +50,8 @@ dependencies {
     compile ('com.aliyun:aliyun-java-sdk-core:3.2.3')
     compile ('com.aliyun:aliyun-java-sdk-dysmsapi:1.0.0')
 
+    compile('org.apache.poi:poi:3.14')
+    compile('org.apache.poi:poi-ooxml:3.14')
     // elasticsearch
     // compile 'io.searchbox:jest:5.3.3'
     // compile 'net.java.dev.jna:jna:4.5.1'

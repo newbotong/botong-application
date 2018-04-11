@@ -1,10 +1,15 @@
 package com.yunjing.botong.log.service;
 
 import com.yunjing.botong.log.params.LogTemplateParam;
+import com.yunjing.botong.log.params.SearchParam;
+import com.yunjing.botong.log.vo.LogTemplateFieldVo;
 import com.yunjing.botong.log.vo.LogTemplateItemVo;
 import com.yunjing.botong.log.vo.LogTemplateVo;
 import com.yunjing.mommon.wrapper.PageWrapper;
 import com.yunjing.mommon.wrapper.ResponseEntityWrapper;
+
+import java.util.List;
+import java.util.Map;
 
 /**
  * 日志模板服务
@@ -51,4 +56,12 @@ public interface LogTemplateService {
      * @return
      */
     boolean updateLogTemplate(LogTemplateParam logTemplateParam);
+
+    /**
+     * 查询模板列头
+     * @param searchParam
+     * @return
+     */
+    Map<String, List<LogTemplateFieldVo>> queryFields(SearchParam searchParam);
+
 }

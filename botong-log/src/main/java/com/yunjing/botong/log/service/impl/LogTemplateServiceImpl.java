@@ -2,6 +2,8 @@ package com.yunjing.botong.log.service.impl;
 
 import com.baomidou.mybatisplus.mapper.EntityWrapper;
 import com.baomidou.mybatisplus.toolkit.IdWorker;
+import com.baomidou.mybatisplus.toolkit.StringUtils;
+import com.yunjing.botong.log.constant.LogConstant;
 import com.yunjing.botong.log.entity.LogTemplateEntity;
 import com.yunjing.botong.log.entity.LogTemplateEnumEntity;
 import com.yunjing.botong.log.entity.LogTemplateEnumItemEntity;
@@ -11,20 +13,21 @@ import com.yunjing.botong.log.mapper.LogTemplateEnumMapper;
 import com.yunjing.botong.log.mapper.LogTemplateFieldMapper;
 import com.yunjing.botong.log.mapper.LogTemplateMapper;
 import com.yunjing.botong.log.params.LogTemplateParam;
+import com.yunjing.botong.log.params.SearchParam;
 import com.yunjing.botong.log.service.LogTemplateService;
 import com.yunjing.botong.log.vo.LogTemplateEnumItemVo;
 import com.yunjing.botong.log.vo.LogTemplateFieldVo;
 import com.yunjing.botong.log.vo.LogTemplateItemVo;
 import com.yunjing.botong.log.vo.LogTemplateVo;
 import com.yunjing.mommon.global.exception.BaseRuntimeException;
+import com.yunjing.mommon.utils.DateUtil;
 import com.yunjing.mommon.wrapper.PageWrapper;
 import org.apache.commons.collections.CollectionUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.ArrayList;
-import java.util.List;
+import java.util.*;
 
 /**
  * 日志模板服务实现类
@@ -220,5 +223,38 @@ public class LogTemplateServiceImpl implements LogTemplateService {
         }
 
         return true;
+    }
+
+    /**
+     * 查询模板列头
+     *
+     * @param searchParam
+     * @return
+     */
+    @Override
+    public Map<String, List<LogTemplateFieldVo>> queryFields(SearchParam searchParam) {
+        Long startDate = null;
+        Long endDate = null;
+        if (StringUtils.isNotEmpty(searchParam.getStartDate())) {
+            startDate = DateUtil.stringToDate(searchParam.getStartDate()).getTime();
+            endDate = DateUtil.stringToDate(searchParam.getEndDate()).getTime();
+        }
+        List<LogTemplateFieldVo>  templateFieldVoList = logTemplateFieldMapper.queryFields(startDate, endDate, searchParam.getSubmitType() != 0 ? searchParam.getSubmitType().toString() : "", "");
+        if (templateFieldVoList == null) {
+            templateFieldVoList = logTemplateFieldMapper.queryFields(null, null, searchParam.getSubmitType() != 0 ? searchParam.getSubmitType().toString() : "", LogConstant.BOTONG_ONE_STR);
+        }
+        Map<String, List<LogTemplateFieldVo>> result = new LinkedHashMap<>();
+        List<LogTemplateFieldVo> list;
+        for (LogTemplateFieldVo vo : templateFieldVoList) {
+            if (result.get(vo.getTemplateName()) == null) {
+                list = new ArrayList<>();
+                list.add(vo);
+                result.put(vo.getTemplateName(), list);
+            } else {
+                result.get(vo.getTemplateName()).add(vo);
+            }
+
+        }
+        return result;
     }
 }

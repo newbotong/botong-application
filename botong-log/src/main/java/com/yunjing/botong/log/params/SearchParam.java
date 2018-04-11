@@ -23,6 +23,11 @@ public class SearchParam {
     private String[] deptIds;
 
     /**
+     * 日志ids
+     */
+    private String[] logIds;
+
+    /**
      * 组织Id
      */
     @NotNullOrEmpty(message = "企业编码不能为空")
