@@ -43,7 +43,7 @@ public class LogSearchApi extends BaseController {
      */
     @PostMapping("/send-page")
     public ResponseEntityWrapper sendPage(@RequestBody ReceviedParam receviedParam) {
-        return success(iLogSearchService.receivePage(receviedParam));
+        return success(iLogSearchService.sendPage(receviedParam));
     }
 
     /**

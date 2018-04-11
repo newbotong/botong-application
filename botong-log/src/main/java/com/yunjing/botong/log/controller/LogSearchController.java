@@ -113,7 +113,7 @@ public class LogSearchController extends BaseController {
             } catch (Exception e2) {
                 log.error("输出流关闭异常",e2);
             }
-            return null;
         }
+        return null;
     }
 }

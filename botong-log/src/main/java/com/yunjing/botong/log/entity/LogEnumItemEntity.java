@@ -2,6 +2,7 @@ package com.yunjing.botong.log.entity;
 
 import lombok.AllArgsConstructor;
 import lombok.Data;
+import lombok.NoArgsConstructor;
 
 /**
  * 日志实体中的枚举项定义
@@ -10,6 +11,7 @@ import lombok.Data;
  */
 @Data
 @AllArgsConstructor
+@NoArgsConstructor
 public class LogEnumItemEntity {
 
     /**

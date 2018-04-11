@@ -9,6 +9,7 @@ import com.common.mongo.dao.Page;
 import com.common.mongo.util.BeanUtils;
 import com.common.mongo.util.PageWrapper;
 import com.netflix.discovery.converters.Auto;
+import com.yunjing.botong.log.cache.MemberRedisOperator;
 import com.yunjing.botong.log.constant.LogConstant;
 import com.yunjing.botong.log.dao.LogDetailDao;
 import com.yunjing.botong.log.entity.LogDetail;
@@ -60,9 +61,8 @@ public class LogSearchServiceImpl implements ILogSearchService {
     @Autowired
     LogTemplateService logTemplateService;
 
-    private Type memberType = new TypeReference<List<Member>>() {
-    }.getType();
-
+    @Autowired
+    MemberRedisOperator memberRedisOperator;
 
 
     /**
@@ -86,7 +86,8 @@ public class LogSearchServiceImpl implements ILogSearchService {
      */
     @Override
     public PageWrapper<LogDetailVO> sendPage(ReceviedParam receviedParam) {
-        PageWrapper<LogDetail> detailResult = logDetailDao.find(receviedParam.getPageNo(), receviedParam.getPageSize(), receviedParam.getOrgId(), null, null, null, LogConstant.BOTONG_ZERO_STR);
+        String[] sendUserIds = {receviedParam.getUserId()};
+        PageWrapper<LogDetail> detailResult = logDetailDao.find(receviedParam.getPageNo(), receviedParam.getPageSize(), receviedParam.getOrgId(), receviedParam.getUserId(), null, sendUserIds, LogConstant.BOTONG_ZERO_STR);
         PageWrapper<LogDetailVO> result = convertResults(receviedParam, detailResult);
         return result;
     }
@@ -139,8 +140,9 @@ public class LogSearchServiceImpl implements ILogSearchService {
     @Override
     public PageWrapper<LogDetailVO> findPage(SearchParam searchParam) {
         //当没有选择范围则查询该企业下所有的员工
-        if (searchParam.getDeptIds().length == 0 && searchParam.getUserIds().length == 0) {
-            searchParam.getDeptIds()[0] = searchParam.getOrgId();
+        if (searchParam.getDeptIds() != null && searchParam.getDeptIds().length == 0 && searchParam.getUserIds() != null && searchParam.getUserIds().length == 0) {
+            String[] deptIds = {searchParam.getOrgId()};
+            searchParam.setDeptIds(deptIds);
         }
         List<Member> memList = appCenterService.findSubLists(searchParam.getDeptIds(), searchParam.getUserIds());
         List<String> memIds = new ArrayList<>();
@@ -197,6 +199,7 @@ public class LogSearchServiceImpl implements ILogSearchService {
             List<LogDetailVO> resultRecord = new ArrayList<>();
             Member userVO;
             Set<Object> userIds = new HashSet<>();
+            //拼接所有需要查询的用户id
             for (LogDetail detail : detailResult.getRecords()) {
                 //设置读取状态
                 if(detail.getReadUserId().contains(String.valueOf(receviedParam.getUserId()))) {
@@ -210,16 +213,12 @@ public class LogSearchServiceImpl implements ILogSearchService {
                 userIds.addAll(detail.getSendToUserId());
                 userIds.addAll(detail.getUnreadUserId());
             }
+            //redis中获取用户信息
+            List<Member> memberList = memberRedisOperator.getMemberList(userIds);
 
-            List listT = redisTemplate.opsForHash().multiGet(LogConstant.BOTONG_ORG_MEMBER, userIds);
-            Member memberVO;
-            List<Member> list = new ArrayList<>();
-            if (listT != null && !listT.isEmpty()) {
-                list = JSON.parseObject(listT.toString(), memberType);
-            }
-
+            //用户放入map中，去匹配
             Map<String, Member> map = new HashMap<>(16);
-            for (Member objVO : list) {
+            for (Member objVO : memberList) {
                 if (objVO == null) {
                     continue;
                 }
@@ -264,7 +263,7 @@ public class LogSearchServiceImpl implements ILogSearchService {
         }
         List<Member> memList = appCenterService.findSubLists(searchParam.getDeptIds(), searchParam.getUserIds());
         List<String> memIds = new ArrayList<>();
-        Map<String, Member> memberMap = new HashMap<>();
+        Map<String, Member> memberMap = new HashMap<>(memList.size());
         for(Member member : memList) {
             memIds.add(member.getId());
             memberMap.put(member.getId(), member);
@@ -292,6 +291,7 @@ public class LogSearchServiceImpl implements ILogSearchService {
                 }
                 AttrValueVO attrValueVO1 = new AttrValueVO();
                 attrValueVO1.setCkey("图片地址");
+                attrValueVO1.setEkey(LogExConsts.CELL_NAME_IMG_EN);
                 String logImgs = StringUtils.join(detail.getLogImages(), " \r\n");
                 attrValueVO1.setAttrVal(logImgs);
                 logData.add(attrValueVO1);
@@ -319,7 +319,7 @@ public class LogSearchServiceImpl implements ILogSearchService {
         log.info("从mongo查询到处理完毕总耗时：" + DateUtil.calculateIntervalSecond(time, time2));
         Map<String, List<LogTemplateFieldVo>> model = logTemplateService.queryFields(searchParam);
         StringBuilder fileName = new StringBuilder().append(LogExConsts.NOTICE).append(LogExConsts.SEPARATOR_POINT).append(LogExConsts.TYPE_XLSX);
-        String TABLE_HEADER = "报表生成日期："+ DateUtil.getDateTime(new Date());
+        String tableHeader = "报表生成日期："+ DateUtil.getDateTime(new Date());
         for (String key : model.keySet()) {
             if (searchParam.getSubmitType() != 0) {
                 if (model.get(key).get(0).getType() != searchParam.getSubmitType().intValue()) {
@@ -339,7 +339,7 @@ public class LogSearchServiceImpl implements ILogSearchService {
             if (StringUtils.isNotBlank(searchParam.getStartDate()) && StringUtils.isNotBlank(searchParam.getEndDate())) {
                 statisticDate = statisticDate + searchParam.getStartDate() + " —— " + searchParam.getEndDate() + "       ";
             }
-            excelModel.setTableHeader(statisticDate + TABLE_HEADER);
+            excelModel.setTableHeader(statisticDate + tableHeader);
 
             // 注入数据项名称
             List<LogTemplVO> logTemplVOList = new ArrayList<>();
