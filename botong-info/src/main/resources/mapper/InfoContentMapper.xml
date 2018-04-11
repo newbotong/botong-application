@@ -48,7 +48,7 @@
         AND r.org_id = #{orgId}
         AND r.is_delete=0
         <if test="parentId!= null and parentId != ''">
-            AND c.parent_id = #{parentId}
+            AND c.id = #{parentId}
         </if>
         <if test="catalogId!= null and catalogId != ''">
             AND r.catalog_id = #{catalogId}
