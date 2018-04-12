@@ -645,7 +645,21 @@ public class InfoCatalogServiceImpl extends ServiceImpl<InfoCatalogMapper, InfoC
                 }
             }
             //批量入库资讯分类
-            insertBatch(infoCatalogList);
+            boolean flag = insertBatch(infoCatalogList);
+            //成功后 将分类录入到缓存
+            if(!flag){
+                return;
+            }
+            for(InfoCatalog infoCatalog:infoCatalogList){
+                if(ValidationUtil.equals(infoCatalog.getId(),infoCatalog.getParentId())){
+                //初始化1级
+                    redisTemplate.opsForHash().put(InfoConstant.COMPANY_INFO_REDIS+infoCatalog.getOrgId(),infoCatalog.getId(),JSONObject.toJSONString(infoCatalog));
+                }else{
+                    //2级初始化
+                    redisTemplate.opsForHash().put(InfoConstant.BOTONG_INFO_CATALOG_LIST + infoCatalog.getOrgId() + InfoConstant.BOTONG_INFO_FIX +infoCatalog.getParentId(), infoCatalog.getId(), JSON.toJSONString(infoCatalog));
+                }
+            }
+
         }
 
 
