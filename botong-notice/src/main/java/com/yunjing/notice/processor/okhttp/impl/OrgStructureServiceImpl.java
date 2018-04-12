@@ -1,6 +1,7 @@
 package com.yunjing.notice.processor.okhttp.impl;
 
 import com.yunjing.mommon.wrapper.ResponseEntityWrapper;
+import com.yunjing.notice.body.Member;
 import com.yunjing.notice.processor.okhttp.OrgStructureService;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
@@ -10,6 +11,7 @@ import retrofit2.Retrofit;
 import retrofit2.converter.gson.GsonConverterFactory;
 
 import java.io.IOException;
+import java.util.List;
 
 /**
  * okhttp调用组织机构
@@ -45,12 +47,12 @@ public class OrgStructureServiceImpl implements OrgStructureService {
      * @return Call<ResponseEntityWrapper>
      */
     @Override
-    public Call<ResponseEntityWrapper> findSubLists(String deptIds, String memberIds, Integer simplify) {
+    public Call<ResponseEntityWrapper<List<Member>>> findSubLists(String deptIds, String memberIds, Integer simplify) {
         if (service == null) {
             initRetrofit();
         }
         try {
-            Call<ResponseEntityWrapper> call = service.findSubLists(deptIds, memberIds, simplify);
+            Call<ResponseEntityWrapper<List<Member>>> call = service.findSubLists(deptIds, memberIds, simplify);
             call.execute();
             return call.clone();
         } catch (IOException e) {

@@ -55,8 +55,6 @@ public class NoticeServiceImpl extends ServiceImpl<NoticeMapper, NoticeEntity> i
     @Autowired
     private NoticeMapper noticeMapper;
 
-    @Autowired
-    private RedisReadonly redisReadonly;
     /**
      * 绑定的公告appId
      */
@@ -97,10 +95,10 @@ public class NoticeServiceImpl extends ServiceImpl<NoticeMapper, NoticeEntity> i
         Response<ResponseEntityWrapper<List<Member>>> execute = call.execute();
         ResponseEntityWrapper<List<Member>> body = execute.body();
         List<Member> memberList;
-        if (null != body) {
+        if (null != body.getData()) {
             memberList = body.getData();
         } else {
-            throw new BaseException("调用失败");
+            throw new BaseException("该用户查询不到");
         }
         String[] passportIds = memberList.stream().map(Member::getPassportId).toArray(String[]::new);
         String[] memberIds = memberList.stream().map(Member::getId).toArray(String[]::new);
@@ -154,7 +152,15 @@ public class NoticeServiceImpl extends ServiceImpl<NoticeMapper, NoticeEntity> i
         if (noticeEntity.getDangState() == 0) {
             //批量查询用户信息
             DangParam dangParam = new DangParam();
-            dangParam.setUserId(noticeEntity.getIssueUserId());
+            Call<ResponseEntityWrapper<List<Member>>> ca = orgStructureService.findSubLists(noticeBody.getDepartmentIds(), noticeBody.getMemberIds(), 0);
+            Response<ResponseEntityWrapper<List<Member>>> re = ca.execute();
+            ResponseEntityWrapper<List<Member>> result = re.body();
+            //查询发布人的账户id
+            if (null != result.getData()) {
+                List<Member> listMember = result.getData();
+                String[] passportId = listMember.stream().map(Member::getPassportId).toArray(String[]::new);
+                dangParam.setUserId(passportId[0]);
+            }
             dangParam.setBizId(noticeEntity.getId());
             dangParam.setBizType(1);
             dangParam.setReceiveBody(JSONObject.toJSONString(passportIds));
@@ -190,19 +196,24 @@ public class NoticeServiceImpl extends ServiceImpl<NoticeMapper, NoticeEntity> i
      * @throws BaseException
      */
     @Transactional(rollbackFor = Exception.class)
-    public void updateNoticeState(String userId, String id){
+    public Integer updateNoticeState(String userId, String id) {
+        //查询该用户下公告详情的未阅读状态
         NoticeUserEntity noticeUserEntity = new NoticeUserEntity().selectOne(new EntityWrapper<NoticeUserEntity>()
                 .eq("logic_delete", NoticeConstant.LOGIC_DELETE_NORMAL)
-                .eq("user_id", userId).eq("notice_id", id).eq("state",1));
-        if (null != noticeUserEntity){
-            noticeUserEntity.setState(0);
+                .eq("user_id", userId).eq("notice_id", id).eq("state", NoticeConstant.NOTICE_NOT_READ));
+        if (null != noticeUserEntity) {
+            //更新已读状态
+            noticeUserEntity.setState(NoticeConstant.NOTICE_READ);
             noticeUserEntity.updateById();
             NoticeEntity noticeEntity = new NoticeEntity().selectOne(new EntityWrapper<NoticeEntity>()
                     .eq("logic_delete", NoticeConstant.LOGIC_DELETE_NORMAL).eq("id", id));
+            //更新已读和未读数量
             noticeEntity.setNotReadNum(noticeEntity.getNotReadNum() > 0 ? noticeEntity.getNotReadNum() - 1 : 0);
             noticeEntity.setReadNum(noticeEntity.getReadNum() + 1);
             noticeEntity.updateById();
+            return 1;
         }
+        return 0;
     }
 
     /**
@@ -272,7 +283,7 @@ public class NoticeServiceImpl extends ServiceImpl<NoticeMapper, NoticeEntity> i
             ResponseEntityWrapper body = execute.body();
             //判断是否为管理员
             boolean results = false;
-            if (null != body) {
+            if (null != body.getData()) {
                 results = (boolean) body.getData();
             }
             maps.put("admin", results);
@@ -304,44 +315,38 @@ public class NoticeServiceImpl extends ServiceImpl<NoticeMapper, NoticeEntity> i
      */
     @Override
     public Page<UserInfoBody> selectNoticeUser(String id, Integer state, Integer pageNo, Integer pageSize) throws BaseException, IOException {
-
         Page<UserInfoBody> page = new Page<>(pageNo, pageSize);
         List<NoticeUserEntity> list = new NoticeUserEntity().selectList(new EntityWrapper<NoticeUserEntity>()
                 .eq("logic_delete", NoticeConstant.LOGIC_DELETE_NORMAL).eq("notice_id", id).eq("state", state));
         if (CollectionUtils.isEmpty(list)) {
             return page;
         }
-        List<String> objectList = new ArrayList<>();
-        for (NoticeUserEntity noticeUserEntity : list) {
-            objectList.add(noticeUserEntity.getUserId());
-        }
-        Call<ResponseEntityWrapper<List<Member>>> call = orgStructureService.findSubLists("", Arrays.toString(objectList.toArray()), 0);
+        String[] memberIds = list.stream().map(NoticeUserEntity::getUserId).toArray(String[]::new);
+        Call<ResponseEntityWrapper<List<Member>>> call = orgStructureService.findSubLists("",StringUtils.join(memberIds,","), 0);
         Response<ResponseEntityWrapper<List<Member>>> execute = call.execute();
         ResponseEntityWrapper<List<Member>> body = execute.body();
-        List<Member> memberList;
-        if (null != body) {
-            memberList = body.getData();
-        } else {
-            throw new BaseException("调用失败");
-        }
         List<UserInfoBody> userInfoBodyList = new ArrayList<>();
-        if (CollectionUtils.isNotEmpty(memberList)) {
-            for (Member object : memberList) {
-                UserInfoBody userInfoBody = new UserInfoBody();
-                userInfoBody.setId(object.getId());
-                if (StringUtils.isNotEmpty(object.getColor())) {
-                    userInfoBody.setColor(object.getColor());
+        List<Member> memberList;
+        if (null != body.getData()) {
+            memberList = body.getData();
+            if (CollectionUtils.isNotEmpty(memberList)) {
+                for (Member object : memberList) {
+                    UserInfoBody userInfoBody = new UserInfoBody();
+                    userInfoBody.setId(object.getId());
+                    if (StringUtils.isNotEmpty(object.getColor())) {
+                        userInfoBody.setColor(object.getColor());
+                    }
+                    if (StringUtils.isNotEmpty(object.getProfile())) {
+                        userInfoBody.setImg(object.getProfile());
+                    }
+                    if (StringUtils.isNotEmpty(object.getMemberName())) {
+                        userInfoBody.setName(object.getMemberName());
+                    }
+                    if (null != object.getMobile()) {
+                        userInfoBody.setPhone(Long.parseLong(object.getMobile()));
+                    }
+                    userInfoBodyList.add(userInfoBody);
                 }
-                if (StringUtils.isNotEmpty(object.getProfile())) {
-                    userInfoBody.setImg(object.getProfile());
-                }
-                if (StringUtils.isNotEmpty(object.getMemberName())) {
-                    userInfoBody.setName(object.getMemberName());
-                }
-                if (null != object.getMobile()) {
-                    userInfoBody.setPhone(Long.parseLong(object.getMobile()));
-                }
-                userInfoBodyList.add(userInfoBody);
             }
         }
         page.setTotal(userInfoBodyList.size());
@@ -357,30 +362,28 @@ public class NoticeServiceImpl extends ServiceImpl<NoticeMapper, NoticeEntity> i
      * @throws BaseException
      */
     @Override
-    public NoticeDetailBody selectNoticeDetail(String id, String userId) throws BaseException,IOException {
+    public NoticeDetailBody selectNoticeDetail(String id, String userId) throws BaseException, IOException {
         NoticeEntity noticeEntity = new NoticeEntity().selectOne(new EntityWrapper<NoticeEntity>().eq("id", id).eq("logic_delete", NoticeConstant.LOGIC_DELETE_NORMAL));
         if (null == noticeEntity) {
             throw new BaseException("该公告已被删除");
         }
-        this.updateNoticeState(userId,id);
+        Integer i = this.updateNoticeState(userId, id);
         NoticeDetailBody noticeDetailBody = new NoticeDetailBody();
         BeanUtils.copyProperties(noticeEntity, noticeDetailBody);
-        noticeDetailBody.setReadNumber(noticeEntity.getReadNum());
-        noticeDetailBody.setNotReadNumber(noticeEntity.getNotReadNum());
+        noticeDetailBody.setReadNumber(i == 0 ? noticeEntity.getReadNum() : noticeEntity.getReadNum() + 1);
+        noticeDetailBody.setNotReadNumber(i == 1 ? noticeEntity.getNotReadNum() - 1 : noticeEntity.getNotReadNum());
         if (null != noticeEntity.getIssueUserId()) {
             Call<ResponseEntityWrapper<List<Member>>> call = orgStructureService.findSubLists("", noticeEntity.getIssueUserId(), 0);
             Response<ResponseEntityWrapper<List<Member>>> execute = call.execute();
             ResponseEntityWrapper<List<Member>> body = execute.body();
             List<Member> memberList;
-            if (null != body) {
+            if (null != body.getData()) {
                 memberList = body.getData();
-            } else {
-                throw new BaseException("调用失败");
-            }
-            if (CollectionUtils.isNotEmpty(memberList)){
-                Member member = memberList.get(0);
-                if (null != member && StringUtils.isNotEmpty(member.getMemberName())){
-                    noticeDetailBody.setIssueUserName(member.getMemberName());
+                if (CollectionUtils.isNotEmpty(memberList)) {
+                    Member member = memberList.get(0);
+                    if (null != member && StringUtils.isNotEmpty(member.getMemberName())) {
+                        noticeDetailBody.setIssueUserName(member.getMemberName());
+                    }
                 }
             }
         }

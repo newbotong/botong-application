@@ -1,9 +1,13 @@
 package com.yunjing.notice.processor.okhttp;
 
 import com.yunjing.mommon.wrapper.ResponseEntityWrapper;
+import com.yunjing.notice.body.Member;
 import retrofit2.Call;
+import retrofit2.http.GET;
 import retrofit2.http.POST;
 import retrofit2.http.Query;
+
+import java.util.List;
 
 /**
  * okhttp调用组织机构
@@ -20,7 +24,6 @@ public interface OrgStructureService {
      * @param memberIds 成员id集合,逗号隔开
      * @return Call<ResponseEntityWrapper>
      */
-
-    @POST("/api/microapps/appcenter/org/find-sub-lists")
-    Call<ResponseEntityWrapper> findSubLists(@Query("deptIds") String deptIds, @Query("memberIds") String memberIds, @Query("simplify") Integer simplify);
+    @GET("/api/microapps/appcenter/org/find-sub-lists")
+    Call<ResponseEntityWrapper<List<Member>>> findSubLists(@Query("deptIds") String deptIds, @Query("memberIds") String memberIds, @Query("simplify") Integer simplify);
 }
