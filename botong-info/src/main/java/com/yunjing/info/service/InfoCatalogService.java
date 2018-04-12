@@ -21,14 +21,6 @@ import java.util.Map;
  * @date 2018/3/30 15:37
  */
 public interface InfoCatalogService extends IService<InfoCatalog> {
-    /**
-     * 新增类目
-     *
-     * @param infoCategoryParam 入参
-     * @throws BaseException
-     */
-    void insertCategory(InfoCategoryParam infoCategoryParam) throws BaseException;
-
 
     /**
      * 查询资讯父级目录
@@ -173,4 +165,5 @@ public interface InfoCatalogService extends IService<InfoCatalog> {
     PageWrapper<InfoContentDto> selectParentPage(String orgId, String parentId, String catalogId,String title, Integer pageNo, Integer pageSize) throws BaseException;
 
 
+    void intoV1DataTransfer();
 }

@@ -239,4 +239,10 @@ public class InfoController extends BaseController {
         return success(infoContent);
     }
 
+
+    @GetMapping("/intoV1DataTransfer")
+    public void intoV1DataTransfer(){
+        infoCatalogService.intoV1DataTransfer();
+    }
+
 }

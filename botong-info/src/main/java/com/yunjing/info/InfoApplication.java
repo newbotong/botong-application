@@ -7,6 +7,7 @@ import org.springframework.cloud.netflix.feign.FeignClient;
 
 /**
  * 资讯服务启动类
+ *
  * @author tandk
  * @date 2018/3/22 17:27
  */
