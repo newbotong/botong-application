@@ -304,9 +304,7 @@ public class NoticeServiceImpl extends ServiceImpl<NoticeMapper, NoticeEntity> i
      */
     @Override
     public Page<UserInfoBody> selectNoticeUser(String id, Integer state, Integer pageNo, Integer pageSize) throws BaseException, IOException {
-        if (null == id && null == state) {
-            throw new BaseException("参数错误");
-        }
+
         Page<UserInfoBody> page = new Page<>(pageNo, pageSize);
         List<NoticeUserEntity> list = new NoticeUserEntity().selectList(new EntityWrapper<NoticeUserEntity>()
                 .eq("logic_delete", NoticeConstant.LOGIC_DELETE_NORMAL).eq("notice_id", id).eq("state", state));
@@ -359,7 +357,7 @@ public class NoticeServiceImpl extends ServiceImpl<NoticeMapper, NoticeEntity> i
      * @throws BaseException
      */
     @Override
-    public NoticeDetailBody selectNoticeDetail(String id, String userId) throws BaseException {
+    public NoticeDetailBody selectNoticeDetail(String id, String userId) throws BaseException,IOException {
         NoticeEntity noticeEntity = new NoticeEntity().selectOne(new EntityWrapper<NoticeEntity>().eq("id", id).eq("logic_delete", NoticeConstant.LOGIC_DELETE_NORMAL));
         if (null == noticeEntity) {
             throw new BaseException("该公告已被删除");
@@ -370,11 +368,19 @@ public class NoticeServiceImpl extends ServiceImpl<NoticeMapper, NoticeEntity> i
         noticeDetailBody.setReadNumber(noticeEntity.getReadNum());
         noticeDetailBody.setNotReadNumber(noticeEntity.getNotReadNum());
         if (null != noticeEntity.getIssueUserId()) {
-            Object object = redisReadonly.getTemple().opsForHash().get(NoticeConstant.USER_INFO_REDIS, noticeEntity.getIssueUserId());
-            if (null != object) {
-                UserInfoRedis userInfoRedis = JSONObject.parseObject(object.toString(), UserInfoRedis.class);
-                if (StringUtils.isNotEmpty(userInfoRedis.getNick())) {
-                    noticeDetailBody.setIssueUserName(userInfoRedis.getNick());
+            Call<ResponseEntityWrapper<List<Member>>> call = orgStructureService.findSubLists("", noticeEntity.getIssueUserId(), 0);
+            Response<ResponseEntityWrapper<List<Member>>> execute = call.execute();
+            ResponseEntityWrapper<List<Member>> body = execute.body();
+            List<Member> memberList;
+            if (null != body) {
+                memberList = body.getData();
+            } else {
+                throw new BaseException("调用失败");
+            }
+            if (CollectionUtils.isNotEmpty(memberList)){
+                Member member = memberList.get(0);
+                if (null != member && StringUtils.isNotEmpty(member.getMemberName())){
+                    noticeDetailBody.setIssueUserName(member.getMemberName());
                 }
             }
         }

@@ -139,7 +139,7 @@ public class NoticeApi extends BaseController {
      * @throws BaseException
      */
     @PostMapping("/detail")
-    public ResponseEntityWrapper selectNoticeDetail(@RequestParam String id, @RequestParam String userId) throws BaseException {
+    public ResponseEntityWrapper selectNoticeDetail(@RequestParam String id, @RequestParam String userId) throws BaseException,IOException {
         if (StringUtils.isAnyBlank(id,userId)) {
             throw new BaseException("参数不能为空");
         }
@@ -157,6 +157,9 @@ public class NoticeApi extends BaseController {
      */
     @PostMapping("/user")
     public ResponseEntityWrapper selectNoticeUser(@RequestParam String id, @RequestParam Integer state, @RequestParam Integer pageNo, @RequestParam Integer pageSize) throws BaseException, IOException {
+        if (null == id && null == state) {
+            throw new BaseException("参数错误");
+        }
         Page<UserInfoBody> page = noticeService.selectNoticeUser(id, state, pageNo, pageSize);
         return success(page);
     }

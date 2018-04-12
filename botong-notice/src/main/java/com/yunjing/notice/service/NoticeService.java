@@ -69,7 +69,7 @@ public interface NoticeService extends IService<NoticeEntity> {
      * @return
      * @throws BaseException
      */
-    NoticeDetailBody selectNoticeDetail(String id, String userId) throws BaseException;
+    NoticeDetailBody selectNoticeDetail(String id, String userId) throws BaseException,IOException;
 
     /**
      * web端公告id查询公告详情接口
