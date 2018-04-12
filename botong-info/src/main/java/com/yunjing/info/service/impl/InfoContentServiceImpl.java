@@ -61,6 +61,7 @@ public class InfoContentServiceImpl extends ServiceImpl<InfoContentMapper, InfoC
      */
     @Override
     public InfoContentDetailDto selectDetail(String id, String userId) throws BaseException, IOException {
+        this.updateNumber(id);
         InfoContent infoContent = new InfoContent().selectOne(new EntityWrapper<InfoContent>().eq("is_delete", InfoConstant.LOGIC_DELETE_NORMAL).eq("id", id));
         if (null == infoContent) {
             throw new BaseException("该资讯已被删除");
@@ -77,22 +78,12 @@ public class InfoContentServiceImpl extends ServiceImpl<InfoContentMapper, InfoC
         return infoContentDetailDto;
     }
 
-    /**
-     * 更新阅读数量接口
-     *
-     * @param id 资讯id
-     * @return
-     * @throws BaseException
-     */
-    @Override
     @Transactional(rollbackFor = Exception.class)
-    public void updateNumber(String id) throws BaseException {
+    public void updateNumber(String id){
         InfoContent infoContent = new InfoContent().selectOne(new EntityWrapper<InfoContent>().eq("is_delete", InfoConstant.LOGIC_DELETE_NORMAL).eq("id", id));
         if (null != infoContent) {
             infoContent.setReadNumber(infoContent.getReadNumber() + 1);
             this.updateById(infoContent);
-        } else {
-            throw new BaseException("该资讯已被删除");
         }
     }
 
