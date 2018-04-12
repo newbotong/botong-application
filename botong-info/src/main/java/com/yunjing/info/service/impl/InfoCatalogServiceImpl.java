@@ -60,17 +60,6 @@ public class InfoCatalogServiceImpl extends ServiceImpl<InfoCatalogMapper, InfoC
     private String appId;
 
     /**
-     * 新增类目
-     *
-     * @param infoCategoryParam 入参
-     */
-    @Override
-    @Transactional(rollbackFor = Exception.class)
-    public void insertCategory(InfoCategoryParam infoCategoryParam) throws BaseException {
-
-    }
-
-    /**
      * 查询资讯父级目录
      *
      * @param orgId  企业id
