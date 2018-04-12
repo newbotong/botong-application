@@ -3,6 +3,7 @@ package com.yunjing.info.processor.okhttp;
 import com.yunjing.mommon.global.exception.BaseException;
 import com.yunjing.mommon.wrapper.ResponseEntityWrapper;
 import retrofit2.Call;
+import retrofit2.http.GET;
 import retrofit2.http.POST;
 import retrofit2.http.Query;
 
@@ -25,6 +26,6 @@ public interface CollectService {
      * @throws BaseException
      * @throws IOException
      */
-    @POST("/api/microapps/appcenter/user/verification")
+    @GET("/api/microapps/appcenter/user/verification")
     Call<ResponseEntityWrapper> collectState(@Query("userId") String userId, @Query("originId") String originId) throws BaseException,IOException;
 }

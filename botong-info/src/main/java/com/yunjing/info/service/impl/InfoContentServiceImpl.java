@@ -8,6 +8,7 @@ import com.baomidou.mybatisplus.service.impl.ServiceImpl;
 import com.yunjing.info.common.InfoConstant;
 import com.yunjing.info.dto.InfoContentDetailDto;
 import com.yunjing.info.dto.InfoDto;
+import com.yunjing.info.dto.Member;
 import com.yunjing.info.dto.ParentInfoDetailDto;
 import com.yunjing.info.mapper.InfoContentMapper;
 import com.yunjing.info.model.InfoCatalog;
@@ -15,6 +16,7 @@ import com.yunjing.info.model.InfoContent;
 import com.yunjing.info.param.InfoCategoryEditParam;
 import com.yunjing.info.param.InfoCategoryParam;
 import com.yunjing.info.processor.okhttp.CollectService;
+import com.yunjing.info.processor.okhttp.OrgStructureService;
 import com.yunjing.info.service.InfoContentService;
 import com.yunjing.mommon.global.exception.BaseException;
 import com.yunjing.mommon.utils.IDUtils;
@@ -30,6 +32,7 @@ import retrofit2.Call;
 import retrofit2.Response;
 
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -50,11 +53,14 @@ public class InfoContentServiceImpl extends ServiceImpl<InfoContentMapper, InfoC
     @Autowired
     private CollectService collectService;
 
+    @Autowired
+    private OrgStructureService orgStructureService;
+
     /**
      * 查询资讯详情接口
      *
      * @param id     资讯id
-     * @param userId 用户id
+     * @param userId 成员id
      * @return
      * @throws BaseException
      * @throws IOException
@@ -68,12 +74,26 @@ public class InfoContentServiceImpl extends ServiceImpl<InfoContentMapper, InfoC
         }
         InfoContentDetailDto infoContentDetailDto = new InfoContentDetailDto();
         BeanUtils.copyProperties(infoContent, infoContentDetailDto);
-
         //调用收藏的OKHttp
-        Call<ResponseEntityWrapper> call = collectService.collectState(userId, id);
+        Call<ResponseEntityWrapper<List<Member>>> call1 = orgStructureService.findSubLists("", userId, 0);
+        Response<ResponseEntityWrapper<List<Member>>> execute1 = call1.execute();
+        ResponseEntityWrapper<List<Member>> body1 = execute1.body();
+        List<Member> memberList;
+        if (null != body1) {
+            memberList = body1.getData();
+        }else {
+            throw new BaseException("调用失败");
+        }
+        String[] passportIds = memberList.stream().map(Member::getPassportId).toArray(String[]::new);
+        Call<ResponseEntityWrapper> call = collectService.collectState(passportIds[0], id);
         Response<ResponseEntityWrapper> execute = call.execute();
         ResponseEntityWrapper body = execute.body();
-        Boolean result = (Boolean) body.getData();
+        Boolean result;
+        if (null != body) {
+            result = (Boolean) body.getData();
+        }else {
+            throw new BaseException("调用失败");
+        }
         infoContentDetailDto.setFavouriteState(result);
         return infoContentDetailDto;
     }
