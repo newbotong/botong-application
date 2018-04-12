@@ -142,6 +142,9 @@ public class LogSearchServiceImpl implements ILogSearchService {
         List<Member> memList = getUsersList(searchParam);
         List<String> memIds = new ArrayList<>();
         Map<String, Member> memberMap = new HashMap<>(16);
+        if(memList == null || memList.isEmpty()) {
+            return null;
+        }
         for(Member member : memList) {
             memIds.add(member.getId());
             memberMap.put(member.getId(), member);
@@ -279,7 +282,9 @@ public class LogSearchServiceImpl implements ILogSearchService {
     @Override
     public List<LogExcelVO> findAll(SearchParam searchParam) {
         List<Member> memList = getUsersList(searchParam);
-
+        if (memList == null || memList.isEmpty()) {
+            return null;
+        }
         List<String> memIds = new ArrayList<>();
         Map<String, Member> memberMap = new HashMap<>(memList.size());
         for(Member member : memList) {
@@ -300,9 +305,9 @@ public class LogSearchServiceImpl implements ILogSearchService {
                 logExcelVO.setLogId(detail.getLogId());
                 logExcelVO.setType(detail.getSubmitType().toString());
                 logData = new ArrayList<>();
-                attrValueVO = new AttrValueVO();
                 for (LogConentVO conentVO : detail.getContents()) {
-                    attrValueVO.setEkey(conentVO.getKey());
+                    attrValueVO = new AttrValueVO();
+                    attrValueVO.setEkey(conentVO.getKey() + conentVO.getName());
                     attrValueVO.setCkey(conentVO.getName());
                     attrValueVO.setAttrVal(conentVO.getValue());
                     logData.add(attrValueVO);
@@ -365,7 +370,7 @@ public class LogSearchServiceImpl implements ILogSearchService {
                 LogTemplVO logTemplVO = new LogTemplVO();
                 logTemplVO.setCKey(modelItem.getFieldLabel());
                 logTemplVO.setVal(modelItem.getFieldLabel());
-                logTemplVO.setEKey(modelItem.getFieldName());
+                logTemplVO.setEKey(modelItem.getFieldName() + modelItem.getFieldLabel());
                 logTemplVOList.add(logTemplVO);
             }
             LogTemplVO logTemplVO2 = new LogTemplVO();

@@ -21,6 +21,10 @@ public class LogConstant implements Serializable {
 
     public final static String  CODE_SCCUESS = "200";
 
+    public final static String  DAY_END_STR = " 23:59:59";
+
+
+
     public final static String  BOTONG_ORG_MEMBER = "botong:org:member";
 
     public final static String  BOTONG_ONE_STR = "1";

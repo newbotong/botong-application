@@ -9,6 +9,7 @@ import com.mongodb.DBObject;
 import com.mongodb.WriteResult;
 import com.yunjing.botong.log.constant.LogConstant;
 import com.yunjing.botong.log.entity.LogDetail;
+import com.yunjing.mommon.Enum.DateStyle;
 import com.yunjing.mommon.utils.DateUtil;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.ArrayUtils;
@@ -218,7 +219,7 @@ public class LogDetailDao extends BaseMongoDaoImpl<LogDetail> {
 
         if (StringUtils.isNotBlank(startDate) && StringUtils.isNotBlank(endDate)) {
             Date start = DateUtil.stringToDate(startDate);
-            Date end = DateUtil.stringToDate(endDate);
+            Date end = DateUtil.StringToDate(endDate + LogConstant.DAY_END_STR, DateStyle.YYYY_MM_DD_HH_MM_SS);
             criteria.andOperator(Criteria.where("submitTime").lte(end).gte(start));
         }
         Query query = new Query(criteria);
