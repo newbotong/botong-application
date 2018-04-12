@@ -491,7 +491,7 @@ public class InfoCatalogServiceImpl extends ServiceImpl<InfoCatalogMapper, InfoC
     public PageWrapper<InfoContentDto> selectParentPage(String orgId, String parentId, String catalogId,String title, Integer pageNo, Integer pageSize) throws BaseException {
 
         Integer count=0;
-        //根据以及查询二级内容
+        //一级查询内容
         if(!ValidationUtil.isEmpty(parentId)){
             //一级查询资讯总数量
             count = infoContentMapper.selectParentPage(orgId, parentId, null, null, null, null).size();
