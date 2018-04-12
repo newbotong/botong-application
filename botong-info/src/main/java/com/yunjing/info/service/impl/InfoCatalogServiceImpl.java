@@ -9,11 +9,11 @@ import com.baomidou.mybatisplus.service.impl.ServiceImpl;
 import com.yunjing.info.common.InfoConstant;
 import com.yunjing.info.common.ValidationUtil;
 import com.yunjing.info.dto.*;
+import com.yunjing.info.mapper.ContentColumnMapper;
+import com.yunjing.info.mapper.ContentMapper;
 import com.yunjing.info.mapper.InfoCatalogMapper;
 import com.yunjing.info.mapper.InfoContentMapper;
-import com.yunjing.info.model.InfoCatalog;
-import com.yunjing.info.model.InfoContent;
-import com.yunjing.info.model.InfoDictionary;
+import com.yunjing.info.model.*;
 import com.yunjing.info.param.InfoCategoryParam;
 import com.yunjing.info.processor.okhttp.AuthorityService;
 import com.yunjing.info.service.InfoCatalogService;
@@ -23,6 +23,7 @@ import com.yunjing.mommon.wrapper.PageWrapper;
 import com.yunjing.mommon.wrapper.ResponseEntityWrapper;
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.collections.MapUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
@@ -34,6 +35,7 @@ import retrofit2.Call;
 import retrofit2.Response;
 
 import java.io.IOException;
+import java.text.SimpleDateFormat;
 import java.util.*;
 
 /**
@@ -58,6 +60,13 @@ public class InfoCatalogServiceImpl extends ServiceImpl<InfoCatalogMapper, InfoC
 
     @Value("${info.appId}")
     private String appId;
+
+    @Autowired
+    ContentColumnMapper contentColumnMapper;
+
+    @Autowired
+    ContentMapper contentMapper;
+
 
     /**
      * 查询资讯父级目录
@@ -559,5 +568,94 @@ public class InfoCatalogServiceImpl extends ServiceImpl<InfoCatalogMapper, InfoC
             }
         }
         this.insertBatch(infoCatalogList);
+    }
+
+
+    /**
+     * 资讯1.0数据转换
+     */
+    @Override
+    public void intoV1DataTransfer(){
+        //资讯分类V1.0列表
+        Wrapper<ContentColumn> wrapper1 = new EntityWrapper<>();
+        List<ContentColumn> contentColumnList = contentColumnMapper.selectList(wrapper1);
+        //2.0资讯分类
+        List<InfoCatalog> infoCatalogList = new ArrayList<>();
+
+
+        if(!ValidationUtil.isEmpty(contentColumnList)){
+            for (ContentColumn contentColumn:contentColumnList){
+                InfoCatalog infoCatalog = new InfoCatalog();
+                infoCatalog.setId(contentColumn.getColumnId());
+                infoCatalog.setName(contentColumn.getColumnName());
+                infoCatalog.setOrgId(contentColumn.getOrgId());
+                if(ValidationUtil.isEmpty(contentColumn.getParentId())){
+                    infoCatalog.setParentId(contentColumn.getColumnId());
+                    //1级
+                    infoCatalog.setLevel(1);
+                }else{
+                    infoCatalog.setParentId(contentColumn.getParentId());
+                    //2级
+                    infoCatalog.setLevel(2);
+                }
+                infoCatalog.setSort(contentColumn.getColumnType());
+                infoCatalog.setWhetherShow(contentColumn.getColumnShowType()==1?1:0);
+                infoCatalog.setIsDelete(0);
+
+                if (ValidationUtil.isEmpty(contentColumn.getCreateTime())){
+                    infoCatalog.setCreateTime(contentColumn.getCreateTime().getTime());
+                    infoCatalog.setUpdateTime(contentColumn.getCreateTime().getTime());
+                }
+                infoCatalogList.add(infoCatalog);
+
+                //遍历内容
+                //根据 分类列表 遍历 内容 并排序
+                //1.0资讯内容列表
+                //2.0资讯内容列表
+                List<InfoContent> infoContentList = new ArrayList<>();
+                Wrapper<Content> wrapper = new EntityWrapper<>();
+                wrapper.eq("column_id",contentColumn.getColumnId()).orderBy("create_time",true);
+                List<Content> contentList = contentMapper.selectList(wrapper);
+                if(!ValidationUtil.isEmpty(contentList)){
+                    for (int i=0;i<contentList.size();i++){
+                        InfoContent infoContent = new InfoContent();
+                        infoContent.setId(contentList.get(i).getContentId());
+                        infoContent.setCatalogId(contentList.get(i).getColumnId());
+                        infoContent.setOrgId(infoCatalog.getOrgId());
+                        infoContent.setDepartmentName("");
+                        infoContent.setTitle(contentList.get(i).getContentTitle());
+                        infoContent.setPictureUrl(contentList.get(i).getContentImg());
+                        infoContent.setContent(contentList.get(i).getContentDetail());
+                        infoContent.setReadNumber(0);
+                        infoContent.setWhetherShow(contentList.get(i).getIsView());
+                        infoContent.setSort(i+1);
+                        infoContent.setIsDelete(contentList.get(i).getStatus());
+                        if (!ValidationUtil.isEmpty(contentList.get(i).getCreateTime())){
+                            infoContent.setCreateTime(contentList.get(i).getCreateTime().getTime());
+                            infoContent.setUpdateTime(contentList.get(i).getLastMdfTime().getTime());
+                        }else{
+                            infoContent.setCreateTime(System.currentTimeMillis());
+                            infoContent.setUpdateTime(System.currentTimeMillis());
+                        }
+                        infoContentList.add(infoContent);
+                    }
+                    //批量入库 资讯内容
+                    InfoContentServiceImpl infoContentService = new InfoContentServiceImpl();
+                    infoContentService.insertBatch(infoContentList);
+                }
+            }
+            //批量入库资讯分类
+            insertBatch(infoCatalogList);
+        }
+
+
+
+
+
+
+
+
+
+
     }
 }

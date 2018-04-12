@@ -165,4 +165,5 @@ public interface InfoCatalogService extends IService<InfoCatalog> {
     PageWrapper<InfoContentDto> selectParentPage(String orgId, String parentId, String catalogId,String title, Integer pageNo, Integer pageSize) throws BaseException;
 
 
+    void intoV1DataTransfer();
 }
