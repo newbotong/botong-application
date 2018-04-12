@@ -535,6 +535,7 @@ public class InfoCatalogServiceImpl extends ServiceImpl<InfoCatalogMapper, InfoC
             InfoRedisInit infoRedisInit = JSONObject.parseObject(entry.getValue().toString(), InfoRedisInit.class);
             InfoCatalog infoCatalog = new InfoCatalog();
             infoCatalog.setId(IDUtils.uuid());
+            infoCatalog.setParentId(infoCatalog.getId());
             infoCatalog.setIsDelete(InfoConstant.LOGIC_DELETE_NORMAL);
             infoCatalog.setLevel(infoRedisInit.getLevel());
             infoCatalog.setName(infoRedisInit.getName());
