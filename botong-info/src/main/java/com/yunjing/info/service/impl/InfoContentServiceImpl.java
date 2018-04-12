@@ -89,14 +89,14 @@ public class InfoContentServiceImpl extends ServiceImpl<InfoContentMapper, InfoC
                 result = (Boolean) body.getData();
                 infoContentDetailDto.setFavouriteState(result);
             }
-        }else {
+        } else {
             infoContentDetailDto.setFavouriteState(false);
         }
         return infoContentDetailDto;
     }
 
     @Transactional(rollbackFor = Exception.class)
-    public void updateNumber(String id){
+    public void updateNumber(String id) {
         InfoContent infoContent = new InfoContent().selectOne(new EntityWrapper<InfoContent>().eq("is_delete", InfoConstant.LOGIC_DELETE_NORMAL).eq("id", id));
         if (null != infoContent) {
             infoContent.setReadNumber(infoContent.getReadNumber() + 1);
@@ -124,14 +124,9 @@ public class InfoContentServiceImpl extends ServiceImpl<InfoContentMapper, InfoC
         infoContent.setIsDelete(InfoConstant.LOGIC_DELETE_NORMAL);
         infoContent.setReadNumber(0);
         infoContent.setWhetherShow(1);
-        List<InfoContent> infoContentList = new InfoContent().selectList(new EntityWrapper<InfoContent>()
-                .eq("is_delete", InfoConstant.LOGIC_DELETE_NORMAL).eq("catalog_id", infoCategoryParam.getCatalogId()).orderBy("sort", false));
-        if (CollectionUtils.isNotEmpty(infoContentList)) {
-            InfoContent infoContent1 = infoContentList.get(0);
-            infoContent.setSort(infoContent1.getSort() + 1);
-        } else {
-            infoContent.setSort(1);
-        }
+        Integer i = new InfoContent().selectCount(new EntityWrapper<InfoContent>()
+                .eq("is_delete", InfoConstant.LOGIC_DELETE_NORMAL).eq("catalog_id", infoContent.getCatalogId()).orderBy("sort", false));
+        infoContent.setSort(i + 1);
         Boolean result = infoContent.insert();
         if (!result) {
             throw new BaseException("新增失败");
@@ -217,14 +212,14 @@ public class InfoContentServiceImpl extends ServiceImpl<InfoContentMapper, InfoC
     /**
      * 根据id查询详情
      *
-     * @param id  根据id查询详情
+     * @param id 根据id查询详情
      * @return
      * @throws BaseException
      */
     @Override
     public InfoContent selectWebDetail(String id) throws BaseException {
-        InfoContent infoContent = new InfoContent().selectOne(new EntityWrapper<InfoContent>().eq("is_delete",InfoConstant.LOGIC_DELETE_NORMAL).eq("id",id));
-        if (null == infoContent){
+        InfoContent infoContent = new InfoContent().selectOne(new EntityWrapper<InfoContent>().eq("is_delete", InfoConstant.LOGIC_DELETE_NORMAL).eq("id", id));
+        if (null == infoContent) {
             throw new BaseException("该资讯已被删除");
         }
         return infoContent;
