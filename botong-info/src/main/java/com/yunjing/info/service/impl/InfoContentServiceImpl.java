@@ -79,22 +79,20 @@ public class InfoContentServiceImpl extends ServiceImpl<InfoContentMapper, InfoC
         Response<ResponseEntityWrapper<List<Member>>> execute1 = call1.execute();
         ResponseEntityWrapper<List<Member>> body1 = execute1.body();
         List<Member> memberList;
-        if (null != body1) {
+        if (null != body1.getData()) {
             memberList = body1.getData();
+            String[] passportIds = memberList.stream().map(Member::getPassportId).toArray(String[]::new);
+            Call<ResponseEntityWrapper> call = collectService.collectState(passportIds[0], id);
+            Response<ResponseEntityWrapper> execute = call.execute();
+            ResponseEntityWrapper body = execute.body();
+            Boolean result;
+            if (null != body.getData()) {
+                result = (Boolean) body.getData();
+                infoContentDetailDto.setFavouriteState(result);
+            }
         }else {
-            throw new BaseException("调用失败");
+            infoContentDetailDto.setFavouriteState(false);
         }
-        String[] passportIds = memberList.stream().map(Member::getPassportId).toArray(String[]::new);
-        Call<ResponseEntityWrapper> call = collectService.collectState(passportIds[0], id);
-        Response<ResponseEntityWrapper> execute = call.execute();
-        ResponseEntityWrapper body = execute.body();
-        Boolean result;
-        if (null != body) {
-            result = (Boolean) body.getData();
-        }else {
-            throw new BaseException("调用失败");
-        }
-        infoContentDetailDto.setFavouriteState(result);
         return infoContentDetailDto;
     }
 
