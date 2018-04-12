@@ -31,15 +31,6 @@ public interface InfoContentService extends IService<InfoContent> {
     InfoContentDetailDto selectDetail(String id, String userId) throws BaseException, IOException;
 
     /**
-     * 更新阅读数量接口
-     *
-     * @param id 资讯id
-     * @return
-     * @throws BaseException
-     */
-    void updateNumber(String id) throws BaseException;
-
-    /**
      * 新增资讯接口
      *
      * @param infoCategoryParam 入参对象

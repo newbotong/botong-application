@@ -2,6 +2,7 @@ package com.yunjing.approval.api;
 
 import com.common.mybatis.page.Page;
 import com.yunjing.approval.model.vo.ClientModelVO;
+import com.yunjing.approval.model.vo.Member;
 import com.yunjing.approval.model.vo.MemberInfo;
 import com.yunjing.approval.param.FilterParam;
 import com.yunjing.approval.processor.okhttp.AppCenterService;
@@ -170,7 +171,7 @@ public class ClientApprovalController extends BaseController {
 
     @GetMapping("/test")
     public ResponseEntityWrapper test(String[] deptIds, String[] memberIds) {
-        List<MemberInfo> subList = appCenterService.findSubList(deptIds, memberIds, true);
+        List<Member> subList = appCenterService.findSubLists(deptIds, memberIds);
         return success(subList);
     }
 

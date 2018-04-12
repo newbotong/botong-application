@@ -6,6 +6,7 @@ import com.yunjing.mommon.global.exception.BaseException;
 import com.yunjing.notice.body.*;
 import com.yunjing.notice.entity.NoticeEntity;
 
+import java.io.IOException;
 import java.util.Map;
 
 /**
@@ -17,23 +18,13 @@ import java.util.Map;
 public interface NoticeService extends IService<NoticeEntity> {
 
     /**
-     * 增加公告
+     * 新增公告
      *
      * @param noticeBody 新增入参
      * @throws BaseException
+     * @throws IOException
      */
-    void insertNotice(NoticeBody noticeBody) throws BaseException;
-
-
-    /**
-     * 更新已读和未读状态
-     *
-     * @param userId 用户id
-     * @param id     公告id
-     * @param state  是否阅读 0为已读 1为未读
-     * @throws BaseException
-     */
-    void updateNoticeState(String userId, String id, Integer state) throws BaseException;
+    void insertNotice(NoticeBody noticeBody) throws BaseException, IOException;
 
     /**
      * 逻辑删除公告
@@ -48,13 +39,14 @@ public interface NoticeService extends IService<NoticeEntity> {
      *
      * @param userId   用户id
      * @param state    是否阅读 0为已读 1为未读
+     * @param orgId    企业id
      * @param pageNo   当前页码
      * @param pageSize 每页显示条数
-     * @param orgId    企业id
      * @return
      * @throws BaseException
+     * @throws IOException
      */
-    Map<String, Object> selectNoticePage(String userId, Integer state, String orgId, Integer pageNo, Integer pageSize) throws BaseException;
+    Map<String, Object> selectNoticePage(String userId, Integer state, String orgId, Integer pageNo, Integer pageSize) throws BaseException, IOException;
 
 
     /**
@@ -67,7 +59,7 @@ public interface NoticeService extends IService<NoticeEntity> {
      * @return
      * @throws BaseException
      */
-    Page<UserInfoBody> selectNoticeUser(String id, Integer state, Integer pageNo, Integer pageSize) throws BaseException;
+    Page<UserInfoBody> selectNoticeUser(String id, Integer state, Integer pageNo, Integer pageSize) throws BaseException, IOException;
 
     /**
      * 根据公告id查询公告详情接口
@@ -77,7 +69,7 @@ public interface NoticeService extends IService<NoticeEntity> {
      * @return
      * @throws BaseException
      */
-    NoticeDetailBody selectNoticeDetail(String id, String userId) throws BaseException;
+    NoticeDetailBody selectNoticeDetail(String id, String userId) throws BaseException,IOException;
 
     /**
      * web端公告id查询公告详情接口

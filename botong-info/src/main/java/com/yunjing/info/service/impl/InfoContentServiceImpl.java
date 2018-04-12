@@ -8,6 +8,7 @@ import com.baomidou.mybatisplus.service.impl.ServiceImpl;
 import com.yunjing.info.common.InfoConstant;
 import com.yunjing.info.dto.InfoContentDetailDto;
 import com.yunjing.info.dto.InfoDto;
+import com.yunjing.info.dto.Member;
 import com.yunjing.info.dto.ParentInfoDetailDto;
 import com.yunjing.info.mapper.InfoContentMapper;
 import com.yunjing.info.model.InfoCatalog;
@@ -15,6 +16,7 @@ import com.yunjing.info.model.InfoContent;
 import com.yunjing.info.param.InfoCategoryEditParam;
 import com.yunjing.info.param.InfoCategoryParam;
 import com.yunjing.info.processor.okhttp.CollectService;
+import com.yunjing.info.processor.okhttp.OrgStructureService;
 import com.yunjing.info.service.InfoContentService;
 import com.yunjing.mommon.global.exception.BaseException;
 import com.yunjing.mommon.utils.IDUtils;
@@ -30,6 +32,7 @@ import retrofit2.Call;
 import retrofit2.Response;
 
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -50,49 +53,55 @@ public class InfoContentServiceImpl extends ServiceImpl<InfoContentMapper, InfoC
     @Autowired
     private CollectService collectService;
 
+    @Autowired
+    private OrgStructureService orgStructureService;
+
     /**
      * 查询资讯详情接口
      *
      * @param id     资讯id
-     * @param userId 用户id
+     * @param userId 成员id
      * @return
      * @throws BaseException
      * @throws IOException
      */
     @Override
     public InfoContentDetailDto selectDetail(String id, String userId) throws BaseException, IOException {
+        this.updateNumber(id);
         InfoContent infoContent = new InfoContent().selectOne(new EntityWrapper<InfoContent>().eq("is_delete", InfoConstant.LOGIC_DELETE_NORMAL).eq("id", id));
         if (null == infoContent) {
             throw new BaseException("该资讯已被删除");
         }
         InfoContentDetailDto infoContentDetailDto = new InfoContentDetailDto();
         BeanUtils.copyProperties(infoContent, infoContentDetailDto);
-
         //调用收藏的OKHttp
-        Call<ResponseEntityWrapper> call = collectService.collectState(userId, id);
-        Response<ResponseEntityWrapper> execute = call.execute();
-        ResponseEntityWrapper body = execute.body();
-        Boolean result = (Boolean) body.getData();
-        infoContentDetailDto.setFavouriteState(result);
+        Call<ResponseEntityWrapper<List<Member>>> call1 = orgStructureService.findSubLists("", userId, 0);
+        Response<ResponseEntityWrapper<List<Member>>> execute1 = call1.execute();
+        ResponseEntityWrapper<List<Member>> body1 = execute1.body();
+        List<Member> memberList;
+        if (null != body1.getData()) {
+            memberList = body1.getData();
+            String[] passportIds = memberList.stream().map(Member::getPassportId).toArray(String[]::new);
+            Call<ResponseEntityWrapper> call = collectService.collectState(passportIds[0], id);
+            Response<ResponseEntityWrapper> execute = call.execute();
+            ResponseEntityWrapper body = execute.body();
+            Boolean result;
+            if (null != body.getData()) {
+                result = (Boolean) body.getData();
+                infoContentDetailDto.setFavouriteState(result);
+            }
+        }else {
+            infoContentDetailDto.setFavouriteState(false);
+        }
         return infoContentDetailDto;
     }
 
-    /**
-     * 更新阅读数量接口
-     *
-     * @param id 资讯id
-     * @return
-     * @throws BaseException
-     */
-    @Override
     @Transactional(rollbackFor = Exception.class)
-    public void updateNumber(String id) throws BaseException {
+    public void updateNumber(String id){
         InfoContent infoContent = new InfoContent().selectOne(new EntityWrapper<InfoContent>().eq("is_delete", InfoConstant.LOGIC_DELETE_NORMAL).eq("id", id));
         if (null != infoContent) {
             infoContent.setReadNumber(infoContent.getReadNumber() + 1);
             this.updateById(infoContent);
-        } else {
-            throw new BaseException("该资讯已被删除");
         }
     }
 

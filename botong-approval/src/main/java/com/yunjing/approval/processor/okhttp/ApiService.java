@@ -1,10 +1,12 @@
 package com.yunjing.approval.processor.okhttp;
 
+import com.yunjing.approval.model.vo.Member;
 import com.yunjing.approval.model.vo.MemberInfo;
 import com.yunjing.approval.model.vo.OrgMemberVo;
 import com.yunjing.approval.param.DangParam;
 import com.yunjing.approval.param.PushParam;
 import com.yunjing.approval.param.SchedulerParam;
+import com.yunjing.mommon.wrapper.PageWrapper;
 import com.yunjing.mommon.wrapper.ResponseEntityWrapper;
 import retrofit2.Call;
 import retrofit2.http.*;
@@ -68,16 +70,24 @@ public interface ApiService {
     Call<ResponseEntityWrapper<List<OrgMemberVo>>> findAllOrgMember(@Query("orgId") String orgId);
 
     /**
-     * 获取多个部门下的成员
+     * 设置任务调度
+     *
+     * @param param
+     * @return
+     */
+    @POST("/api/microapps/appcenter/scheduler/set")
+    @Headers({"Content-Type: application/json;charset=UTF-8"})
+    Call<ResponseEntityWrapper<Long>> setTask(@Body SchedulerParam param);
+
+    /**
+     * 获取所有的人员id
      *
      * @param deptIds
      * @param memberIds
      * @return
      */
     @GET("/api/microapps/appcenter/org/find-sub-lists")
-    Call<ResponseEntityWrapper<List<MemberInfo>>> findSubList(@Query("deptIds")String[] deptIds, @Query("memberIds")String[] memberIds);
-
-
+    Call<ResponseEntityWrapper<List<Member>>> findSubLists(@Query("deptIds") String[] deptIds, @Query("memberIds") String[] memberIds, @Query("simplify") int simplify);
 
     /**
      * 获取企业成员管理范围
@@ -87,15 +97,18 @@ public interface ApiService {
      * @return
      */
     @GET("/api/microapps/appcenter/org/admin/manage-scope")
-    Call<ResponseEntityWrapper<List<MemberInfo>>> manageScope(@Query("appId") String appId, @Query("memberId") String memberId);
+    Call<ResponseEntityWrapper<List<Member>>> manageScope(@Query("appId") String appId, @Query("memberId") String memberId);
+
 
     /**
-     * 设置任务调度
-     *
-     * @param param
+     * 分页获取人员id
+     * @param deptIds
+     * @param memberIds
+     * @param pageNo
+     * @param pageSize
      * @return
      */
-    @POST("/api/microapps/appcenter/scheduler/set")
-    @Headers({"Content-Type: application/json;charset=UTF-8"})
-    Call<ResponseEntityWrapper<Long>> setTask(@Body SchedulerParam param);
+    @GET("/api/microapps/appcenter/org/find-member-page")
+    Call<ResponseEntityWrapper<PageWrapper<Member>>> findMemberPage(@Query("deptIds") String[] deptIds, @Query("memberIds") String[] memberIds,
+                                                                            @Query("pageNo") int pageNo, @Query("pageSize")int pageSize);
 }

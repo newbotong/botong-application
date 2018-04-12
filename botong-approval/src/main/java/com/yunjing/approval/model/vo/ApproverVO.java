@@ -16,7 +16,7 @@ public class ApproverVO {
     /**
      * 条件主键
      */
-    private String conditionId;
+    private List<String> conditionId;
 
     /**
      * 部门名称
@@ -28,5 +28,7 @@ public class ApproverVO {
      */
     private String deptId;
 
-    private List<UserVO> userVOList;
+    private List<UserVO> approvers;
+
+    private List<UserVO> copys;
 }

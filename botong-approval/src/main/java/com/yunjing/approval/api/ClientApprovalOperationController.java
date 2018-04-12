@@ -54,7 +54,7 @@ public class ClientApprovalOperationController extends BaseController {
                                         @RequestParam("memberId") String memberId,
                                         @RequestParam("modelId") String modelId,
                                         @RequestParam("jsonData") String jsonData,
-                                        @RequestParam("deptId") String deptId,
+                                        @RequestParam(value = "deptId",required = false) String deptId,
                                         @RequestParam("sendUserIds") String sendUserIds,
                                         @RequestParam(value = "sendCopyIds", required = false) String sendCopyIds) throws Exception {
         return success(approvalService.submit(companyId, memberId, modelId, jsonData, sendUserIds, sendCopyIds));

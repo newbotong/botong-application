@@ -40,4 +40,11 @@ public interface IModelItemService extends IBaseService<ModelItem> {
      * @throws Exception 异常
      */
     ModelVO saveModelItem(String companyId, String memberId, String json) throws Exception;
+
+    /**
+     * 删除企业下的模板子项
+     * @param orgId 企业主键
+     * @return
+     */
+    boolean deleteModelItemListByOrgId(String orgId);
 }

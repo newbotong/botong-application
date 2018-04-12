@@ -1,8 +1,8 @@
-package com.yunjing.notice.processor.okhttp.impl;
+package com.yunjing.info.processor.okhttp.impl;
 
+import com.yunjing.info.dto.Member;
+import com.yunjing.info.processor.okhttp.OrgStructureService;
 import com.yunjing.mommon.wrapper.ResponseEntityWrapper;
-import com.yunjing.notice.body.Member;
-import com.yunjing.notice.processor.okhttp.OrgStructureService;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;

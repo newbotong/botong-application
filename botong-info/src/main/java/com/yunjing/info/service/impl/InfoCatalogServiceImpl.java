@@ -491,7 +491,7 @@ public class InfoCatalogServiceImpl extends ServiceImpl<InfoCatalogMapper, InfoC
     public PageWrapper<InfoContentDto> selectParentPage(String orgId, String parentId, String catalogId,String title, Integer pageNo, Integer pageSize) throws BaseException {
 
         Integer count=0;
-        //根据以及查询二级内容
+        //一级查询内容
         if(!ValidationUtil.isEmpty(parentId)){
             //一级查询资讯总数量
             count = infoContentMapper.selectParentPage(orgId, parentId, null, null, null, null).size();
@@ -535,6 +535,7 @@ public class InfoCatalogServiceImpl extends ServiceImpl<InfoCatalogMapper, InfoC
             InfoRedisInit infoRedisInit = JSONObject.parseObject(entry.getValue().toString(), InfoRedisInit.class);
             InfoCatalog infoCatalog = new InfoCatalog();
             infoCatalog.setId(IDUtils.uuid());
+            infoCatalog.setParentId(infoCatalog.getId());
             infoCatalog.setIsDelete(InfoConstant.LOGIC_DELETE_NORMAL);
             infoCatalog.setLevel(infoRedisInit.getLevel());
             infoCatalog.setName(infoRedisInit.getName());

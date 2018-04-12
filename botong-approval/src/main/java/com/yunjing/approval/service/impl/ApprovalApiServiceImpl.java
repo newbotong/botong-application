@@ -4,20 +4,25 @@ import com.baomidou.mybatisplus.mapper.Condition;
 import com.baomidou.mybatisplus.toolkit.CollectionUtils;
 import com.baomidou.mybatisplus.toolkit.MapUtils;
 import com.common.mybatis.page.Page;
+import com.yunjing.approval.config.AbstractRedisConfiguration;
+import com.yunjing.approval.config.RedisApproval;
 import com.yunjing.approval.dao.mapper.*;
 import com.yunjing.approval.model.dto.ApprovalContentDTO;
 import com.yunjing.approval.model.dto.ApprovalDetailDTO;
 import com.yunjing.approval.model.entity.*;
 import com.yunjing.approval.model.vo.*;
 import com.yunjing.approval.param.FilterParam;
+import com.yunjing.approval.processor.okhttp.AppCenterService;
 import com.yunjing.approval.processor.task.async.ApprovalPushTask;
 import com.yunjing.approval.service.*;
+import com.yunjing.approval.util.ApproConstants;
 import com.yunjing.approval.util.Colors;
 import com.yunjing.mommon.global.exception.InsertMessageFailureException;
 import com.yunjing.mommon.global.exception.UpdateMessageFailureException;
 import com.yunjing.mommon.utils.IDUtils;
 import org.apache.commons.lang.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
@@ -59,7 +64,11 @@ public class ApprovalApiServiceImpl implements IApprovalApiService {
     private ApprovalPushTask approvalPushTask;
     @Autowired
     private ApprovalAttrMapper approvalAttrMapper;
+    @Autowired
+    private AppCenterService appCenterService;
 
+    @Autowired
+    private RedisApproval redisApproval;
 
     @Override
     @Transactional(propagation = Propagation.REQUIRED, rollbackFor = Exception.class)
@@ -81,8 +90,10 @@ public class ApprovalApiServiceImpl implements IApprovalApiService {
         int size = page.getPageSize();
         int index = (current - 1) * size;
         String deptId = filterParam.getDeptId();
-        List<ApprovalUser> approvalUsers = approvalUserMapper.selectUser(deptId);
-        List<String> userIds = approvalUsers.stream().map(ApprovalUser::getId).collect(Collectors.toList());
+        // 查询部门中成员
+        String[] did = new String[]{deptId};
+        List<Member> members = appCenterService.findSubLists(did, null);
+        List<String> userIds = members.stream().map(Member::getId).collect(Collectors.toList());
         userIds.add(userId);
         Page<ClientApprovalVO> clientApprovalVOPage = new Page<>(current, size);
         List<ClientApprovalVO> clientApprovalVOS = new ArrayList<>();
@@ -100,8 +111,10 @@ public class ApprovalApiServiceImpl implements IApprovalApiService {
         int size = page.getPageSize();
         int index = (current - 1) * size;
         String deptId = filterParam.getDeptId();
-        List<ApprovalUser> approvalUsers = approvalUserMapper.selectUser(deptId);
-        List<String> userIds = approvalUsers.stream().map(ApprovalUser::getId).collect(Collectors.toList());
+        // 查询部门中成员
+        String[] did = new String[]{deptId};
+        List<Member> members = appCenterService.findSubLists(did, null);
+        List<String> userIds = members.stream().map(Member::getId).collect(Collectors.toList());
         userIds.add(userId);
         Page<ClientApprovalVO> clientApprovalVOPage = new Page<>(current, size);
         List<ClientApprovalVO> clientApprovalVOS = new ArrayList<>();
@@ -394,7 +407,7 @@ public class ApprovalApiServiceImpl implements IApprovalApiService {
         copysList.forEach(copys -> {
             copys.setIsRead(1);
         });
-        if(!copysList.isEmpty()){
+        if (!copysList.isEmpty()) {
             isUpdated = copySService.updateBatchById(copysList);
         }
         return isUpdated;

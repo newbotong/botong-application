@@ -62,6 +62,8 @@ public class ModelItemServiceImpl extends BaseServiceImpl<ModelItemMapper, Model
 
     @Autowired
     private ICopyService copyService;
+    @Autowired
+    private ModelItemMapper modelItemMapper;
 
     /**
      * 1-多行输入框 2-数字输入框 3-单选框 4-日期 5-日期区间 6-单行输入框 7-明细 8-说明文字 9-金额 10- 图片 11-附件
@@ -90,17 +92,17 @@ public class ModelItemServiceImpl extends BaseServiceImpl<ModelItemMapper, Model
                 modelItemVO.setLabel(modelItem.getItemLabel());
                 modelItemVO.setLabels(modelItem.getItemLabels());
                 modelItemVO.setField(modelItem.getField());
-                modelItemVO.setIsDisplay(modelItem.getIsDisplay());
-                modelItemVO.setIsRequired(modelItem.getIsRequired());
+                modelItemVO.setDisplay(modelItem.getIsDisplay());
+                modelItemVO.setRequired(modelItem.getIsRequired());
                 modelItemVO.setHelp(modelItem.getHelp());
                 List<ModelItem> modelItems = this.selectList(Condition.create().where("is_child={0}", modelItem.getId()).orderBy("priority"));
-                modelItemVO.setModelItems(modelItems);
+                modelItemVO.setItems(modelItems);
             }
             modelItemVOS.add(modelItemVO);
 
         }
 
-        modelVO.setModelItems(modelItemVOS);
+        modelVO.setItems(modelItemVOS);
         ClientModelItemVO clientModelItemVO = new ClientModelItemVO(modelVO);
 
         // 获取审批流程设置类型，set=0:不分条件设置审批人 set=1:分条件设置审批人
@@ -150,7 +152,7 @@ public class ModelItemServiceImpl extends BaseServiceImpl<ModelItemMapper, Model
             }
         });
 
-        vo.setModelItems(items);
+        vo.setItems(items);
         return vo;
     }
 
@@ -193,7 +195,7 @@ public class ModelItemServiceImpl extends BaseServiceImpl<ModelItemMapper, Model
             throw new BaseException("审批名称不存在");
         }
 
-        List<ModelItemVO> itemVOS = vo.getModelItems();
+        List<ModelItemVO> itemVOS = vo.getItems();
         if (CollectionUtils.isEmpty(itemVOS)) {
             throw new BaseException("字段数据不存在");
         }
@@ -203,7 +205,7 @@ public class ModelItemServiceImpl extends BaseServiceImpl<ModelItemMapper, Model
 
         ModelL entity = new ModelL();
         boolean isNew = false;
-        if (null != vo.getModelId()) {
+        if (StringUtils.isNotBlank(vo.getModelId())) {
             entity = modelService.selectById(modelId);
             if (entity == null) {
                 throw new BaseException("模型信息不存在");
@@ -213,7 +215,7 @@ public class ModelItemServiceImpl extends BaseServiceImpl<ModelItemMapper, Model
             isNew = true;
             modelId = IDUtils.uuid();
             entity.setId(modelId);
-            entity.setLogo("https://web.botong.tech/resource/img/public.png");
+            entity.setLogo(vo.getLogo());
 
             Integer max = modelMapper.getMaxSort(companyId);
             if (max == null) {
@@ -250,7 +252,7 @@ public class ModelItemServiceImpl extends BaseServiceImpl<ModelItemMapper, Model
                 OrgModel orgModel = new OrgModel();
                 orgModel.setId(IDUtils.uuid());
                 orgModel.setOrgId(companyId);
-                orgModel.setModelId(entity.getId().toString());
+                orgModel.setModelId(entity.getId());
                 orgModel.setDataType(2);
                 orgModel.setCreateTime(now.getTime());
                 result = orgModelService.insert(orgModel);
@@ -266,6 +268,12 @@ public class ModelItemServiceImpl extends BaseServiceImpl<ModelItemMapper, Model
         }
 
         return this.getModelVO(entity, entityList);
+    }
+
+    @Override
+    public boolean deleteModelItemListByOrgId(String orgId) {
+        return modelItemMapper.deleteModelItemListByOrgId(orgId);
+
     }
 
     /**
@@ -356,7 +364,7 @@ public class ModelItemServiceImpl extends BaseServiceImpl<ModelItemMapper, Model
             item.setIsCustom(1);
 
             // 是否显示 0:不显示 1:显示
-            Integer isDisplay = itemVO.getIsDisplay();
+            Integer isDisplay = itemVO.getDisplay();
             if (isDisplay == null) {
                 isDisplay = 1;
             } else {
@@ -369,7 +377,7 @@ public class ModelItemServiceImpl extends BaseServiceImpl<ModelItemMapper, Model
             item.setIsDisplay(isDisplay);
 
             // 是否必填
-            Integer isRequired = itemVO.getIsRequired();
+            Integer isRequired = itemVO.getRequired();
             if (isRequired != null && isRequired == 1) {
                 isRequired = 1;
             } else {
@@ -402,18 +410,17 @@ public class ModelItemServiceImpl extends BaseServiceImpl<ModelItemMapper, Model
                 item.setIsChild(parent.getId().toString());
             }
             entityList.add(item);
-
             // 明细
             List<ModelItemVO> child = itemVO.getChild();
             if (!flag && type == 7 && CollectionUtils.isNotEmpty(child)) {
                 List<ModelItem> childList = this.getModelItemList(child, modelId, version, true, item);
                 if (CollectionUtils.isNotEmpty(childList)) {
                     entityList.addAll(childList);
+                    childList.clear();
                 } else {
                     throw new BaseException("字段子集数据解析异常");
                 }
             }
-
             i++;
         }
 

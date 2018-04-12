@@ -1,5 +1,7 @@
 package com.yunjing.approval.processor.okhttp.impl;
 
+import com.alibaba.fastjson.JSON;
+import com.yunjing.approval.model.vo.Member;
 import com.yunjing.approval.model.vo.MemberInfo;
 import com.yunjing.approval.model.vo.OrgMemberVo;
 import com.yunjing.approval.param.DangParam;
@@ -7,7 +9,9 @@ import com.yunjing.approval.param.PushParam;
 import com.yunjing.approval.param.SchedulerParam;
 import com.yunjing.approval.processor.okhttp.ApiService;
 import com.yunjing.approval.processor.okhttp.AppCenterService;
+import com.yunjing.approval.util.ApproConstants;
 import com.yunjing.mommon.constant.StatusCode;
+import com.yunjing.mommon.wrapper.PageWrapper;
 import com.yunjing.mommon.wrapper.ResponseEntityWrapper;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
@@ -245,47 +249,6 @@ public class AppCenterServiceImpl implements AppCenterService {
     }
 
     @Override
-    public List<MemberInfo> findSubList(String[] deptIds, String[] memberIds, boolean isSync) {
-        Call<ResponseEntityWrapper<List<MemberInfo>>> call = apiService.findSubList(deptIds,memberIds);
-        if (isSync) {
-            try {
-                Response<ResponseEntityWrapper<List<MemberInfo>>> response = call.execute();
-                ResponseEntityWrapper<List<MemberInfo>> body = response.body();
-                if (body != null) {
-                    log.info("获取指定企业所有成员信息:code:{},message:{}", body.getStatusCode(), body.getStatusMessage());
-                    if (response.isSuccessful() && body.getStatusCode() == StatusCode.SUCCESS.getStatusCode()) {
-                        return body.getData();
-                    }
-                } else {
-                    log.error("body is null");
-                }
-                return null;
-            } catch (IOException e) {
-                e.printStackTrace();
-            }
-        } else {
-            call.enqueue(new Callback<ResponseEntityWrapper<List<MemberInfo>>>() {
-                @Override
-                public void onResponse(Call<ResponseEntityWrapper<List<MemberInfo>>> call, Response<ResponseEntityWrapper<List<MemberInfo>>> response) {
-                    ResponseEntityWrapper<List<MemberInfo>> body = response.body();
-                    if (body != null && memberCallback != null) {
-                        log.info("code:{},message:{}", body.getStatusCode(), body.getStatusMessage());
-                        memberCallback.result(body.getData());
-                    } else {
-                        log.error("body is null");
-                    }
-                }
-
-                @Override
-                public void onFailure(Call<ResponseEntityWrapper<List<MemberInfo>>> call, Throwable t) {
-                    log.error("Throwable:{}", t);
-                }
-            });
-        }
-        return null;
-    }
-
-    @Override
     public Long setTask(SchedulerParam param) {
         try {
             Response<ResponseEntityWrapper<Long>> response = apiService.setTask(param).execute();
@@ -305,13 +268,20 @@ public class AppCenterServiceImpl implements AppCenterService {
         return null;
     }
 
+    /**
+     * 获取所有的人员id
+     *
+     * @param deptIds
+     * @param memberIds
+     * @return
+     */
     @Override
-    public List<MemberInfo> manageScope(String appId, String memberId) {
+    public List<Member> findSubLists(String[] deptIds, String[] memberIds) {
         try {
-            Response<ResponseEntityWrapper<List<MemberInfo>>> response = apiService.manageScope(appId, memberId).execute();
-            ResponseEntityWrapper<List<MemberInfo>> body = response.body();
+            Response<ResponseEntityWrapper<List<Member>>> response = apiService.findSubLists(deptIds, memberIds, ApproConstants.BOTONG_ONE_NUM).execute();
+            ResponseEntityWrapper<List<Member>> body = response.body();
             if (body != null) {
-                log.info("获取管理范围：code:{}，message:{}", body.getStatusCode(), body.getStatusMessage());
+                log.info("根据部门id和用户id查询成员信息：code:{}，message:{}，data:{}", body.getStatusCode(), body.getStatusMessage(), JSON.toJSON(body.getData()));
                 if (response.isSuccessful() && body.getStatusCode() == StatusCode.SUCCESS.getStatusCode()) {
                     return body.getData();
                 }
@@ -324,4 +294,62 @@ public class AppCenterServiceImpl implements AppCenterService {
         }
         return null;
     }
+
+    /**
+     * 分页获取人员id
+     *
+     * @param deptIds
+     * @param memberIds
+     * @param pageNo
+     * @param pageSize
+     * @return
+     */
+    @Override
+    public PageWrapper<Member> findMemberPage(String[] deptIds, String[] memberIds, int pageNo, int pageSize) {
+        try {
+            Response<ResponseEntityWrapper<PageWrapper<Member>>> response = apiService.findMemberPage(deptIds, memberIds, pageNo, pageSize).execute();
+            ResponseEntityWrapper<PageWrapper<Member>> body = response.body();
+            if (body != null) {
+                log.info("分页查询用户：code:{}，message:{}，data:{}", body.getStatusCode(), body.getStatusMessage(), JSON.toJSON(body.getData()));
+                if (response.isSuccessful() && body.getStatusCode() == StatusCode.SUCCESS.getStatusCode()) {
+                    return body.getData();
+                }
+            } else {
+                log.error("body is null");
+            }
+            return null;
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        return null;
+    }
+
+    /**
+     * 获取企业成员管理范围
+     *
+     * @param appId
+     * @param memberId
+     * @return
+     */
+    @Override
+    public List<Member> manageScope(String appId, String memberId) {
+        try {
+            Response<ResponseEntityWrapper<List<Member>>> response = apiService.manageScope(appId, memberId).execute();
+            ResponseEntityWrapper<List<Member>> body = response.body();
+            if (body != null) {
+                log.info("获取管理范围：code:{}，message:{}，data:{}", body.getStatusCode(), body.getStatusMessage(), JSON.toJSON(body.getData()));
+                if (response.isSuccessful() && body.getStatusCode() == StatusCode.SUCCESS.getStatusCode()) {
+                    return body.getData();
+                }
+            } else {
+                log.error("body is null");
+            }
+            return null;
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        return null;
+    }
+
+
 }

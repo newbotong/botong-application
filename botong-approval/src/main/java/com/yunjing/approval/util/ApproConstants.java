@@ -6,6 +6,20 @@ package com.yunjing.approval.util;
  */
 public class ApproConstants {
 
+    public final static String  BOTONG_ORG_MEMBER = "botong:org:dept:member";
+
+    /**
+     * 审批完成 （状态 0:审批中 1: 审批完成 2:已撤回）
+     */
+    public static final int APPROVAL_STATE_1 = 1;
+    /**
+     * 是系统默认模型
+     */
+    public static final int IS_SYSTEM_MODEL_1 = 1;
+    /**
+     * 不是系统默认模型
+     */
+    public static final int IS_SYSTEM_MODEL_0 = 0;
     /**
      * 不分条件设置审批
      */
@@ -75,4 +89,8 @@ public class ApproConstants {
      * 11-附件
      */
     public static final int ENCLOSURE_TYPE_11 = 11;
+
+    public final static Integer  BOTONG_ONE_NUM = 1;
+
+    public final static Integer  BOTONG_ZERO_NUM = 0;
 }

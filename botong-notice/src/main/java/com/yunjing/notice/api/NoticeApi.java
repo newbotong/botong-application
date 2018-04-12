@@ -14,9 +14,11 @@ import com.yunjing.notice.processor.okhttp.InformService;
 import com.yunjing.notice.service.ExportNoticeService;
 import com.yunjing.notice.service.NoticeService;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
+import java.io.IOException;
 import java.util.Map;
 
 /**
@@ -84,32 +86,18 @@ public class NoticeApi extends BaseController {
     private ExportNoticeService exportNoticeService;
 
     /**
-     * 新增公告接口
+     * 新增公告
      *
-     * @param body 公告实体类
+     * @param body 新增入参
      * @throws BaseException
+     * @throws IOException
      */
     @PostMapping("/save")
-    public ResponseEntityWrapper insertNotice(@RequestBody NoticeBody body) throws BaseException {
+    public ResponseEntityWrapper insertNotice(@RequestBody NoticeBody body) throws BaseException, IOException {
         BeanFieldValidator.getInstance().ignore().validate(body);
         noticeService.insertNotice(body);
         return success();
     }
-
-    /**
-     * 更新已读和未读状态
-     *
-     * @param userId 用户id
-     * @param id     公告id
-     * @param state  是否阅读 0为已读 1为未读
-     * @throws BaseException
-     */
-    @PostMapping("/update")
-    public ResponseEntityWrapper updateNoticeState(@RequestParam String userId, @RequestParam String id, @RequestParam Integer state) throws BaseException {
-        noticeService.updateNoticeState(userId, id, state);
-        return success();
-    }
-
     /**
      * 逻辑删除公告
      *
@@ -118,6 +106,9 @@ public class NoticeApi extends BaseController {
      */
     @PostMapping("/delete-batch")
     public ResponseEntityWrapper deleteNotice(@RequestParam String ids) throws BaseException {
+        if (StringUtils.isEmpty(ids)) {
+            throw new BaseException("公告id不能为空");
+        }
         noticeService.deleteNotice(ids);
         return success();
     }
@@ -127,14 +118,15 @@ public class NoticeApi extends BaseController {
      *
      * @param userId   用户id
      * @param state    是否阅读 0为已读 1为未读
+     * @param orgId    企业id
      * @param pageNo   当前页码
      * @param pageSize 每页显示条数
-     * @param orgId    企业id
      * @return
      * @throws BaseException
+     * @throws IOException
      */
     @PostMapping("/page")
-    public ResponseEntityWrapper selectNoticePage(@RequestParam String userId, Integer state, @RequestParam String orgId, @RequestParam Integer pageNo, @RequestParam Integer pageSize) throws BaseException {
+    public ResponseEntityWrapper selectNoticePage(@RequestParam String userId, Integer state, @RequestParam String orgId, @RequestParam Integer pageNo, @RequestParam Integer pageSize) throws BaseException, IOException {
         Map<String, Object> map = noticeService.selectNoticePage(userId, state, orgId, pageNo, pageSize);
         return success(map);
     }
@@ -147,7 +139,10 @@ public class NoticeApi extends BaseController {
      * @throws BaseException
      */
     @PostMapping("/detail")
-    public ResponseEntityWrapper selectNoticeDetail(@RequestParam String id, @RequestParam String userId) throws BaseException {
+    public ResponseEntityWrapper selectNoticeDetail(@RequestParam String id, @RequestParam String userId) throws BaseException,IOException {
+        if (StringUtils.isAnyBlank(id,userId)) {
+            throw new BaseException("参数不能为空");
+        }
         NoticeDetailBody noticeDetailBody = noticeService.selectNoticeDetail(id, userId);
         return success(noticeDetailBody);
     }
@@ -161,7 +156,10 @@ public class NoticeApi extends BaseController {
      * @throws BaseException
      */
     @PostMapping("/user")
-    public ResponseEntityWrapper selectNoticeUser(@RequestParam String id, @RequestParam Integer state, @RequestParam Integer pageNo, @RequestParam Integer pageSize) throws BaseException {
+    public ResponseEntityWrapper selectNoticeUser(@RequestParam String id, @RequestParam Integer state, @RequestParam Integer pageNo, @RequestParam Integer pageSize) throws BaseException, IOException {
+        if (null == id && null == state) {
+            throw new BaseException("参数错误");
+        }
         Page<UserInfoBody> page = noticeService.selectNoticeUser(id, state, pageNo, pageSize);
         return success(page);
     }

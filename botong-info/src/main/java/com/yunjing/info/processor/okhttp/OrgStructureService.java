@@ -1,10 +1,9 @@
-package com.yunjing.notice.processor.okhttp;
+package com.yunjing.info.processor.okhttp;
 
+import com.yunjing.info.dto.Member;
 import com.yunjing.mommon.wrapper.ResponseEntityWrapper;
-import com.yunjing.notice.body.Member;
 import retrofit2.Call;
 import retrofit2.http.GET;
-import retrofit2.http.POST;
 import retrofit2.http.Query;
 
 import java.util.List;

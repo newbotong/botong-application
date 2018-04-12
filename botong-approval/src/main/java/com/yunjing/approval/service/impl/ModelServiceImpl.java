@@ -12,6 +12,7 @@ import com.yunjing.approval.model.vo.ModelVO;
 import com.yunjing.approval.service.ICopyService;
 import com.yunjing.approval.service.IModelCategoryService;
 import com.yunjing.approval.service.IModelService;
+import com.yunjing.approval.util.ApproConstants;
 import com.yunjing.mommon.global.exception.BaseException;
 import com.yunjing.mommon.global.exception.MessageNotExitException;
 import com.yunjing.mommon.global.exception.UpdateMessageFailureException;
@@ -171,4 +172,13 @@ public class ModelServiceImpl extends BaseServiceImpl<ModelMapper, ModelL> imple
         return logo;
     }
 
+    @Override
+    public List<ModelL> findModel(String orgId) {
+        return modelMapper.selectModelListByOrgId(orgId, ApproConstants.IS_SYSTEM_MODEL_0);
+    }
+
+    @Override
+    public boolean deleteModel(String orgId) {
+        return modelMapper.deleteModelListByOrgId(orgId);
+    }
 }

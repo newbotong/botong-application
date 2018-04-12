@@ -81,19 +81,6 @@ public class InfoApi extends BaseController {
 
 
     /**
-     * 更新阅读数量接口
-     *
-     * @param id 资讯id
-     * @return
-     */
-    @PostMapping("/update")
-    public ResponseEntityWrapper updateNumber(@RequestParam String id) throws BaseException {
-        infoContentService.updateNumber(id);
-        return success();
-    }
-
-
-    /**
      * 新增资讯接口
      *
      * @param infoCategoryParam 入参对象

@@ -80,4 +80,16 @@ public interface IModelService extends IBaseService<ModelL> {
     List<String> getLogo() throws Exception;
 
 
+    /**
+     * 查询企业下的初始化模板
+     * @param orgId 企业主键
+     * @return
+     */
+    List<ModelL> findModel(String orgId);
+    /**
+     * 删除企业下的初始化模板
+     * @param orgId 企业主键
+     * @return
+     */
+    boolean deleteModel(String orgId);
 }

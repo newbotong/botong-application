@@ -3,6 +3,7 @@ package com.yunjing.approval.service.impl;
 import com.common.mybatis.service.impl.BaseServiceImpl;
 import com.yunjing.approval.dao.mapper.ApprovalUserMapper;
 import com.yunjing.approval.model.entity.ApprovalUser;
+import com.yunjing.approval.model.vo.Member;
 import com.yunjing.approval.model.vo.MemberInfo;
 import com.yunjing.approval.model.vo.OrgMemberVo;
 import com.yunjing.approval.processor.okhttp.AppCenterService;
@@ -31,7 +32,7 @@ public class ApprovalUserServiceImpl extends BaseServiceImpl<ApprovalUserMapper,
 //        List<OrgMemberVo> allOrgMember = appCenterService.findAllOrgMember(orgId, true);
       //  deptIds:383879319994765312,6384203970528677888
         String[] deptIds = new String[]{"6383873980897431552","6384203970528677888"};
-        List<MemberInfo> subList = appCenterService.findSubList(deptIds, null, true);
+        List<Member> subList = appCenterService.findSubLists(deptIds, null);
         return true;
     }
 }

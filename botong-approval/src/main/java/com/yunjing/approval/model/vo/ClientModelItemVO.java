@@ -3,6 +3,7 @@ package com.yunjing.approval.model.vo;
 import lombok.Data;
 
 import java.util.List;
+import java.util.Set;
 
 /**
  * 客户端--审批模型
@@ -20,7 +21,7 @@ public class ClientModelItemVO {
     public ClientModelItemVO(ModelVO modelVO) {
         this.modelId = modelVO.getModelId();
         this.modelName = modelVO.getModelName();
-        this.modelItems = modelVO.getModelItems();
+        this.items = modelVO.getItems();
     }
 
     /**
@@ -36,7 +37,7 @@ public class ClientModelItemVO {
     /**
      * modelItem
      */
-    private List<ModelItemVO> modelItems;
+    private List<ModelItemVO> items;
 
     /**
      * 部门主键
@@ -63,5 +64,5 @@ public class ClientModelItemVO {
      */
     private List<UserVO> copyerVOS;
 
-    private String key;
+    private Set<String> field;
 }

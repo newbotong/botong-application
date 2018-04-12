@@ -1,10 +1,15 @@
 package com.yunjing.approval.processor.okhttp;
 
+import com.yunjing.approval.model.vo.Member;
 import com.yunjing.approval.model.vo.MemberInfo;
 import com.yunjing.approval.model.vo.OrgMemberVo;
 import com.yunjing.approval.param.DangParam;
 import com.yunjing.approval.param.PushParam;
 import com.yunjing.approval.param.SchedulerParam;
+import com.yunjing.mommon.wrapper.PageWrapper;
+import com.yunjing.mommon.wrapper.ResponseEntityWrapper;
+import retrofit2.Call;
+import retrofit2.http.GET;
 import retrofit2.http.Query;
 
 import java.util.List;
@@ -57,32 +62,12 @@ public interface AppCenterService {
     List<OrgMemberVo> findAllOrgMember(String orgId, boolean isSync);
 
     /**
-     * 获取指定企业所有成员信息
-     *
-     * @param deptIds
-     * @param memberIds
-     * @param isSync 是否同步方式执行
-     * @return
-     */
-    List<MemberInfo> findSubList(String[] deptIds, String[] memberIds, boolean isSync);
-
-
-    /**
      * 设置任务调度
      *
      * @param param
      * @return
      */
     Long setTask(SchedulerParam param);
-
-    /**
-     * 获取企业成员管理范围
-     *
-     * @param appId
-     * @param memberId
-     * @return
-     */
-    List<MemberInfo> manageScope(String appId, String memberId);
 
     /**
      * 验证管理员回调
@@ -133,4 +118,33 @@ public interface AppCenterService {
          */
         void taskCallback(Long taskId);
     }
+
+    /**
+     * 获取所有的人员id
+     * @param deptIds
+     * @param memberIds
+     * @return
+     */
+    List<Member> findSubLists(@Query("deptIds") String[] deptIds, @Query("memberIds") String[] memberIds);
+
+    /**
+     * 分页获取人员id
+     * @param deptIds
+     * @param memberIds
+     * @param pageNo
+     * @param pageSize
+     * @return
+     */
+    PageWrapper<Member> findMemberPage(@Query("deptIds") String[] deptIds, @Query("memberIds") String[] memberIds,
+                                       @Query("pageNo") int pageNo, @Query("pageSize")int pageSize);
+
+    /**
+     * 获取企业成员管理范围
+     *
+     * @param appId
+     * @param memberId
+     * @return
+     */
+    List<Member> manageScope(@Query("appId") String appId, @Query("memberId") String memberId);
+
 }
