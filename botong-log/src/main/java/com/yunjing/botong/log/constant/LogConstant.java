@@ -13,6 +13,7 @@ public class LogConstant implements Serializable {
 
     public final static String  SEPARATE_STR = ",";
     public final static String  SEPARATE_STR_SPACE = " ";
+    public final static String  SEPARATE_STR_T = "@@##";
 
     public final static String  CODE_STR = "code";
     public final static String  MSG_STR = "msg";

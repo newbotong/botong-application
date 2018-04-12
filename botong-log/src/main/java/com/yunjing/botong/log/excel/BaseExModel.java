@@ -166,33 +166,10 @@ public abstract class BaseExModel {
         style.setBottomBorderColor(IndexedColors.BLACK.getIndex());
         style.setLeftBorderColor(IndexedColors.BLACK.getIndex());
         style.setRightBorderColor(IndexedColors.BLACK.getIndex());
-
-        // 超链接样式
-        CellStyle urlStyle = excel.createCellStyle();
-        urlStyle.setAlignment(CellStyle.ALIGN_CENTER);
-        urlStyle.setVerticalAlignment(CellStyle.VERTICAL_CENTER);
-        urlStyle.setBorderTop(CellStyle.BORDER_THIN);
-        urlStyle.setBorderBottom(CellStyle.BORDER_THIN);
-        urlStyle.setBorderLeft(CellStyle.BORDER_THIN);
-        urlStyle.setBorderRight(CellStyle.BORDER_THIN);
-        urlStyle.setTopBorderColor(IndexedColors.BLACK.getIndex());
-        urlStyle.setBottomBorderColor(IndexedColors.BLACK.getIndex());
-        urlStyle.setLeftBorderColor(IndexedColors.BLACK.getIndex());
-        urlStyle.setRightBorderColor(IndexedColors.BLACK.getIndex());
-        Font urlFont = excel.createFont();
-        urlFont.setColor(HSSFColor.BLUE.index);
-        urlFont.setUnderline(Font.U_SINGLE);
-        urlStyle.setFont(urlFont);
         for (int i = 0; i < items.size(); i++) {
             Cell c = tileRow.createCell(i);
-            if (StringUtils.isNotBlank(items.get(i)) && items.get(i).startsWith("http")) {
-                c.setCellType(HSSFCell.CELL_TYPE_FORMULA);
-                c.setCellFormula("HYPERLINK(\"" + items.get(i) + "\",\"" + "图" + "\")");
-                c.setCellStyle(urlStyle);
-            } else {
-                c.setCellValue(items.get(i));
-                c.setCellStyle(style);
-            }
+            c.setCellValue(items.get(i));
+            c.setCellStyle(style);
         }
     }
 
