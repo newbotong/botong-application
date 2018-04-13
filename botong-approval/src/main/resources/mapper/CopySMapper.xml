@@ -14,7 +14,7 @@
         SELECT a.title, a.state,a.result, a.model_id, a.create_time,m.model_name,co.create_time,co.user_id
         FROM approval_copys co,approval a,model m
         <where>
-            co.copys_type = 1 AND co.approval_id = a.id AND m.id= a.model_id AND co.user_id = #{userId} AND a.org_id = #{orgId}
+            co.copys_type = 1 AND co.approval_id = a.id AND m.id= a.model_id AND a.user_id = #{userId} AND a.org_id = #{orgId}
             <if test="filterParam.state != null">
                 and a.state = #{filterParam.state}
             </if>

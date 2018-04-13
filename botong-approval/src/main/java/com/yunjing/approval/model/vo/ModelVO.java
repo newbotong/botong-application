@@ -82,9 +82,9 @@ public class ModelVO {
     private Long updateTime;
 
     /**
-     * 抄送人人数
+     * 是否有必填的子项
      */
-    private Integer copyUserCount;
+    private Boolean haveRequired;
 
     /**
      * 字段

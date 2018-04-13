@@ -4,8 +4,10 @@ import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 import com.baomidou.mybatisplus.mapper.Condition;
 import com.common.mybatis.service.impl.BaseServiceImpl;
+import com.yunjing.approval.dao.mapper.ModelItemMapper;
 import com.yunjing.approval.dao.mapper.ModelMapper;
 import com.yunjing.approval.model.entity.ModelCategory;
+import com.yunjing.approval.model.entity.ModelItem;
 import com.yunjing.approval.model.entity.ModelL;
 import com.yunjing.approval.model.vo.ModelListVO;
 import com.yunjing.approval.model.vo.ModelVO;
@@ -40,11 +42,27 @@ public class ModelServiceImpl extends BaseServiceImpl<ModelMapper, ModelL> imple
 
     @Autowired
     private IModelCategoryService modelCategoryService;
+    @Autowired
+    private ModelItemMapper modelItemMapper;
 
     @Override
     @Transactional(propagation = Propagation.REQUIRED, rollbackFor = Exception.class)
     public List<ModelListVO> findModelList(String orgId) {
-        List<ModelVO> modelVOList = modelMapper.selectModelListByOrgId(orgId);
+        boolean haveRequired;
+        List<ModelVO> modelVOList = modelMapper.selectLists(orgId);
+        List<ModelItem> modelItems = modelItemMapper.selectAll(orgId);
+        for (ModelVO modelVO : modelVOList) {
+            List<ModelItem> items = modelItems.stream().filter(modelItem -> modelItem.getModelId().equals(modelVO.getModelId())).collect(Collectors.toList());
+            for (ModelItem item : items) {
+                if (item.getDataType() == ApproConstants.RADIO_TYPE_3 && item.getIsRequired() == 1) {
+                    haveRequired = true;
+                    modelVO.setHaveRequired(haveRequired);
+                } else {
+                    haveRequired = false;
+                    modelVO.setHaveRequired(haveRequired);
+                }
+            }
+        }
         List<ModelListVO> modelListVOList = new ArrayList<>();
         List<ModelCategory> list = modelCategoryService.selectList(Condition.create().where("org_id={0}", orgId));
         if (!list.isEmpty()) {
@@ -55,7 +73,8 @@ public class ModelServiceImpl extends BaseServiceImpl<ModelMapper, ModelL> imple
                 modelListVO.setSort(modelCategory.getSort());
                 modelListVO.setUpdateTime(modelCategory.getUpdateTime());
                 if (modelCategory.getId() != null) {
-                    List<ModelVO> modelVOS = modelVOList.stream().filter(modelVO1 -> modelCategory.getId().equals(modelVO1.getCategoryId())).collect(Collectors.toList());
+                    List<ModelVO> modelVOS = modelVOList.stream().filter(modelVO1 -> modelCategory.getId().equals(modelVO1.getCategoryId())).collect(Collectors.toSet()).stream().collect(Collectors.toList());
+
                     modelListVO.setModelVOList(modelVOS);
                     modelListVO.setModelCount(modelVOS.size());
                 }
@@ -131,12 +150,7 @@ public class ModelServiceImpl extends BaseServiceImpl<ModelMapper, ModelL> imple
     @Override
     @Transactional(propagation = Propagation.REQUIRED, rollbackFor = Exception.class)
     public List<ModelVO> findModelListByOrgId(String orgId) {
-        List<ModelVO> modelVOList = modelMapper.selectModelListByOrgId(orgId);
-        for (ModelVO modelVO : modelVOList) {
-            // 获取每个审批项的抄送人数量
-            int count = copyService.selectCount(Condition.create().where("model_id={0}", modelVO.getModelId()));
-            modelVO.setCopyUserCount(count);
-        }
+        List<ModelVO> modelVOList = modelMapper.selectLists(orgId);
         return modelVOList;
     }
 
@@ -174,7 +188,7 @@ public class ModelServiceImpl extends BaseServiceImpl<ModelMapper, ModelL> imple
 
     @Override
     public List<ModelL> findModel(String orgId) {
-        return modelMapper.selectModelListByOrgId(orgId, ApproConstants.IS_SYSTEM_MODEL_0);
+        return modelMapper.selectModelListByOrgId(orgId);
     }
 
     @Override

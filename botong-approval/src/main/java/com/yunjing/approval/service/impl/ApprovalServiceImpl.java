@@ -6,15 +6,17 @@ import com.alibaba.fastjson.JSONObject;
 import com.baomidou.mybatisplus.mapper.Condition;
 import com.baomidou.mybatisplus.mapper.EntityWrapper;
 import com.baomidou.mybatisplus.mapper.Wrapper;
-import com.baomidou.mybatisplus.plugins.Page;
 import com.common.mybatis.service.impl.BaseServiceImpl;
+import com.yunjing.approval.config.RedisApproval;
 import com.yunjing.approval.dao.cache.ApprovalRedisService;
 import com.yunjing.approval.dao.mapper.ApprovalAttrMapper;
 import com.yunjing.approval.dao.mapper.ApprovalMapper;
 import com.yunjing.approval.dao.mapper.ModelItemMapper;
 import com.yunjing.approval.excel.*;
+import com.yunjing.approval.model.dto.CompanyDTO;
 import com.yunjing.approval.model.entity.*;
 import com.yunjing.approval.model.vo.*;
+import com.yunjing.approval.param.DataParam;
 import com.yunjing.approval.processor.task.async.ApprovalPushTask;
 import com.yunjing.approval.service.*;
 import com.yunjing.approval.util.ApproConstants;
@@ -22,14 +24,15 @@ import com.yunjing.approval.util.DateUtil;
 import com.yunjing.approval.util.EmojiFilterUtils;
 import com.yunjing.mommon.global.exception.BaseException;
 import com.yunjing.mommon.global.exception.InsertMessageFailureException;
+import com.yunjing.mommon.utils.BeanUtils;
 import com.yunjing.mommon.utils.IDUtils;
+import com.yunjing.mommon.wrapper.PageWrapper;
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.collections.MapUtils;
 import org.apache.commons.lang.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
@@ -72,7 +75,7 @@ public class ApprovalServiceImpl extends BaseServiceImpl<ApprovalMapper, Approva
     @Autowired
     private ApprovalPushTask approvalPushTask;
     @Autowired
-    private StringRedisTemplate redisTemplate;
+    private RedisApproval redisTemplate;
 
     @Override
     public boolean submit(String companyId, String memberId, String modelId, String jsonData, String sendUserIds, String sendCopyIds) throws Exception {
@@ -226,14 +229,12 @@ public class ApprovalServiceImpl extends BaseServiceImpl<ApprovalMapper, Approva
     }
 
     @Override
-    public ApprovalPageVO page(Page<Approval> page, String companyId, String modelId, Integer state, String title, String createTimeStart, String createTimeEnd, String finishTimeStart, String finishTimeEnd) throws Exception {
-        page = this.getPage(page, companyId, modelId, state, title, createTimeStart, createTimeEnd, finishTimeStart, finishTimeEnd);
+    public PageWrapper<ApprovalVO> page(DataParam dataParam) throws Exception {
+        PageWrapper<Approval> page = this.getPage(dataParam);
         List<Approval> approvalList = page.getRecords();
         if (CollectionUtils.isEmpty(approvalList)) {
             return null;
         }
-        ApprovalPageVO result = new ApprovalPageVO(page);
-
         List<String> approvaIds = approvalList.stream().map(Approval::getId).collect(Collectors.toList());
         List<ApprovalProcess> approvalProcessList = approvalProcessService.selectList(new EntityWrapper<ApprovalProcess>().in("approval_id", approvaIds).and("is_delete=0"));
 
@@ -268,8 +269,11 @@ public class ApprovalServiceImpl extends BaseServiceImpl<ApprovalMapper, Approva
             approvalVO.setApprover(approver);
             records.add(approvalVO);
         });
-
-        result.setRows(records);
+        PageWrapper<ApprovalVO> result = new PageWrapper<>();
+        result.setCurrent(dataParam.getCurrentPage());
+        result.setSize(dataParam.getPageSize());
+        result.setTotal(page.getTotal());
+        result.setRecords(records);
         return result;
     }
 
@@ -297,8 +301,12 @@ public class ApprovalServiceImpl extends BaseServiceImpl<ApprovalMapper, Approva
     }
 
     @Override
-    public BaseExModel createApprovalExcel(String orgId, String userId, String modelId, Integer state, String title, String createTimeStart, String createTimeEnd, String finishTimeStart, String finishTimeEnd) throws Exception {
-        List<ApprovalExcelVO> exportData = getExportData(orgId, userId, modelId, state, title, createTimeStart, createTimeEnd, finishTimeStart, finishTimeEnd);
+    public BaseExModel createApprovalExcel(DataParam dataParam) throws Exception {
+        String orgId = dataParam.getCompanyId();
+        String userId = dataParam.getMemberId();
+        String modelId = dataParam.getModelId();
+
+        List<ApprovalExcelVO> exportData = getExportData(dataParam);
 
         ApprovalExModel approvalExModel = new ApprovalExModel();
         // 从redis缓存中获取approvalExData
@@ -338,12 +346,14 @@ public class ApprovalServiceImpl extends BaseServiceImpl<ApprovalMapper, Approva
 
                     // 注入表头l
                     String statisticDate = "统计日期：";
-                    if (StringUtils.isNotBlank(createTimeStart) && StringUtils.isNotBlank(createTimeEnd)) {
-                        statisticDate = statisticDate + createTimeStart + " —— " + createTimeEnd + "       ";
+                    if (null != dataParam.getCreateTimeStart() && null != dataParam.getCreateTimeEnd()) {
+                        statisticDate = statisticDate + dataParam.getCreateTimeStart() + " —— " + dataParam.getCreateTimeEnd() + "       ";
                     } else {
-                        // DateUtil.dateFormmat(orgReadisService.get(String.valueOf(orgId)).getCreateTime(), DateUtil.DATE_FORMAT_2);
-
+                        CompanyDTO companyDTO = (CompanyDTO) redisTemplate.getTemple().opsForHash().get(ApproConstants.BOTONG_ORG, orgId);
                         String orgCreateTime = "";
+                        if (companyDTO != null) {
+                            orgCreateTime = com.yunjing.mommon.utils.DateUtil.convert(companyDTO.getStartTime());
+                        }
                         statisticDate = statisticDate + orgCreateTime + " —— " + DateUtil.dateFormmat(new Date(), DateUtil.DATE_FORMAT_2) + "       ";
                     }
                     excelModel.setTableHeader(statisticDate + tableHead);
@@ -391,8 +401,8 @@ public class ApprovalServiceImpl extends BaseServiceImpl<ApprovalMapper, Approva
             excelModel.setTitles(approvalTemplVOList);
             // 注入表头l
             String statisticDate = "统计日期：";
-            if (StringUtils.isNotBlank(createTimeStart) && StringUtils.isNotBlank(createTimeEnd)) {
-                statisticDate = statisticDate + createTimeStart + " —— " + createTimeEnd + "       ";
+            if (null != dataParam.getCreateTimeStart() && null != dataParam.getCreateTimeEnd()) {
+                statisticDate = statisticDate + dataParam.getCreateTimeStart() + " —— " + dataParam.getCreateTimeEnd() + "       ";
             } else {
                 String orgCreateTime = "";
                 statisticDate = statisticDate + orgCreateTime + " —— " + DateUtil.dateFormmat(new Date(), DateUtil.DATE_FORMAT_2) + "       ";
@@ -412,21 +422,15 @@ public class ApprovalServiceImpl extends BaseServiceImpl<ApprovalMapper, Approva
     /**
      * 获取需要导出的审批数据
      *
-     * @param orgId           企业主键
-     * @param modelId         模型主键, 审批类型, 可空(全部)
-     * @param state           审批状态  0:审批中 1:审批完成 2:已撤回, 可空(全部)
-     * @param title           审批标题
-     * @param createTimeStart 发起时间_开始
-     * @param createTimeEnd   发起时间_结束
-     * @param finishTimeStart 完成时间_开始
-     * @param finishTimeEnd   完成时间_结束
+     * @param dataParam 参数
      * @return
      * @throws Exception
      */
-    private List<ApprovalExcelVO> getExportData(String orgId, String userId, String modelId, Integer state, String title, String createTimeStart,
-                                                String createTimeEnd, String finishTimeStart, String finishTimeEnd) throws Exception {
+    private List<ApprovalExcelVO> getExportData(DataParam dataParam) throws Exception {
+        String orgId = dataParam.getCompanyId();
+        String userId = dataParam.getMemberId();
         approvalRedisService.remove(orgId + userId);
-        List<Approval> approvalList = this.getList(orgId, modelId, state, title, createTimeStart, createTimeEnd, finishTimeStart, finishTimeEnd);
+        List<Approval> approvalList = this.getList(dataParam);
         List<ApprovalExcelVO> excelVOList = new ArrayList<>();
         Map<String, List<ApprovalTemplVO>> tmpMap = new HashMap<>(1);
         // 获取审批人
@@ -774,51 +778,50 @@ public class ApprovalServiceImpl extends BaseServiceImpl<ApprovalMapper, Approva
         return true;
     }
 
-    private Wrapper<Approval> getWrapper(String oid, String mid, Integer state, String title, String createTimeStart, String createTimeEnd, String finishTimeStart, String finishTimeEnd) throws BaseException {
+    private Wrapper<Approval> getWrapper(DataParam dataParam) throws BaseException {
         Wrapper<Approval> wrapper = new EntityWrapper<>();
-        if (null == oid) {
+        if (StringUtils.isBlank(dataParam.getCompanyId())) {
             throw new BaseException("主键不存在");
         }
-
-        wrapper.eq("org_id", oid);
-
-        if (null != mid) {
-            wrapper.in("model_id", mid.toString());
+        wrapper.eq("org_id", dataParam.getCompanyId());
+        if (StringUtils.isNotBlank(dataParam.getModelId())) {
+            wrapper.in("model_id", dataParam.getModelId());
+        }
+        if (dataParam.getState() != null) {
+            wrapper.eq("state", dataParam.getState());
+        }
+        if (StringUtils.isNotBlank(dataParam.getTitle())) {
+            wrapper.like("title", dataParam.getTitle());
+        }
+        if (null != dataParam.getCreateTimeStart()) {
+            wrapper.ge("from_unixtime(create_time/1000, '%Y%m%d')", convertDate(dataParam.getCreateTimeStart()));
         }
 
-        if (state != null) {
-            wrapper.eq("state", state);
+        if (null != dataParam.getCreateTimeEnd()) {
+
+            wrapper.le("from_unixtime(create_time/1000, '%Y%m%d')", convertDate(dataParam.getCreateTimeEnd()));
         }
 
-        if (StringUtils.isNotBlank(title)) {
-            wrapper.like("title", title);
+        if (null != dataParam.getFinishTimeStart()) {
+            wrapper.ge("from_unixtime(finish_time/1000, '%Y%m%d')", convertDate(dataParam.getFinishTimeStart()));
         }
 
-        if (StringUtils.isNotBlank(createTimeStart)) {
-            wrapper.ge("DATE_FORMAT(create_time,'%Y-%m-%d')", createTimeStart);
-        }
-
-        if (StringUtils.isNotBlank(createTimeEnd)) {
-            wrapper.le("DATE_FORMAT(create_time,'%Y-%m-%d')", createTimeEnd);
-        }
-
-        if (StringUtils.isNotBlank(finishTimeStart)) {
-            wrapper.ge("DATE_FORMAT(finish_time,'%Y-%m-%d')", finishTimeStart);
-        }
-
-        if (StringUtils.isNotBlank(finishTimeEnd)) {
-            wrapper.le("DATE_FORMAT(finish_time,'%Y-%m-%d')", finishTimeEnd);
+        if (null != dataParam.getFinishTimeEnd()) {
+            wrapper.le("from_unixtime(finish_time/1000, '%Y%m%d')", convertDate(dataParam.getFinishTimeEnd()));
         }
         wrapper.orderBy("create_time", false);
         return wrapper;
     }
 
-    private List<Approval> getList(String oid, String mid, Integer state, String title, String createTimeStart, String createTimeEnd, String finishTimeStart, String finishTimeEnd) throws BaseException {
-        return this.selectList(getWrapper(oid, mid, state, title, createTimeStart, createTimeEnd, finishTimeStart, finishTimeEnd).orderBy("model_id", true));
+    private List<Approval> getList(DataParam dataParam) throws BaseException {
+        return this.selectList(getWrapper(dataParam).orderBy("model_id", true));
     }
 
-    private Page<Approval> getPage(Page<Approval> page, String oid, String mid, Integer state, String title, String createTimeStart, String createTimeEnd, String finishTimeStart, String finishTimeEnd) throws BaseException {
-        return this.selectPage(page, getWrapper(oid, mid, state, title, createTimeStart, createTimeEnd, finishTimeStart, finishTimeEnd));
+    private PageWrapper<Approval> getPage(DataParam dataParam) throws BaseException {
+        com.baomidou.mybatisplus.plugins.Page page = new com.baomidou.mybatisplus.plugins.Page(dataParam.getCurrentPage(), dataParam.getPageSize());
+        com.baomidou.mybatisplus.plugins.Page page1 = this.selectPage(page, getWrapper(dataParam));
+        PageWrapper<Approval> pageWrapper = BeanUtils.mapPage(page1, Approval.class);
+        return pageWrapper;
     }
 
     /**
@@ -912,4 +915,8 @@ public class ApprovalServiceImpl extends BaseServiceImpl<ApprovalMapper, Approva
     }
 
 
+    private String convertDate(Long time) {
+        String date = com.yunjing.mommon.utils.DateUtil.convert(time);
+        return date.substring(0, date.indexOf("")).replaceAll("-", "");
+    }
 }

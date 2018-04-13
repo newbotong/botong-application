@@ -71,7 +71,7 @@ public class OrgModelServiceImpl extends BaseServiceImpl<OrgModelMapper, OrgMode
 
     @Override
     @Transactional(propagation = Propagation.REQUIRED, rollbackFor = Exception.class)
-    public boolean deleteApprovalModel(String orgId) throws Exception {
+    public boolean deleteApprovalModel(String orgId){
         // 查询审批模板使用后产生的数据
         List<Approval> approvalList = approvalService.selectList(Condition.create().where("org_id={0}", orgId));
         if (approvalList != null && approvalList.size() > 0) {
@@ -82,13 +82,10 @@ public class OrgModelServiceImpl extends BaseServiceImpl<OrgModelMapper, OrgMode
                     count++;
                 }
             }
-            if (count != 0){
-                throw new BaseException("该企业审批模板已存在审批完成的数据，不能删除");
-            }else {
+            if (count == 0){
                 // 删除企业模板
                 this.deleteOrgModel(orgId);
             }
-
         } else {
             // 删除企业模板
             this.deleteOrgModel(orgId);

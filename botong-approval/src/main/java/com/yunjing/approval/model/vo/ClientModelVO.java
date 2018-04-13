@@ -1,5 +1,6 @@
 package com.yunjing.approval.model.vo;
 
+import com.yunjing.approval.model.entity.ModelL;
 import lombok.Data;
 
 /**
@@ -15,8 +16,8 @@ public class ClientModelVO {
 
     }
 
-    public ClientModelVO(ModelVO modelVO) {
-        this.modelId = modelVO.getModelId();
+    public ClientModelVO(ModelL modelVO) {
+        this.modelId = modelVO.getId();
         this.modelName = modelVO.getModelName();
         this.logo = modelVO.getLogo();
         this.isDisabled = modelVO.getIsDisabled();

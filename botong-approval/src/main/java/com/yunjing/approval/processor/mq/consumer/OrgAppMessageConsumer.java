@@ -1,8 +1,6 @@
 package com.yunjing.approval.processor.mq.consumer;
 
-import com.yunjing.approval.config.RedisApproval;
 import com.yunjing.approval.processor.mq.configuration.OrgAppMessageConfiguration;
-import com.yunjing.approval.processor.okhttp.AppCenterService;
 import com.yunjing.approval.service.IOrgModelService;
 import com.yunjing.message.annotation.MessageQueueDeclarable;
 import com.yunjing.message.declare.consumer.AbstractMessageConsumerWithQueueDeclare;
@@ -26,14 +24,8 @@ import org.springframework.stereotype.Component;
 @MessageQueueDeclarable
 public class OrgAppMessageConsumer extends AbstractMessageConsumerWithQueueDeclare<Message, OrgAppMessageConfiguration> {
 
-    /**
-     * 应用中心
-     */
-    @Autowired
-    private AppCenterService appCenterService;
     @Autowired
     private IOrgModelService orgModelService;
-
 
     public OrgAppMessageConsumer(OrgAppMessageConfiguration configuration) {
         super(configuration);
@@ -42,19 +34,13 @@ public class OrgAppMessageConsumer extends AbstractMessageConsumerWithQueueDecla
     @Override
     public void onMessageReceive(Message message) {
         Object messageObj = message.getObj();
-        if(messageObj instanceof OrgAppMessage){
+        if (messageObj instanceof OrgAppMessage) {
             OrgAppMessage appMessage = (OrgAppMessage) messageObj;
             String companyId = appMessage.getCompanyId();
-            if(StringUtils.isNotBlank(companyId)){
-                if(appMessage.getMessageType().equals(OrgAppMessage.MessageType.INIT)){
-                    orgModelService.createApprovalModel(companyId);
-                }else if(appMessage.getMessageType().equals(OrgAppMessage.MessageType.DISBAND)){
-                    try {
-                        orgModelService.deleteApprovalModel(companyId);
-                    } catch (Exception e) {
-                        e.printStackTrace();
-                    }
-                }
+            if (StringUtils.isNotBlank(companyId) && appMessage.getMessageType().equals(OrgAppMessage.MessageType.INIT)) {
+                orgModelService.createApprovalModel(companyId);
+            } else if (StringUtils.isNotBlank(companyId) && appMessage.getMessageType().equals(OrgAppMessage.MessageType.DISBAND)) {
+                orgModelService.deleteApprovalModel(companyId);
             }
         }
     }

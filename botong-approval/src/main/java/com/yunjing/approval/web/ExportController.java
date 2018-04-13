@@ -2,10 +2,12 @@ package com.yunjing.approval.web;
 
 import com.baomidou.mybatisplus.plugins.Page;
 import com.yunjing.approval.excel.BaseExModel;
-import com.yunjing.approval.model.entity.Approval;
+import com.yunjing.approval.model.vo.ApprovalVO;
+import com.yunjing.approval.param.DataParam;
 import com.yunjing.approval.service.IApprovalService;
 import com.yunjing.approval.service.IExportLogService;
 import com.yunjing.mommon.base.BaseController;
+import com.yunjing.mommon.wrapper.PageWrapper;
 import com.yunjing.mommon.wrapper.ResponseEntityWrapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
@@ -30,20 +32,13 @@ public class ExportController extends BaseController {
     /**
      * 获取审批数据列表
      *
-     * @param page            分页对象, 可空 页码current 默认1页    大小size 默认10
-     * @param companyId       公司id
-     * @param modelId         模型主键, 审批类型, 可空(全部)
-     * @param state           审批状态  0:审批中 1:审批完成 2:已撤回, 可空(全部)
-     * @param title           审批标题, 可空
-     * @param createTimeStart 发起时间_开始, 可空
-     * @param createTimeEnd   发起时间_结束, 可空
-     * @param finishTimeStart 完成时间_开始, 可空
-     * @param finishTimeEnd   完成时间_结束, 可空
+     * @param dataParam 设置查询参数
      * @return 分页列表
      */
     @PostMapping("/list")
-    public ResponseEntityWrapper page(@ModelAttribute(value = "page") Page<Approval> page, @RequestParam("companyId") String companyId, String modelId, Integer state, String title, String createTimeStart, String createTimeEnd, String finishTimeStart, String finishTimeEnd) throws Exception {
-        return success(approvalService.page(page, companyId, modelId, state, title, createTimeStart, createTimeEnd, finishTimeStart, finishTimeEnd));
+    public ResponseEntityWrapper page(@RequestBody DataParam dataParam) throws Exception {
+        PageWrapper<ApprovalVO> page = approvalService.page(dataParam);
+        return success(page);
     }
 
     /**
@@ -74,22 +69,15 @@ public class ExportController extends BaseController {
     /**
      * 审批数据导出
      *
-     * @param companyId       公司id
-     * @param memberId        成员id
-     * @param modelId             模型主键, 审批类型, 可空(全部)
-     * @param state           审批状态  0:审批中 1:审批完成 2:已撤回, 可空(全部)
-     * @param title           审批标题
-     * @param createTimeStart 发起时间_开始
-     * @param createTimeEnd   发起时间_结束
-     * @param finishTimeStart 完成时间_开始
-     * @param finishTimeEnd   完成时间_结束
+     * @param dataParam 导出参数
      * @return ResponseEntityWrapper
      * @throws Exception 抛异常
      */
     @GetMapping("/export")
-    public ResponseEntityWrapper exportData(@RequestParam("companyId") String companyId, @RequestParam("memberId") String memberId, String modelId, Integer state, String title, String createTimeStart,
-                                            String createTimeEnd, String finishTimeStart, String finishTimeEnd, HttpServletResponse response) throws Exception {
-        BaseExModel excel = approvalService.createApprovalExcel(companyId, memberId, modelId, state, title, createTimeStart, createTimeEnd, finishTimeStart, finishTimeEnd);
+    public ResponseEntityWrapper exportData(@RequestParam("companyId") String companyId, @RequestParam("memberId")String memberId, DataParam dataParam, HttpServletResponse response) throws Exception {
+        dataParam.setCompanyId(companyId);
+        dataParam.setMemberId(memberId);
+        BaseExModel excel = approvalService.createApprovalExcel(dataParam);
         String fileName = excel.getFileName();
         //设置响应类型，告知浏览器输出的是图片
         response.setContentType("application/vnd.ms-excel;charset=utf-8");

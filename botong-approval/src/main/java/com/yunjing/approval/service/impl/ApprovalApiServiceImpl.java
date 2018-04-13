@@ -4,7 +4,6 @@ import com.baomidou.mybatisplus.mapper.Condition;
 import com.baomidou.mybatisplus.toolkit.CollectionUtils;
 import com.baomidou.mybatisplus.toolkit.MapUtils;
 import com.common.mybatis.page.Page;
-import com.yunjing.approval.config.AbstractRedisConfiguration;
 import com.yunjing.approval.config.RedisApproval;
 import com.yunjing.approval.dao.mapper.*;
 import com.yunjing.approval.model.dto.ApprovalContentDTO;
@@ -15,22 +14,17 @@ import com.yunjing.approval.param.FilterParam;
 import com.yunjing.approval.processor.okhttp.AppCenterService;
 import com.yunjing.approval.processor.task.async.ApprovalPushTask;
 import com.yunjing.approval.service.*;
-import com.yunjing.approval.util.ApproConstants;
 import com.yunjing.approval.util.Colors;
 import com.yunjing.mommon.global.exception.InsertMessageFailureException;
 import com.yunjing.mommon.global.exception.UpdateMessageFailureException;
 import com.yunjing.mommon.utils.IDUtils;
 import org.apache.commons.lang.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.stream.Collectors;
 
 /**
@@ -73,12 +67,13 @@ public class ApprovalApiServiceImpl implements IApprovalApiService {
     @Override
     @Transactional(propagation = Propagation.REQUIRED, rollbackFor = Exception.class)
     public List<ClientModelVO> getList(String orgId) {
-        List<ModelVO> modelVOS = modelMapper.selectModelListByOrgId(orgId);
-        List<ClientModelVO> list = new ArrayList<>();
-        for (ModelVO modelVO : modelVOS) {
-            ClientModelVO modelVO1 = new ClientModelVO(modelVO);
-            list.add(modelVO1);
+        List<ModelL> modelLList = modelMapper.selectModelListByOrgId(orgId);
+        Set<ClientModelVO> set = new HashSet<>();
+        for (ModelL model : modelLList) {
+            ClientModelVO modelVO1 = new ClientModelVO(model);
+            set.add(modelVO1);
         }
+        List<ClientModelVO> list = new ArrayList<>(set);
         return list;
     }
 
@@ -93,7 +88,10 @@ public class ApprovalApiServiceImpl implements IApprovalApiService {
         // 查询部门中成员
         String[] did = new String[]{deptId};
         List<Member> members = appCenterService.findSubLists(did, null);
-        List<String> userIds = members.stream().map(Member::getId).collect(Collectors.toList());
+        List<String> userIds = new ArrayList<>();
+        if (members != null) {
+            userIds = members.stream().map(Member::getId).collect(Collectors.toList());
+        }
         userIds.add(userId);
         Page<ClientApprovalVO> clientApprovalVOPage = new Page<>(current, size);
         List<ClientApprovalVO> clientApprovalVOS = new ArrayList<>();
@@ -114,7 +112,10 @@ public class ApprovalApiServiceImpl implements IApprovalApiService {
         // 查询部门中成员
         String[] did = new String[]{deptId};
         List<Member> members = appCenterService.findSubLists(did, null);
-        List<String> userIds = members.stream().map(Member::getId).collect(Collectors.toList());
+        List<String> userIds = new ArrayList<>();
+        if (members != null) {
+            userIds = members.stream().map(Member::getId).collect(Collectors.toList());
+        }
         userIds.add(userId);
         Page<ClientApprovalVO> clientApprovalVOPage = new Page<>(current, size);
         List<ClientApprovalVO> clientApprovalVOS = new ArrayList<>();
