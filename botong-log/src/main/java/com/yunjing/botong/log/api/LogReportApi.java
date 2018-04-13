@@ -41,7 +41,7 @@ public class LogReportApi extends BaseController {
                                       @RequestParam String appId,
                                       @RequestParam Integer pageNo,
                                       @RequestParam Integer pageSize,
-                                      @RequestParam(required = false, defaultValue = "0") Integer submitType,
+                                      @RequestParam(required = false, defaultValue = "1") Integer submitType,
                                       @RequestParam(required = false, defaultValue = "0") Long startDate,
                                       @RequestParam(required = false, defaultValue = "0") Long endDate) {
 

@@ -127,10 +127,7 @@ public class LogReportDao extends BaseMongoDaoImpl<LogDetail> {
     public Page<LogDetail> report(int pageNo, int pageSize, String orgId, List<String> memberId, int submitType, long startDate, long endDate) {
         Criteria criteria = Criteria.where("orgId").is(orgId);
         criteria.and("memberId").in(memberId);
-
-        if (submitType != 0) {
-            criteria.and("submitType").is(submitType);
-        }
+        criteria.and("submitType").is(submitType);
 
         if (startDate != 0 && endDate != 0) {
             String start = DateFormatUtils.format(new Date(startDate), "yyyy-MM-dd HH:mm:ss");
