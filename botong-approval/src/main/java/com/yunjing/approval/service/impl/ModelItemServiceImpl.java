@@ -8,10 +8,7 @@ import com.common.mybatis.service.impl.BaseServiceImpl;
 import com.yunjing.approval.dao.mapper.ConditionMapper;
 import com.yunjing.approval.dao.mapper.ModelItemMapper;
 import com.yunjing.approval.dao.mapper.ModelMapper;
-import com.yunjing.approval.model.entity.ModelItem;
-import com.yunjing.approval.model.entity.ModelL;
-import com.yunjing.approval.model.entity.OrgModel;
-import com.yunjing.approval.model.entity.SetsCondition;
+import com.yunjing.approval.model.entity.*;
 import com.yunjing.approval.model.vo.*;
 import com.yunjing.approval.service.*;
 import com.yunjing.mommon.global.exception.BaseException;
@@ -64,11 +61,13 @@ public class ModelItemServiceImpl extends BaseServiceImpl<ModelItemMapper, Model
     private ICopyService copyService;
     @Autowired
     private ModelItemMapper modelItemMapper;
+    @Autowired
+    private IModelCategoryService modelCategoryService;
 
     /**
      * 1-多行输入框 2-数字输入框 3-单选框 4-日期 5-日期区间 6-单行输入框 7-明细 8-说明文字 9-金额 10- 图片 11-附件
      */
-    private final int[] types = {1, 2, 3, 4, 5, 6, 7, 8, 9, 11, 12};
+    private final int[] types = {1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11};
 
     @Override
     @Transactional(propagation = Propagation.REQUIRED, rollbackFor = Exception.class)
@@ -178,7 +177,14 @@ public class ModelItemServiceImpl extends BaseServiceImpl<ModelItemMapper, Model
     @Override
     @Transactional(propagation = Propagation.REQUIRED, rollbackFor = Exception.class)
     public ModelVO saveModelItem(String companyId, String memberId, String json) throws Exception {
-
+        List<ModelCategory> categories = modelCategoryService.selectList(Condition.create().where("org_id={0}", companyId));
+        String other = "其他";
+        String categoryId = "";
+        for (ModelCategory category : categories) {
+            if(other.equals(category.getCategoryName())){
+                categoryId = category.getId();
+            }
+        }
         if (StringUtils.isBlank(json)) {
             throw new BaseException("模型数据不存在");
         }
@@ -226,6 +232,8 @@ public class ModelItemServiceImpl extends BaseServiceImpl<ModelItemMapper, Model
             entity.setIsDef(0);
             entity.setProvider(memberId);
             entity.setModelType(2);
+            entity.setCategoryId(categoryId);
+            entity.setVisibleRange("全部可见");
             vo.setModelId(modelId);
         }
         entity.setModelName(vo.getModelName());

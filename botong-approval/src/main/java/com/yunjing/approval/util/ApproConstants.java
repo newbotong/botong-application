@@ -7,6 +7,7 @@ package com.yunjing.approval.util;
 public class ApproConstants {
 
     public final static String  BOTONG_ORG_MEMBER = "botong:org:dept:member";
+    public final static String  BOTONG_ORG = "botong:org:company";
 
     /**
      * 审批完成 （状态 0:审批中 1: 审批完成 2:已撤回）

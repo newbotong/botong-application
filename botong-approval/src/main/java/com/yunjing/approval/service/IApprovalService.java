@@ -1,11 +1,12 @@
 package com.yunjing.approval.service;
 
 
-import com.baomidou.mybatisplus.plugins.Page;
 import com.common.mybatis.service.IBaseService;
 import com.yunjing.approval.excel.BaseExModel;
 import com.yunjing.approval.model.entity.Approval;
-import com.yunjing.approval.model.vo.ApprovalPageVO;
+import com.yunjing.approval.model.vo.ApprovalVO;
+import com.yunjing.approval.param.DataParam;
+import com.yunjing.mommon.wrapper.PageWrapper;
 
 /**
  * @author 刘小鹏
@@ -30,19 +31,11 @@ public interface IApprovalService extends IBaseService<Approval> {
     /**
      * 获取审批数据列表
      *
-     * @param page            分页对象  current 页码, size页大小
-     * @param companyId       公司id
-     * @param modelId         模型主键, 审批类型, 可空(全部)
-     * @param state           审批状态  0:审批中 1:审批完成 2:已撤回, 可空(全部)
-     * @param title           审批标题
-     * @param createTimeStart 发起时间_开始
-     * @param createTimeEnd   发起时间_结束
-     * @param finishTimeStart 完成时间_开始
-     * @param finishTimeEnd   完成时间_结束
+     * @param dataParam 设置查询参数
      * @return 分页列表
-     * @throws Exception 异常
+     * @throws Exception 抛异常
      */
-    ApprovalPageVO page(Page<Approval> page, String companyId, String modelId, Integer state, String title, String createTimeStart, String createTimeEnd, String finishTimeStart, String finishTimeEnd) throws Exception;
+    PageWrapper<ApprovalVO> page(DataParam dataParam) throws Exception;
 
     /**
      * 删除审批数据
@@ -55,19 +48,9 @@ public interface IApprovalService extends IBaseService<Approval> {
 
     /**
      * 审批数据导出
-     *
-     * @param companyId       公司id
-     * @param memberId        成员id
-     * @param modelId         模型主键, 审批类型, 可空(全部)
-     * @param state           审批状态  0:审批中 1:审批完成 2:已撤回, 可空(全部)
-     * @param title           审批标题
-     * @param createTimeStart 发起时间_开始
-     * @param createTimeEnd   发起时间_结束
-     * @param finishTimeStart 完成时间_开始
-     * @param finishTimeEnd   完成时间_结束
+     * @param dataParam 设置参数
      * @return
      * @throws Exception
      */
-    BaseExModel createApprovalExcel(String companyId, String memberId, String modelId, Integer state, String title, String createTimeStart,
-                                    String createTimeEnd, String finishTimeStart, String finishTimeEnd) throws Exception;
+    BaseExModel createApprovalExcel(DataParam dataParam) throws Exception;
 }

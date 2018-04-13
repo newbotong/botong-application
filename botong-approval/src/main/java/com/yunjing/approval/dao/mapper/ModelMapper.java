@@ -17,11 +17,11 @@ import java.util.List;
 public interface ModelMapper extends IBaseMapper<ModelL> {
 
     /**
-     * 查询企业下的所有审批模板
+     * 为客户端查询企业下的所有审批模板
      * @param orgId 企业Id
      * @return List<ModelVO>
      */
-    List<ModelVO> selectModelListByOrgId(@Param("orgId") String orgId);
+    List<ModelVO> selectModelList(@Param("orgId") String orgId);
 
     /**
      * 获取审批模板最大排序值
@@ -31,13 +31,18 @@ public interface ModelMapper extends IBaseMapper<ModelL> {
     Integer getMaxSort(@Param("orgId") String orgId);
 
     /**
-     * 查询企业下的所有审批模板
+     * 为管理端查询企业下的所有审批模板
      * @param orgId 企业Id
-     * @param isDef
      * @return
      */
-    List<ModelL> selectModelListByOrgId(@Param("orgId") String orgId, @Param("isDef") Integer isDef);
+    List<ModelVO> selectLists(@Param("orgId") String orgId);
 
+    /**
+     * 查询企业下的所有审批模板
+     * @param orgId 企业Id
+     * @return
+     */
+    List<ModelL> selectModelListByOrgId(@Param("orgId") String orgId);
     /**
      * 删除企业下的所有审批模板
      * @param orgId 企业Id

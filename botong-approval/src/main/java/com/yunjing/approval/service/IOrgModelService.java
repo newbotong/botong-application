@@ -28,6 +28,6 @@ public interface IOrgModelService extends IBaseService<OrgModel> {
      * @return
      * @throws Exception
      */
-    boolean deleteApprovalModel(String orgId) throws Exception;
+    boolean deleteApprovalModel(String orgId);
 
 }
