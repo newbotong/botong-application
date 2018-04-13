@@ -317,12 +317,13 @@ public class LogSearchServiceImpl implements ILogSearchService {
                 attrValueVO1.setEkey(LogExConsts.CELL_NAME_IMG_EN);
 
                 AttrValueVO attrValueVO2 = new AttrValueVO();
-                attrValueVO1.setCkey(LogExConsts.CELL_NAME_REMARK);
-                attrValueVO1.setEkey(LogExConsts.CELL_NAME_REMARK_EN);
-                attrValueVO1.setAttrVal(detail.getRemark());
+                attrValueVO2.setCkey(LogExConsts.CELL_NAME_REMARK);
+                attrValueVO2.setEkey(LogExConsts.CELL_NAME_REMARK_EN);
+                attrValueVO2.setAttrVal(detail.getRemark());
                 String logImgs = StringUtils.join(detail.getLogImages(), " \r\n");
                 attrValueVO1.setAttrVal(logImgs);
                 logData.add(attrValueVO1);
+                logData.add(attrValueVO2);
                 logExcelVO.setListValue(logData);
                 resultRecord.add(logExcelVO);
             }
@@ -381,12 +382,13 @@ public class LogSearchServiceImpl implements ILogSearchService {
             LogTemplVO logTemplVO2 = new LogTemplVO();
             logTemplVO2.setCKey("图片地址");
             logTemplVO2.setEKey(LogExConsts.CELL_NAME_IMG_EN);
-            logTemplVOList.add(logTemplVO2);
+
 
             LogTemplVO logTemplVO3 = new LogTemplVO();
-            logTemplVO2.setCKey(LogExConsts.CELL_NAME_REMARK);
-            logTemplVO2.setEKey(LogExConsts.CELL_NAME_REMARK_EN);
+            logTemplVO3.setCKey(LogExConsts.CELL_NAME_REMARK);
+            logTemplVO3.setEKey(LogExConsts.CELL_NAME_REMARK_EN);
             logTemplVOList.add(logTemplVO3);
+            logTemplVOList.add(logTemplVO2);
             excelModel.setTitles(logTemplVOList);
 
             // 注入日志数据
