@@ -125,7 +125,7 @@ public class InfoContentServiceImpl extends ServiceImpl<InfoContentMapper, InfoC
         infoContent.setReadNumber(0);
         infoContent.setWhetherShow(1);
         Integer i = new InfoContent().selectCount(new EntityWrapper<InfoContent>()
-                .eq("is_delete", InfoConstant.LOGIC_DELETE_NORMAL).eq("catalog_id", infoContent.getCatalogId()));
+                .eq("catalog_id", infoContent.getCatalogId()));
         infoContent.setSort(i + 1);
         Boolean result = infoContent.insert();
         if (!result) {
