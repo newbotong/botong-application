@@ -661,7 +661,7 @@ public class InfoCatalogServiceImpl extends ServiceImpl<InfoCatalogMapper, InfoC
                     redisTemplate.opsForHash().put(InfoConstant.COMPANY_INFO_REDIS+infoCatalog.getOrgId(),infoCatalog.getId(),JSONObject.toJSONString(infoCatalog));
                 }else{
                     if (redisTemplate.hasKey(InfoConstant.BOTONG_INFO_CATALOG_LIST + infoCatalog.getOrgId() + InfoConstant.BOTONG_INFO_FIX + infoCatalog.getParentId())) {
-                        redisTemplate.opsForHash().delete(InfoConstant.BOTONG_INFO_CATALOG_LIST + infoCatalog.getOrgId() + InfoConstant.BOTONG_INFO_FIX + infoCatalog.getParentId());
+                        redisTemplate.opsForHash().delete(InfoConstant.BOTONG_INFO_CATALOG_LIST + infoCatalog.getOrgId() + InfoConstant.BOTONG_INFO_FIX + infoCatalog.getParentId(),infoCatalog.getId());
                         // 在更新
                         redisTemplate.opsForHash().put(InfoConstant.BOTONG_INFO_CATALOG_LIST + infoCatalog.getOrgId() + InfoConstant.BOTONG_INFO_FIX +infoCatalog.getParentId(), infoCatalog.getId(), JSON.toJSONString(infoCatalog));
                     }else {
