@@ -459,15 +459,17 @@ public class InfoCatalogServiceImpl extends ServiceImpl<InfoCatalogMapper, InfoC
         infoContent2 =  infoContentMapper.selectOne(infoContent2);
         int flag = 0;
         if (!ValidationUtil.isEmpty(infoContent1) && !ValidationUtil.isEmpty(infoContent2)) {
+            int sort1 = infoContent1.getSort();
+            int sort2 = infoContent2.getSort();
             EntityWrapper<InfoContent> wrapper1 = new EntityWrapper<>();
             infoContent1.setUpdateTime(System.currentTimeMillis());
-            infoContent1.setSort(infoContent2.getSort());
+            infoContent1.setSort(sort2);
             wrapper1.where("org_id={0}", orgId).and("id={0}", id1).and("is_delete=0");
             flag = infoContentMapper.update(infoContent1, wrapper1);
 
             EntityWrapper<InfoContent> wrapper2 = new EntityWrapper<>();
             infoContent2.setUpdateTime(System.currentTimeMillis());
-            infoContent2.setSort(infoContent1.getSort());
+            infoContent2.setSort(sort1);
             wrapper2.where("org_id={0}", orgId).and("id={0}", id2).and("is_delete=0");
             flag = infoContentMapper.update(infoContent2, wrapper2);
         }
