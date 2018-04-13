@@ -2,20 +2,17 @@ package com.yunjing.notice;
 
 import com.alibaba.fastjson.JSONObject;
 import com.yunjing.notice.body.NoticeBody;
-import org.apache.commons.lang.StringUtils;
 import org.junit.Test;
 import org.junit.runner.RunWith;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.http.MediaType;
 import org.springframework.test.context.junit4.SpringRunner;
-import org.springframework.test.web.servlet.MockMvc;
+import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
 
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
-import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  * @version 1.0.0
@@ -26,31 +23,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 @RunWith(SpringRunner.class)
 @SpringBootTest
 @AutoConfigureMockMvc
-public class NoticeTest {
-
-    @Autowired
-    private MockMvc mvc;
-
-    private final MediaType mediaType = MediaType.APPLICATION_JSON_UTF8;
-
-    /**
-     * POST 提交测试
-     * @param url
-     * @param jsonContent
-     * @param params
-     */
-    public void postTest(String url, String jsonContent, MultiValueMap<String, String> params){
-        try {
-            if(StringUtils.isNotBlank(jsonContent)){
-                mvc.perform(post(url).contentType(mediaType).content(jsonContent)).andExpect(status().isOk()).andDo(print());
-            } else {
-                mvc.perform(post(url).contentType(mediaType).params(params)).andExpect(status().isOk()).andDo(print());
-            }
-
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-    }
+public class NoticeTest extends BaseTest{
 
     @Test
     public void sendNotice(){
@@ -68,7 +41,63 @@ public class NoticeTest {
         body.setMemberIds("6390013882458443776");
         body.setDepartmentIds("6384295807830462465");
 
-        postTest(url, JSONObject.toJSONString(body), null);
+        postTest(url, MediaType.APPLICATION_JSON_UTF8,JSONObject.toJSONString(body), null);
     }
+
+    @Test
+    public void deleteNotice(){
+        MultiValueMap params = new LinkedMultiValueMap<>();
+        String url = "/notice/delete-batch";
+        params.add("ids","004ac8ca877e4ad9b0307e69ca95b9f6");
+        postTest(url,MediaType.ALL,null,params);
+    }
+
+    @Test
+    public void selectNoticePage(){
+        MultiValueMap params = new LinkedMultiValueMap<>();
+        String url = "/notice/page";
+        params.add("userId","547985455656556");
+        params.add("state","0");
+        params.add("orgId","ff80808156683550015668c92b4b0058");
+        params.add("pageNo","1");
+        params.add("pageSize","10");
+        postTest(url,MediaType.ALL,null,params);
+    }
+
+    @Test
+    public void selectDetail(){
+        MultiValueMap params = new LinkedMultiValueMap<>();
+        String url = "/notice/detail";
+        params.add("userId","547985455656556");
+        params.add("id","014530e2a095422abeb73ad5edf13684");
+        postTest(url,MediaType.ALL,null,params);
+    }
+
+
+    @Test
+    public void selectNoticeUser(){
+        MultiValueMap params = new LinkedMultiValueMap<>();
+        String url = "/notice/user";
+        params.add("userId","547985455656556");
+        params.add("state","0");
+        params.add("id","181026927d3a45a2a2acaffb83b449aa");
+        params.add("pageNo","1");
+        params.add("pageSize","10");
+        postTest(url,MediaType.ALL,null,params);
+    }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 }
