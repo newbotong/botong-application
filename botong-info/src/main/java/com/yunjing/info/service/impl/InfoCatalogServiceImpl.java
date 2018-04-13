@@ -655,8 +655,16 @@ public class InfoCatalogServiceImpl extends ServiceImpl<InfoCatalogMapper, InfoC
                 //初始化1级
                     redisTemplate.opsForHash().put(InfoConstant.COMPANY_INFO_REDIS+infoCatalog.getOrgId(),infoCatalog.getId(),JSONObject.toJSONString(infoCatalog));
                 }else{
-                    //2级初始化
-                    redisTemplate.opsForHash().put(InfoConstant.BOTONG_INFO_CATALOG_LIST + infoCatalog.getOrgId() + InfoConstant.BOTONG_INFO_FIX +infoCatalog.getParentId(), infoCatalog.getId(), JSON.toJSONString(infoCatalog));
+                    if (redisTemplate.hasKey(InfoConstant.BOTONG_INFO_CATALOG_LIST + infoCatalog.getOrgId() + InfoConstant.BOTONG_INFO_FIX + infoCatalog.getParentId())) {
+                        redisTemplate.opsForHash().delete(InfoConstant.BOTONG_INFO_CATALOG_LIST + infoCatalog.getOrgId() + InfoConstant.BOTONG_INFO_FIX + infoCatalog.getParentId());
+                        // 在更新
+                        redisTemplate.opsForHash().put(InfoConstant.BOTONG_INFO_CATALOG_LIST + infoCatalog.getOrgId() + InfoConstant.BOTONG_INFO_FIX +infoCatalog.getParentId(), infoCatalog.getId(), JSON.toJSONString(infoCatalog));
+                    }else {
+                        //不存在放入缓存
+                        //2级初始化
+                        redisTemplate.opsForHash().put(InfoConstant.BOTONG_INFO_CATALOG_LIST + infoCatalog.getOrgId() + InfoConstant.BOTONG_INFO_FIX +infoCatalog.getParentId(), infoCatalog.getId(), JSON.toJSONString(infoCatalog));
+                    }
+
                 }
             }
 
