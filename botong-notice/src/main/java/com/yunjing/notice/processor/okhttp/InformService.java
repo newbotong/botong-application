@@ -1,7 +1,7 @@
 package com.yunjing.notice.processor.okhttp;
 
-import com.yunjing.mommon.base.PushParam;
 import com.yunjing.mommon.wrapper.ResponseEntityWrapper;
+import com.yunjing.notice.common.AppPushParam;
 import retrofit2.Call;
 import retrofit2.http.Body;
 import retrofit2.http.POST;
@@ -21,5 +21,5 @@ public interface InformService {
      */
 
     @POST("/api/microapps/appcenter/push/push-target-user")
-    Call<ResponseEntityWrapper> pushAllTargetByUser(@Body PushParam pushParam);
+    Call<ResponseEntityWrapper> pushAllTargetByUser(@Body AppPushParam pushParam);
 }

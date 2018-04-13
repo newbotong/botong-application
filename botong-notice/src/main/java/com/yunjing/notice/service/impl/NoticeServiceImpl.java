@@ -5,13 +5,13 @@ import com.alibaba.fastjson.JSONObject;
 import com.baomidou.mybatisplus.mapper.EntityWrapper;
 import com.baomidou.mybatisplus.plugins.Page;
 import com.baomidou.mybatisplus.service.impl.ServiceImpl;
-import com.yunjing.mommon.base.PushParam;
 import com.yunjing.mommon.global.exception.BaseException;
+import com.yunjing.mommon.utils.DateUtil;
 import com.yunjing.mommon.utils.IDUtils;
 import com.yunjing.mommon.wrapper.ResponseEntityWrapper;
 import com.yunjing.notice.body.*;
+import com.yunjing.notice.common.AppPushParam;
 import com.yunjing.notice.common.NoticeConstant;
-import com.yunjing.notice.config.RedisReadonly;
 import com.yunjing.notice.entity.NoticeEntity;
 import com.yunjing.notice.entity.NoticeUserEntity;
 import com.yunjing.notice.mapper.NoticeMapper;
@@ -123,42 +123,63 @@ public class NoticeServiceImpl extends ServiceImpl<NoticeMapper, NoticeEntity> i
         }
         noticeEntity.insert();
         noticeUserService.insertBatch(userInfoBodyList);
-        //推送
+
+        //推送请求URL
         String url = H5Address + "?" + "id=" + noticeEntity.getId();
+
+        //添加公告模块子标题
         Map<String, String> map = new HashMap<>(32);
-        JSONArray array = new JSONArray();
-        JSONObject json = new JSONObject();
         map.put("subModuleName", "公告");
         map.put("url", url);
-        json.put("title","公告");
-        json.put("content",noticeEntity.getTitle());
-        json.put("type","0");
-        array.add(json);
-        JSONObject json1 = new JSONObject();
-        if (StringUtils.isNotEmpty(noticeEntity.getCover())) {
-            json1.put("imgPath", noticeEntity.getCover());
-        }
-        json1.put("type","1");
-        array.add(json1);
-        JSONObject json2 = new JSONObject();
-        json2.put("bottom",noticeEntity.getAuthor());
-        json2.put("createDate",System.currentTimeMillis());
-        json2.put("type","4");
-        array.add(json2);
-        JSONObject json3 = new JSONObject();
-        json3.put("subTitle","公告");
-        json3.put("type","5");
-        array.add(json3);
-        map.put("content",array.toJSONString());
-        PushParam pushParam = new PushParam();
-        pushParam.setNotificationTitle("公告");
 
+        //构建推送列表内容体
+        JSONArray array = new JSONArray();
+        JSONObject json;
+
+        //添加公告标题
+        json = new JSONObject();
+        json.put("subTitle",noticeEntity.getTitle());
+        json.put("type","5");
+        array.add(json);
+
+        //判断是否存在图片
+        if (StringUtils.isNotEmpty(noticeEntity.getCover())) {
+            json = new JSONObject();
+            json.put("imgPath", noticeEntity.getCover());
+            json.put("type","1");
+            array.add(json);
+        }
+
+        //添加公告内容
+        json = new JSONObject();
+        json.put("description", noticeEntity.getContent());
+        json.put("type","2");
+        array.add(json);
+
+        //添加公告发送人
+        json = new JSONObject();
+        json.put("bottom", noticeEntity.getAuthor() + "  " + DateUtil.convert(System.currentTimeMillis()));
+        json.put("type","4");
+        array.add(json);
+
+        //保存公告内容体
+        map.put("content",array.toJSONString());
+
+        //构建发送公告参数
+        AppPushParam pushParam = new AppPushParam();
+        pushParam.setNotificationTitle("公告");
         pushParam.setAlias(passportIds);
-        pushParam.setMsg(noticeEntity.getTitle());
+        pushParam.setTitle(noticeEntity.getTitle());
         pushParam.setMap(map);
         pushParam.setMsg("您有一条新公告，请注意查收！");
+        pushParam.setCompanyId("6384295807801102336");
+        pushParam.setAppId("fbbc9bbb6ead4750a5a725f8b098e304");
+
+
         // okhttp调用工作通知
-        informService.pushAllTargetByUser(pushParam);
+        Call<ResponseEntityWrapper> response = informService.pushAllTargetByUser(pushParam);
+
+
         //Dang
         if (noticeEntity.getDangState() == 0) {
             //批量查询用户信息

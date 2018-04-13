@@ -1,7 +1,7 @@
 package com.yunjing.notice.processor.okhttp.impl;
 
-import com.yunjing.mommon.base.PushParam;
 import com.yunjing.mommon.wrapper.ResponseEntityWrapper;
+import com.yunjing.notice.common.AppPushParam;
 import com.yunjing.notice.processor.okhttp.InformService;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
@@ -45,7 +45,7 @@ public class InformServiceImpl implements InformService {
      * @return ResponseEntityWrapper
      */
     @Override
-    public Call<ResponseEntityWrapper> pushAllTargetByUser(PushParam pushParam) {
+    public Call<ResponseEntityWrapper> pushAllTargetByUser(AppPushParam pushParam) {
         if (service == null) {
             initRetrofit();
         }
