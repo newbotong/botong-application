@@ -265,7 +265,7 @@ public class AppCenterServiceImpl implements AppCenterService {
                     return body.getData();
                 }
             } else {
-                log.error("body is null");
+                log.error("获取管理范围 body is null");
             }
             return null;
         } catch (IOException e) {

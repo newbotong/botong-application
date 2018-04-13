@@ -2,8 +2,11 @@ package com.yunjing.approval.service;
 
 
 import com.common.mybatis.service.IBaseService;
+import com.yunjing.approval.model.dto.OrgMemberMessage;
 import com.yunjing.approval.model.entity.ApprovalUser;
 import com.yunjing.mommon.global.exception.BaseException;
+
+import java.util.List;
 
 /**
  * @author 刘小鹏
@@ -12,13 +15,31 @@ import com.yunjing.mommon.global.exception.BaseException;
 public interface IApprovalUserService extends IBaseService<ApprovalUser> {
 
     /**
-     * 添加用户信息
+     * 添加成员信息
      *
-     * @param companyId 公司id
+     * @param orgMemberMessages 企业成员信息集合
      * @return
      * @throws BaseException
      */
-    boolean addUser(String companyId) throws BaseException;
+    boolean addMember(List<OrgMemberMessage> orgMemberMessages) throws BaseException;
+
+    /**
+     * 更新成员信息
+     *
+     * @param orgMemberMessages 企业成员信息集合
+     * @return
+     * @throws BaseException
+     */
+    boolean updateMember(List<OrgMemberMessage> orgMemberMessages) throws BaseException;
+
+    /**
+     * 删除成员信息
+     *
+     * @param orgMemberMessages 企业成员信息集合
+     * @return
+     * @throws BaseException
+     */
+    boolean deleteMember(List<OrgMemberMessage> orgMemberMessages) throws BaseException;
 
 
 }

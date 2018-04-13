@@ -1,6 +1,7 @@
 package com.yunjing.botong.log.processor.mq.consumer;
 
 import com.alibaba.fastjson.JSON;
+import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 import com.yunjing.botong.log.config.AbstractRedisConfiguration;
 import com.yunjing.botong.log.config.LogConstant;
@@ -10,12 +11,12 @@ import com.yunjing.botong.log.params.UserInfoModel;
 import com.yunjing.botong.log.processor.mq.configuration.RemindMessageConfiguration;
 import com.yunjing.botong.log.processor.okhttp.AppCenterService;
 import com.yunjing.botong.log.service.ISMSService;
+import com.yunjing.botong.log.vo.AppPushParam;
 import com.yunjing.botong.log.vo.Member;
 import com.yunjing.botong.log.vo.RemindVo;
 import com.yunjing.message.annotation.MessageQueueDeclarable;
 import com.yunjing.message.declare.consumer.AbstractMessageConsumerWithQueueDeclare;
 import com.yunjing.message.model.Message;
-import com.yunjing.mommon.base.PushParam;
 import com.yunjing.mommon.base.SmSParam;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections.CollectionUtils;
@@ -130,7 +131,7 @@ public class RemindMessageConsumer extends AbstractMessageConsumerWithQueueDecla
                 // 不是管理员，根据remindMode提醒
                 switch (remind.getRemindMode()) {
                     case 1:
-                        push(new String[]{memberInfo.getPassportId()}, remind.getSubmitType());
+                        push(remind.getAppId(), memberInfo.getCompanyId(), new String[]{memberInfo.getPassportId()}, remind.getSubmitType());
                         break;
                     case 2:
                         List<String> phoneNumbers = new ArrayList<>();
@@ -193,7 +194,7 @@ public class RemindMessageConsumer extends AbstractMessageConsumerWithQueueDecla
                         for (int i = 0; i < passportIdList.size(); i++) {
                             idList[i] = passportIdList.get(i);
                         }
-                        push(idList, remind.getSubmitType());
+                        push(remind.getAppId(), memberInfo.getCompanyId(), idList, remind.getSubmitType());
                         break;
                     case 2:
                         sms(phoneNumbers, remind.getSubmitType());
@@ -224,15 +225,50 @@ public class RemindMessageConsumer extends AbstractMessageConsumerWithQueueDecla
     }
 
 
-    private void push(String[] alias, int submitType) {
-        PushParam param = new PushParam();
-        param.setTitle(MESSAGE[submitType - 1]);
-        param.setNotificationTitle("伯通");
-        param.setAlias(alias);
-        appCenterService.push(param);
+    /**
+     * 推送
+     *
+     * @param appId
+     * @param companyId
+     * @param alias
+     * @param submitType
+     */
+    private void push(String appId, String companyId, String[] alias, int submitType) {
+
+        AppPushParam pushParam = new AppPushParam();
+
+        pushParam.setAppId(appId);
+        pushParam.setCompanyId(companyId);
+        pushParam.setMsg("您收到一条日志提醒");
+        pushParam.setNotificationTitle("伯通");
+        pushParam.setTitle(MESSAGE[submitType - 1]);
+        pushParam.setAlias(alias);
+
+
+        Map<String, String> map = new HashMap<>(2);
+        map.put("subModuleName", "日报提醒");
+        // TODO 发送日志地址
+        map.put("url", "http://www.rizhi.com");
+
+        //日志提醒
+        JSONArray array = new JSONArray();
+        JSONObject json = new JSONObject();
+        json.put("subTitle", "您收到一条日报提醒");
+        json.put("type", "5");
+
+        array.add(json);
+        map.put("content", array.toJSONString());
+        pushParam.setMap(map);
+
+        appCenterService.push(pushParam);
     }
 
-
+    /**
+     * 发送短信
+     *
+     * @param phoneNumbers
+     * @param submitType
+     */
     private void sms(List<String> phoneNumbers, int submitType) {
         // sms
         SmSParam param = new SmSParam();
@@ -246,6 +282,14 @@ public class RemindMessageConsumer extends AbstractMessageConsumerWithQueueDecla
         smsService.sendSmSMessage(phoneNumbers, param.getTemplateId(), param.getSignName(), param.getMapParam());
     }
 
+    /**
+     * dang
+     *
+     * @param infoModels
+     * @param userId
+     * @param mobile
+     * @param submitType
+     */
     private void dang(List<UserInfoModel> infoModels, long userId, long mobile, int submitType) {
         DangParam param = new DangParam();
         param.setIsAccessory(0);
