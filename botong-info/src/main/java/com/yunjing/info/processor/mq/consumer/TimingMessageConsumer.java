@@ -6,6 +6,7 @@ import com.yunjing.info.common.InfoConstant;
 import com.yunjing.info.model.InfoCatalog;
 import com.yunjing.info.processor.mq.configuration.TimingMessageConfiguration;
 import com.yunjing.info.service.impl.InfoCatalogServiceImpl;
+import com.yunjing.message.annotation.MessageConsumerDeclarable;
 import com.yunjing.message.annotation.MessageQueueDeclarable;
 import com.yunjing.message.declare.consumer.AbstractMessageConsumerWithQueueDeclare;
 import com.yunjing.message.model.Message;
