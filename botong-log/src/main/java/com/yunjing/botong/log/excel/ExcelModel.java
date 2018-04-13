@@ -80,7 +80,9 @@ public class ExcelModel {
             for (AttrValueVO attr : logData.getListValue()) {
                 if (attr != null && StringUtils.isNotBlank(attr.getAttrVal())) {
                     if (attr.getEkey() != null) {
-                        item[titleMap.get(attr.getEkey())] = attr.getAttrVal();
+                        if (titleMap.get(attr.getEkey()) != null) {
+                            item[titleMap.get(attr.getEkey())] = attr.getAttrVal();
+                        }
                     }
                 }
             }
