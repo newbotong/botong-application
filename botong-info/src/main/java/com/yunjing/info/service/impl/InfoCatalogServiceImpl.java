@@ -156,8 +156,11 @@ public class InfoCatalogServiceImpl extends ServiceImpl<InfoCatalogMapper, InfoC
         Call<ResponseEntityWrapper> call = authorityService.authority(appId, userId);
         Response<ResponseEntityWrapper> execute = call.execute();
         ResponseEntityWrapper body = execute.body();
-        //判断是否为管理员
-        boolean results = (boolean) body.getData();
+        Boolean results = false;
+        if (null != body && null != body.getData()) {
+            //判断是否为管理员
+            results = (boolean) body.getData();
+        }
         resultMap.put("admin", results);
         return resultMap;
     }
