@@ -212,7 +212,10 @@ public class LogSearchServiceImpl implements ILogSearchService {
                 userIds.addAll(detail.getUnreadUserId());
             }
             //redis中获取用户信息
-            List<Member> memberList = memberRedisOperator.getMemberList(userIds);
+            List<Member> memberList = new ArrayList<>();
+            if (!userIds.isEmpty()) {
+                memberList = memberRedisOperator.getMemberList(userIds);
+            }
 
             //用户放入map中，去匹配
             Map<String, Member> map = new HashMap<>(16);
@@ -315,9 +318,15 @@ public class LogSearchServiceImpl implements ILogSearchService {
                 AttrValueVO attrValueVO1 = new AttrValueVO();
                 attrValueVO1.setCkey("图片地址");
                 attrValueVO1.setEkey(LogExConsts.CELL_NAME_IMG_EN);
+
+                AttrValueVO attrValueVO2 = new AttrValueVO();
+                attrValueVO2.setCkey(LogExConsts.CELL_NAME_REMARK);
+                attrValueVO2.setEkey(LogExConsts.CELL_NAME_REMARK_EN);
+                attrValueVO2.setAttrVal(detail.getRemark());
                 String logImgs = StringUtils.join(detail.getLogImages(), " \r\n");
                 attrValueVO1.setAttrVal(logImgs);
                 logData.add(attrValueVO1);
+                logData.add(attrValueVO2);
                 logExcelVO.setListValue(logData);
                 resultRecord.add(logExcelVO);
             }
@@ -376,6 +385,12 @@ public class LogSearchServiceImpl implements ILogSearchService {
             LogTemplVO logTemplVO2 = new LogTemplVO();
             logTemplVO2.setCKey("图片地址");
             logTemplVO2.setEKey(LogExConsts.CELL_NAME_IMG_EN);
+
+
+            LogTemplVO logTemplVO3 = new LogTemplVO();
+            logTemplVO3.setCKey(LogExConsts.CELL_NAME_REMARK);
+            logTemplVO3.setEKey(LogExConsts.CELL_NAME_REMARK_EN);
+            logTemplVOList.add(logTemplVO3);
             logTemplVOList.add(logTemplVO2);
             excelModel.setTitles(logTemplVOList);
 

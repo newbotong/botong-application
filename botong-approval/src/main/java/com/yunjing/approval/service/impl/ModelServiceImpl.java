@@ -9,6 +9,7 @@ import com.yunjing.approval.dao.mapper.ModelMapper;
 import com.yunjing.approval.model.entity.ModelCategory;
 import com.yunjing.approval.model.entity.ModelItem;
 import com.yunjing.approval.model.entity.ModelL;
+import com.yunjing.approval.model.vo.ModelItemVO;
 import com.yunjing.approval.model.vo.ModelListVO;
 import com.yunjing.approval.model.vo.ModelVO;
 import com.yunjing.approval.service.ICopyService;
@@ -51,17 +52,28 @@ public class ModelServiceImpl extends BaseServiceImpl<ModelMapper, ModelL> imple
         boolean haveRequired;
         List<ModelVO> modelVOList = modelMapper.selectLists(orgId);
         List<ModelItem> modelItems = modelItemMapper.selectAll(orgId);
+        List<ModelItemVO> itemVOS = new ArrayList<>();
         for (ModelVO modelVO : modelVOList) {
             List<ModelItem> items = modelItems.stream().filter(modelItem -> modelItem.getModelId().equals(modelVO.getModelId())).collect(Collectors.toList());
             for (ModelItem item : items) {
-                if (item.getDataType() == ApproConstants.RADIO_TYPE_3 && item.getIsRequired() == 1) {
-                    haveRequired = true;
-                    modelVO.setHaveRequired(haveRequired);
-                } else {
-                    haveRequired = false;
-                    modelVO.setHaveRequired(haveRequired);
+                if (item.getDataType() == ApproConstants.RADIO_TYPE_3) {
+                    ModelItemVO modelItemVO = new ModelItemVO();
+                    modelItemVO.setField(item.getField());
+                    modelItemVO.setLabel(item.getItemLabel());
+                    modelItemVO.setIsJudge(item.getIsJudge());
+                    modelItemVO.setOption(item.getOptValue());
+                    modelItemVO.setRequired(item.getIsRequired());
+                    itemVOS.add(modelItemVO);
+                    if (item.getIsRequired() == 1) {
+                        haveRequired = true;
+                        modelVO.setHaveRequired(haveRequired);
+                    } else {
+                        haveRequired = false;
+                        modelVO.setHaveRequired(haveRequired);
+                    }
                 }
             }
+            modelVO.setItems(itemVOS);
         }
         List<ModelListVO> modelListVOList = new ArrayList<>();
         List<ModelCategory> list = modelCategoryService.selectList(Condition.create().where("org_id={0}", orgId));

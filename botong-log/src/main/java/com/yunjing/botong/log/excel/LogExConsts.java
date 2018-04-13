@@ -26,6 +26,9 @@ public class LogExConsts {
 
     public static final String CELL_NAME_IMG_EN = "sendImages";
 
+    public static final String CELL_NAME_REMARK = "备注";
+    public static final String CELL_NAME_REMARK_EN = "remark";
+
     public static final int ROW_NUM_NOTICE_0 = 0;
     public static final int ROW_NUM_TABLE_1 = 1;
     public static final int ROW_NUM_TITLE_2 = 2;

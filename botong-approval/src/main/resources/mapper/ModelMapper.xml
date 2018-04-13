@@ -14,7 +14,7 @@
         <result column="approver" property="approver"/>
     </resultMap>
     <delete id="deleteModelListByOrgId" >
-        DELETE FROM model m WHERE model_id IN (SELECT o.model_id FROM org_model o WHERE o.org_id= = #{ orgId })
+        DELETE FROM model WHERE id IN (SELECT o.model_id FROM org_model o WHERE o.org_id = #{ orgId })
     </delete>
 
     <select id="selectModelList" resultMap="ModelInfoMap">

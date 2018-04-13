@@ -106,7 +106,7 @@ public class ExcelModel {
      * 设置数据项名称索引
      */
     private void setTitleMap() {
-        titleMap = new HashMap<>(8);
+        titleMap = new HashMap<>(titles.size());
         for (int i = 0; i < titles.size(); i++) {
             titleMap.put(tempList.get(i).getEKey(), i);
         }

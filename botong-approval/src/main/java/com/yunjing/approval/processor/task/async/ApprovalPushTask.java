@@ -1,5 +1,6 @@
 package com.yunjing.approval.processor.task.async;
 
+import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 import com.yunjing.approval.dao.mapper.ApprovalProcessMapper;
 import com.yunjing.approval.dao.mapper.CopysMapper;
@@ -146,11 +147,7 @@ public class ApprovalPushTask extends BaseTask {
                                 throw new InsertMessageFailureException("保存推送审批记录失败");
                             }
                             // 审批推送入参
-                            PushParam pushParam = new PushParam();
-                            pushParam.setMsg(systemMessage);
-                            pushParam.setAlias(phones);
-                            pushParam.setRegistrationId(user.getMobile());
-                            pushParam.setNotificationTitle(message);
+                            PushParam pushParam = setPushParam(systemMessage, phones,user, message);
                             // 推送审批
                             appCenterService.push(pushParam);
 
@@ -169,11 +166,8 @@ public class ApprovalPushTask extends BaseTask {
                     pushLog.setCreateTime(DateUtil.getCurrentTime().getTime());
                     pushLog.setMessage("您收到一条审批消息");
                     // 审批推送入参
-                    PushParam pushParam = new PushParam();
-                    pushParam.setMsg(message);
-                    pushParam.setAlias(phones);
-                    pushParam.setRegistrationId(user.getMobile());
-                    pushParam.setNotificationTitle(message);
+                    // 审批推送入参
+                    PushParam pushParam = setPushParam(systemMessage, phones,user, message);
                     // 推送审批
                     appCenterService.push(pushParam);
                     boolean insert = pushLogService.insert(pushLog);
@@ -212,11 +206,8 @@ public class ApprovalPushTask extends BaseTask {
                                 userPhones.removeAll(userPhones);
                                 String[] photos = phoneList.toArray(new String[phoneList.size()]);
                                 // 审批推送入参
-                                PushParam pushParam2 = new PushParam();
-                                pushParam2.setMsg(systemMessage);
-                                pushParam2.setAlias(photos);
-                                pushParam2.setRegistrationId(user.getMobile());
-                                pushParam2.setNotificationTitle(message);
+                                // 审批推送入参
+                                PushParam pushParam2 = setPushParam(systemMessage, phones,user, message);
                                 // 推送审批
                                 appCenterService.push(pushParam2);
                                 n = 1;
@@ -242,5 +233,32 @@ public class ApprovalPushTask extends BaseTask {
                 }
             }
         }
+    }
+
+    private PushParam setPushParam(String systemMessage,String[] phones,ApprovalUser user,String message) {
+        PushParam pushParam = new PushParam();
+        pushParam.setMsg(systemMessage);
+        pushParam.setAlias(phones);
+        pushParam.setRegistrationId(user.getMobile());
+        pushParam.setNotificationTitle(message);
+        pushParam.setCompanyId(orgId);
+        pushParam.setRegistrationId(user.getId());
+        pushParam.setTitle("我是自定义标题");
+        pushParam.setAppId("978518782567088130");
+        Map<String, String> maps = new HashMap<>(5);
+        maps.put("appName", "审批");
+        maps.put("subModuleName", "审批提醒");
+        maps.put("logo", "http://www.shenpi.com/shenpi.jpg");
+        maps.put("url", "http://www.shenpi.com");
+        // 审批提醒
+        JSONArray array = new JSONArray();
+        JSONObject json = new JSONObject();
+        json.put("subTitle", "您收到一条审批提醒");
+        json.put("type", "5");
+        array.add(json);
+        maps.put ("content", array.toJSONString());
+        pushParam.setMap(maps);
+        return pushParam;
+
     }
 }

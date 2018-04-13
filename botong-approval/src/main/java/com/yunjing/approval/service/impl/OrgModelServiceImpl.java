@@ -24,7 +24,6 @@ import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.ArrayList;
-import java.util.Date;
 import java.util.List;
 
 /**
@@ -47,6 +46,7 @@ public class OrgModelServiceImpl extends BaseServiceImpl<OrgModelMapper, OrgMode
     private IApprovalService approvalService;
 
     private static final Log logger = LogFactory.getLog(OrgModelServiceImpl.class);
+
     @Override
     @Transactional(propagation = Propagation.REQUIRED, rollbackFor = Exception.class)
     public boolean createApprovalModel(String orgId) {
@@ -63,7 +63,7 @@ public class OrgModelServiceImpl extends BaseServiceImpl<OrgModelMapper, OrgMode
                 flag = this.createOrgModel(orgId, defaultModelList);
             } catch (Exception e) {
                 flag = true;
-                logger.error("初始化该企业审批模板失败",e);
+                logger.error("初始化该企业审批模板失败", e);
             }
         }
         return flag;
@@ -71,26 +71,28 @@ public class OrgModelServiceImpl extends BaseServiceImpl<OrgModelMapper, OrgMode
 
     @Override
     @Transactional(propagation = Propagation.REQUIRED, rollbackFor = Exception.class)
-    public boolean deleteApprovalModel(String orgId){
+    public boolean deleteApprovalModel(String orgId) {
+        boolean flag = false;
         // 查询审批模板使用后产生的数据
         List<Approval> approvalList = approvalService.selectList(Condition.create().where("org_id={0}", orgId));
         if (approvalList != null && approvalList.size() > 0) {
             // 记录有没有审批完成的数据条数;
             int count = 0;
-            for (Approval approval: approvalList) {
-                if(approval.getState() == ApproConstants.APPROVAL_STATE_1){
+            for (Approval approval : approvalList) {
+                if (approval.getState() == ApproConstants.APPROVAL_STATE_1) {
                     count++;
                 }
             }
-            if (count == 0){
+            if (count == 0) {
                 // 删除企业模板
-                this.deleteOrgModel(orgId);
+                flag = this.deleteOrgModel(orgId);
             }
         } else {
             // 删除企业模板
-            this.deleteOrgModel(orgId);
+            flag = this.deleteOrgModel(orgId);
         }
-        return true;
+
+        return flag;
     }
 
 
@@ -102,7 +104,7 @@ public class OrgModelServiceImpl extends BaseServiceImpl<OrgModelMapper, OrgMode
      * @return List<String> 返回模板ID集合（modelIds）
      * @throws Exception
      */
-    private boolean createOrgModel(String orgId, List<ModelL> defaultModelList){
+    private boolean createOrgModel(String orgId, List<ModelL> defaultModelList) {
         boolean isInsert = false;
         List<ModelL> newModelList = new ArrayList<>();
         List<OrgModel> newOrgModelList = new ArrayList<>();
@@ -143,14 +145,14 @@ public class OrgModelServiceImpl extends BaseServiceImpl<OrgModelMapper, OrgMode
                 try {
                     throw new BaseException("企业的审批模板(org_model)批量插入失败");
                 } catch (BaseException e) {
-                    logger.error("企业的审批模板(org_model)批量插入失败",e);
+                    logger.error("企业的审批模板(org_model)批量插入失败", e);
                 }
             }
         } else {
             try {
                 throw new BaseException("企业的审批模板(model)批量插入失败");
             } catch (BaseException e) {
-                logger.error("企业的审批模板(model)批量插入失败",e);
+                logger.error("企业的审批模板(model)批量插入失败", e);
             }
         }
         return isInsert;
@@ -164,7 +166,7 @@ public class OrgModelServiceImpl extends BaseServiceImpl<OrgModelMapper, OrgMode
      * @return boolean
      * @throws Exception
      */
-    private boolean createModelItem(String modelId, List<ModelItem> defaltModelItemsList){
+    private boolean createModelItem(String modelId, List<ModelItem> defaltModelItemsList) {
         boolean flag = false;
         if (defaltModelItemsList != null && defaltModelItemsList.size() > 0) {
 
@@ -237,18 +239,18 @@ public class OrgModelServiceImpl extends BaseServiceImpl<OrgModelMapper, OrgMode
             try {
                 throw new BaseException("该企业的模板子项初始化失败");
             } catch (BaseException e) {
-                logger.error("该企业的模板子项初始化失败",e);
+                logger.error("该企业的模板子项初始化失败", e);
             }
         }
         return true;
     }
 
     /**
-     *
      * @param orgId 企业主键
      * @return
      */
-    private boolean deleteOrgModel(String orgId){
+    private boolean deleteOrgModel(String orgId) {
+        boolean flag = false;
         // 删除org_model数据
         boolean isDelete = this.delete(Condition.create().where("org_id={0}", orgId));
         if (isDelete) {
@@ -256,10 +258,10 @@ public class OrgModelServiceImpl extends BaseServiceImpl<OrgModelMapper, OrgMode
             boolean b = modelItemService.deleteModelItemListByOrgId(orgId);
             if (b) {
                 // 删除model数据
-                modelLService.deleteModel(orgId);
+                flag = modelLService.deleteModel(orgId);
             }
         }
-        return true;
+        return flag;
     }
 }
 
