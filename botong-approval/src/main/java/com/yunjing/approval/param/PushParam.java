@@ -15,6 +15,11 @@ import java.util.Map;
 public class PushParam {
 
 
+    private String appId;
+
+    /** 公司id */
+    private String companyId;
+
     /** 推送标题 */
     @NotNullOrEmpty
     private String notificationTitle;

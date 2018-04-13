@@ -22,7 +22,7 @@
                 and from_unixtime(a.create_time/1000, '%Y%m%d') = from_unixtime(#{filterParam.time}/1000,'%Y%m%d')
             </if>
             <if test="filterParam.searchKey != null and filterParam.searchKey != ''">
-                and concat(a.id,a.title,ap.reason) like CONCAT('%',#{filterParam.searchKey},'%')
+                and concat(a.id,a.title) like CONCAT('%',#{filterParam.searchKey},'%')
             </if>
         </where>
         ORDER BY co.create_time DESC

@@ -83,6 +83,8 @@ public class ProcessServiceImpl extends BaseServiceImpl<ProcessMapper, SetsProce
             list = this.selectList(Condition.create().where("model_id={0}", modelId).and("(condition_id is null or condition_id='')").orderBy(true, "sort", true));
         }
         List<ApprovalUser> userList = approvalUserService.selectList(Condition.create());
+
+        String passportId = "default";
         for (SetsProcess process : list) {
             String userId = process.getApprover();
             String userNick = "";
@@ -104,6 +106,7 @@ public class ProcessServiceImpl extends BaseServiceImpl<ProcessMapper, SetsProce
             vo.setMemberId(userId);
             vo.setName(userNick);
             vo.setProfile(userAvatar);
+            vo.setPassportId(passportId);
             users.add(vo);
         }
         return users;

@@ -36,6 +36,12 @@ public class ApprovalUser extends BaseModel<ApprovalUser>{
     private String avatar;
 
     /**
+     * 头像颜色
+     */
+    @TableField("color")
+    private String color;
+
+    /**
      * 用户手机号
      */
     @TableField("mobile")

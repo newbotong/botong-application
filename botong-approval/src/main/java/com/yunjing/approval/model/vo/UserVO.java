@@ -34,7 +34,7 @@ public class UserVO implements Serializable{
     /**
      * 账号id
      */
-    private String passpottld;
+    private String passportId;
 
     /**
      * 头像

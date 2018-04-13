@@ -3,7 +3,6 @@ package com.yunjing.approval.param;
 import com.yunjing.mommon.validate.annotation.NotNullOrEmpty;
 import lombok.Data;
 
-import javax.servlet.http.HttpServletResponse;
 
 /**
  * 审批筛选参数
@@ -13,6 +12,12 @@ import javax.servlet.http.HttpServletResponse;
  */
 @Data
 public class DataParam {
+
+    /** 多个成员ID 以逗号隔开 */
+    private String[] memberIds;
+
+    /** 多个部门ID 以逗号隔开 */
+    private String[] deptIds;
 
     /** 当前页数 */
     private Integer currentPage;

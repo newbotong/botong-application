@@ -32,7 +32,7 @@ public class ClientApprovalOperationController extends BaseController {
     @PostMapping("/get-member-list")
     public ResponseEntityWrapper getMember(@RequestParam("companyId") String companyId) throws Exception {
 
-        return success(approvalUserService.addUser(companyId));
+        return success();
     }
 
 
