@@ -339,7 +339,7 @@ public class LogSearchServiceImpl implements ILogSearchService {
         List<ExcelModel> excelModelList = new ArrayList<>();
         LogExModel logExModel = new LogExModel();
         Date time2 = new Date();
-        log.info("从mongo查询到处理完毕总耗时：" + DateUtil.calculateIntervalSecond(time, time2));
+        log.info("从mongo查询到处理完毕总耗时：" + (time2.getTime() - time.getTime()));
         Map<String, List<LogTemplateFieldVo>> model = logTemplateService.queryFields(searchParam);
         StringBuilder fileName = new StringBuilder().append(LogExConsts.NOTICE).append(LogExConsts.SEPARATOR_POINT).append(LogExConsts.TYPE_XLSX);
         String tableHeader = "报表生成日期："+ DateUtil.getDateTime(new Date());
@@ -388,7 +388,7 @@ public class LogSearchServiceImpl implements ILogSearchService {
         logExModel.setExcelModelList(excelModelList);
         logExModel.setFileName(fileName.toString());
         Date time3 = new Date();
-        log.info("数据注入excel表耗时：" + DateUtil.calculateIntervalSecond(time, time2));
+        log.info("数据注入excel表耗时：" + (time3.getTime() - time2.getTime()));
         return logExModel;
     }
 }

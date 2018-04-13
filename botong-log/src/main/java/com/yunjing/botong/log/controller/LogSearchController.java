@@ -105,7 +105,7 @@ public class LogSearchController extends BaseController {
             Date time = new Date();
             excel.createWorkbook().write(out);
             Date time1 = new Date();;
-            log.info("写日志数据到excel表的耗时："+ DateUtil.calculateIntervalSecond(time, time1));
+            log.info("写日志数据到excel表的耗时："+ (time1.getTime() - time.getTime()));
             resultFlag = true;
         } catch (Exception e) {
             log.error("写日志数据到excel表出现异常",e);

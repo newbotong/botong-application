@@ -4,9 +4,11 @@ import com.baomidou.mybatisplus.mapper.EntityWrapper;
 import com.baomidou.mybatisplus.service.impl.ServiceImpl;
 import com.yunjing.mommon.utils.BeanUtils;
 import com.yunjing.mommon.utils.IDUtils;
+import com.yunjing.sign.beans.model.SignConfigDaily;
 import com.yunjing.sign.beans.model.SignConfigModel;
 import com.yunjing.sign.beans.param.SignConfigParam;
 import com.yunjing.sign.beans.vo.SignConfigVO;
+import com.yunjing.sign.constant.SignConstant;
 import com.yunjing.sign.dao.mapper.SignConfigMapper;
 import com.yunjing.sign.service.ISignConfigService;
 import lombok.extern.slf4j.Slf4j;
@@ -37,8 +39,19 @@ public class SignConfigServiceImpl extends ServiceImpl<SignConfigMapper, SignCon
     @Transactional(rollbackFor = Exception.class)
     public boolean setSignConfig(SignConfigParam signConfigParam) {
         SignConfigModel signConfig = BeanUtils.map(signConfigParam, SignConfigModel.class);
-        signConfig.setId(IDUtils.uuid());
-        boolean result = signConfig.insert();
+        SignConfigModel signConfigModel = new SignConfigModel().selectOne(new EntityWrapper<SignConfigModel>().eq("org_id", signConfigParam.getOrgId()));
+        boolean result = false;
+        if (signConfigModel != null) {
+            signConfig.setId(signConfigModel.getId());
+            if (signConfig.getTimeStatus() == SignConstant.BOTONG_ZERO_VALUE.intValue()) {
+                signConfig.setStartTime(SignConstant.EMPTY_STR);
+                signConfig.setEndTime(SignConstant.EMPTY_STR);
+            }
+            result = signConfig.updateById();
+        } else {
+            signConfig.setId(IDUtils.uuid());
+            result = signConfig.insert();
+        }
         return result;
     }
 

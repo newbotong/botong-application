@@ -120,7 +120,7 @@ public class SignDetailServiceImpl extends ServiceImpl<SignDetailMapper, SignDet
         String[] userIdCs = StringUtils.split(userAndDeptParam.getUserIds(),",");
         //okhttp
         List<SignUserInfoVO> userList = userRemoteApiService.findSubLists(deptIds, userIdCs);
-        if(userList.size() == 0) {
+        if(userList == null || userList.size() == 0) {
             return null;
         }
         Map<String, SignUserInfoVO> map = new HashMap<>(userList.size());

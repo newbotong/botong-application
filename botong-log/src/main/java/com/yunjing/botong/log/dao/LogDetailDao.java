@@ -222,6 +222,7 @@ public class LogDetailDao extends BaseMongoDaoImpl<LogDetail> {
             Date end = DateUtil.StringToDate(endDate + LogConstant.DAY_END_STR, DateStyle.YYYY_MM_DD_HH_MM_SS);
             criteria.andOperator(Criteria.where("submitTime").lte(end).gte(start));
         }
+        criteria.and("deleteStatus").is(LogConstant.BOTONG_ZERO_NUM);
         Query query = new Query(criteria);
         query.with(new Sort(Sort.Direction.DESC, "submitTime"));
         return query;
