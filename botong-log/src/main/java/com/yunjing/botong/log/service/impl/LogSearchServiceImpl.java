@@ -213,7 +213,7 @@ public class LogSearchServiceImpl implements ILogSearchService {
             }
             //redis中获取用户信息
             List<Member> memberList = new ArrayList<>();
-            if (userIds.size() > 0) {
+            if (!userIds.isEmpty()) {
                 memberList = memberRedisOperator.getMemberList(userIds);
             }
 
