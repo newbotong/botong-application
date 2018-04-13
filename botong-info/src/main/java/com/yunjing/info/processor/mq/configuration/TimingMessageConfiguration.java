@@ -16,7 +16,7 @@ public class TimingMessageConfiguration extends DefaultQueueConfiguration {
 
     @Override
     public String queueName() {
-        return "botong.org-app.queue";
+        return "botong-notice.queue";
     }
 
     @Override
