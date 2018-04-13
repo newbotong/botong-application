@@ -1,8 +1,11 @@
 package com.yunjing.botong.log.api;
 
+import com.yunjing.botong.log.constant.LogConstant;
+import com.yunjing.botong.log.mapper.LogTemplateFieldMapper;
 import com.yunjing.botong.log.params.DangParam;
 import com.yunjing.botong.log.params.UserInfoModel;
 import com.yunjing.botong.log.processor.okhttp.AppCenterService;
+import com.yunjing.botong.log.vo.LogTemplateFieldVo;
 import com.yunjing.mommon.base.PushParam;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -10,6 +13,7 @@ import org.springframework.dao.DataAccessException;
 import org.springframework.data.redis.connection.RedisConnection;
 import org.springframework.data.redis.core.RedisCallback;
 import org.springframework.data.redis.core.StringRedisTemplate;
+import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
@@ -36,10 +40,19 @@ public class TestController {
     @Autowired
     private StringRedisTemplate redisTemplate;
 
+    @Autowired
+    private LogTemplateFieldMapper logTemplateFieldMapper;
+
     @PostConstruct
     public void init() {
     }
 
+
+    @GetMapping("/field")
+    public List<LogTemplateFieldVo> field() {
+        List<LogTemplateFieldVo> fieldVos = logTemplateFieldMapper.queryFields(null, null, "1", LogConstant.BOTONG_ONE_STR);
+        return fieldVos;
+    }
 
     @RequestMapping("/push")
     public String push() {

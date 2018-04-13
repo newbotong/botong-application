@@ -1,6 +1,7 @@
 package com.yunjing.botong.log.vo;
 
 import lombok.Data;
+import org.dozer.Mapping;
 
 /**
  * @author liuxiaopeng
@@ -8,7 +9,7 @@ import lombok.Data;
  */
 
 @Data
-public class LogTemplVO  {
+public class LogTemplVO {
 
     /**
      * 属性编号
@@ -18,17 +19,18 @@ public class LogTemplVO  {
     /**
      * 属性英文名
      */
+    @Mapping("fieldName")
     private String eKey;
 
     /**
      * 属性中文名
      */
+    @Mapping("fieldLabel")
     private String cKey;
 
     /**
      * 属性值
      */
+    @Mapping("templateName")
     private String val;
-
-
 }
