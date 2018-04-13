@@ -16,6 +16,7 @@ import com.yunjing.approval.service.ICopysService;
 import com.yunjing.approval.service.IPushLogService;
 import com.yunjing.approval.util.DateUtil;
 import com.yunjing.mommon.global.exception.InsertMessageFailureException;
+import com.yunjing.mommon.utils.IDUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -132,6 +133,7 @@ public class ApprovalPushTask extends BaseTask {
                         PushLog pushLog = new PushLog();
                         if (approvalUserVO.getProcessState() == 0) {
                             phones[0] = approvalUserVO.getMobile();
+                            pushLog.setId(IDUtils.uuid());
                             pushLog.setDatatype(30);
                             pushLog.setInfoId(approvalId);
                             pushLog.setUserId(approvalUserVO.getUserId());
