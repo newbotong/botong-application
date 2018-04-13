@@ -172,14 +172,10 @@ public class NoticeServiceImpl extends ServiceImpl<NoticeMapper, NoticeEntity> i
         pushParam.setTitle(noticeEntity.getTitle());
         pushParam.setMap(map);
         pushParam.setMsg("您有一条新公告，请注意查收！");
-        pushParam.setCompanyId("6384295807801102336");
-        pushParam.setAppId("fbbc9bbb6ead4750a5a725f8b098e304");
-
-
+        pushParam.setCompanyId(noticeBody.getOrgId());
+        pushParam.setAppId(appId);
         // okhttp调用工作通知
-        Call<ResponseEntityWrapper> response = informService.pushAllTargetByUser(pushParam);
-
-
+        informService.pushAllTargetByUser(pushParam);
         //Dang
         if (noticeEntity.getDangState() == 0) {
             //批量查询用户信息
