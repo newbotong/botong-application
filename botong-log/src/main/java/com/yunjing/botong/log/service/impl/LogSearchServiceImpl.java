@@ -212,7 +212,10 @@ public class LogSearchServiceImpl implements ILogSearchService {
                 userIds.addAll(detail.getUnreadUserId());
             }
             //redis中获取用户信息
-            List<Member> memberList = memberRedisOperator.getMemberList(userIds);
+            List<Member> memberList = new ArrayList<>();
+            if (userIds.size() > 0) {
+                memberList = memberRedisOperator.getMemberList(userIds);
+            }
 
             //用户放入map中，去匹配
             Map<String, Member> map = new HashMap<>(16);
