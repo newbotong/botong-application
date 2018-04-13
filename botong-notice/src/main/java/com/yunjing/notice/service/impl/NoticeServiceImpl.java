@@ -1,5 +1,6 @@
 package com.yunjing.notice.service.impl;
 
+import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 import com.baomidou.mybatisplus.mapper.EntityWrapper;
 import com.baomidou.mybatisplus.plugins.Page;
@@ -123,29 +124,39 @@ public class NoticeServiceImpl extends ServiceImpl<NoticeMapper, NoticeEntity> i
         noticeEntity.insert();
         noticeUserService.insertBatch(userInfoBodyList);
         //推送
+        String url = H5Address + "?" + "id=" + noticeEntity.getId();
         Map<String, String> map = new HashMap<>(32);
+        JSONArray array = new JSONArray();
+        JSONObject json = new JSONObject();
+        map.put("subModuleName", "公告");
+        map.put("url", url);
+        json.put("title","公告");
+        json.put("content",noticeEntity.getTitle());
+        json.put("type","0");
+        array.add(json);
+        json.clear();
         if (StringUtils.isNotEmpty(noticeEntity.getCover())) {
-            map.put("cover", noticeEntity.getCover());
-        } else {
-            map.put("cover", null);
+            map.put("imgPath", noticeEntity.getCover());
         }
-        map.put("title", noticeEntity.getTitle());
-        map.put("id", noticeEntity.getId());
-        map.put("content", noticeEntity.getContent());
-        map.put("createTime", noticeEntity.getCreateTime().toString());
-        map.put("author", noticeEntity.getAuthor());
-        if (StringUtils.isNotEmpty(noticeEntity.getPicture())) {
-            String[] pictureArrays = noticeEntity.getPicture().split(",");
-            map.put("accessory", pictureArrays.length + "");
-        } else {
-            map.put("accessory", null);
-        }
+        json.put("type","1");
+        array.add(json);
+        json.clear();
+        json.put("bottom",noticeEntity.getAuthor());
+        json.put("createDate",System.currentTimeMillis());
+        json.put("type","4");
+        array.add(json);
+        json.clear();
+        json.put("subTitle","公告");
+        json.put("type","5");
+        array.add(json);
+        map.put("content",array.toJSONString());
         PushParam pushParam = new PushParam();
-        pushParam.setTitle("公告");
-        pushParam.setNotificationTitle(noticeEntity.getTitle());
+        pushParam.setNotificationTitle("公告");
+//        pushParam.setNotificationTitle(noticeEntity.getTitle());
         pushParam.setAlias(passportIds);
+        pushParam.setMsg(noticeEntity.getTitle());
         pushParam.setMap(map);
-        pushParam.setMsg("");
+        pushParam.setMsg("您有一条新公告，请注意查收！");
         // okhttp调用工作通知
         informService.pushAllTargetByUser(pushParam);
         //Dang
