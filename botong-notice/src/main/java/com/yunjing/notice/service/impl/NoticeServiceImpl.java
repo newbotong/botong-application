@@ -134,25 +134,25 @@ public class NoticeServiceImpl extends ServiceImpl<NoticeMapper, NoticeEntity> i
         json.put("content",noticeEntity.getTitle());
         json.put("type","0");
         array.add(json);
-        json.clear();
+        JSONObject json1 = new JSONObject();
         if (StringUtils.isNotEmpty(noticeEntity.getCover())) {
-            map.put("imgPath", noticeEntity.getCover());
+            json1.put("imgPath", noticeEntity.getCover());
         }
-        json.put("type","1");
-        array.add(json);
-        json.clear();
-        json.put("bottom",noticeEntity.getAuthor());
-        json.put("createDate",System.currentTimeMillis());
-        json.put("type","4");
-        array.add(json);
-        json.clear();
-        json.put("subTitle","公告");
-        json.put("type","5");
-        array.add(json);
+        json1.put("type","1");
+        array.add(json1);
+        JSONObject json2 = new JSONObject();
+        json2.put("bottom",noticeEntity.getAuthor());
+        json2.put("createDate",System.currentTimeMillis());
+        json2.put("type","4");
+        array.add(json2);
+        JSONObject json3 = new JSONObject();
+        json3.put("subTitle","公告");
+        json3.put("type","5");
+        array.add(json3);
         map.put("content",array.toJSONString());
         PushParam pushParam = new PushParam();
         pushParam.setNotificationTitle("公告");
-//        pushParam.setNotificationTitle(noticeEntity.getTitle());
+
         pushParam.setAlias(passportIds);
         pushParam.setMsg(noticeEntity.getTitle());
         pushParam.setMap(map);
