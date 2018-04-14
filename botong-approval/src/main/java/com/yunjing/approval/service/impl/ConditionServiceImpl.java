@@ -1,5 +1,8 @@
 package com.yunjing.approval.service.impl;
 
+import com.alibaba.fastjson.JSON;
+import com.alibaba.fastjson.JSONArray;
+import com.alibaba.fastjson.JSONObject;
 import com.baomidou.mybatisplus.mapper.Condition;
 import com.baomidou.mybatisplus.mapper.EntityWrapper;
 import com.baomidou.mybatisplus.mapper.Wrapper;
@@ -18,15 +21,13 @@ import com.yunjing.approval.service.IProcessService;
 import com.yunjing.mommon.global.exception.BaseException;
 import com.yunjing.mommon.utils.IDUtils;
 import org.apache.commons.collections.CollectionUtils;
-import org.apache.commons.lang.ArrayUtils;
 import org.apache.commons.lang.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.ArrayList;
-import java.util.List;
+import java.util.*;
 
 /**
  * @author roc
@@ -77,11 +78,11 @@ public class ConditionServiceImpl extends BaseServiceImpl<ConditionMapper, SetsC
 
         List<SetsCondition> listCondition = this.selectList(wrapper);
         List<SetConditionVO> list = new ArrayList<>();
-        List<String> conditonIds = new ArrayList<>();
+        List<String> conditionIds = new ArrayList<>();
         for (SetsCondition setsCondition : listCondition) {
             SetConditionVO setConditionVO = new SetConditionVO();
-            conditonIds.add(setsCondition.getId());
-            List<UserVO> userVoList = processService.getProcess(modelId, conditonIds);
+            conditionIds.add(setsCondition.getId());
+            List<UserVO> userVoList = processService.getProcess(modelId, conditionIds);
             setConditionVO.setConditionId(setsCondition.getId());
             setConditionVO.setCdn(setsCondition.getCdn());
             setConditionVO.setContent(setsCondition.getContent());
@@ -167,19 +168,13 @@ public class ConditionServiceImpl extends BaseServiceImpl<ConditionMapper, SetsC
     @Override
     public List<ModelItemVO> getJudgeList(String modelId) throws Exception {
         ModelL model = modelService.selectById(modelId);
-        if (model == null) {
-            throw new BaseException("模型不存");
-        }
-
         Integer version = model.getModelVersion();
         if (version == null || version < 1) {
             throw new BaseException("模型版本异常");
         }
-
         Wrapper<ModelItem> wrapper = new EntityWrapper<>();
-        wrapper.eq("model_id", modelId).eq("is_judge", 1).eq("item_version", version);
+        wrapper.eq("model_id", modelId).eq("data_type", 3).eq("item_version", version);
         wrapper.orderBy(true, "priority", true);
-
         List<ModelItem> list = modelItemService.selectList(wrapper);
         if (CollectionUtils.isEmpty(list)) {
             return new ArrayList<>(0);
@@ -195,152 +190,37 @@ public class ConditionServiceImpl extends BaseServiceImpl<ConditionMapper, SetsC
     }
 
     @Override
-    public List<SetConditionVO> save(String modelId, String field, String numbers) throws Exception {
-
-        if (StringUtils.isBlank(field)) {
-            throw new BaseException("字段不存在");
+    public List<SetConditionVO> save(String modelId, String judge,String memberIds) throws Exception {
+        // 解析
+        Map<String, String> param = new HashMap<>(1);
+        JSONArray jsonArray = JSON.parseArray(judge);
+        Iterator<Object> it = jsonArray.iterator();
+        while (it.hasNext()) {
+            JSONObject obj = (JSONObject) it.next();
+            String field = obj.getString("field");
+            String value = obj.getString("value");
+            param.put(field, value);
         }
-
         ModelL model = modelService.selectById(modelId);
-        if (model == null) {
-            throw new BaseException("模型不存在");
-        }
-
         Integer version = model.getModelVersion();
         if (version == null || version < 1) {
             throw new BaseException("模型版本异常");
         }
-
-
-        Wrapper<ModelItem> wrapper = new EntityWrapper<>();
-        wrapper.eq("model_id", modelId).eq("field", field).eq("item_version", version);
-
-        ModelItem item = modelItemService.selectOne(wrapper);
-
-        if (item == null || StringUtils.isBlank(item.getId())) {
-            throw new BaseException("字段类型错误");
-        }
-
         List<SetsCondition> list = new ArrayList<>(16);
-
-        String label = item.getItemLabel();
-
-        int type = item.getDataType();
-
-        // 数字输入框
-        final int dataTypeNum = 2;
-
-        // 单选框
-        final int dataTypeRadio = 3;
-
-        if (type == dataTypeRadio) {
-            if (StringUtils.isBlank(item.getOptValue())) {
-                throw new BaseException("字段无可选项");
-            }
-
-            String[] opts = StringUtils.split(item.getOptValue(), ",");
-
-            if (ArrayUtils.isEmpty(opts)) {
-                throw new BaseException("字段无可选项");
-            }
-
-            if (StringUtils.isBlank(label)) {
-                throw new BaseException("字段名称为空");
-            }
-
-            String flag = " = ";
-
-            for (int i = 0; i < opts.length; i++) {
-                String opt = opts[i];
-
-                if (StringUtils.isBlank(opt)) {
-                    continue;
-                }
-
-                SetsCondition entity = new SetsCondition();
-                entity.setId(IDUtils.uuid());
-                entity.setModelId(modelId);
-
-                entity.setContent(label + flag + opt);
-                entity.setCdn(field + flag + opt);
-
-                entity.setEnabled(1);
-                entity.setSort(i + 1);
-
-                list.add(entity);
-            }
-        }
-
-        if (type == dataTypeNum) {
-            if (StringUtils.isBlank(numbers)) {
-                throw new BaseException("字段参数值不正确");
-            }
-
-            String[] vals = StringUtils.split(numbers, ",");
-            if (ArrayUtils.isEmpty(vals)) {
-                throw new BaseException("字段参数值不正确");
-            }
-
-            Integer num = 0;
-
-            String flag = " ≤ ";
-
-            for (int i = 0; i < vals.length; i++) {
-                String value = vals[i];
-
-                if (StringUtils.isBlank(value)) {
-                    continue;
-                }
-
-                String content;
-                String cdn;
-
-                if (num > 0) {
-                    content = num + " ＜ " + label + flag + value;
-                    cdn = num + " ＜ " + label + flag + value;
-                } else {
-                    content = label + flag + value;
-                    cdn = field + flag + value;
-                }
-
-                SetsCondition entity = new SetsCondition();
-                entity.setId(IDUtils.uuid());
-                entity.setModelId(modelId);
-
-                entity.setContent(content);
-                entity.setCdn(cdn);
-                entity.setEnabled(1);
-                entity.setSort(i + 1);
-
-                list.add(entity);
-
-                num = Integer.parseInt(value);
-
-                if (i == vals.length - 1) {
-                    SetsCondition e = new SetsCondition();
-                    e.setId(IDUtils.uuid());
-                    e.setModelId(modelId);
-
-                    flag = " ＞ ";
-
-                    content = label + flag + value;
-                    cdn = field + flag + value;
-
-                    e.setContent(content);
-                    e.setCdn(cdn);
-                    e.setEnabled(1);
-                    e.setSort(i + 2);
-
-                    list.add(e);
-                }
-            }
-        }
-
-        conditionMapper.disableByModelId(modelId);
-        if (!list.isEmpty()) {
-            this.insertBatch(list);
+        int i = 0;
+        for (Map.Entry<String, String> entry : param.entrySet()) {
+            SetsCondition condition = new SetsCondition();
+            condition.setId(IDUtils.uuid());
+            condition.setModelId(modelId);
+            condition.setCdn(entry.getKey() + " = " + entry.getValue());
+            condition.setEnabled(1);
+            condition.setSort(i + 1);
+            list.add(condition);
+            // 保存审批人
+            processService.updateProcess(modelId, condition.getId(), memberIds);
         }
 
         return this.getConditionList(modelId);
     }
+
 }

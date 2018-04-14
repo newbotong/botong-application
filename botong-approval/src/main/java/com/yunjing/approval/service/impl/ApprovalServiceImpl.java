@@ -94,7 +94,10 @@ public class ApprovalServiceImpl extends BaseServiceImpl<ApprovalMapper, Approva
             title += "用户";
         } else {
             ApprovalUser user = approvalUserService.selectOne(Condition.create().where("id={0}", memberId));
-            String nick = user.getName();
+            String nick = "";
+            if(user!=null){
+                nick = user.getName();
+            }
             String name = modelL.getModelName();
 
             if (StringUtils.isBlank(nick)) {
@@ -102,7 +105,7 @@ public class ApprovalServiceImpl extends BaseServiceImpl<ApprovalMapper, Approva
             } else if (StringUtils.isBlank(name)) {
                 title += "模型名称";
             } else {
-                title = user.getName() + "的" + modelL.getModelName();
+                title = nick + "的" + modelL.getModelName();
             }
         }
         approval.setTitle(title);

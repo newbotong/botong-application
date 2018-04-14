@@ -41,6 +41,7 @@ public class ModelItemVO {
      */
     private String field;
 
+    private String value = "事假";
     /**
      * 显示名称
      */

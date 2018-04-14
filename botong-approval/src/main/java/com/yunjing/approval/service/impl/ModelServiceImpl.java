@@ -174,9 +174,7 @@ public class ModelServiceImpl extends BaseServiceImpl<ModelMapper, ModelL> imple
     @Transactional(propagation = Propagation.REQUIRED, rollbackFor = Exception.class)
     public boolean updateVisibleRange(String modelId, String deptIds, String userIds) throws Exception {
         // TODO 调用rpc接口处理可见范围权限业务
-
         ModelL modelL = this.selectById(modelId);
-
         return true;
     }
 

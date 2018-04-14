@@ -5,6 +5,7 @@ import com.common.mybatis.service.IBaseService;
 import com.yunjing.approval.model.entity.SetsProcess;
 import com.yunjing.approval.model.vo.ApproverVO;
 import com.yunjing.approval.model.vo.UserVO;
+import com.yunjing.mommon.global.exception.BaseException;
 
 import java.util.List;
 
@@ -27,7 +28,7 @@ public interface IProcessService extends IBaseService<SetsProcess> {
     /**
      * 获取审批流程
      *
-     * @param modelId     模型主键
+     * @param modelId      模型主键
      * @param conditionIds 条件主键
      * @return
      * @throws Exception
@@ -66,4 +67,15 @@ public interface IProcessService extends IBaseService<SetsProcess> {
      * @throws Exception
      */
     ApproverVO getApprover(String companyId, String memberId, String modelId, String deptId, String conditionId, String judge) throws Exception;
+
+    /**
+     * 保存默认审批人和抄送人
+     *
+     * @param modelId     模型Id
+     * @param approverIds 审批人ID集合
+     * @param copyIds     抄送人ID集合
+     * @return
+     * @throws BaseException
+     */
+    boolean saveDefaultApprover(String modelId, String approverIds, String copyIds) throws BaseException;
 }
