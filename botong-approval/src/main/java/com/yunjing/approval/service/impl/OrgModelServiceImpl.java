@@ -186,6 +186,7 @@ public class OrgModelServiceImpl extends BaseServiceImpl<OrgModelMapper, OrgMode
                     newModelItem.setModelId(modelId);
                     newModelItem.setField(modelItem.getField());
                     newModelItem.setItemLabel(modelItem.getItemLabel());
+                    newModelItem.setItemLabels(modelItem.getItemLabels());
                     newModelItem.setPriority(modelItem.getPriority());
                     newModelItem.setDefValue(modelItem.getDefValue());
                     newModelItem.setOptValue(modelItem.getOptValue());
@@ -217,6 +218,7 @@ public class OrgModelServiceImpl extends BaseServiceImpl<OrgModelMapper, OrgMode
                         newModelItem.setModelId(modelId);
                         newModelItem.setField(modelItem.getField());
                         newModelItem.setItemLabel(modelItem.getItemLabel());
+                        newModelItem.setItemLabels(modelItem.getItemLabels());
                         newModelItem.setPriority(modelItem.getPriority());
                         newModelItem.setDefValue(modelItem.getDefValue());
                         newModelItem.setOptValue(modelItem.getOptValue());
