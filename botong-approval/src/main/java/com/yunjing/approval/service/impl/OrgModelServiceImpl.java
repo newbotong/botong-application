@@ -33,7 +33,6 @@ import java.util.List;
  * @date 2017/11/29
  */
 @Service
-@Transactional(propagation = Propagation.REQUIRED, rollbackFor = Exception.class)
 public class OrgModelServiceImpl extends BaseServiceImpl<OrgModelMapper, OrgModel> implements IOrgModelService {
 
     @Autowired
