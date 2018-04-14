@@ -1,6 +1,7 @@
 package com.yunjing.approval.service;
 
 
+import com.alibaba.fastjson.JSONArray;
 import com.common.mybatis.service.IBaseService;
 import com.yunjing.approval.excel.BaseExModel;
 import com.yunjing.approval.model.entity.Approval;
@@ -28,7 +29,7 @@ public interface IApprovalService extends IBaseService<Approval> {
      * @return
      * @throws Exception
      */
-    boolean submit(String companyId, String memberId, String modelId, List jsonData, String sendUserIds, String sendCopyIds) throws Exception;
+    boolean submit(String companyId, String memberId, String modelId, JSONArray jsonData, String sendUserIds, String sendCopyIds) throws Exception;
 
     /**
      * 获取审批数据列表

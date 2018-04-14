@@ -56,11 +56,12 @@ public class ClientApprovalOperationController extends BaseController {
     public ResponseEntityWrapper submit(@RequestParam("companyId") String companyId,
                                         @RequestParam("memberId") String memberId,
                                         @RequestParam("modelId") String modelId,
-                                        @RequestParam("jsonData") List jsonData,
+                                        @RequestParam("jsonData") String jsonData,
                                         @RequestParam(value = "deptId",required = false) String deptId,
                                         @RequestParam("sendUserIds") String sendUserIds,
                                         @RequestParam(value = "sendCopyIds", required = false) String sendCopyIds) throws Exception {
-        return success(approvalService.submit(companyId, memberId, modelId, jsonData, sendUserIds, sendCopyIds));
+        JSONArray list = JSONArray.parseArray(jsonData);
+        return success(approvalService.submit(companyId, memberId, modelId, list, sendUserIds, sendCopyIds));
     }
 
     /**
