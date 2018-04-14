@@ -10,6 +10,7 @@ version '1.0-SNAPSHOT'
 
 apply from: "../common_service.gradle"
 apply from: "../build.gradle"
+apply plugin: 'org.springframework.boot'
 
 sourceCompatibility = 1.8
 
