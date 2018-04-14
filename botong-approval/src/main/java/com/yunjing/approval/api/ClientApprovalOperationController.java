@@ -1,5 +1,6 @@
 package com.yunjing.approval.api;
 
+import com.alibaba.fastjson.JSONArray;
 import com.yunjing.approval.service.IApprovalApiService;
 import com.yunjing.approval.service.IApprovalService;
 import com.yunjing.approval.service.IApprovalUserService;
@@ -10,6 +11,8 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
+
+import java.util.List;
 
 
 /**
@@ -53,7 +56,7 @@ public class ClientApprovalOperationController extends BaseController {
     public ResponseEntityWrapper submit(@RequestParam("companyId") String companyId,
                                         @RequestParam("memberId") String memberId,
                                         @RequestParam("modelId") String modelId,
-                                        @RequestParam("jsonData") String jsonData,
+                                        @RequestParam("jsonData") List jsonData,
                                         @RequestParam(value = "deptId",required = false) String deptId,
                                         @RequestParam("sendUserIds") String sendUserIds,
                                         @RequestParam(value = "sendCopyIds", required = false) String sendCopyIds) throws Exception {

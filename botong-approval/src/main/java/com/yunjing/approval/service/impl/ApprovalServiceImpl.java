@@ -78,7 +78,8 @@ public class ApprovalServiceImpl extends BaseServiceImpl<ApprovalMapper, Approva
     private RedisApproval redisTemplate;
 
     @Override
-    public boolean submit(String companyId, String memberId, String modelId, String jsonData, String sendUserIds, String sendCopyIds) throws Exception {
+    public boolean submit(String companyId, String memberId, String modelId, List jsonData, String sendUserIds, String sendCopyIds) throws Exception {
+        String json =(String) jsonData.get(0);
         ModelL modelL = modelService.selectById(modelId);
         Approval approval = new Approval();
         approval.setId(IDUtils.uuid());
@@ -118,7 +119,7 @@ public class ApprovalServiceImpl extends BaseServiceImpl<ApprovalMapper, Approva
         Set<ApprovalAttr> attrSet = new HashSet<>();
         Set<ApprovalAttr> contentSet = new HashSet<>();
         // 解析并保存审批信息
-        JSONArray jsonArray = JSON.parseArray(jsonData);
+        JSONArray jsonArray = JSON.parseArray(json);
         Iterator<Object> it = jsonArray.iterator();
         while (it.hasNext()) {
             JSONObject obj = (JSONObject) it.next();
