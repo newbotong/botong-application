@@ -119,8 +119,8 @@ public class ApprovalServiceImpl extends BaseServiceImpl<ApprovalMapper, Approva
         Set<ApprovalAttr> attrSet = new HashSet<>();
         Set<ApprovalAttr> contentSet = new HashSet<>();
         // 解析并保存审批信息
-        JSONArray jsonArray = JSON.parseArray(json);
-        Iterator<Object> it = jsonArray.iterator();
+//        JSONArray jsonArray = JSON.parseArray(json);
+        Iterator<Object> it = jsonData.iterator();
         while (it.hasNext()) {
             JSONObject obj = (JSONObject) it.next();
             int type = obj.getIntValue("type");
