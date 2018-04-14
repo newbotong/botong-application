@@ -80,6 +80,7 @@ public class ApprovalServiceImpl extends BaseServiceImpl<ApprovalMapper, Approva
     @Override
     public boolean submit(String companyId, String memberId, String modelId, List jsonData, String sendUserIds, String sendCopyIds) throws Exception {
         String json =(String) jsonData.get(0);
+        logger.info(json);
         ModelL modelL = modelService.selectById(modelId);
         Approval approval = new Approval();
         approval.setId(IDUtils.uuid());
@@ -122,7 +123,7 @@ public class ApprovalServiceImpl extends BaseServiceImpl<ApprovalMapper, Approva
 //        JSONArray jsonArray = JSON.parseArray(json);
         Iterator<Object> it = jsonData.iterator();
         while (it.hasNext()) {
-            JSONObject obj = (JSONObject) it.next();
+            JSONObject obj = JSONObject.parseObject((String) it.next()) ;
             int type = obj.getIntValue("type");
             String name = obj.getString("field");
             String value = obj.getString("value");
