@@ -1,9 +1,11 @@
 package com.yunjing.approval.model.vo;
 
+import com.yunjing.approval.model.entity.ModelItem;
 import com.yunjing.approval.model.entity.ModelL;
 import lombok.Data;
 
 import java.util.List;
+import java.util.Set;
 
 /**
  * @author 刘小鹏
@@ -90,4 +92,7 @@ public class ModelVO {
      * 字段
      */
     private List<ModelItemVO> items;
+
+
+    private Set<ModelItem> itemVOSet;
 }
