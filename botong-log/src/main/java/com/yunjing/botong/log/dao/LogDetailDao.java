@@ -114,7 +114,8 @@ public class LogDetailDao extends BaseMongoDaoImpl<LogDetail> {
      * @return
      */
     public LogDetail findByLogId(String logId, String userId){
-        return findOne(findOne(logId, userId));
+        List<LogDetail> list = find(findOne(logId, userId));
+        return (list != null && list.size() > 0) ? list.get(0) : null;
     }
 
     /**

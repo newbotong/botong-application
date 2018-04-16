@@ -406,4 +406,31 @@ public class LogSearchServiceImpl implements ILogSearchService {
         log.info("数据注入excel表耗时：" + (time3.getTime() - time2.getTime()));
         return logExModel;
     }
+
+    /**
+     * 获取日志详情
+     * @param receviedParam 参数对象
+     * @return 日志对象
+     */
+    @Override
+    public LogDetailVO get(ReceviedParam receviedParam) {
+        if (StringUtils.isEmpty(receviedParam.getLogId())) {
+            throw new ParameterErrorException("日志Id不能为空");
+        }
+        if (StringUtils.isEmpty(receviedParam.getUserId())) {
+            throw new ParameterErrorException("用户Id不能为空");
+        }
+        LogDetail detail = logDetailDao.findByLogId(receviedParam.getLogId(), receviedParam.getUserId());
+        PageWrapper<LogDetail> detailResult = new PageWrapper();
+        List<LogDetail> details = new ArrayList<>();
+        details.add(detail);
+        detailResult.setRecords(details);
+        PageWrapper<LogDetailVO> resultPage = convertResults(receviedParam, detailResult);
+        LogDetailVO result = null;
+        if (resultPage.getRecords() != null && resultPage.getRecords().size() > 0) {
+            result = resultPage.getRecords().get(0);
+        }
+
+        return result;
+    }
 }
