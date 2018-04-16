@@ -13,7 +13,7 @@
         WHERE o.org_id = #{ orgId }
     </select>
     <select id="getMinSort" resultType="java.lang.Integer">
-        select MIN(priority) AS max FROM model_item WHERE model_id = #{model_id} AND data_type = #{dataType}
+        select MIN(priority) AS max FROM model_item WHERE model_id = #{modelId} AND data_type = #{dataType}
     </select>
     <delete id="deleteModelItemListByOrgId" parameterType="java.lang.String">
         DELETE FROM model_item WHERE  model_id IN (SELECT o.model_id FROM org_model o WHERE o.org_id= #{ orgId })

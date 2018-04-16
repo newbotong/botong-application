@@ -118,26 +118,6 @@ public class ProcessServiceImpl extends BaseServiceImpl<ProcessMapper, SetsProce
     @Override
     public boolean updateProcess(String modelId, String conditionId, String userArray) throws Exception {
         String[] userIds = userArray.split(",");
-        int setting = ApproConstants.SET_TYPE_0;
-        if (null != conditionId) {
-            setting = ApproConstants.SET_TYPE_1;
-        }
-        if (null == conditionId) {
-            conditionId = null;
-        }
-        ApprovalSets approvalSets = approvalSetsService.selectOne(Condition.create().where("model_id={0}", modelId));
-        if (approvalSets == null) {
-            approvalSets = new ApprovalSets();
-            approvalSets.setId(modelId);
-        }
-        approvalSets.setSetting(setting);
-        boolean insertOrUpdate = approvalSetsService.insertOrUpdate(approvalSets);
-        if (!insertOrUpdate) {
-            throw new BaseException("审批设置项保存失败");
-        }
-        // 先删除旧的审批条件，再设置新的审批条件
-        this.delete(modelId, conditionId);
-
         // 批量保存审批人信息
         List<SetsProcess> list = new ArrayList<>();
         for (int i = 0; i < userIds.length; i++) {
@@ -196,7 +176,7 @@ public class ProcessServiceImpl extends BaseServiceImpl<ProcessMapper, SetsProce
                         String field = sc.getCdn().substring(0, sc.getCdn().indexOf(" "));
                         String value = sc.getCdn().substring(sc.getCdn().lastIndexOf(" "), sc.getCdn().length()).trim();
                         for (Map.Entry<String, String> m : param.entrySet()) {
-                            if (sc != null && field.equals(m.getKey()) && value.equals(m.getValue())) {
+                            if (sc != null && field.equals(m.getKey()) && m.getValue().equals(value)) {
                                 cdnIds.add(sc.getId());
                             }
 
@@ -206,7 +186,6 @@ public class ProcessServiceImpl extends BaseServiceImpl<ProcessMapper, SetsProce
                 } else {
                     cdnIds.addAll(conditionIds);
                 }
-
                 if (cdnIds.isEmpty()) {
                     return null;
                 }

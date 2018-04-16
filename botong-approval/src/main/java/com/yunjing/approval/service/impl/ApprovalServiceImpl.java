@@ -117,7 +117,6 @@ public class ApprovalServiceImpl extends BaseServiceImpl<ApprovalMapper, Approva
         Set<ApprovalAttr> attrSet = new HashSet<>();
         Set<ApprovalAttr> contentSet = new HashSet<>();
         // 解析并保存审批信息
-//        JSONArray jsonArray = JSON.parseArray(jsonData);
         Iterator<Object> it = jsonData.iterator();
         while (it.hasNext()) {
             JSONObject obj = (JSONObject) it.next();
@@ -268,6 +267,7 @@ public class ApprovalServiceImpl extends BaseServiceImpl<ApprovalMapper, Approva
             List<String> nicks = new ArrayList<>(uIds.size());
             uIds.forEach(uid -> nicks.add(userMap.get(uid)));
             String approver = StringUtils.join(nicks, "|");
+//            approvalVO.setApprover(StringUtils.isNotBlank(approver) ? approver : "无");
             approvalVO.setApprover(approver);
             records.add(approvalVO);
         });

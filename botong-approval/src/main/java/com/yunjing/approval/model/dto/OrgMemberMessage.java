@@ -84,7 +84,7 @@ public class OrgMemberMessage implements Serializable {
         /**
          * 删除
          */
-        DELETE;
+        DELETE
 
     }
 }

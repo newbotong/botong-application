@@ -49,13 +49,12 @@ public class ConditionController extends BaseController {
     /**
      * 删除审批条件
      *
-     * @param modelId     模型主键
-     * @param conditionId 审批条件
+     * @param modelId 模型主键
      * @return
      * @throws Exception
      */
     @PostMapping("/delete")
-    public ResponseEntityWrapper delete(@RequestParam String modelId, @RequestParam(required = false) String conditionId) throws Exception {
-        return success(cdnService.delete(modelId, conditionId));
+    public ResponseEntityWrapper delete(@RequestParam String modelId) throws Exception {
+        return success(cdnService.delete(modelId));
     }
 }

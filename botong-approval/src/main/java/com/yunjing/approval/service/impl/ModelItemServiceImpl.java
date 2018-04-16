@@ -394,7 +394,7 @@ public class ModelItemServiceImpl extends BaseServiceImpl<ModelItemMapper, Model
             // 是否为判断条件
             if (!flag) {
                 if (type == 2 || type == 3) {
-                    Integer isJudge = itemVO.getIsJudge();
+                    Integer isJudge = itemVO.getJudge();
                     if (isJudge != null && isJudge == 1) {
                         isJudge = 1;
                     } else {
@@ -402,7 +402,11 @@ public class ModelItemServiceImpl extends BaseServiceImpl<ModelItemMapper, Model
                     }
                     item.setIsJudge(isJudge);
                 } else {
-                    item.setIsJudge(0);
+                    if(item.getPriority().equals(minSort)){
+                        item.setIsJudge(1);
+                    }else {
+                        item.setIsJudge(0);
+                    }
                 }
             } else {
                 item.setIsJudge(0);

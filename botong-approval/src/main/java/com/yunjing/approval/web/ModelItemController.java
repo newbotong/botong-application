@@ -42,7 +42,9 @@ public class ModelItemController extends BaseController {
      */
     @PostMapping("/save")
     public ResponseEntityWrapper saveItem(@RequestParam("companyId") String companyId, @RequestParam("memberId") String memberId,
-                                          @RequestParam("categoryId") String categoryId, @RequestParam("json") String json) throws Exception {
-        return success(modelItemService.saveModelItem(companyId, memberId,categoryId, json));
+                                          @RequestParam(value = "categoryId", required = false) String categoryId, @RequestParam("json") String json) throws Exception {
+
+
+        return success(modelItemService.saveModelItem(companyId, memberId, categoryId, json));
     }
 }
