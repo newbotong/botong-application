@@ -29,6 +29,9 @@ import java.util.Map;
 @Service
 public class LogServiceImpl implements LogService {
 
+    @Value("${botong.log.look-log}")
+    private String lookLog;
+
     @Autowired
     private LogTemplateService logTemplateService;
 
@@ -69,8 +72,7 @@ public class LogServiceImpl implements LogService {
 
         Map<String, String> map = new HashMap<>(2);
         map.put("subModuleName", "日报提醒");
-        // TODO 看日志地址
-        map.put("url", "http://www.rizhi.com");
+        map.put("url", lookLog + entity.getLogId());
 
         //日志提醒
         JSONArray array = new JSONArray();

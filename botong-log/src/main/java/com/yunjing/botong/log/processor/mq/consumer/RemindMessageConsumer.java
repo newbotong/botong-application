@@ -22,6 +22,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.lang3.time.DateFormatUtils;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.messaging.handler.annotation.Payload;
 import org.springframework.stereotype.Component;
@@ -45,6 +46,10 @@ public class RemindMessageConsumer extends AbstractMessageConsumerWithQueueDecla
     private final static String[] MESSAGE = {"您当日的日报尚未提交，请及时提交。", "您本周的周报尚未提交，请及时提交。", "您本月的月报尚未提交，请及时提交。"};
 
     private final static String[] SMS_TEMPLATE = {"当日的日报", "本周的周报", "本月的月报"};
+
+
+    @Value("${botong.log.write-log}")
+    private String writeLog;
 
     @Autowired
     private LogReportDao logReportDao;
@@ -247,8 +252,7 @@ public class RemindMessageConsumer extends AbstractMessageConsumerWithQueueDecla
 
         Map<String, String> map = new HashMap<>(2);
         map.put("subModuleName", "日报提醒");
-        // TODO 发送日志地址
-        map.put("url", "http://www.rizhi.com");
+        map.put("url", writeLog);
 
         //日志提醒
         JSONArray array = new JSONArray();

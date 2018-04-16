@@ -92,6 +92,8 @@ ali:
 botong:
   log:
     appId: ${botong.log.appId}
+  write-log: ${botong.log.write-log}
+  look-log: ${botong.log.look-log}
 
 # 写入文件日志
 logging:
