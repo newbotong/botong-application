@@ -70,8 +70,11 @@ public class SignDetailDailyServiceImpl extends ServiceImpl<SignDetailDailyMappe
             if (signConfigModel.getTimeStatus() == 1) {
                 Date start = DateUtil.StringToDate(DateUtil.getDate(new Date()) + SignConstant.SEPARATE_STR_SPACE + signConfigModel.getStartTime(), DateStyle.YYYY_MM_DD_HH_MM);
                 Date end = DateUtil.StringToDate(DateUtil.getDate(new Date())  + SignConstant.SEPARATE_STR_SPACE + signConfigModel.getEndTime(), DateStyle.YYYY_MM_DD_HH_MM);
-                if (DateUtil.compareDate(new Date(), start) > 0 && DateUtil.compareDate(new Date(), end) < 0) {
-                    throw new UpdateMessageFailureException(600, "时间未到，不能打卡");
+                if (DateUtil.compareDate(new Date(), start) > 0 && (end != null && DateUtil.compareDate(new Date(), end) < 0)) {
+                    throw new UpdateMessageFailureException(600, "打卡时间超出范围");
+                }
+                if (DateUtil.compareDate(new Date(), start) > 0 && end == null) {
+                    throw new UpdateMessageFailureException(600, "打卡时间超出范围");
                 }
             }
         }
