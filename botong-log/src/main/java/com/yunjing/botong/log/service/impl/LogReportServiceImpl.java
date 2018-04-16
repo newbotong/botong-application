@@ -116,11 +116,13 @@ public class LogReportServiceImpl implements LogReportService {
         vo.setLogId(detail.getLogId());
         vo.setDeleteStatus(detail.getDeleteStatus());
         List<String> images = detail.getLogImages();
-        String[] img = new String[images.size()];
-        for (int i = 0; i < images.size(); i++) {
-            img[i] = images.get(i);
+        if (CollectionUtils.isNotEmpty(images)) {
+            String[] img = new String[images.size()];
+            for (int i = 0; i < images.size(); i++) {
+                img[i] = images.get(i);
+            }
+            vo.setLogImages(img);
         }
-        vo.setLogImages(img);
         vo.setLogVersion(detail.getLogVersion());
         vo.setOrgId(detail.getOrgId());
         vo.setRemark(detail.getRemark());

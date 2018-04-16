@@ -47,7 +47,9 @@ public class LogReportApi extends BaseController {
                                       @RequestParam(required = false, defaultValue = "1") Integer submitType,
                                       @RequestParam(required = false, defaultValue = "0") Long startDate,
                                       @RequestParam(required = false, defaultValue = "0") Long endDate) {
-
+        if (submitType == 0) {
+            submitType = 1;
+        }
         PageWrapper query = logReportService.query(memberId, orgId, appId, pageNo, pageSize, submitType, startDate, endDate);
         return success(query);
     }
