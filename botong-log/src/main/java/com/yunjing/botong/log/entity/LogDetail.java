@@ -1,11 +1,12 @@
 package com.yunjing.botong.log.entity;
 
 import com.baomidou.mybatisplus.toolkit.IdWorker;
+import com.baomidou.mybatisplus.toolkit.StringUtils;
 import com.yunjing.botong.log.params.LogParam;
 import com.yunjing.botong.log.vo.LogConentVO;
 import com.yunjing.botong.log.vo.LogTemplateVo;
 import lombok.Data;
-import org.springframework.data.mongodb.core.mapping.DBRef;
+import org.apache.commons.beanutils.BeanUtils;
 import org.springframework.data.mongodb.core.mapping.Field;
 
 import java.util.*;
@@ -125,8 +126,23 @@ public class LogDetail {
             this.contents.add(itemEntity);
         }
         this.logImages=param.getImages();
-        this.sendToUserId=param.getSendToUser();
-        this.unreadUserId=param.getSendToUser();
+        this.sendToUserId = new HashSet<>();
+        Iterator<String> it = param.getSendToUser().iterator();
+        while (it.hasNext()){
+            String item = it.next();
+            if(StringUtils.isNotEmpty(item)){
+                this.sendToUserId.add(item);
+            }
+        }
+
+        this.unreadUserId= new HashSet<>();
+        Iterator<String> iterator = param.getSendToUser().iterator();
+        while (iterator.hasNext()){
+            String item = iterator.next();
+            if(StringUtils.isNotEmpty(item)){
+                this.unreadUserId.add(item);
+            }
+        }
         this.readUserId = new HashSet<>();
         this.sendToGroupId=param.getSendToGroup();
         this.remark=param.getRemark();
