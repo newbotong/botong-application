@@ -256,6 +256,7 @@ public class AppCenterServiceImpl implements AppCenterService {
 
     @Override
     public List<Member> manageScope(String appId, String memberId) {
+        log.info("获取管理范围 appId:{},memberId:{}", appId, memberId);
         try {
             Response<ResponseEntityWrapper<List<Member>>> response = apiService.manageScope(appId, memberId).execute();
             ResponseEntityWrapper<List<Member>> body = response.body();

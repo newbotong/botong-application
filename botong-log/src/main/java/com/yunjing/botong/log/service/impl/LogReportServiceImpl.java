@@ -116,11 +116,13 @@ public class LogReportServiceImpl implements LogReportService {
         vo.setLogId(detail.getLogId());
         vo.setDeleteStatus(detail.getDeleteStatus());
         List<String> images = detail.getLogImages();
-        String[] img = new String[images.size()];
-        for (int i = 0; i < images.size(); i++) {
-            img[i] = images.get(i);
+        if (CollectionUtils.isNotEmpty(images)) {
+            String[] img = new String[images.size()];
+            for (int i = 0; i < images.size(); i++) {
+                img[i] = images.get(i);
+            }
+            vo.setLogImages(img);
         }
-        vo.setLogImages(img);
         vo.setLogVersion(detail.getLogVersion());
         vo.setOrgId(detail.getOrgId());
         vo.setRemark(detail.getRemark());
@@ -208,70 +210,12 @@ public class LogReportServiceImpl implements LogReportService {
     /**
      * 管理成员id集合
      *
-     * @param memberId
      * @param appId
+     * @param memberId
      * @return
      */
     private List<Member> manageScopeList(String memberId, String appId) {
         // 根据memberId 查询管理范围
         return appCenterService.manageScope(appId, memberId);
-    }
-
-
-    /**
-     * 测试数据
-     *
-     * @return
-     */
-    private List<Member> buildTestMemberData() {
-        List<Member> list = new ArrayList<>();
-        list.add(new Member("6387252886685880323", "这是名字", "这是电话", "https://storage.googleapis.com/gweb-uniblog-publish-prod/images/android_ambassador_v1_cmyk_200px.max-2800x2800.png"));
-        list.add(new Member("6387216520023379968", "这是名字", "这是电话", "https://storage.googleapis.com/gweb-uniblog-publish-prod/images/android_ambassador_v1_cmyk_200px.max-2800x2800.png"));
-        list.add(new Member("6387252886685880324", "这是名字", "这是电话", "https://storage.googleapis.com/gweb-uniblog-publish-prod/images/android_ambassador_v1_cmyk_200px.max-2800x2800.png"));
-        list.add(new Member("6387216520027574275", "这是名字", "这是电话", "https://storage.googleapis.com/gweb-uniblog-publish-prod/images/android_ambassador_v1_cmyk_200px.max-2800x2800.png"));
-        list.add(new Member("6387252886685880320", "这是名字", "这是电话", "https://storage.googleapis.com/gweb-uniblog-publish-prod/images/android_ambassador_v1_cmyk_200px.max-2800x2800.png"));
-        list.add(new Member("6388997372029964288", "这是名字", "这是电话", "https://storage.googleapis.com/gweb-uniblog-publish-prod/images/android_ambassador_v1_cmyk_200px.max-2800x2800.png"));
-        list.add(new Member("6387216520027574274", "这是名字", "这是电话", "https://storage.googleapis.com/gweb-uniblog-publish-prod/images/android_ambassador_v1_cmyk_200px.max-2800x2800.png"));
-        list.add(new Member("6387216520027574273", "这是名字", "这是电话", "https://storage.googleapis.com/gweb-uniblog-publish-prod/images/android_ambassador_v1_cmyk_200px.max-2800x2800.png"));
-        list.add(new Member("6387252886685880321", "这是名字", "这是电话", "https://storage.googleapis.com/gweb-uniblog-publish-prod/images/android_ambassador_v1_cmyk_200px.max-2800x2800.png"));
-        list.add(new Member("6387221054862921732", "这是名字", "这是电话", "https://storage.googleapis.com/gweb-uniblog-publish-prod/images/android_ambassador_v1_cmyk_200px.max-2800x2800.png"));
-        list.add(new Member("6387252886685880322", "这是名字", "这是电话", "https://storage.googleapis.com/gweb-uniblog-publish-prod/images/android_ambassador_v1_cmyk_200px.max-2800x2800.png"));
-        list.add(new Member("6387216520027574272", "这是名字", "这是电话", "https://storage.googleapis.com/gweb-uniblog-publish-prod/images/android_ambassador_v1_cmyk_200px.max-2800x2800.png"));
-        list.add(new Member("6386505038969180166", "这是名字", "这是电话", "https://storage.googleapis.com/gweb-uniblog-publish-prod/images/android_ambassador_v1_cmyk_200px.max-2800x2800.png"));
-        list.add(new Member("6388997328186904576", "这是名字", "这是电话", "https://storage.googleapis.com/gweb-uniblog-publish-prod/images/android_ambassador_v1_cmyk_200px.max-2800x2800.png"));
-        list.add(new Member("6388996885952073728", "这是名字", "这是电话", "https://storage.googleapis.com/gweb-uniblog-publish-prod/images/android_ambassador_v1_cmyk_200px.max-2800x2800.png"));
-        list.add(new Member("6387221054862921730", "这是名字", "这是电话", "https://storage.googleapis.com/gweb-uniblog-publish-prod/images/android_ambassador_v1_cmyk_200px.max-2800x2800.png"));
-        list.add(new Member("6387216817735077891", "这是名字", "这是电话", "https://storage.googleapis.com/gweb-uniblog-publish-prod/images/android_ambassador_v1_cmyk_200px.max-2800x2800.png"));
-        list.add(new Member("6387221054862921731", "这是名字", "这是电话", "https://storage.googleapis.com/gweb-uniblog-publish-prod/images/android_ambassador_v1_cmyk_200px.max-2800x2800.png"));
-        list.add(new Member("6389047773366325248", "这是名字", "这是电话", "https://storage.googleapis.com/gweb-uniblog-publish-prod/images/android_ambassador_v1_cmyk_200px.max-2800x2800.png"));
-        list.add(new Member("6387216817735077890", "这是名字", "这是电话", "https://storage.googleapis.com/gweb-uniblog-publish-prod/images/android_ambassador_v1_cmyk_200px.max-2800x2800.png"));
-        list.add(new Member("6388997260423729152", "这是名字", "这是电话", "https://storage.googleapis.com/gweb-uniblog-publish-prod/images/android_ambassador_v1_cmyk_200px.max-2800x2800.png"));
-        list.add(new Member("6388916729069703168", "这是名字", "这是电话", "https://storage.googleapis.com/gweb-uniblog-publish-prod/images/android_ambassador_v1_cmyk_200px.max-2800x2800.png"));
-        list.add(new Member("6388916729069703169", "这是名字", "这是电话", "https://storage.googleapis.com/gweb-uniblog-publish-prod/images/android_ambassador_v1_cmyk_200px.max-2800x2800.png"));
-        list.add(new Member("6386821498899795968", "这是名字", "这是电话", "https://storage.googleapis.com/gweb-uniblog-publish-prod/images/android_ambassador_v1_cmyk_200px.max-2800x2800.png"));
-        list.add(new Member("6386837899156918272", "这是名字", "这是电话", "https://storage.googleapis.com/gweb-uniblog-publish-prod/images/android_ambassador_v1_cmyk_200px.max-2800x2800.png"));
-        list.add(new Member("6388997346864140288", "这是名字", "这是电话", "https://storage.googleapis.com/gweb-uniblog-publish-prod/images/android_ambassador_v1_cmyk_200px.max-2800x2800.png"));
-        list.add(new Member("6389045655553183744", "这是名字", "这是电话", "https://storage.googleapis.com/gweb-uniblog-publish-prod/images/android_ambassador_v1_cmyk_200px.max-2800x2800.png"));
-        list.add(new Member("6388558948298919938", "这是名字", "这是电话", "https://storage.googleapis.com/gweb-uniblog-publish-prod/images/android_ambassador_v1_cmyk_200px.max-2800x2800.png"));
-        list.add(new Member("6388558948298919939", "这是名字", "这是电话", "https://storage.googleapis.com/gweb-uniblog-publish-prod/images/android_ambassador_v1_cmyk_200px.max-2800x2800.png"));
-        list.add(new Member("6387213507254816768", "这是名字", "这是电话", "https://storage.googleapis.com/gweb-uniblog-publish-prod/images/android_ambassador_v1_cmyk_200px.max-2800x2800.png"));
-        list.add(new Member("6388558948298919936", "这是名字", "这是电话", "https://storage.googleapis.com/gweb-uniblog-publish-prod/images/android_ambassador_v1_cmyk_200px.max-2800x2800.png"));
-        list.add(new Member("6387221054862921729", "这是名字", "这是电话", "https://storage.googleapis.com/gweb-uniblog-publish-prod/images/android_ambassador_v1_cmyk_200px.max-2800x2800.png"));
-        list.add(new Member("6388558948298919937", "这是名字", "这是电话", "https://storage.googleapis.com/gweb-uniblog-publish-prod/images/android_ambassador_v1_cmyk_200px.max-2800x2800.png"));
-        list.add(new Member("6387216817735077888", "这是名字", "这是电话", "https://storage.googleapis.com/gweb-uniblog-publish-prod/images/android_ambassador_v1_cmyk_200px.max-2800x2800.png"));
-        list.add(new Member("6387221054862921728", "这是名字", "这是电话", "https://storage.googleapis.com/gweb-uniblog-publish-prod/images/android_ambassador_v1_cmyk_200px.max-2800x2800.png"));
-        list.add(new Member("6387216817735077889", "这是名字", "这是电话", "https://storage.googleapis.com/gweb-uniblog-publish-prod/images/android_ambassador_v1_cmyk_200px.max-2800x2800.png"));
-        list.add(new Member("6388916729069703171", "这是名字", "这是电话", "https://storage.googleapis.com/gweb-uniblog-publish-prod/images/android_ambassador_v1_cmyk_200px.max-2800x2800.png"));
-        list.add(new Member("6388997399360049152", "这是名字", "这是电话", "https://storage.googleapis.com/gweb-uniblog-publish-prod/images/android_ambassador_v1_cmyk_200px.max-2800x2800.png"));
-        list.add(new Member("6386837371463143424", "这是名字", "这是电话", "https://storage.googleapis.com/gweb-uniblog-publish-prod/images/android_ambassador_v1_cmyk_200px.max-2800x2800.png"));
-        list.add(new Member("6388916729069703170", "这是名字", "这是电话", "https://storage.googleapis.com/gweb-uniblog-publish-prod/images/android_ambassador_v1_cmyk_200px.max-2800x2800.png"));
-        list.add(new Member("6388997068404297728", "这是名字", "这是电话", "https://storage.googleapis.com/gweb-uniblog-publish-prod/images/android_ambassador_v1_cmyk_200px.max-2800x2800.png"));
-        list.add(new Member("6388916729069703172", "这是名字", "这是电话", "https://storage.googleapis.com/gweb-uniblog-publish-prod/images/android_ambassador_v1_cmyk_200px.max-2800x2800.png"));
-        list.add(new Member("6386837057284608000", "这是名字", "这是电话", "https://storage.googleapis.com/gweb-uniblog-publish-prod/images/android_ambassador_v1_cmyk_200px.max-2800x2800.png"));
-        list.add(new Member("6388558948298919940", "这是名字", "这是电话", "https://storage.googleapis.com/gweb-uniblog-publish-prod/images/android_ambassador_v1_cmyk_200px.max-2800x2800.png"));
-        list.add(new Member("6387216817730883584", "这是名字", "这是电话", "https://storage.googleapis.com/gweb-uniblog-publish-prod/images/android_ambassador_v1_cmyk_200px.max-2800x2800.png"));
-        list.add(new Member("6386824524179968000", "这是名字", "这是电话", "https://storage.googleapis.com/gweb-uniblog-publish-prod/images/android_ambassador_v1_cmyk_200px.max-2800x2800.png"));
-        list.add(new Member("6388627626654699520", "这是名字", "这是电话", "https://storage.googleapis.com/gweb-uniblog-publish-prod/images/android_ambassador_v1_cmyk_200px.max-2800x2800.png"));
-        return list;
     }
 }

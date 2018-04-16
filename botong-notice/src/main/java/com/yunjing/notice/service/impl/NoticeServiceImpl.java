@@ -16,6 +16,7 @@ import com.yunjing.notice.entity.NoticeEntity;
 import com.yunjing.notice.entity.NoticeUserEntity;
 import com.yunjing.notice.mapper.NoticeMapper;
 import com.yunjing.notice.processor.feign.param.DangParam;
+import com.yunjing.notice.processor.feign.param.UserInfoModel;
 import com.yunjing.notice.processor.okhttp.AuthorityService;
 import com.yunjing.notice.processor.okhttp.DangService;
 import com.yunjing.notice.processor.okhttp.InformService;
@@ -103,6 +104,7 @@ public class NoticeServiceImpl extends ServiceImpl<NoticeMapper, NoticeEntity> i
         }
         String[] passportIds = memberList.stream().map(Member::getPassportId).toArray(String[]::new);
         String[] memberIds = memberList.stream().map(Member::getId).toArray(String[]::new);
+
         List<String> userInfoBodies = Arrays.asList(memberIds);
         if (CollectionUtils.isNotEmpty(userInfoBodies)) {
             noticeEntity.setNotReadNum(userInfoBodies.size());
@@ -138,32 +140,32 @@ public class NoticeServiceImpl extends ServiceImpl<NoticeMapper, NoticeEntity> i
 
         //添加公告标题
         json = new JSONObject();
-        json.put("subTitle",noticeEntity.getTitle());
-        json.put("type","5");
+        json.put("subTitle", noticeEntity.getTitle());
+        json.put("type", "5");
         array.add(json);
 
         //判断是否存在图片
         if (StringUtils.isNotEmpty(noticeEntity.getCover())) {
             json = new JSONObject();
             json.put("imgPath", noticeEntity.getCover());
-            json.put("type","1");
+            json.put("type", "1");
             array.add(json);
         }
 
         //添加公告内容
         json = new JSONObject();
         json.put("description", noticeEntity.getContent());
-        json.put("type","2");
+        json.put("type", "2");
         array.add(json);
 
         //添加公告发送人
         json = new JSONObject();
         json.put("bottom", noticeEntity.getAuthor() + "  " + DateUtil.convert(System.currentTimeMillis()));
-        json.put("type","4");
+        json.put("type", "4");
         array.add(json);
 
         //保存公告内容体
-        map.put("content",array.toJSONString());
+        map.put("content", array.toJSONString());
 
         //构建发送公告参数
         AppPushParam pushParam = new AppPushParam();
@@ -184,6 +186,17 @@ public class NoticeServiceImpl extends ServiceImpl<NoticeMapper, NoticeEntity> i
             Response<ResponseEntityWrapper<List<Member>>> re = ca.execute();
             ResponseEntityWrapper<List<Member>> result = re.body();
             //查询发布人的账户id
+            List<UserInfoModel> userInfoModelList = new ArrayList<>();
+            for (Member member : memberList) {
+                UserInfoModel userInfoModel = new UserInfoModel();
+                if (StringUtils.isNotEmpty(member.getPassportId())) {
+                    userInfoModel.setUserId(member.getPassportId());
+                }
+                if (StringUtils.isNotEmpty(member.getMobile())) {
+                    userInfoModel.setUserTelephone(Long.parseLong(member.getMobile()));
+                }
+                userInfoModelList.add(userInfoModel);
+            }
             if (null != result.getData()) {
                 List<Member> listMember = result.getData();
                 String[] passportId = listMember.stream().map(Member::getPassportId).toArray(String[]::new);
@@ -191,7 +204,7 @@ public class NoticeServiceImpl extends ServiceImpl<NoticeMapper, NoticeEntity> i
             }
             dangParam.setBizId(noticeEntity.getId());
             dangParam.setBizType(1);
-            dangParam.setReceiveBody(JSONObject.toJSONString(passportIds));
+            dangParam.setReceiveBody(userInfoModelList);
             dangParam.setDangType(1);
             dangParam.setRemindType(1);
             dangParam.setSendType(1);
@@ -350,7 +363,7 @@ public class NoticeServiceImpl extends ServiceImpl<NoticeMapper, NoticeEntity> i
             return page;
         }
         String[] memberIds = list.stream().map(NoticeUserEntity::getUserId).toArray(String[]::new);
-        Call<ResponseEntityWrapper<List<Member>>> call = orgStructureService.findSubLists("",StringUtils.join(memberIds,","), 0);
+        Call<ResponseEntityWrapper<List<Member>>> call = orgStructureService.findSubLists("", StringUtils.join(memberIds, ","), 0);
         Response<ResponseEntityWrapper<List<Member>>> execute = call.execute();
         ResponseEntityWrapper<List<Member>> body = execute.body();
         List<UserInfoBody> userInfoBodyList = new ArrayList<>();
