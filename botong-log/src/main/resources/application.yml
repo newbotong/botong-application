@@ -29,6 +29,11 @@ spring:
     port: ${rabbitmq.port}
     username: ${rabbitmq.username}
     password: ${rabbitmq.password}
+#  redis:
+#    host: ${redis.host}
+#    port: ${redis.port}
+#    database: ${redis.dbindex}
+#    password: ${redis.password}
   data:
     mongodb:
       host: ${mongo.host}
