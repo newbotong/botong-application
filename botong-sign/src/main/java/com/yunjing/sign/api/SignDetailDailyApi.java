@@ -42,7 +42,7 @@ public class SignDetailDailyApi extends BaseController {
     public ResponseEntityWrapper toSign(@RequestBody SignDetailParam signDetailParam){
         // 基础校验
         BeanFieldValidator.getInstance().validate(signDetailParam);
-        SignDetailVO isAdd = iSignDetailDailyService.toSign(signDetailParam);
+            SignDetailVO isAdd = iSignDetailDailyService.toSign(signDetailParam);
         return success(isAdd);
     }
 
