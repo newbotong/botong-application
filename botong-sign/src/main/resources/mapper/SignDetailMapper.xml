@@ -1,0 +1,102 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.yunjing.sign.dao.mapper.SignDetailMapper">
+
+    <!-- 通用查询映射结果 -->
+    <resultMap id="BaseResultMap" type="com.yunjing.sign.beans.vo.SignUserInfoVO">
+        <result column="user_id" property="memberId" />
+    </resultMap>
+
+
+    <select id="getCountInfo" resultMap="BaseResultMap">
+        select de.user_id
+        from sign_detail de
+        where de.user_id in (${userIds}) and de.create_time >= #{startDate} and de.create_time <![CDATA[ < ]]> #{endDate}
+    </select>
+
+    <resultMap id="SignDetailResultMap" type="com.yunjing.sign.beans.vo.SignDetailVO">
+        <result column="user_id" property="userId" />
+        <result column="sign_date" property="signDate" />
+        <result column="address_title" property="addressTitle" />
+        <result column="address" property="address" />
+        <result column="imgs" property="imgUrls" />
+        <result column="remark" property="remark" />
+    </resultMap>
+
+    <select id="queryMonthInfo" resultMap="SignDetailResultMap">
+       SELECT
+            de.user_id,
+            de.address,
+            de.address_title,
+            de.remark,
+            de.create_time as sign_date,
+            group_concat(img.url) AS imgs
+        FROM
+            sign_detail de
+        LEFT JOIN sign_detail_img img ON img.sign_detail_id = de.id
+        where de.is_delete = 0 and de.user_id = #{userId} and de.create_time >= #{startDate} and de.create_time <![CDATA[ < ]]> #{endDate}
+        GROUP BY
+            de.user_id,
+            de.address,
+            de.address_title,
+            de.remark,
+            de.create_time
+        ORDER BY de.create_time DESC
+    </select>
+
+    <resultMap id="MonthResultMap" type="com.yunjing.sign.beans.vo.SignMonthVO">
+        <result column="user_id" property="userId" />
+        <result column="sign_date" property="signDate" />
+        <result column="sign_count" property="signCount" />
+    </resultMap>
+
+    <select id="staticsMonthInfo" resultMap="MonthResultMap">
+        SELECT
+          de.user_id,
+          FROM_UNIXTIME(de.create_time/1000,'%Y-%m-%d') as sign_date,
+          count(1) as sign_count
+        FROM
+          sign_detail de
+        where
+          de.user_id in (${userIds}) and de.create_time >= #{startDate} and de.create_time <![CDATA[ < ]]> #{endDate}
+        group by de.user_id, sign_date
+    </select>
+
+
+    <resultMap id="ExcelSignResultMap" type="com.yunjing.sign.beans.vo.SignExcelVO">
+        <result column="user_id" property="userId" />
+        <result column="create_time" property="signDate" />
+        <result column="signTime" property="signTime" />
+        <result column="address_title" property="addressTitle" />
+        <result column="address" property="address" />
+        <result column="imgUrls" property="imgUrls" />
+        <result column="lng" property="longitude" />
+        <result column="lat" property="latitude" />
+        <result column="remark" property="remark" />
+    </resultMap>
+    <select id="querySignDetail" resultMap="ExcelSignResultMap">
+        SELECT
+            de.user_id,
+            de.address,
+            de.address_title,
+            FROM_UNIXTIME(de.create_time/1000,'%Y-%m-%d') as signTime,
+            de.create_time,
+            de.lng,
+            de.lat,
+            de.remark,
+            group_concat(img.url) AS imgUrls
+        FROM
+          sign_detail de
+        LEFT JOIN sign_detail_img img ON img.sign_detail_id = de.id
+        WHERE
+            de.is_delete = 0 and de.user_id in (${userIds}) AND de.create_time >= #{startDate} AND de.create_time <![CDATA[ < ]]> #{endDate}
+        GROUP BY
+            de.user_id,
+            de.address,
+            de.address_title,
+            de.create_time,
+            de.lng,
+            de.lat,
+            de.remark
+    </select>
+</mapper>

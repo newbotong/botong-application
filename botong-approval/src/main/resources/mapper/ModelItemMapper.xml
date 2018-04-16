@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.yunjing.approval.dao.mapper.ModelItemMapper">
+
+    <select id="selectAll" resultType="com.yunjing.approval.model.entity.ModelItem">
+        SELECT m.id, m.model_id AS modelId, m.field AS field,
+          m.item_label AS itemLabel,m.priority AS priority, m.def_value AS defValue, m.opt_value AS optValue,
+          m.help AS help, m.unit AS unit, m.date_format AS dateFormat,m.data_type AS dataType,m.is_custom AS isCustom,
+          m.is_display AS isDisplay, m.is_required AS isRequired,m.is_judge AS isJudge,m.is_child AS isChild,
+          m.item_version AS itemVersion
+        FROM model_item m
+        INNER JOIN org_model o ON o.model_id = m.model_id
+        WHERE o.org_id = #{ orgId }
+    </select>
+    <delete id="deleteModelItemListByOrgId" parameterType="java.lang.String">
+        DELETE FROM model_item WHERE  model_id IN (SELECT o.model_id FROM org_model o WHERE o.org_id= #{ orgId })
+    </delete>
+</mapper>

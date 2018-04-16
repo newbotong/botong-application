@@ -1,0 +1,8 @@
+rootProject.name = 'botong-application'
+
+include 'botong-sign'
+include 'botong-notice'
+include 'botong-info'
+include 'botong-log'
+include 'botong-approval'
+
