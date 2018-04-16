@@ -187,7 +187,7 @@ public class ApprovalApiServiceImpl implements IApprovalApiService {
     }
 
     @Override
-    public ClientApprovalDetailVO getApprovalDetail(String orgId, String userId, String approvalId) {
+    public ClientApprovalDetailVO getApprovalDetail(String orgId, String memberId, String approvalId) {
         ClientApprovalDetailVO clientApprovalDetailVO = new ClientApprovalDetailVO();
         // 获取审批详情
         List<ApproveAttrVO> detail = getDetail(approvalId);
@@ -195,7 +195,7 @@ public class ApprovalApiServiceImpl implements IApprovalApiService {
         clientApprovalDetailVO.setApproveAttrVO(detail);
 
         // 根据审批主键查询审批信息
-        ApprovalDetailDTO approvalById = approvalMapper.getApprovalById(approvalId);
+        ApprovalDetailDTO approvalById = approvalMapper.getApprovalById(approvalId,memberId);
         if (approvalById != null) {
             // 审批主体信息
             clientApprovalDetailVO.setName(approvalById.getName());
@@ -206,8 +206,7 @@ public class ApprovalApiServiceImpl implements IApprovalApiService {
             if (StringUtils.isNotBlank(approvalById.getAvatar())) {
                 clientApprovalDetailVO.setAvatar(approvalById.getAvatar());
             } else {
-                clientApprovalDetailVO.setColor(Colors.generateBeautifulColor(approvalById.getMobile(), approvalById.getName()));
-                clientApprovalDetailVO.setAvatarName(approvalById.getName().length() <= 2 ? approvalById.getName() : approvalById.getName().substring(1, 3));
+                clientApprovalDetailVO.setColor("");
             }
             clientApprovalDetailVO.setState(approvalById.getState());
             clientApprovalDetailVO.setResult(approvalById.getResult() != null ? approvalById.getResult() : null);
@@ -222,7 +221,7 @@ public class ApprovalApiServiceImpl implements IApprovalApiService {
                 approvalUserVO.setAvatarName(approvalUserVO.getName().length() <= 2 ? approvalUserVO.getName() : approvalUserVO.getName().substring(1, 3));
             }
             if (approvalUserVO.getProcessState() == 0) {
-                if (approvalUserVO.getUserId().equals(userId)) {
+                if (approvalUserVO.getUserId().equals(memberId)) {
                     //描述提醒用户信息
                     clientApprovalDetailVO.setProcessState(approvalUserVO.getProcessState());
                     clientApprovalDetailVO.setMessage("等待我审批");
