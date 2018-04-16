@@ -28,12 +28,6 @@ public class RemindVo {
     private String taskId;
 
     /**
-     * 应用id
-     */
-    @NotNullOrEmpty
-    private String appId;
-
-    /**
      * 组织架构id
      */
     @NotNullOrEmpty

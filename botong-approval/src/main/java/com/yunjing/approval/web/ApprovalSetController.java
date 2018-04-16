@@ -52,17 +52,19 @@ public class ApprovalSetController extends BaseController {
     }
 
     /**
-     * 设置审批流程
+     * 设置默认审批人和抄送人
      *
+     * @param modelId 模型主键
+     * @param modelId 模型主键
      * @param modelId 模型主键
      * @return ResponseEntityWrapper
      */
     @PostMapping("/updateProcess")
-    public ResponseEntityWrapper updateProcess(@RequestParam("modelId") String modelId,
-                                               @RequestParam(value = "conditionId", required = false) String conditionId,
-                                               @RequestParam(value = "userArray", required = false) String userArray) throws Exception {
+    public ResponseEntityWrapper saveDefaultApprover(@RequestParam("modelId") String modelId,
+                                               @RequestParam(value = "approverIds", required = false) String approverIds,
+                                               @RequestParam(value = "copyIds", required = false) String copyIds) throws Exception {
 
-        return success(processService.updateProcess(modelId, conditionId, userArray));
+        return success(processService.saveDefaultApprover(modelId, approverIds, copyIds));
     }
 
     /**

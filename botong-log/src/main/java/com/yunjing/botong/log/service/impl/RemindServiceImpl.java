@@ -17,6 +17,7 @@ import com.yunjing.botong.log.vo.RemindVo;
 import com.yunjing.mommon.utils.BeanUtils;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -36,6 +37,10 @@ import java.util.Map;
 @Service
 public class RemindServiceImpl extends BaseServiceImpl<RemindMapper, RemindEntity> implements IRemindService {
 
+
+    @Value("${botong.log.appId}")
+    private String appId;
+
     @Autowired
     private AbstractRedisConfiguration redisLog;
 
@@ -51,7 +56,7 @@ public class RemindServiceImpl extends BaseServiceImpl<RemindMapper, RemindEntit
 
         // 该成员在该企业的该模版类型下是否已经设置提醒
         entity.setMemberId(remind.getMemberId());
-        entity.setAppId(remind.getAppId());
+        entity.setAppId(appId);
         entity.setOrgId(remind.getOrgId());
         entity.setSubmitType(remind.getSubmitType());
 
@@ -67,7 +72,7 @@ public class RemindServiceImpl extends BaseServiceImpl<RemindMapper, RemindEntit
             Wrapper<RemindEntity> wrapper = new EntityWrapper<>();
             wrapper.eq("member_id", remind.getMemberId())
                     .and()
-                    .eq("app_id", remind.getAppId())
+                    .eq("app_id", appId)
                     .and()
                     .eq("org_id", remind.getOrgId())
                     .and()
@@ -123,13 +128,13 @@ public class RemindServiceImpl extends BaseServiceImpl<RemindMapper, RemindEntit
         RemindVo vo = null;
         switch (remind.getSubmitType()) {
             case 1:
-                vo = gson.fromJson(String.valueOf(redisTemplate.opsForHash().get(LogConstant.LOG_SET_DAY_REMIND + remind.getAppId(), key)), RemindVo.class);
+                vo = gson.fromJson(String.valueOf(redisTemplate.opsForHash().get(LogConstant.LOG_SET_DAY_REMIND + appId, key)), RemindVo.class);
                 break;
             case 2:
-                vo = gson.fromJson(String.valueOf(redisTemplate.opsForHash().get(LogConstant.LOG_SET_WEEK_REMIND + remind.getAppId(), key)), RemindVo.class);
+                vo = gson.fromJson(String.valueOf(redisTemplate.opsForHash().get(LogConstant.LOG_SET_WEEK_REMIND + appId, key)), RemindVo.class);
                 break;
             case 3:
-                vo = gson.fromJson(String.valueOf(redisTemplate.opsForHash().get(LogConstant.LOG_SET_MONTH_REMIND + remind.getAppId(), key)), RemindVo.class);
+                vo = gson.fromJson(String.valueOf(redisTemplate.opsForHash().get(LogConstant.LOG_SET_MONTH_REMIND + appId, key)), RemindVo.class);
                 break;
             default:
                 break;
@@ -143,7 +148,7 @@ public class RemindServiceImpl extends BaseServiceImpl<RemindMapper, RemindEntit
         param.setCycleType(remind.getCycleType());
         param.setOutKey(key);
         Map<String, Object> map = new HashMap<>(2);
-        map.put("appId", remind.getAppId());
+        map.put("appId", appId);
         map.put("submitType", remind.getSubmitType());
         param.setRecord(JSON.toJSONString(map));
         param.setRemark("");
@@ -156,7 +161,7 @@ public class RemindServiceImpl extends BaseServiceImpl<RemindMapper, RemindEntit
         taskId = appCenterService.setTask(param);
 
         if (taskId != null) {
-            boolean flag = updateByMemberIdAndAppId(taskId, remind.getMemberId(), remind.getAppId());
+            boolean flag = updateByMemberIdAndAppId(taskId, remind.getMemberId(), appId);
             if (flag) {
                 remind.setTaskId(taskId);
                 String value = gson.toJson(remind);
@@ -164,15 +169,15 @@ public class RemindServiceImpl extends BaseServiceImpl<RemindMapper, RemindEntit
                 switch (remind.getSubmitType()) {
                     case 1:
                         // 日报
-                        redisTemplate.opsForHash().put(LogConstant.LOG_SET_DAY_REMIND + remind.getAppId(), key, value);
+                        redisTemplate.opsForHash().put(LogConstant.LOG_SET_DAY_REMIND + appId, key, value);
                         break;
                     case 2:
                         // 周报
-                        redisTemplate.opsForHash().put(LogConstant.LOG_SET_WEEK_REMIND + remind.getAppId(), key, value);
+                        redisTemplate.opsForHash().put(LogConstant.LOG_SET_WEEK_REMIND + appId, key, value);
                         break;
                     case 3:
                         // 月报
-                        redisTemplate.opsForHash().put(LogConstant.LOG_SET_MONTH_REMIND + remind.getAppId(), key, value);
+                        redisTemplate.opsForHash().put(LogConstant.LOG_SET_MONTH_REMIND + appId, key, value);
                         break;
                     default:
                         break;

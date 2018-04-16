@@ -2,6 +2,13 @@ server:
   port: 26100
   tomcat:
     uri-encoding: UTF-8
+### 注册中心eureka
+eureka:
+  client:
+    register-with-eureka: true
+    fetch-registry: true
+    serviceUrl:
+      defaultZone: http://${eureka.server}:${eureka.port}/eureka/
 
 ### 设置服务名称
 spring:
@@ -85,6 +92,8 @@ ali:
 botong:
   log:
     appId: ${botong.log.appId}
+  write-log: ${botong.log.write-log}
+  look-log: ${botong.log.look-log}
 
 # 写入文件日志
 logging:

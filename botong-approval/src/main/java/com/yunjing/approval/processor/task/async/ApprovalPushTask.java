@@ -237,6 +237,7 @@ public class ApprovalPushTask extends BaseTask {
 
     private PushParam setPushParam(String systemMessage,String[] phones,ApprovalUser user,String message) {
         PushParam pushParam = new PushParam();
+        pushParam.setAppId("861c643f34714df3bf99bffde9ae20ea");
         pushParam.setMsg(systemMessage);
         pushParam.setAlias(phones);
         pushParam.setRegistrationId(user.getMobile());

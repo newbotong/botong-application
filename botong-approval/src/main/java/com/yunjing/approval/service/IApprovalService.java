@@ -1,12 +1,15 @@
 package com.yunjing.approval.service;
 
 
+import com.alibaba.fastjson.JSONArray;
 import com.common.mybatis.service.IBaseService;
 import com.yunjing.approval.excel.BaseExModel;
 import com.yunjing.approval.model.entity.Approval;
 import com.yunjing.approval.model.vo.ApprovalVO;
 import com.yunjing.approval.param.DataParam;
 import com.yunjing.mommon.wrapper.PageWrapper;
+
+import java.util.List;
 
 /**
  * @author 刘小鹏
@@ -26,7 +29,7 @@ public interface IApprovalService extends IBaseService<Approval> {
      * @return
      * @throws Exception
      */
-    boolean submit(String companyId, String memberId, String modelId, String jsonData, String sendUserIds, String sendCopyIds) throws Exception;
+    boolean submit(String companyId, String memberId, String modelId, JSONArray jsonData, String sendUserIds, String sendCopyIds) throws Exception;
 
     /**
      * 获取审批数据列表

@@ -33,7 +33,6 @@ import java.util.List;
  * @date 2017/11/29
  */
 @Service
-@Transactional(propagation = Propagation.REQUIRED, rollbackFor = Exception.class)
 public class OrgModelServiceImpl extends BaseServiceImpl<OrgModelMapper, OrgModel> implements IOrgModelService {
 
     @Autowired
@@ -186,6 +185,7 @@ public class OrgModelServiceImpl extends BaseServiceImpl<OrgModelMapper, OrgMode
                     newModelItem.setModelId(modelId);
                     newModelItem.setField(modelItem.getField());
                     newModelItem.setItemLabel(modelItem.getItemLabel());
+                    newModelItem.setItemLabels(modelItem.getItemLabels());
                     newModelItem.setPriority(modelItem.getPriority());
                     newModelItem.setDefValue(modelItem.getDefValue());
                     newModelItem.setOptValue(modelItem.getOptValue());
@@ -217,6 +217,7 @@ public class OrgModelServiceImpl extends BaseServiceImpl<OrgModelMapper, OrgMode
                         newModelItem.setModelId(modelId);
                         newModelItem.setField(modelItem.getField());
                         newModelItem.setItemLabel(modelItem.getItemLabel());
+                        newModelItem.setItemLabels(modelItem.getItemLabels());
                         newModelItem.setPriority(modelItem.getPriority());
                         newModelItem.setDefValue(modelItem.getDefValue());
                         newModelItem.setOptValue(modelItem.getOptValue());

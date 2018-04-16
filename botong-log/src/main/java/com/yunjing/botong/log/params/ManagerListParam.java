@@ -26,11 +26,6 @@ public class ManagerListParam implements Serializable {
     private String orgId;
 
     /**
-     * 应用id
-     */
-    private String appId;
-
-    /**
      * 提交类型（1-日报 2-周报 3-月报）
      */
     private int submitType;

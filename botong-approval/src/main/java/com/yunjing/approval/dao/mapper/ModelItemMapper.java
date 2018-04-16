@@ -30,4 +30,12 @@ public interface ModelItemMapper extends IBaseMapper<ModelItem> {
      * @return
      */
     boolean deleteModelItemListByOrgId(@Param("orgId") String orgId);
+
+    /**
+     * 获取审批模板详情项最小排序值
+     * @param modelId 模型id
+     * @param dataType 数据类型
+     * @return 最大值
+     */
+    Integer getMinSort(@Param("modelId") String modelId,@Param("dataType") Integer dataType);
 }

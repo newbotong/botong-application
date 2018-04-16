@@ -70,7 +70,7 @@ public class Test {
         remindVo.setCycleType("ONCE");
         remindVo.setJobTime("2018-3-30 16:30");
         remindVo.setRemindMode(1);
-        remindVo.setAppId("botong-log");
+        // remindVo.setAppId("botong-log");
         // 提交周期（1每天 2 每周 3 每月 4 季度 5 年度）
         remindVo.setSubmitType(1);
 

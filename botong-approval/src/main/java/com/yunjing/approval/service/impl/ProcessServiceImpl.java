@@ -6,12 +6,11 @@ import com.alibaba.fastjson.JSONObject;
 import com.baomidou.mybatisplus.mapper.Condition;
 import com.baomidou.mybatisplus.mapper.Wrapper;
 import com.common.mybatis.service.impl.BaseServiceImpl;
+import com.yunjing.approval.dao.mapper.ApprovalProcessMapper;
 import com.yunjing.approval.dao.mapper.ConditionMapper;
+import com.yunjing.approval.dao.mapper.CopyMapper;
 import com.yunjing.approval.dao.mapper.ProcessMapper;
-import com.yunjing.approval.model.entity.ApprovalSets;
-import com.yunjing.approval.model.entity.ApprovalUser;
-import com.yunjing.approval.model.entity.SetsCondition;
-import com.yunjing.approval.model.entity.SetsProcess;
+import com.yunjing.approval.model.entity.*;
 import com.yunjing.approval.model.vo.ApproverVO;
 import com.yunjing.approval.model.vo.UserVO;
 import com.yunjing.approval.service.*;
@@ -52,6 +51,10 @@ public class ProcessServiceImpl extends BaseServiceImpl<ProcessMapper, SetsProce
     private IApprovalUserService approvalUserService;
     @Autowired
     private ICopyService copyService;
+    @Autowired
+    private ApprovalProcessMapper approvalProcessMapper;
+    @Autowired
+    private CopyMapper copyMapper;
 
     @Override
     public boolean delete(String modelId, String conditions) throws Exception {
@@ -246,6 +249,46 @@ public class ProcessServiceImpl extends BaseServiceImpl<ProcessMapper, SetsProce
             return result;
         }
         return null;
+    }
+
+    @Override
+    public boolean saveDefaultApprover(String modelId, String approverIds, String copyIds) throws BaseException {
+        boolean isInserted = false;
+        String[] aIds = approverIds.split(",");
+        String[] cIds = copyIds.split(",");
+        // 批量保存审批人信息
+        List<SetsProcess> list = new ArrayList<>();
+        for (int i = 0; i < aIds.length; i++) {
+            SetsProcess process = new SetsProcess();
+            process.setId(IDUtils.uuid());
+            process.setModelId(modelId);
+            process.setApprover(aIds[i]);
+            process.setSort(i + 1);
+            list.add(process);
+        }
+        if (!list.isEmpty()) {
+            boolean insertBatch = this.insertBatch(list);
+            if (!insertBatch) {
+                throw new BaseException("批量保存审批人信息失败");
+            }
+        }
+        List<Copy> copyList = new ArrayList<>();
+        for (int i = 0; i < cIds.length; i++) {
+            Copy copy = new Copy();
+            copy.setId(IDUtils.uuid());
+            copy.setType(0);
+            copy.setModelId(modelId);
+            copy.setSort(i + 1);
+            copy.setUserId(cIds[i]);
+            copyList.add(copy);
+        }
+        if (!copyList.isEmpty()) {
+            isInserted = copyService.insertBatch(copyList);
+            if (!isInserted) {
+                throw new BaseException("批量保存抄送人信息失败");
+            }
+        }
+        return isInserted;
     }
 
     /**

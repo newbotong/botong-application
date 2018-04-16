@@ -68,7 +68,7 @@ public class ModelCategoryServiceImpl extends BaseServiceImpl<ModelCategoryMappe
             for (ModelVO modelVO : modelVOList) {
                 modelIds.add(modelVO.getModelId());
             }
-            List<ModelL> modelLS = modelService.selectBatchIds(modelIds);
+            List<ModelL> modelLS = modelService.selectList(Condition.create().in("id",modelIds));
             ModelCategory modelCategory = this.selectOne(Condition.create().where("category_name={0}", "其他"));
             for (ModelL modelL : modelLS) {
                 modelL.setCategoryId(modelCategory.getId());

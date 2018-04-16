@@ -49,32 +49,25 @@ public class ModelServiceImpl extends BaseServiceImpl<ModelMapper, ModelL> imple
     @Override
     @Transactional(propagation = Propagation.REQUIRED, rollbackFor = Exception.class)
     public List<ModelListVO> findModelList(String orgId) {
-        boolean haveRequired;
         List<ModelVO> modelVOList = modelMapper.selectLists(orgId);
         List<ModelItem> modelItems = modelItemMapper.selectAll(orgId);
-        List<ModelItemVO> itemVOS = new ArrayList<>();
         for (ModelVO modelVO : modelVOList) {
+            // 过滤属于某个审批模板的所有详情项
             List<ModelItem> items = modelItems.stream().filter(modelItem -> modelItem.getModelId().equals(modelVO.getModelId())).collect(Collectors.toList());
-            for (ModelItem item : items) {
-                if (item.getDataType() == ApproConstants.RADIO_TYPE_3) {
-                    ModelItemVO modelItemVO = new ModelItemVO();
-                    modelItemVO.setField(item.getField());
-                    modelItemVO.setLabel(item.getItemLabel());
-                    modelItemVO.setIsJudge(item.getIsJudge());
-                    modelItemVO.setOption(item.getOptValue());
-                    modelItemVO.setRequired(item.getIsRequired());
-                    itemVOS.add(modelItemVO);
-                    if (item.getIsRequired() == 1) {
-                        haveRequired = true;
-                        modelVO.setHaveRequired(haveRequired);
-                    } else {
-                        haveRequired = false;
-                        modelVO.setHaveRequired(haveRequired);
-                    }
-                }
+             // 过滤出类型是单选框的modelItem
+            Set<ModelItem> itemSet = items.stream().filter(modelItem -> modelItem.getDataType().equals(ApproConstants.RADIO_TYPE_3)).collect(Collectors.toSet());
+            modelVO.setItemVOSet(itemSet);
+            // 过滤出所有需要必填的单选框
+            Set<ModelItem> set = itemSet.stream().filter(modelItem -> modelItem.getIsRequired().equals(1)).collect(Collectors.toSet());
+            if(!set.isEmpty()){
+                // 有必填的单选框则标识true
+                modelVO.setHaveRequired(true);
+            }else {
+                // 没有必填的单选框标识为false
+                modelVO.setHaveRequired(false);
             }
-            modelVO.setItems(itemVOS);
         }
+
         List<ModelListVO> modelListVOList = new ArrayList<>();
         List<ModelCategory> list = modelCategoryService.selectList(Condition.create().where("org_id={0}", orgId));
         if (!list.isEmpty()) {
@@ -86,7 +79,18 @@ public class ModelServiceImpl extends BaseServiceImpl<ModelMapper, ModelL> imple
                 modelListVO.setUpdateTime(modelCategory.getUpdateTime());
                 if (modelCategory.getId() != null) {
                     List<ModelVO> modelVOS = modelVOList.stream().filter(modelVO1 -> modelCategory.getId().equals(modelVO1.getCategoryId())).collect(Collectors.toSet()).stream().collect(Collectors.toList());
-
+                    Collections.sort(modelVOS, new Comparator<ModelVO>() {
+                        @Override
+                        public int compare(ModelVO o1, ModelVO o2) {
+                            if (o1.getSort() > o2.getSort()) {
+                                return 1;
+                            } else if (o1.getSort()<(o2.getSort())) {
+                                return -1;
+                            } else {
+                                return 0;
+                            }
+                        }
+                    });
                     modelListVO.setModelVOList(modelVOS);
                     modelListVO.setModelCount(modelVOS.size());
                 }
@@ -170,9 +174,7 @@ public class ModelServiceImpl extends BaseServiceImpl<ModelMapper, ModelL> imple
     @Transactional(propagation = Propagation.REQUIRED, rollbackFor = Exception.class)
     public boolean updateVisibleRange(String modelId, String deptIds, String userIds) throws Exception {
         // TODO 调用rpc接口处理可见范围权限业务
-
         ModelL modelL = this.selectById(modelId);
-
         return true;
     }
 

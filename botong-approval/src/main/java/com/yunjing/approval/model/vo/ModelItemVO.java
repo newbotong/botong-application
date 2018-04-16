@@ -30,6 +30,7 @@ public class ModelItemVO {
         this.isJudge = item.getIsJudge();
     }
 
+    private String modelId;
     /**
      * 字段类型     1:多行输入框 2:数字输入框 3:单选框 4:日期 5:日期区间 6:单行输入框 7:明细 8:说明 9:金额 11:附件 12:图片
      */
@@ -40,6 +41,7 @@ public class ModelItemVO {
      */
     private String field;
 
+    private String value = "事假";
     /**
      * 显示名称
      */

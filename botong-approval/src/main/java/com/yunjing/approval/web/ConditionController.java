@@ -33,22 +33,23 @@ public class ConditionController extends BaseController {
     }
 
     /**
-     * 保存审批条件
+     * 保存审批条件及对应的审批人
      *
-     * @param modelId 模型主键
-     * @param field   字段名称
-     * @param numbers 天数 多个天数以因为逗号（,）分隔
+     * @param modelId   模型主键
+     * @param judge     选择的审批条件选项
+     * @param memberIds 审批人集合
      * @return
      * @throws Exception
      */
     @PostMapping("/save")
-    public ResponseEntityWrapper save(@RequestParam String modelId, @RequestParam String field, @RequestParam(required = false) String numbers) throws Exception {
-        return success(cdnService.save(modelId, field, numbers));
+    public ResponseEntityWrapper save(@RequestParam String modelId, @RequestParam String judge, @RequestParam("memberIds") String memberIds) throws Exception {
+        return success(cdnService.save(modelId, judge, memberIds));
     }
 
     /**
      * 删除审批条件
-     * @param modelId    模型主键
+     *
+     * @param modelId     模型主键
      * @param conditionId 审批条件
      * @return
      * @throws Exception

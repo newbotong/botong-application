@@ -22,6 +22,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.lang3.time.DateFormatUtils;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.messaging.handler.annotation.Payload;
 import org.springframework.stereotype.Component;
@@ -45,6 +46,13 @@ public class RemindMessageConsumer extends AbstractMessageConsumerWithQueueDecla
     private final static String[] MESSAGE = {"您当日的日报尚未提交，请及时提交。", "您本周的周报尚未提交，请及时提交。", "您本月的月报尚未提交，请及时提交。"};
 
     private final static String[] SMS_TEMPLATE = {"当日的日报", "本周的周报", "本月的月报"};
+
+
+    @Value("${botong.log.write-log}")
+    private String writeLog;
+
+    @Value("${botong.log.appId}")
+    private String appId;
 
     @Autowired
     private LogReportDao logReportDao;
@@ -131,7 +139,7 @@ public class RemindMessageConsumer extends AbstractMessageConsumerWithQueueDecla
                 // 不是管理员，根据remindMode提醒
                 switch (remind.getRemindMode()) {
                     case 1:
-                        push(remind.getAppId(), memberInfo.getCompanyId(), new String[]{memberInfo.getPassportId()}, remind.getSubmitType());
+                        push(memberInfo.getCompanyId(), new String[]{memberInfo.getPassportId()}, remind.getSubmitType());
                         break;
                     case 2:
                         List<String> phoneNumbers = new ArrayList<>();
@@ -159,7 +167,7 @@ public class RemindMessageConsumer extends AbstractMessageConsumerWithQueueDecla
                 Date date = new Date();
                 String current = DateFormatUtils.format(date, "yyyy-MM-dd");
                 // 3.2 查询出所有管理的人员
-                List<Member> memberInfos = appCenterService.manageScope(remind.getAppId(), memberId);
+                List<Member> memberInfos = appCenterService.manageScope(appId, memberId);
                 // 3.3 3.1与3.2结果取交集，剩下的则是没有发送日志的
                 List<String> manageScopeList = new ArrayList<>();
                 for (Member info : memberInfos) {
@@ -194,7 +202,7 @@ public class RemindMessageConsumer extends AbstractMessageConsumerWithQueueDecla
                         for (int i = 0; i < passportIdList.size(); i++) {
                             idList[i] = passportIdList.get(i);
                         }
-                        push(remind.getAppId(), memberInfo.getCompanyId(), idList, remind.getSubmitType());
+                        push(memberInfo.getCompanyId(), idList, remind.getSubmitType());
                         break;
                     case 2:
                         sms(phoneNumbers, remind.getSubmitType());
@@ -228,12 +236,11 @@ public class RemindMessageConsumer extends AbstractMessageConsumerWithQueueDecla
     /**
      * 推送
      *
-     * @param appId
      * @param companyId
      * @param alias
      * @param submitType
      */
-    private void push(String appId, String companyId, String[] alias, int submitType) {
+    private void push(String companyId, String[] alias, int submitType) {
 
         AppPushParam pushParam = new AppPushParam();
 
@@ -247,8 +254,7 @@ public class RemindMessageConsumer extends AbstractMessageConsumerWithQueueDecla
 
         Map<String, String> map = new HashMap<>(2);
         map.put("subModuleName", "日报提醒");
-        // TODO 发送日志地址
-        map.put("url", "http://www.rizhi.com");
+        map.put("url", writeLog);
 
         //日志提醒
         JSONArray array = new JSONArray();

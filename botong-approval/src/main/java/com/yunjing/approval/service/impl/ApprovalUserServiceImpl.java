@@ -26,7 +26,7 @@ import java.util.stream.Collectors;
 public class ApprovalUserServiceImpl extends BaseServiceImpl<ApprovalUserMapper, ApprovalUser> implements IApprovalUserService {
 
     @Override
-    public boolean addMember(List<OrgMemberMessage> orgMemberMessages) throws BaseException {
+    public boolean addMember(List<OrgMemberMessage> orgMemberMessages) {
         boolean isInserted = false;
         List<ApprovalUser> approvalUsers = new ArrayList<>();
         orgMemberMessages.forEach(orgMemberMessage -> {
@@ -60,7 +60,7 @@ public class ApprovalUserServiceImpl extends BaseServiceImpl<ApprovalUserMapper,
     }
 
     @Override
-    public boolean updateMember(List<OrgMemberMessage> orgMemberMessages) throws BaseException {
+    public boolean updateMember(List<OrgMemberMessage> orgMemberMessages) {
         boolean isUpdated = false;
         List<String> ids = orgMemberMessages.stream().map(OrgMemberMessage::getMemberId).collect(Collectors.toList());
         if(!ids.isEmpty()){
@@ -73,7 +73,7 @@ public class ApprovalUserServiceImpl extends BaseServiceImpl<ApprovalUserMapper,
     }
 
     @Override
-    public boolean deleteMember(List<OrgMemberMessage> orgMemberMessages) throws BaseException {
+    public boolean deleteMember(List<OrgMemberMessage> orgMemberMessages) {
         boolean isDeleted = false;
         List<String> ids = orgMemberMessages.stream().map(OrgMemberMessage::getMemberId).collect(Collectors.toList());
         if(!ids.isEmpty()){

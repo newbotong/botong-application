@@ -1,6 +1,5 @@
 package com.yunjing.approval.service.impl;
 
-import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 import com.baomidou.mybatisplus.mapper.Condition;
@@ -78,7 +77,7 @@ public class ApprovalServiceImpl extends BaseServiceImpl<ApprovalMapper, Approva
     private RedisApproval redisTemplate;
 
     @Override
-    public boolean submit(String companyId, String memberId, String modelId, String jsonData, String sendUserIds, String sendCopyIds) throws Exception {
+    public boolean submit(String companyId, String memberId, String modelId, JSONArray jsonData, String sendUserIds, String sendCopyIds) throws Exception {
         ModelL modelL = modelService.selectById(modelId);
         Approval approval = new Approval();
         approval.setId(IDUtils.uuid());
@@ -94,7 +93,10 @@ public class ApprovalServiceImpl extends BaseServiceImpl<ApprovalMapper, Approva
             title += "用户";
         } else {
             ApprovalUser user = approvalUserService.selectOne(Condition.create().where("id={0}", memberId));
-            String nick = user.getName();
+            String nick = "";
+            if (user != null) {
+                nick = user.getName();
+            }
             String name = modelL.getModelName();
 
             if (StringUtils.isBlank(nick)) {
@@ -102,7 +104,7 @@ public class ApprovalServiceImpl extends BaseServiceImpl<ApprovalMapper, Approva
             } else if (StringUtils.isBlank(name)) {
                 title += "模型名称";
             } else {
-                title = user.getName() + "的" + modelL.getModelName();
+                title = nick + "的" + modelL.getModelName();
             }
         }
         approval.setTitle(title);
@@ -115,8 +117,8 @@ public class ApprovalServiceImpl extends BaseServiceImpl<ApprovalMapper, Approva
         Set<ApprovalAttr> attrSet = new HashSet<>();
         Set<ApprovalAttr> contentSet = new HashSet<>();
         // 解析并保存审批信息
-        JSONArray jsonArray = JSON.parseArray(jsonData);
-        Iterator<Object> it = jsonArray.iterator();
+//        JSONArray jsonArray = JSON.parseArray(jsonData);
+        Iterator<Object> it = jsonData.iterator();
         while (it.hasNext()) {
             JSONObject obj = (JSONObject) it.next();
             int type = obj.getIntValue("type");
@@ -863,9 +865,11 @@ public class ApprovalServiceImpl extends BaseServiceImpl<ApprovalMapper, Approva
                 }
             }
             List<ApprovalProcess> approvalProcesses1 = new ArrayList<>(approvalProcesses);
-            flag = approvalProcessService.insertBatch(approvalProcesses1);
-            if (!flag) {
-                throw new InsertMessageFailureException("批量保存审批人失败");
+            if (!approvalProcesses1.isEmpty()) {
+                flag = approvalProcessService.insertBatch(approvalProcesses1);
+                if (!flag) {
+                    throw new InsertMessageFailureException("批量保存审批人失败");
+                }
             }
         }
         return flag;

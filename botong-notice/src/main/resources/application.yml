@@ -90,7 +90,8 @@ mybatis-plus:
     sql-injector: com.baomidou.mybatisplus.mapper.LogicSqlInjector
 #Notice-AppId
 notice:
-     appId: be61789d315b11e89a1c0242ac110004
+     appId: e30af71736f04aacaadc9320d58903e6
+#     appId: be61789d315b11e89a1c0242ac110004
 
 ##过滤返回null或空字段
 #spring:

@@ -9,6 +9,7 @@ import com.yunjing.mommon.utils.DateUtil;
 import com.yunjing.mommon.wrapper.ResponseEntityWrapper;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.web.bind.annotation.*;
 
 import javax.servlet.http.HttpServletResponse;
@@ -31,6 +32,10 @@ public class LogSearchController extends BaseController {
     @Autowired
     private ILogSearchService iLogSearchService;
 
+    @Value("${botong.log.appId}")
+    private String appId;
+
+
     /**
      * 我收到的日志明细列表
      * @param searchParam     接收参数
@@ -38,6 +43,7 @@ public class LogSearchController extends BaseController {
      */
     @PostMapping("/find-page")
     public ResponseEntityWrapper receviedPage(@RequestBody SearchParam searchParam) {
+        searchParam.setAppId(appId);
         return success(iLogSearchService.findPage(searchParam));
     }
 
@@ -68,7 +74,6 @@ public class LogSearchController extends BaseController {
                          @RequestParam(value = "startDate", required = false) String startDate,
                          @RequestParam(value = "endDate", required = false) String endDate,
                          @RequestParam(value = "orgId") String orgId,
-                         @RequestParam(value = "appId", required = false) String appId,
                          @RequestParam(value = "memberId", required = false) String memberId,
                          @RequestParam(value = "userIds", required = false) String[] userIds,
                          @RequestParam(value = "deptIds", required = false) String[] deptIds) throws Exception {

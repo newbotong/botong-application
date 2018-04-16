@@ -27,12 +27,12 @@ public interface IConditionService extends IBaseService<SetsCondition> {
      * 保存审批条件
      *
      * @param modelId 模型编号
-     * @param field   字段
-     * @param numbers 天数
+     * @param judge   选择的审批条件
+     * @param memberIds 审批人
      * @return
      * @throws Exception
      */
-    List<SetConditionVO> save(String modelId, String field, String numbers) throws Exception;
+    List<SetConditionVO> save(String modelId, String judge,String memberIds) throws Exception;
 
     /**
      * 删除审批条件

@@ -21,7 +21,7 @@ public interface IApprovalUserService extends IBaseService<ApprovalUser> {
      * @return
      * @throws BaseException
      */
-    boolean addMember(List<OrgMemberMessage> orgMemberMessages) throws BaseException;
+    boolean addMember(List<OrgMemberMessage> orgMemberMessages);
 
     /**
      * 更新成员信息
@@ -30,7 +30,7 @@ public interface IApprovalUserService extends IBaseService<ApprovalUser> {
      * @return
      * @throws BaseException
      */
-    boolean updateMember(List<OrgMemberMessage> orgMemberMessages) throws BaseException;
+    boolean updateMember(List<OrgMemberMessage> orgMemberMessages);
 
     /**
      * 删除成员信息
@@ -39,7 +39,7 @@ public interface IApprovalUserService extends IBaseService<ApprovalUser> {
      * @return
      * @throws BaseException
      */
-    boolean deleteMember(List<OrgMemberMessage> orgMemberMessages) throws BaseException;
+    boolean deleteMember(List<OrgMemberMessage> orgMemberMessages);
 
 
 }
