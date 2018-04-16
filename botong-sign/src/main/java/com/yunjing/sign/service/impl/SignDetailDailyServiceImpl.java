@@ -76,7 +76,7 @@ public class SignDetailDailyServiceImpl extends ServiceImpl<SignDetailDailyMappe
                     }
                 } else {
                     if (DateUtil.compareDate(new Date(), start) > 0 && (end != null && DateUtil.compareDate(new Date(), end) < 0)) {
-                        throw new UpdateMessageFailureException(600, "打卡未在范围");
+                        throw new UpdateMessageFailureException(600, "打卡未在时间范围");
                     }
                     if (DateUtil.compareDate(new Date(), start) > 0 && end == null) {
                         throw new UpdateMessageFailureException(600, "打卡时间超出范围");
