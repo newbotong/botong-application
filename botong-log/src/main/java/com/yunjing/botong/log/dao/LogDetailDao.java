@@ -108,6 +108,16 @@ public class LogDetailDao extends BaseMongoDaoImpl<LogDetail> {
     }
 
     /**
+       根据日志查看
+     * @param logId
+     * @param userId
+     * @return
+     */
+    public LogDetail findByLogId(String logId, String userId){
+        return findOne(findOne(logId, userId));
+    }
+
+    /**
      * 根据条件组装查询对象
      * @param orgId         企业Id
      * @param userId        memberId
