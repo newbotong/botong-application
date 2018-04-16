@@ -61,7 +61,7 @@ public class LogReportApi extends BaseController {
      */
     @PostMapping("/manager-submit-list")
     public ResponseEntityWrapper submitList(@RequestBody ManagerListParam param) {
-        PageWrapper<Member> wrapper = logReportService.submitList(param.getMemberId(), param.getOrgId(), param.getAppId(), param.getSubmitType(), param.getDate(), param.getPageNo(), param.getPageSize());
+        PageWrapper<Member> wrapper = logReportService.submitList(param.getMemberId(), param.getOrgId(), appId, param.getSubmitType(), param.getDate(), param.getPageNo(), param.getPageSize());
         return success(wrapper);
     }
 
@@ -73,7 +73,7 @@ public class LogReportApi extends BaseController {
      */
     @PostMapping("/manager-unsubmit-list")
     public ResponseEntityWrapper unSubmitList(@RequestBody ManagerListParam param) {
-        PageWrapper<Member> wrapper = logReportService.unSubmitList(param.getMemberId(), param.getOrgId(), param.getAppId(), param.getSubmitType(), param.getDate(), param.getPageNo(), param.getPageSize());
+        PageWrapper<Member> wrapper = logReportService.unSubmitList(param.getMemberId(), param.getOrgId(), appId, param.getSubmitType(), param.getDate(), param.getPageNo(), param.getPageSize());
         return success(wrapper);
     }
 }

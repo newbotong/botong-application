@@ -16,7 +16,6 @@ import com.yunjing.mommon.global.exception.ParameterErrorException;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections.CollectionUtils;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.stereotype.Service;
 
@@ -33,10 +32,6 @@ import java.util.*;
 @Slf4j
 @Service
 public class LogReportServiceImpl implements LogReportService {
-
-
-    @Value("${botong.log.appId}")
-    private String appId;
 
     /**
      * mongo 数据中心
@@ -70,7 +65,7 @@ public class LogReportServiceImpl implements LogReportService {
         List<String> memberIdList = new ArrayList<>();
         if (manager) {
             // 管理员查询他所在企业的管理的memberId
-            List<Member> list = manageScopeList(memberId);
+            List<Member> list = manageScopeList(memberId, appId);
             if (CollectionUtils.isEmpty(list)) {
                 throw new ParameterErrorException(StatusCode.NOT_ADMIN_AUTH);
             }
@@ -140,7 +135,7 @@ public class LogReportServiceImpl implements LogReportService {
     @Override
     public PageWrapper<Member> submitList(String memberId, String orgId, String appId, int submitType, String date, int pageNo, int pageSize) {
         // 获取管理范围集合
-        List<Member> list = manageScopeList(memberId);
+        List<Member> list = manageScopeList(memberId, appId);
         if (CollectionUtils.isEmpty(list)) {
             throw new ParameterErrorException(StatusCode.NOT_ADMIN_AUTH);
         }
@@ -179,7 +174,7 @@ public class LogReportServiceImpl implements LogReportService {
     @Override
     public PageWrapper<Member> unSubmitList(String memberId, String orgId, String appId, int submitType, String date, int pageNo, int pageSize) {
         // 获取管理范围集合
-        List<Member> list = manageScopeList(memberId);
+        List<Member> list = manageScopeList(memberId, appId);
         if (CollectionUtils.isEmpty(list)) {
             throw new ParameterErrorException(StatusCode.NOT_ADMIN_AUTH);
         }
@@ -213,10 +208,11 @@ public class LogReportServiceImpl implements LogReportService {
     /**
      * 管理成员id集合
      *
+     * @param appId
      * @param memberId
      * @return
      */
-    private List<Member> manageScopeList(String memberId) {
+    private List<Member> manageScopeList(String memberId, String appId) {
         // 根据memberId 查询管理范围
         return appCenterService.manageScope(appId, memberId);
     }
