@@ -22,5 +22,6 @@
 		LEFT JOIN model_item m ON a.model_id = m.model_id
 		LEFT JOIN approval_user u ON u.id = a.user_id
 		WHERE a.id = #{approvalId} and u.id = #{memberId}
+		GROUP BY u.id
 	</select>
 </mapper>
