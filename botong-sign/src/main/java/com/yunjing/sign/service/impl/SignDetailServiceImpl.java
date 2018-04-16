@@ -129,7 +129,7 @@ public class SignDetailServiceImpl extends ServiceImpl<SignDetailMapper, SignDet
             map.put(obj.getMemberId(), obj);
             ids.add(obj.getMemberId());
         }
-        String userIds = StringUtils.join(ids, ",");
+        String userIds = SignConstant.QUOTES_STR + StringUtils.join(ids, SignConstant.SEPARATE_QUOTES_COMMA_STR) + SignConstant.QUOTES_STR;
         long startDate = DateUtil.stringToDate(userAndDeptParam.getSignDate()).getTime();
         long endDate = DateUtil.addDay(DateUtil.stringToDate(userAndDeptParam.getSignDate()), 1).getTime();
         SignMapperParam signMapperParam = new SignMapperParam();
