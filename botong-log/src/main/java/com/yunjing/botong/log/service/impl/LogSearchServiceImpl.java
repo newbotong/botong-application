@@ -192,7 +192,7 @@ public class LogSearchServiceImpl implements ILogSearchService {
      */
     private PageWrapper<LogDetailVO> convertResults(ReceviedParam receviedParam, PageWrapper<LogDetail> detailResult){
         PageWrapper<LogDetailVO> result = new PageWrapper<>();
-        if (detailResult.getRecords() != null && detailResult.getSize() > 0) {
+        if (detailResult.getRecords() != null && detailResult.getRecords().size() > 0) {
             LogDetailVO vo;
             List<LogDetailVO> resultRecord = new ArrayList<>();
             Member userVO;
