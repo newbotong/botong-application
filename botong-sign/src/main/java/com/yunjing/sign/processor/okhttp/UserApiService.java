@@ -24,6 +24,7 @@ public interface UserApiService {
      *
      * @param deptIds
      * @param memberIds
+     * @param simplify
      * @return
      */
     @GET("/api/microapps/appcenter/org/find-sub-lists")
