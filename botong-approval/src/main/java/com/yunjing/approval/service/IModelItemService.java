@@ -33,16 +33,18 @@ public interface IModelItemService extends IBaseService<ModelItem> {
     /**
      * 保存模型
      *
-     * @param companyId 公司id
-     * @param memberId  成员id
-     * @param json      字段数据
+     * @param companyId  公司id
+     * @param memberId   成员id
+     * @param categoryId 分组id
+     * @param json       字段数据
      * @return 模型视图
      * @throws Exception 异常
      */
-    ModelVO saveModelItem(String companyId, String memberId, String json) throws Exception;
+    ModelVO saveModelItem(String companyId, String memberId, String categoryId, String json) throws Exception;
 
     /**
      * 删除企业下的模板子项
+     *
      * @param orgId 企业主键
      * @return
      */

@@ -33,14 +33,16 @@ public class ModelItemController extends BaseController {
     /**
      * 保存审批项模型
      *
-     * @param companyId 公司id
-     * @param memberId  成员id
-     * @param json      审批项json数据
+     * @param companyId  公司id
+     * @param memberId   成员id
+     * @param categoryId 分组id
+     * @param json       审批项json数据
      * @return ResponseEntityWrapper
      * @throws Exception 抛异常
      */
     @PostMapping("/save")
-    public ResponseEntityWrapper saveItem(@RequestParam("companyId") String companyId, @RequestParam("memberId") String memberId, @RequestParam("json") String json) throws Exception {
-        return success(modelItemService.saveModelItem(companyId, memberId, json));
+    public ResponseEntityWrapper saveItem(@RequestParam("companyId") String companyId, @RequestParam("memberId") String memberId,
+                                          @RequestParam("categoryId") String categoryId, @RequestParam("json") String json) throws Exception {
+        return success(modelItemService.saveModelItem(companyId, memberId,categoryId, json));
     }
 }

@@ -8,9 +8,13 @@ import com.common.mybatis.service.impl.BaseServiceImpl;
 import com.yunjing.approval.dao.mapper.ConditionMapper;
 import com.yunjing.approval.dao.mapper.ModelItemMapper;
 import com.yunjing.approval.dao.mapper.ModelMapper;
-import com.yunjing.approval.model.entity.*;
+import com.yunjing.approval.model.entity.ModelItem;
+import com.yunjing.approval.model.entity.ModelL;
+import com.yunjing.approval.model.entity.OrgModel;
+import com.yunjing.approval.model.entity.SetsCondition;
 import com.yunjing.approval.model.vo.*;
 import com.yunjing.approval.service.*;
+import com.yunjing.approval.util.ApproConstants;
 import com.yunjing.mommon.global.exception.BaseException;
 import com.yunjing.mommon.utils.IDUtils;
 import org.apache.commons.collections.CollectionUtils;
@@ -176,15 +180,7 @@ public class ModelItemServiceImpl extends BaseServiceImpl<ModelItemMapper, Model
 
     @Override
     @Transactional(propagation = Propagation.REQUIRED, rollbackFor = Exception.class)
-    public ModelVO saveModelItem(String companyId, String memberId, String json) throws Exception {
-        List<ModelCategory> categories = modelCategoryService.selectList(Condition.create().where("org_id={0}", companyId));
-        String other = "其他";
-        String categoryId = "";
-        for (ModelCategory category : categories) {
-            if(other.equals(category.getCategoryName())){
-                categoryId = category.getId();
-            }
-        }
+    public ModelVO saveModelItem(String companyId, String memberId, String categoryId, String json) throws Exception {
         if (StringUtils.isBlank(json)) {
             throw new BaseException("模型数据不存在");
         }
@@ -290,7 +286,7 @@ public class ModelItemServiceImpl extends BaseServiceImpl<ModelItemMapper, Model
      * @param version 模型版本号
      * @param flag    是否为子字段
      * @param parent  父字段视图
-     * @return 字段结婚
+     * @return
      * @throws Exception 异常
      */
     private List<ModelItem> getModelItemList(List<ModelItemVO> itemVOS, String modelId, int version, boolean flag, ModelItem parent) throws Exception {
@@ -393,6 +389,8 @@ public class ModelItemServiceImpl extends BaseServiceImpl<ModelItemMapper, Model
             }
             item.setIsRequired(isRequired);
 
+            // 获取单选框中排序最小值
+            Integer minSort = modelItemMapper.getMinSort(modelId, ApproConstants.RADIO_TYPE_3);
             // 是否为判断条件
             if (!flag) {
                 if (type == 2 || type == 3) {
