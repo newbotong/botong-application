@@ -64,11 +64,13 @@ public class RemindServiceImpl extends BaseServiceImpl<RemindMapper, RemindEntit
         if (entity == null) {
             entity = new RemindEntity();
             entity.beforeInsert();
+            entity.setAppId(appId);
             BeanUtils.copy(remind, entity);
             res = baseMapper.insert(entity);
         } else {
             BeanUtils.copy(remind, entity);
             entity.setUpdateTime(System.currentTimeMillis());
+            entity.setAppId(appId);
             Wrapper<RemindEntity> wrapper = new EntityWrapper<>();
             wrapper.eq("member_id", remind.getMemberId())
                     .and()
@@ -77,7 +79,6 @@ public class RemindServiceImpl extends BaseServiceImpl<RemindMapper, RemindEntit
                     .eq("org_id", remind.getOrgId())
                     .and()
                     .eq("submit_type", remind.getSubmitType());
-
             res = baseMapper.update(entity, wrapper);
         }
         boolean flag = res > 0;
