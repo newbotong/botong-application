@@ -50,5 +50,12 @@ public interface UserRemoteApiService {
      */
     List<SignUserInfoVO> manageScope(@Query("appId") String appId, @Query("memberId") String memberId);
 
-
+    /**
+     * 校验用户权限
+     *
+     * @param appId
+     * @param memberId
+     * @return
+     */
+    boolean verifyManager(String appId, String memberId);
 }

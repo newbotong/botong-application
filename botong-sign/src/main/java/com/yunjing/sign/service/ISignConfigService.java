@@ -28,5 +28,13 @@ public interface ISignConfigService extends IService<SignConfigModel> {
      * @return
      */
     SignConfigVO getSignConfig(String orgId);
+
+    /**
+     * 校验用户权限
+     * @param appId         应用id
+     * @param memberId      成员Id
+     * @return              成功与否
+     */
+    boolean verifyManager(String appId, String memberId);
 	
 }

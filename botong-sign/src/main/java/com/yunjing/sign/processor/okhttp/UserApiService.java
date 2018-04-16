@@ -53,4 +53,16 @@ public interface UserApiService {
     Call<ResponseEntityWrapper<PageWrapper<SignUserInfoVO>>> findMemberPage(@Query("deptIds") String[] deptIds, @Query("memberIds") String[] memberIds,
                                                                             @Query("pageNo") int pageNo, @Query("pageSize")int pageSize);
 
+    /**
+     * 校验用户权限
+     *
+     * @param appId
+     * @param memberId
+     * @return
+     */
+    @GET("/api/microapps/appcenter/org/verify-manager")
+    Call<ResponseEntityWrapper<Boolean>> verifyManager(@Query("appId") String appId, @Query("memberId") String memberId);
+
+
+
 }
