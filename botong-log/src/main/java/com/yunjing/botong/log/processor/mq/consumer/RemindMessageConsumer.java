@@ -51,6 +51,9 @@ public class RemindMessageConsumer extends AbstractMessageConsumerWithQueueDecla
     @Value("${botong.log.write-log}")
     private String writeLog;
 
+    @Value("${botong.log.appId}")
+    private String appId;
+
     @Autowired
     private LogReportDao logReportDao;
 
@@ -136,7 +139,7 @@ public class RemindMessageConsumer extends AbstractMessageConsumerWithQueueDecla
                 // 不是管理员，根据remindMode提醒
                 switch (remind.getRemindMode()) {
                     case 1:
-                        push(remind.getAppId(), memberInfo.getCompanyId(), new String[]{memberInfo.getPassportId()}, remind.getSubmitType());
+                        push(memberInfo.getCompanyId(), new String[]{memberInfo.getPassportId()}, remind.getSubmitType());
                         break;
                     case 2:
                         List<String> phoneNumbers = new ArrayList<>();
@@ -164,7 +167,7 @@ public class RemindMessageConsumer extends AbstractMessageConsumerWithQueueDecla
                 Date date = new Date();
                 String current = DateFormatUtils.format(date, "yyyy-MM-dd");
                 // 3.2 查询出所有管理的人员
-                List<Member> memberInfos = appCenterService.manageScope(remind.getAppId(), memberId);
+                List<Member> memberInfos = appCenterService.manageScope(appId, memberId);
                 // 3.3 3.1与3.2结果取交集，剩下的则是没有发送日志的
                 List<String> manageScopeList = new ArrayList<>();
                 for (Member info : memberInfos) {
@@ -199,7 +202,7 @@ public class RemindMessageConsumer extends AbstractMessageConsumerWithQueueDecla
                         for (int i = 0; i < passportIdList.size(); i++) {
                             idList[i] = passportIdList.get(i);
                         }
-                        push(remind.getAppId(), memberInfo.getCompanyId(), idList, remind.getSubmitType());
+                        push(memberInfo.getCompanyId(), idList, remind.getSubmitType());
                         break;
                     case 2:
                         sms(phoneNumbers, remind.getSubmitType());
@@ -233,12 +236,11 @@ public class RemindMessageConsumer extends AbstractMessageConsumerWithQueueDecla
     /**
      * 推送
      *
-     * @param appId
      * @param companyId
      * @param alias
      * @param submitType
      */
-    private void push(String appId, String companyId, String[] alias, int submitType) {
+    private void push(String companyId, String[] alias, int submitType) {
 
         AppPushParam pushParam = new AppPushParam();
 

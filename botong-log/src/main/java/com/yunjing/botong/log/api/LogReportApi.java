@@ -7,6 +7,7 @@ import com.yunjing.botong.log.vo.Member;
 import com.yunjing.mommon.base.BaseController;
 import com.yunjing.mommon.wrapper.ResponseEntityWrapper;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.web.bind.annotation.*;
 
 /**
@@ -20,6 +21,9 @@ import org.springframework.web.bind.annotation.*;
 @RestController
 @RequestMapping("/log/report")
 public class LogReportApi extends BaseController {
+
+    @Value("${botong.log.appId}")
+    private String appId;
 
 
     @Autowired
@@ -38,7 +42,6 @@ public class LogReportApi extends BaseController {
     @GetMapping("/list")
     public ResponseEntityWrapper list(@RequestParam String memberId,
                                       @RequestParam String orgId,
-                                      @RequestParam String appId,
                                       @RequestParam Integer pageNo,
                                       @RequestParam Integer pageSize,
                                       @RequestParam(required = false, defaultValue = "1") Integer submitType,
