@@ -1,5 +1,6 @@
 package com.yunjing.sign;
 
+import com.yunjing.mommon.annotation.EnableCommonLogger;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.EnableAutoConfiguration;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
@@ -17,6 +18,7 @@ import org.springframework.context.annotation.Configuration;
 @SpringBootApplication
 @EnableEurekaClient
 @Configuration
+@EnableCommonLogger
 public class SignApplication {
 
 	public static void main(String[] args) {
