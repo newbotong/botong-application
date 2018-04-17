@@ -38,7 +38,7 @@
         m.is_disabled AS isDisabled, m.is_def AS isDef, m.provider AS provider, m.model_type AS modelType, m.model_version AS modelVersion
         FROM model m
         JOIN org_model o ON m.id = o.model_id
-        WHERE o.org_id = #{ orgId }AND m.is_def = 0
+        WHERE o.org_id = #{ orgId }AND m.is_def = 0 ORDER BY m.sort ASC
     </select>
     <select id="getMaxSort" resultType="java.lang.Integer">
         select MAX(m.sort) AS max from model m, org_model o WHERE m.id = o.model_id and m.model_type = 2 and o.data_type = 2 and o.org_id = #{ orgId }

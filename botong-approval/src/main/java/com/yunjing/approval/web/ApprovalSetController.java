@@ -44,7 +44,7 @@ public class ApprovalSetController extends BaseController {
      * @param conditionId 条件主键
      * @return ResponseEntityWrapper
      */
-    @PostMapping("/deleteProcess")
+    @PostMapping("/delete-process")
     public ResponseEntityWrapper deleteProcess(@RequestParam("modelId") String modelId, @RequestParam(value = "conditionId", required = false) String conditionId) throws Exception {
         return success(processService.delete(modelId, conditionId));
     }
@@ -55,7 +55,7 @@ public class ApprovalSetController extends BaseController {
      * @param companyId 公司id
      * @param memberId  成员id
      */
-    @PostMapping("/deleteProcessUser")
+    @PostMapping("/delete-processUser")
     public void deleteProcessUser(@RequestParam("companyId") String companyId, @RequestParam("memberId") String memberId) {
         processService.deleteProcessUser(companyId, memberId);
     }

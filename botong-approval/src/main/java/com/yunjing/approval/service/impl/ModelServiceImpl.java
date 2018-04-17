@@ -49,8 +49,8 @@ public class ModelServiceImpl extends BaseServiceImpl<ModelMapper, ModelL> imple
     @Override
     @Transactional(propagation = Propagation.REQUIRED, rollbackFor = Exception.class)
     public List<ModelListVO> findModelList(String orgId) {
-        List<ModelVO> modelVOList = modelMapper.selectLists(orgId);
         List<ModelItem> modelItems = modelItemMapper.selectAll(orgId);
+        List<ModelVO> modelVOList = modelMapper.selectLists(orgId);
         for (ModelVO modelVO : modelVOList) {
             // 过滤属于某个审批模板的所有详情项
             List<ModelItem> items = modelItems.stream().filter(modelItem -> modelItem.getModelId().equals(modelVO.getModelId())).collect(Collectors.toList());

@@ -19,7 +19,7 @@ import org.springframework.context.annotation.Configuration;
 @EnableEurekaClient
 @SpringBootApplication
 @EnableFeignClients
-@EnableCommonLogger
+//@EnableCommonLogger
 public class ApprovalApplication extends BaseApplication {
 
     public static void main(String[] args) {

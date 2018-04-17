@@ -35,8 +35,6 @@ public class ClientApprovalController extends BaseController {
     private IModelItemService modelItemService;
     @Autowired
     private IProcessService processService;
-    @Autowired
-    private ICopyService copyService;
 
     /**
      * 获取审批列表

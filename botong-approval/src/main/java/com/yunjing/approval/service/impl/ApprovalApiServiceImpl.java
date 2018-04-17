@@ -68,18 +68,17 @@ public class ApprovalApiServiceImpl implements IApprovalApiService {
     @Transactional(propagation = Propagation.REQUIRED, rollbackFor = Exception.class)
     public List<ClientModelVO> getList(String orgId) {
         List<ModelL> modelLList = modelMapper.selectModelListByOrgId(orgId);
-        Set<ClientModelVO> set = new HashSet<>();
+        List<ClientModelVO> list = new ArrayList<>();
         for (ModelL model : modelLList) {
             ClientModelVO modelVO1 = new ClientModelVO(model);
-            set.add(modelVO1);
+            list.add(modelVO1);
         }
-        List<ClientModelVO> list = new ArrayList<>(set);
         return list;
     }
 
     @Override
     @Transactional(propagation = Propagation.REQUIRED, rollbackFor = Exception.class)
-    public Page<ClientApprovalVO> getWaited(Page page, String orgId, String userId, FilterParam filterParam) {
+    public Page<ClientApprovalVO> getWaited(Page page, String companyId, String memberId, FilterParam filterParam) {
 
         int current = page.getCurrentPage();
         int size = page.getPageSize();
@@ -92,10 +91,10 @@ public class ApprovalApiServiceImpl implements IApprovalApiService {
         if (members != null) {
             userIds = members.stream().map(Member::getId).collect(Collectors.toList());
         }
-        userIds.add(userId);
+        userIds.add(memberId);
         Page<ClientApprovalVO> clientApprovalVOPage = new Page<>(current, size);
         List<ClientApprovalVO> clientApprovalVOS = new ArrayList<>();
-        List<ApprovalContentDTO> waitedMeApprovalList = approvalProcessMapper.getWaitedMeApprovalList(index, size, orgId, userIds, filterParam);
+        List<ApprovalContentDTO> waitedMeApprovalList = approvalProcessMapper.getWaitedMeApprovalList(index, size, companyId, userIds, filterParam);
         convertList(clientApprovalVOS, waitedMeApprovalList);
         clientApprovalVOPage.build(clientApprovalVOS != null ? clientApprovalVOS : new ArrayList<>());
         clientApprovalVOPage.setTotalCount(clientApprovalVOS.size());
