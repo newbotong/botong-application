@@ -57,6 +57,13 @@ spring:
       max-idle: 8
       min-idle: 0
 
+  logback:
+    redisKey: botong:admin:log         # rediskey 保存日志list的key
+    type: ${spring.application.name}   # 根据模块定义类型，kibana 会根据这个查找 禁止有大写字母
+    hostName: ${logback.host}          # Redis 服务器地址
+    database: ${logback.database}      # 日志对应缓存的数据库
+    port: ${logback.port}              # 端口号 不用改
+    password: ${logback.password}      # 密码 不用改
 ##配置注册中心
 eureka:
   client:
@@ -89,3 +96,9 @@ okhttp:
 # 写入文件日志
 logging:
   file: ${user.dir}/logs/${spring.application.name}.log
+
+approval:
+     appId: 861c643f34714df3bf99bffde9ae20ea
+
+
+

@@ -21,6 +21,7 @@ import com.yunjing.mommon.utils.IDUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
 import java.util.*;
@@ -37,14 +38,17 @@ public class ApprovalPushTask extends BaseTask {
 
     private Log logger = LogFactory.getLog(this.getClass());
 
+    /**
+     * 绑定的公告appId
+     */
+    @Value("${approval.appId}")
+    private String appId;
     @Autowired
     private IApprovalUserService approvalUserService;
     @Autowired
     private IApprovalService approvalService;
     @Autowired
     private ApprovalProcessMapper approvalProcessMapper;
-    @Autowired
-    private ICopysService copySService;
     @Autowired
     private CopysMapper copySMapper;
     @Autowired
@@ -237,15 +241,14 @@ public class ApprovalPushTask extends BaseTask {
 
     private PushParam setPushParam(String systemMessage,String[] phones,ApprovalUser user,String message) {
         PushParam pushParam = new PushParam();
-        pushParam.setAppId("861c643f34714df3bf99bffde9ae20ea");
+        pushParam.setAppId(appId);
         pushParam.setMsg(systemMessage);
         pushParam.setAlias(phones);
         pushParam.setRegistrationId(user.getMobile());
         pushParam.setNotificationTitle(message);
         pushParam.setCompanyId(orgId);
         pushParam.setRegistrationId(user.getId());
-        pushParam.setTitle("我是自定义标题");
-        pushParam.setAppId("978518782567088130");
+        pushParam.setTitle("审批消息");
         Map<String, String> maps = new HashMap<>(5);
         maps.put("appName", "审批");
         maps.put("subModuleName", "审批提醒");

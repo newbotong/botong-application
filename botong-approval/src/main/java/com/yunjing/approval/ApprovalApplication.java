@@ -1,5 +1,6 @@
 package com.yunjing.approval;
 
+import com.yunjing.mommon.annotation.EnableCommonLogger;
 import com.yunjing.mommon.base.BaseApplication;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.EnableAutoConfiguration;
@@ -18,6 +19,7 @@ import org.springframework.context.annotation.Configuration;
 @EnableEurekaClient
 @SpringBootApplication
 @EnableFeignClients
+@EnableCommonLogger
 public class ApprovalApplication extends BaseApplication {
 
     public static void main(String[] args) {
