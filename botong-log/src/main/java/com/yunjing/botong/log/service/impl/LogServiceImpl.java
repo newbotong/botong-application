@@ -64,7 +64,6 @@ public class LogServiceImpl implements LogService {
         AppPushParam param = new AppPushParam();
 
         param.setAppId(appId);
-        log.info("appId:{},成员信息:{}", appId, JSON.toJSONString(member));
         param.setCompanyId(member.getCompanyId());
 
         param.setTitle(member.getName() + "向你提交了日志：" + vo.getName() + "，请及时查阅！");

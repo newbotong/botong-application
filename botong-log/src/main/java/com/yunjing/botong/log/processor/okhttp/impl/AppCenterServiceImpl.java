@@ -102,6 +102,9 @@ public class AppCenterServiceImpl implements AppCenterService {
         if (apiService == null) {
             init();
         }
+
+        log.info("推送参数：{}", JSON.toJSONString(param));
+
         apiService.push(param).enqueue(new Callback<ResponseEntityWrapper>() {
 
             /**
@@ -134,7 +137,7 @@ public class AppCenterServiceImpl implements AppCenterService {
 
     @Override
     public void dang(DangParam param) {
-        if (apiService == null){
+        if (apiService == null) {
             init();
         }
         apiService.dang(param).enqueue(new Callback<ResponseEntityWrapper>() {
@@ -159,7 +162,7 @@ public class AppCenterServiceImpl implements AppCenterService {
     public boolean isManager(String appId, String memberId, boolean isSync) {
 
 
-        if (apiService == null){
+        if (apiService == null) {
             init();
         }
 
@@ -207,7 +210,7 @@ public class AppCenterServiceImpl implements AppCenterService {
     @Override
     public List<Member> findAllOrgMember(String orgId, boolean isSync) {
 
-        if (apiService == null){
+        if (apiService == null) {
             init();
         }
 
@@ -253,7 +256,7 @@ public class AppCenterServiceImpl implements AppCenterService {
     @Override
     public String setTask(SchedulerParam param) {
 
-        if (apiService == null){
+        if (apiService == null) {
             init();
         }
         try {
@@ -276,7 +279,7 @@ public class AppCenterServiceImpl implements AppCenterService {
 
     @Override
     public List<Member> manageScope(String appId, String memberId) {
-        if (apiService == null){
+        if (apiService == null) {
             init();
         }
         log.info("获取管理范围 appId:{},memberId:{}", appId, memberId);
@@ -307,7 +310,7 @@ public class AppCenterServiceImpl implements AppCenterService {
      */
     @Override
     public List<Member> findSubLists(String[] deptIds, String[] memberIds) {
-        if (apiService == null){
+        if (apiService == null) {
             init();
         }
         try {
