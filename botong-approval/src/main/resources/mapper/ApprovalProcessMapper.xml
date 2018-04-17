@@ -19,7 +19,7 @@
         <where>
             ap. approval_id = a.id AND m.id = a.model_id AND ap.process_state = 0
             <if test="userIds != null and userIds.size()>0">
-                AND a.user_id IN
+                AND ap.user_id IN
                 <foreach collection="userIds" item="userId" index="index"
                          open="(" separator="," close=")">#{userId}
                 </foreach>
@@ -44,7 +44,7 @@
         <where>
             ap. approval_id = a.id AND m.id = a.model_id AND ap.process_state > 0 and 4 > ap.process_state
             <if test="userIds != null and userIds.size()>0">
-                AND a.user_id IN
+                AND ap.user_id IN
                 <foreach collection="userIds" item="userId" index="index"
                          open="(" separator="," close=")">#{userId}
                 </foreach>
