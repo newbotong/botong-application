@@ -14,7 +14,6 @@ import com.yunjing.approval.param.FilterParam;
 import com.yunjing.approval.processor.okhttp.AppCenterService;
 import com.yunjing.approval.processor.task.async.ApprovalPushTask;
 import com.yunjing.approval.service.*;
-import com.yunjing.approval.util.Colors;
 import com.yunjing.mommon.global.exception.InsertMessageFailureException;
 import com.yunjing.mommon.global.exception.UpdateMessageFailureException;
 import com.yunjing.mommon.utils.IDUtils;
@@ -24,7 +23,10 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 import java.util.stream.Collectors;
 
 /**
@@ -214,9 +216,9 @@ public class ApprovalApiServiceImpl implements IApprovalApiService {
         List<ApprovalUserVO> approvalUserList = approvalProcessMapper.getApprovalUserList(approvalId);
         int index = 1;
         for (ApprovalUserVO approvalUserVO : approvalUserList) {
-            approvalUserVO.setColor(Colors.generateBeautifulColor(approvalUserVO.getMobile(), approvalUserVO.getName()));
+            approvalUserVO.setColor(approvalUserVO.getColor() != null ? approvalUserVO.getColor() : "#1E90FF");
             if (StringUtils.isBlank(approvalUserVO.getAvatar())) {
-                approvalUserVO.setColor(Colors.generateBeautifulColor(approvalUserVO.getMobile(), approvalUserVO.getName()));
+                approvalUserVO.setColor(approvalUserVO.getColor() != null ? approvalUserVO.getColor() : "#1E90FF");
                 approvalUserVO.setAvatarName(approvalUserVO.getName().length() <= 2 ? approvalUserVO.getName() : approvalUserVO.getName().substring(1, 3));
             }
             if (approvalUserVO.getProcessState() == 0) {
@@ -239,7 +241,7 @@ public class ApprovalApiServiceImpl implements IApprovalApiService {
         List<CopyUserVO> copyUserList = copysMapper.getCopyUserList(approvalId);
         copyUserList.forEach(copyUserVO -> {
             if (StringUtils.isBlank(copyUserVO.getAvatar())) {
-                copyUserVO.setColor(Colors.generateBeautifulColor(copyUserVO.getMobile(), copyUserVO.getName()));
+                copyUserVO.setColor(copyUserVO.getColor() != null ? copyUserVO.getColor() : "#1E90FF");
                 copyUserVO.setAvatarName(copyUserVO.getName().length() <= 2 ? copyUserVO.getName() : copyUserVO.getName().substring(1, 3));
             }
         });
@@ -422,7 +424,7 @@ public class ApprovalApiServiceImpl implements IApprovalApiService {
                 contentDTO.setUserNick(user.getName());
                 contentDTO.setUserAvatar(user.getAvatar());
                 if (StringUtils.isBlank(contentDTO.getUserAvatar())) {
-                    contentDTO.setColor(Colors.generateBeautifulColor(StringUtils.isNotBlank(user.getMobile()) ? user.getMobile() : "", StringUtils.isNotBlank(user.getName()) ? user.getName() : ""));
+                    contentDTO.setColor(user.getColor() != null ? user.getColor() : "#1E90FF");
                 }
             }
             ClientApprovalVO clientApprovalVO = new ClientApprovalVO(contentDTO);
