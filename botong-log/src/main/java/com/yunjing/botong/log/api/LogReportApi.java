@@ -5,7 +5,10 @@ import com.yunjing.botong.log.params.ManagerListParam;
 import com.yunjing.botong.log.service.LogReportService;
 import com.yunjing.botong.log.vo.Member;
 import com.yunjing.mommon.base.BaseController;
+import com.yunjing.mommon.global.exception.ParameterErrorException;
+import com.yunjing.mommon.validate.BeanFieldValidator;
 import com.yunjing.mommon.wrapper.ResponseEntityWrapper;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.web.bind.annotation.*;
@@ -47,6 +50,13 @@ public class LogReportApi extends BaseController {
                                       @RequestParam(required = false, defaultValue = "1") Integer submitType,
                                       @RequestParam(required = false, defaultValue = "0") Long startDate,
                                       @RequestParam(required = false, defaultValue = "0") Long endDate) {
+
+        if (StringUtils.isEmpty(memberId)) {
+            throw new ParameterErrorException("memberId 不能为空");
+        }
+        if (StringUtils.isEmpty(orgId)) {
+            throw new ParameterErrorException("orgId 不能为空");
+        }
         if (submitType == 0) {
             submitType = 1;
         }
@@ -63,6 +73,7 @@ public class LogReportApi extends BaseController {
      */
     @PostMapping("/manager-submit-list")
     public ResponseEntityWrapper submitList(@RequestBody ManagerListParam param) {
+        BeanFieldValidator.getInstance().validate(param);
         PageWrapper<Member> wrapper = logReportService.submitList(param.getMemberId(), param.getOrgId(), appId, param.getSubmitType(), param.getDate(), param.getPageNo(), param.getPageSize());
         return success(wrapper);
     }
@@ -75,6 +86,7 @@ public class LogReportApi extends BaseController {
      */
     @PostMapping("/manager-unsubmit-list")
     public ResponseEntityWrapper unSubmitList(@RequestBody ManagerListParam param) {
+        BeanFieldValidator.getInstance().validate(param);
         PageWrapper<Member> wrapper = logReportService.unSubmitList(param.getMemberId(), param.getOrgId(), appId, param.getSubmitType(), param.getDate(), param.getPageNo(), param.getPageSize());
         return success(wrapper);
     }
