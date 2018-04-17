@@ -11,8 +11,6 @@ import com.yunjing.botong.log.service.LogReportService;
 import com.yunjing.botong.log.util.ListPage;
 import com.yunjing.botong.log.vo.LogDetailVO;
 import com.yunjing.botong.log.vo.Member;
-import com.yunjing.mommon.constant.StatusCode;
-import com.yunjing.mommon.global.exception.ParameterErrorException;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections.CollectionUtils;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -145,10 +143,13 @@ public class LogReportServiceImpl implements LogReportService {
     public PageWrapper<Member> submitList(String memberId, String orgId, String appId, int submitType, String date, int pageNo, int pageSize) {
         // 获取管理范围集合
         List<Member> list = manageScopeList(memberId, appId);
-        if (CollectionUtils.isEmpty(list)) {
-            throw new ParameterErrorException(StatusCode.NOT_ADMIN_AUTH);
+        if (list == null) {
+            list = new ArrayList<>();
         }
         List<String> memberIdList = new ArrayList<>();
+        if (CollectionUtils.isEmpty(list)) {
+            memberIdList.add(memberId);
+        }
         for (Member member : list) {
             memberIdList.add(member.getId());
         }
@@ -184,11 +185,13 @@ public class LogReportServiceImpl implements LogReportService {
     public PageWrapper<Member> unSubmitList(String memberId, String orgId, String appId, int submitType, String date, int pageNo, int pageSize) {
         // 获取管理范围集合
         List<Member> list = manageScopeList(memberId, appId);
-        if (CollectionUtils.isEmpty(list)) {
-            throw new ParameterErrorException(StatusCode.NOT_ADMIN_AUTH);
+        if (list == null) {
+            list = new ArrayList<>();
         }
-
         List<String> memberIdList = new ArrayList<>();
+        if (CollectionUtils.isEmpty(list)) {
+            memberIdList.add(memberId);
+        }
         for (Member member : list) {
             memberIdList.add(member.getId());
         }

@@ -38,6 +38,8 @@ import java.util.Map;
 @Service
 public class RemindServiceImpl extends BaseServiceImpl<RemindMapper, RemindEntity> implements IRemindService {
 
+    private final static String REMIND_DAY = "DAY";
+
 
     @Value("${botong.log.appId}")
     private String appId;
@@ -146,6 +148,9 @@ public class RemindServiceImpl extends BaseServiceImpl<RemindMapper, RemindEntit
             taskId = vo.getTaskId();
         }
         SchedulerParam param = new SchedulerParam();
+        if (REMIND_DAY.equals(remind.getCycleType())) {
+            remind.setCycle("1,2,3,4,5,6,7");
+        }
         param.setCycle(remind.getCycle());
         param.setCycleType(remind.getCycleType());
         param.setOutKey(key);
