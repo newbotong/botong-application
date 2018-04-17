@@ -1,5 +1,6 @@
 package com.yunjing.botong.log;
 
+import com.yunjing.mommon.annotation.EnableCommonLogger;
 import com.yunjing.mommon.base.BaseApplication;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
@@ -13,6 +14,7 @@ import org.springframework.cloud.netflix.eureka.EnableEurekaClient;
  * @date 2018/3/23 16:57
  * @description
  **/
+@EnableCommonLogger
 @EnableEurekaClient
 @SpringBootApplication
 public class LogApplication extends BaseApplication {
