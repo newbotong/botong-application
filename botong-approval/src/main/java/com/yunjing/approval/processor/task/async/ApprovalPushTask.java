@@ -13,9 +13,7 @@ import com.yunjing.approval.param.PushParam;
 import com.yunjing.approval.processor.okhttp.AppCenterService;
 import com.yunjing.approval.service.IApprovalService;
 import com.yunjing.approval.service.IApprovalUserService;
-import com.yunjing.approval.service.ICopysService;
 import com.yunjing.approval.service.IPushLogService;
-import com.yunjing.approval.util.DateUtil;
 import com.yunjing.mommon.global.exception.InsertMessageFailureException;
 import com.yunjing.mommon.utils.IDUtils;
 import org.apache.commons.logging.Log;
@@ -121,10 +119,8 @@ public class ApprovalPushTask extends BaseTask {
         if (orgId != null && userId != null) {
             String message = "您收到一条审批消息";
             Map<String, Object> map = new HashMap<>(16);
-            map.put("dataType", "20");
             map.put("id", approvalId);
             map.put("orgId", orgId);
-            map.put("orgName", "");
             map.put("message", message);
             String systemMessage = JSONObject.toJSONString(map);
             logger.info("oid=" + orgId + "    msg=" + systemMessage);
@@ -144,14 +140,14 @@ public class ApprovalPushTask extends BaseTask {
                             pushLog.setUserId(approvalUserVO.getUserId());
                             pushLog.setOrgId(orgId);
                             pushLog.setCopyNum(2);
-                            pushLog.setCreateTime(DateUtil.getCurrentTime().getTime());
+                            pushLog.setCreateTime(System.currentTimeMillis());
                             pushLog.setMessage("您收到一条审批消息");
                             boolean insert = pushLogService.insert(pushLog);
                             if (!insert) {
                                 throw new InsertMessageFailureException("保存推送审批记录失败");
                             }
                             // 审批推送入参
-                            PushParam pushParam = setPushParam(systemMessage, phones,user, message);
+                            PushParam pushParam = setPushParam(systemMessage, phones, user, message);
                             // 推送审批
                             appCenterService.push(pushParam);
 
@@ -167,11 +163,10 @@ public class ApprovalPushTask extends BaseTask {
                     pushLog.setInfoId(String.valueOf(approval.getId()));
                     pushLog.setUserId(approval.getUserId());
                     pushLog.setOrgId(orgId);
-                    pushLog.setCreateTime(DateUtil.getCurrentTime().getTime());
+                    pushLog.setCreateTime(System.currentTimeMillis());
                     pushLog.setMessage("您收到一条审批消息");
                     // 审批推送入参
-                    // 审批推送入参
-                    PushParam pushParam = setPushParam(systemMessage, phones,user, message);
+                    PushParam pushParam = setPushParam(systemMessage, phones, user, message);
                     // 推送审批
                     appCenterService.push(pushParam);
                     boolean insert = pushLogService.insert(pushLog);
@@ -197,7 +192,7 @@ public class ApprovalPushTask extends BaseTask {
                                 pushLog1.setUserId(copyVO.getUserId());
                                 pushLog1.setOrgId(orgId);
                                 pushLog1.setCopyNum(1);
-                                pushLog1.setCreateTime(DateUtil.getCurrentTime().getTime());
+                                pushLog1.setCreateTime(System.currentTimeMillis());
                                 pushLog1.setMessage("您收到一条审批消息");
                                 logger.debug("抄送人ID================" + copyVO.getUserId());
                                 logger.debug("审批ID================" + approvalId);
@@ -210,8 +205,7 @@ public class ApprovalPushTask extends BaseTask {
                                 userPhones.removeAll(userPhones);
                                 String[] photos = phoneList.toArray(new String[phoneList.size()]);
                                 // 审批推送入参
-                                // 审批推送入参
-                                PushParam pushParam2 = setPushParam(systemMessage, phones,user, message);
+                                PushParam pushParam2 = setPushParam(systemMessage, photos, user, message);
                                 // 推送审批
                                 appCenterService.push(pushParam2);
                                 n = 1;
@@ -239,7 +233,7 @@ public class ApprovalPushTask extends BaseTask {
         }
     }
 
-    private PushParam setPushParam(String systemMessage,String[] phones,ApprovalUser user,String message) {
+    private PushParam setPushParam(String systemMessage, String[] phones, ApprovalUser user, String message) {
         PushParam pushParam = new PushParam();
         pushParam.setAppId(appId);
         pushParam.setMsg(systemMessage);
@@ -260,7 +254,7 @@ public class ApprovalPushTask extends BaseTask {
         json.put("subTitle", "您收到一条审批提醒");
         json.put("type", "5");
         array.add(json);
-        maps.put ("content", array.toJSONString());
+        maps.put("content", array.toJSONString());
         pushParam.setMap(maps);
         return pushParam;
 
