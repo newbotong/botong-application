@@ -1,114 +1,46 @@
-<?xml version="1.0" encoding="UTF-8"?>
-<!--该日志将日志级别不同的log信息保存到不同的文件中 -->
+<?xml version="1.0" encoding="UTF-8" ?>
+        <!DOCTYPE configuration>
 <configuration scan="true" scanPeriod="60 seconds">
-    <include resource="org/springframework/boot/logging/logback/base.xml"/>
+
+<include resource="org/springframework/boot/logging/logback/base.xml"/>
     <logger name="com.yunjing.info.mapper" level="DEBUG"/>
-    <jmxConfigurator/>
+<jmxConfigurator/>
 
-    <springProperty scope="context" name="appName" source="spring.application.name"/>
-    <springProperty scope="context" name="ip" source="spring.cloud.client.ipAddress"/>
+<springProperty scope="context" name="redisKey" source="logback.redisKey"/>
+<springProperty scope="context" name="hostName" source="logback.hostName"/>
+<springProperty scope="context" name="database" source="logback.database"/>
+<springProperty scope="context" name="port" source="logback.port"/>
+<springProperty scope="context" name="type" source="logback.type"/>
+<springProperty scope="context" name="password" source="logback.password"/>
 
-    <!-- 日志在工程中的输出位置 -->
-    <property name="LOG_FILE" value="${BUILD_FOLDER:-build}/${appName}"/>
+<appender name="redisAppender" class="com.cwbase.logback.RedisAppender">
+    <host>${hostName}</host>
+    <port>${port}</port>
+    <!-- 设置保存的Redis key -->
+    <key>${redisKey}</key>
+    <!-- 设置数据库 -->
+    <database>${database}</database>
+    <!-- redis密码 -->
+    <!--<password>${password}</password>-->
+    <!-- Kibana 区分类型 -->
+    <type>${type}</type>
+</appender>
 
-    <!-- 控制台的日志输出样式 -->
-    <property name="CONSOLE_LOG_PATTERN"
-              value="%clr(%d{yyyy-MM-dd HH:mm:ss.SSS}){faint} %clr(${LOG_LEVEL_PATTERN:-%5p}) %clr(${PID:- }){magenta} %clr(---){faint} %clr([%15.15t]){faint} %m%n${LOG_EXCEPTION_CONVERSION_WORD:-%wEx}}"/>
+<appender name="sync" class="ch.qos.logback.classic.AsyncAppender">
+    <discardingThreshold>0</discardingThreshold>
+    <!-- 更改默认的队列的深度,该值会影响性能.默认值为256 -->
+    <queueSize>512</queueSize>
+    <appender-ref ref="redisAppender"/>
+</appender>
 
-    <!-- 控制台输出 -->
-    <appender name="console" class="ch.qos.logback.core.ConsoleAppender">
-        <filter class="ch.qos.logback.classic.filter.ThresholdFilter">
-            <level>INFO</level>
-        </filter>
-        <!-- 日志输出编码 -->
-        <encoder>
-            <pattern>${CONSOLE_LOG_PATTERN}</pattern>
-            <charset>utf8</charset>
-        </encoder>
-    </appender>
-
-    <!--本地保存文件，通过logstash读取文件的方式，提交数据到elasticearch。此方式适合于每一个服务都配合部署一个logstash-->
-    <appender name="logstash"
-              class="ch.qos.logback.core.rolling.RollingFileAppender">
-        <file>${LOG_FILE}.json</file>
-        <rollingPolicy class="ch.qos.logback.core.rolling.TimeBasedRollingPolicy">
-            <!--日志文件输出的文件名 -->
-            <fileNamePattern>${LOG_FILE}.json.%d{yyyy-MM-dd}.gz</fileNamePattern>
-            <!--日志文件保留天数 -->
-            <MaxHistory>6</MaxHistory>
-        </rollingPolicy>
-        <!-- 日志输出编码 -->
-        <encoder
-                class="net.logstash.logback.encoder.LoggingEventCompositeJsonEncoder">
-            <jsonFactoryDecorator class="com.yunjing.mommon.decorator.NoneAsciiJsonGeneratorDecorator"/>
-            <providers>
-                <timestamp>
-                    <timeZone>UTC</timeZone>
-                </timestamp>
-                <mdc/>
-                <pattern>
-                    <pattern>
-                        {
-                        "ip": "${ip}",
-                        "severity": "%level",
-                        "service": "${appName:-}",
-                        "trace": "%X{X-B3-TraceId:-}",
-                        "span": "%X{X-B3-SpanId:-}",
-                        "exportable": "%X{X-Span-Export:-}",
-                        "pid": "${PID:-}",
-                        "thread": "%thread",
-                        "class": "%logger{40}",
-                        "rest": "%message"
-                        }
-                    </pattern>
-                </pattern>
-                <stackTrace>
-                    <throwableConverter class="net.logstash.logback.stacktrace.ShortenedThrowableConverter">
-                        <maxDepthPerThrowable>2</maxDepthPerThrowable>
-                        <maxLength>2048</maxLength>
-                        <rootCauseFirst>true</rootCauseFirst>
-                    </throwableConverter>
-                </stackTrace>
-            </providers>
-        </encoder>
-    </appender>
-
-    <!-- 通过Logback的tcpAppender将数据提交给logstash，然后logstash再提交给elasticsearch。此方式适合于将logstash部署到一个公共节点上，提供日志接收和日志提交工作 -->
-    <!--<appender name="logstash"-->
-    <!--class="net.logstash.logback.appender.LogstashTcpSocketAppender">-->
-    <!--<destination>192.168.226.133:9250</destination>-->
-    <!--&lt;!&ndash; 日志输出编码 &ndash;&gt;-->
-    <!--<encoder-->
-    <!--class="net.logstash.logback.encoder.LoggingEventCompositeJsonEncoder">-->
-    <!--<providers>-->
-    <!--<timestamp>-->
-    <!--<timeZone>UTC</timeZone>-->
-    <!--</timestamp>-->
-    <!--<pattern>-->
-    <!--<pattern>-->
-    <!--{-->
-    <!--"ip": "${ip}",-->
-    <!--"severity": "%level",-->
-    <!--"service": "${springAppName:-}",-->
-    <!--"trace": "%X{X-B3-TraceId:-}",-->
-    <!--"span": "%X{X-B3-SpanId:-}",-->
-    <!--"exportable": "%X{X-Span-Export:-}",-->
-    <!--"pid": "${PID:-}",-->
-    <!--"thread": "%thread",-->
-    <!--"class": "%logger{40}",-->
-    <!--"rest": "%message"-->
-    <!--}-->
-    <!--</pattern>-->
-    <!--</pattern>-->
-    <!--</providers>-->
-    <!--</encoder>-->
-    <!--</appender>-->
-
-    <!-- 日志输出级别 -->
-    <root level="INFO">
-        <!--<appender-ref ref="console"/>-->
-        <appender-ref ref="logstash"/>
-    </root>
+<root level="INFO">
+    <appender-ref ref="sync"/>
+    <appender-ref ref="CONSOLE"/>
+</root>
 
 </configuration>
+
+
+
+
 

@@ -1,5 +1,6 @@
 package com.yunjing.notice;
 
+import com.yunjing.mommon.annotation.EnableCommonLogger;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.cloud.netflix.eureka.EnableEurekaClient;
@@ -14,11 +15,11 @@ import org.springframework.context.annotation.Configuration;
  * @author 李双喜
  * @since 2018/3/20.
  */
+@EnableCommonLogger
 @EnableEurekaClient
 @Configuration
 @SpringBootApplication
 @EnableFeignClients
-
 public class NoticeApplication {
 
     public static void main(String... args) {
