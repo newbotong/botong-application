@@ -96,5 +96,6 @@
         FROM approval_process ap
         LEFT JOIN approval_user au ON ap.user_id = au.id
         WHERE ap.approval_id = #{approvalId}
+        ORDER BY ap.seq ASC
     </select>
 </mapper>
