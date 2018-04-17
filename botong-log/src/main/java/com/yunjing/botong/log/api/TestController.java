@@ -5,6 +5,7 @@ import com.yunjing.botong.log.mapper.LogTemplateFieldMapper;
 import com.yunjing.botong.log.params.DangParam;
 import com.yunjing.botong.log.params.UserInfoModel;
 import com.yunjing.botong.log.processor.okhttp.AppCenterService;
+import com.yunjing.botong.log.vo.AppPushParam;
 import com.yunjing.botong.log.vo.LogTemplateFieldVo;
 import com.yunjing.mommon.base.PushParam;
 import lombok.extern.slf4j.Slf4j;
@@ -57,7 +58,7 @@ public class TestController {
     @RequestMapping("/push")
     public String push() {
         // 创建请求参数
-        PushParam param = new PushParam();
+        AppPushParam param = new AppPushParam();
         param.setTitle("Title");
         param.setNotificationTitle("NotificationTitle");
         param.setAlias(new String[]{"6386505037916409856"});
