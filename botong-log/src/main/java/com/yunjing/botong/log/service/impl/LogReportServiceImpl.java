@@ -205,13 +205,16 @@ public class LogReportServiceImpl implements LogReportService {
         // 去除已提交列表，其余为未提交列表
         memberIdList.removeAll(collection);
 
-        ListPage<Member> page = new ListPage<>(list, pageSize);
         PageWrapper<Member> wrapper = new PageWrapper<>();
-        wrapper.setRecords(page.getPagedList(pageNo));
-        wrapper.setSize(page.getPageSize());
-        wrapper.setCurrent(pageNo);
-        wrapper.setPages(page.getPageCount());
-        wrapper.setTotal(list.size());
+        if (CollectionUtils.isNotEmpty(list)) {
+            ListPage<Member> page = new ListPage<>(list, pageSize);
+            wrapper.setRecords(page.getPagedList(pageNo));
+            wrapper.setSize(page.getPageSize());
+            wrapper.setCurrent(pageNo);
+            wrapper.setPages(page.getPageCount());
+            wrapper.setTotal(list.size());
+        }
+
 
         return wrapper;
     }

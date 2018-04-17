@@ -1,5 +1,6 @@
 package com.yunjing.botong.log.service.impl;
 
+import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 import com.yunjing.botong.log.cache.MemberRedisOperator;
@@ -12,6 +13,7 @@ import com.yunjing.botong.log.vo.AppPushParam;
 import com.yunjing.botong.log.vo.LogTemplateVo;
 import com.yunjing.botong.log.vo.Member;
 import com.yunjing.mommon.global.exception.BaseRuntimeException;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.mongodb.core.MongoTemplate;
@@ -26,6 +28,7 @@ import java.util.Map;
  * @author 王开亮
  * @date 2018/4/9 9:53
  */
+@Slf4j
 @Service
 public class LogServiceImpl implements LogService {
 

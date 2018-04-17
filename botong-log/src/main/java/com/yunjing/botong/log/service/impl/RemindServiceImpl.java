@@ -162,7 +162,7 @@ public class RemindServiceImpl extends BaseServiceImpl<RemindMapper, RemindEntit
         param.setJobTime(remind.getJobTime());
         param.setJobTitle(jobTitle);
         if (taskId != null) {
-            param.setTaskId(taskId);
+            param.setId(taskId);
         }
         log.info("设置任务调度参数:{}", gson.toJson(param));
         taskId = appCenterService.setTask(param);
