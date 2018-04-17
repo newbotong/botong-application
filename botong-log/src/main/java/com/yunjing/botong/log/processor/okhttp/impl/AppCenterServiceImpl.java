@@ -37,7 +37,7 @@ public class AppCenterServiceImpl implements AppCenterService {
     /**
      * 这里需要在启动参数时指定，无法放在配置中心加载
      */
-    @Value("app-center-url")
+    @Value("${okhttp.botong.zuul}")
     private String appCenterUrl = ApiService.BASE_URL;
 
     /**
@@ -84,8 +84,8 @@ public class AppCenterServiceImpl implements AppCenterService {
         this.taskCallback = taskCallback;
     }
 
-    public AppCenterServiceImpl() {
-
+    private void init() {
+        log.info("appCenterUrl:{}", appCenterUrl);
         // 构建 Retrofit 对象
         Retrofit retrofit = new Retrofit.Builder()
                 .baseUrl(appCenterUrl)
@@ -99,6 +99,9 @@ public class AppCenterServiceImpl implements AppCenterService {
 
     @Override
     public void push(PushParam param) {
+        if (apiService == null) {
+            init();
+        }
         apiService.push(param).enqueue(new Callback<ResponseEntityWrapper>() {
 
             /**
@@ -131,6 +134,9 @@ public class AppCenterServiceImpl implements AppCenterService {
 
     @Override
     public void dang(DangParam param) {
+        if (apiService == null){
+            init();
+        }
         apiService.dang(param).enqueue(new Callback<ResponseEntityWrapper>() {
             @Override
             public void onResponse(Call<ResponseEntityWrapper> call, Response<ResponseEntityWrapper> response) {
@@ -151,6 +157,11 @@ public class AppCenterServiceImpl implements AppCenterService {
 
     @Override
     public boolean isManager(String appId, String memberId, boolean isSync) {
+
+
+        if (apiService == null){
+            init();
+        }
 
         Call<ResponseEntityWrapper<Boolean>> call = apiService.verifyManager(appId, memberId);
         if (isSync) {
@@ -195,6 +206,11 @@ public class AppCenterServiceImpl implements AppCenterService {
 
     @Override
     public List<Member> findAllOrgMember(String orgId, boolean isSync) {
+
+        if (apiService == null){
+            init();
+        }
+
         Call<ResponseEntityWrapper<List<Member>>> call = apiService.findAllOrgMember(orgId);
         if (isSync) {
             try {
@@ -236,6 +252,10 @@ public class AppCenterServiceImpl implements AppCenterService {
 
     @Override
     public String setTask(SchedulerParam param) {
+
+        if (apiService == null){
+            init();
+        }
         try {
             Response<ResponseEntityWrapper<String>> response = apiService.setTask(param).execute();
             ResponseEntityWrapper<String> body = response.body();
@@ -256,6 +276,9 @@ public class AppCenterServiceImpl implements AppCenterService {
 
     @Override
     public List<Member> manageScope(String appId, String memberId) {
+        if (apiService == null){
+            init();
+        }
         log.info("获取管理范围 appId:{},memberId:{}", appId, memberId);
         try {
             Response<ResponseEntityWrapper<List<Member>>> response = apiService.manageScope(appId, memberId).execute();
@@ -284,6 +307,9 @@ public class AppCenterServiceImpl implements AppCenterService {
      */
     @Override
     public List<Member> findSubLists(String[] deptIds, String[] memberIds) {
+        if (apiService == null){
+            init();
+        }
         try {
             Response<ResponseEntityWrapper<List<Member>>> response = apiService.findSubLists(deptIds, memberIds, LogConstant.BOTONG_ZERO_NUM).execute();
             ResponseEntityWrapper<List<Member>> body = response.body();

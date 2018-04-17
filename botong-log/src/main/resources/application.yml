@@ -98,3 +98,8 @@ botong:
 # 写入文件日志
 logging:
   file: ${user.dir}/logs/${spring.application.name}.log
+
+#okHttp调用
+okhttp:
+  botong:
+    zuul: ${okhttp.botong.zuul}
