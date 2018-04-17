@@ -194,7 +194,7 @@ public class ApprovalApiServiceImpl implements IApprovalApiService {
         clientApprovalDetailVO.setApproveAttrVO(detail);
 
         // 根据审批主键查询审批信息
-        ApprovalDetailDTO approvalById = approvalMapper.getApprovalById(approvalId,memberId);
+        ApprovalDetailDTO approvalById = approvalMapper.getApprovalById(approvalId);
         if (approvalById != null) {
             // 审批主体信息
             clientApprovalDetailVO.setName(approvalById.getName());
