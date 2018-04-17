@@ -66,6 +66,13 @@ public class LogReportServiceImpl implements LogReportService {
         if (manager) {
             // 管理员查询他所在企业的管理的memberId
             List<Member> list = manageScopeList(memberId, appId);
+            if (list == null) {
+                list = new ArrayList<>();
+            }
+            Member m = JSON.parseObject(String.valueOf(redisTemplate.opsForHash().get(LogConstant.LOG_MEMBER_INFO, memberId)), Member.class);
+            if (m != null) {
+                list.add(m);
+            }
             if (CollectionUtils.isEmpty(list)) {
                 throw new ParameterErrorException(StatusCode.NOT_ADMIN_AUTH);
             }
