@@ -60,6 +60,8 @@ public class LogReportServiceImpl implements LogReportService {
     @Override
     public PageWrapper<LogDetailVO> query(String memberId, String orgId, String appId, int pageNo, int pageSize, int submitType, long startDate, long endDate) {
 
+        log.info("日志报表统计参数：memberId={},orgId={},appId={}", memberId, orgId, appId);
+
         // 1. 校验是否是管理员
         boolean manager = appCenterService.isManager(appId, memberId, true);
         List<String> memberIdList = new ArrayList<>();
@@ -69,12 +71,8 @@ public class LogReportServiceImpl implements LogReportService {
             if (list == null) {
                 list = new ArrayList<>();
             }
-            Member m = JSON.parseObject(String.valueOf(redisTemplate.opsForHash().get(LogConstant.LOG_MEMBER_INFO, memberId)), Member.class);
-            if (m != null) {
-                list.add(m);
-            }
             if (CollectionUtils.isEmpty(list)) {
-                throw new ParameterErrorException(StatusCode.NOT_ADMIN_AUTH);
+                memberIdList.add(memberId);
             }
             for (Member member : list) {
                 memberIdList.add(member.getId());
@@ -88,7 +86,9 @@ public class LogReportServiceImpl implements LogReportService {
         List<Object> list = redisTemplate.opsForHash().multiGet(LogConstant.LOG_MEMBER_INFO, new HashSet<>(memberIdList));
         for (Object o : list) {
             Member vo = JSON.parseObject(String.valueOf(o), Member.class);
-            userVOMap.put(vo.getId(), vo);
+            if (vo != null) {
+                userVOMap.put(vo.getId(), vo);
+            }
         }
 
         Page<LogDetail> report = logReportDao.report(pageNo, pageSize, orgId, memberIdList, submitType, startDate, endDate);
