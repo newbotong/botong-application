@@ -2,6 +2,7 @@ package com.yunjing.botong.log.processor.okhttp;
 
 import com.yunjing.botong.log.params.DangParam;
 import com.yunjing.botong.log.params.SchedulerParam;
+import com.yunjing.botong.log.vo.AppPushParam;
 import com.yunjing.botong.log.vo.Member;
 import com.yunjing.mommon.base.PushParam;
 
@@ -23,7 +24,7 @@ public interface AppCenterService {
      *
      * @param param
      */
-    void push(PushParam param);
+    void push(AppPushParam param);
 
 
     /**

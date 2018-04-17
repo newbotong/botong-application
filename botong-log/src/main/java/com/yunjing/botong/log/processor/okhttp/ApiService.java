@@ -2,6 +2,7 @@ package com.yunjing.botong.log.processor.okhttp;
 
 import com.yunjing.botong.log.params.DangParam;
 import com.yunjing.botong.log.params.SchedulerParam;
+import com.yunjing.botong.log.vo.AppPushParam;
 import com.yunjing.botong.log.vo.Member;
 import com.yunjing.mommon.base.PushParam;
 import com.yunjing.mommon.wrapper.ResponseEntityWrapper;
@@ -34,7 +35,7 @@ public interface ApiService {
     @POST("/api/microapps/appcenter/push/push-target-user")
     // 设置请求头，post body方式提交
     @Headers({"Content-Type: application/json;charset=UTF-8"})
-    Call<ResponseEntityWrapper> push(@Body PushParam param);
+    Call<ResponseEntityWrapper> push(@Body AppPushParam param);
 
     /**
      * dang

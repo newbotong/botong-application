@@ -6,6 +6,7 @@ import com.yunjing.botong.log.params.DangParam;
 import com.yunjing.botong.log.params.SchedulerParam;
 import com.yunjing.botong.log.processor.okhttp.ApiService;
 import com.yunjing.botong.log.processor.okhttp.AppCenterService;
+import com.yunjing.botong.log.vo.AppPushParam;
 import com.yunjing.botong.log.vo.Member;
 import com.yunjing.mommon.base.PushParam;
 import com.yunjing.mommon.constant.StatusCode;
@@ -98,7 +99,7 @@ public class AppCenterServiceImpl implements AppCenterService {
     }
 
     @Override
-    public void push(PushParam param) {
+    public void push(AppPushParam param) {
         if (apiService == null) {
             init();
         }
