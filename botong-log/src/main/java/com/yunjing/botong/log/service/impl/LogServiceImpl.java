@@ -18,6 +18,7 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.mongodb.core.MongoTemplate;
 import org.springframework.stereotype.Service;
 
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -72,9 +73,15 @@ public class LogServiceImpl implements LogService {
         logParam.getSendToUser().toArray(userIdArray);
 
         List<Member> list = memberRedisOperator.getMemberList(logParam.getSendToUser());
+        List<String> passportIdList = new ArrayList<>();
         String[] passportIdArray = new String[list.size()];
-        for (int i = 0; i < list.size(); i++) {
-            passportIdArray[i] = list.get(i).getPassportId();
+        for (Member m : list) {
+            if (m != null) {
+                passportIdList.add(m.getPassportId());
+            }
+        }
+        for (int i = 0; i < passportIdList.size(); i++) {
+            passportIdArray[i] = passportIdList.get(i);
         }
         param.setAlias(passportIdArray);
 
