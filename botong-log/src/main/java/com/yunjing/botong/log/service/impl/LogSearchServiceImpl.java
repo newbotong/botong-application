@@ -271,6 +271,7 @@ public class LogSearchServiceImpl implements ILogSearchService {
                 UserInfo userInfo = memberRedisOperator.getUserInfo(user.getPassportId());
                 user.setProfile(userInfo.getProfile());
                 user.setColor(userInfo.getColor());
+                user.setName(userInfo.getNick());
                 // 不是管理员查自己的
                 memList.add(user);
             }
