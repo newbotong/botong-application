@@ -52,12 +52,13 @@ public class ClientApprovalController extends BaseController {
      * 获取审批模型详情
      *
      * @param modelId 模型主键
+     * @param memberId 成员id
      * @return
      * @throws Exception
      */
     @GetMapping("/model-item-detail")
-    public ResponseEntityWrapper getItem(@RequestParam("modelId") String modelId) throws Exception {
-        return success(modelItemService.getModelItem(modelId));
+    public ResponseEntityWrapper getItem(@RequestParam("modelId") String modelId,@RequestParam("memberId") String memberId) throws Exception {
+        return success(modelItemService.getModelItem(modelId,memberId));
     }
 
 

@@ -8,10 +8,7 @@ import com.common.mybatis.service.impl.BaseServiceImpl;
 import com.yunjing.approval.dao.mapper.ConditionMapper;
 import com.yunjing.approval.dao.mapper.ModelItemMapper;
 import com.yunjing.approval.dao.mapper.ModelMapper;
-import com.yunjing.approval.model.entity.ModelItem;
-import com.yunjing.approval.model.entity.ModelL;
-import com.yunjing.approval.model.entity.OrgModel;
-import com.yunjing.approval.model.entity.SetsCondition;
+import com.yunjing.approval.model.entity.*;
 import com.yunjing.approval.model.vo.*;
 import com.yunjing.approval.service.*;
 import com.yunjing.approval.util.ApproConstants;
@@ -66,8 +63,8 @@ public class ModelItemServiceImpl extends BaseServiceImpl<ModelItemMapper, Model
     @Autowired
     private ModelItemMapper modelItemMapper;
     @Autowired
-    private IModelCategoryService modelCategoryService;
-
+    private IApprovalUserService approvalUserService;
+    
     /**
      * 1-多行输入框 2-数字输入框 3-单选框 4-日期 5-日期区间 6-单行输入框 7-明细 8-说明文字 9-金额 10- 图片 11-附件
      */
@@ -75,7 +72,7 @@ public class ModelItemServiceImpl extends BaseServiceImpl<ModelItemMapper, Model
 
     @Override
     @Transactional(propagation = Propagation.REQUIRED, rollbackFor = Exception.class)
-    public ClientModelItemVO getModelItem(String modelId) throws Exception {
+    public ClientModelItemVO getModelItem(String modelId, String memberId) throws Exception {
         ModelL modelL = modelService.selectById(modelId);
         List<ModelItem> itemList = this.selectList(Condition.create().where("model_id={0}", modelId).and("item_version={0}", modelL.getModelVersion()).orderBy("priority"));
         ModelVO modelVO = new ModelVO();
@@ -133,8 +130,19 @@ public class ModelItemServiceImpl extends BaseServiceImpl<ModelItemMapper, Model
 
         // 获取默认抄送人
         List<UserVO> userVOList = copyService.get(modelId);
-        clientModelItemVO.setCopyerVOS(new ArrayList<>());
+        clientModelItemVO.setCopyerVOS(userVOList);
 
+        // 获取部门信息
+        List<DeptVO> deptVOList = new ArrayList<>();
+        DeptVO deptVO = new DeptVO();
+        deptVO.setDeptId("6384295807830462465");
+        deptVO.setDeptName("行政部");
+        DeptVO deptVO1 = new DeptVO();
+        deptVO1.setDeptId("6384295807830462466");
+        deptVO1.setDeptName("行政部2");
+        deptVOList.add(deptVO);
+        deptVOList.add(deptVO1);
+        clientModelItemVO.setDeptList(deptVOList);
         return clientModelItemVO;
 
     }
@@ -402,9 +410,9 @@ public class ModelItemServiceImpl extends BaseServiceImpl<ModelItemMapper, Model
                     }
                     item.setIsJudge(isJudge);
                 } else {
-                    if(item.getPriority().equals(minSort)){
+                    if (item.getPriority().equals(minSort)) {
                         item.setIsJudge(1);
-                    }else {
+                    } else {
                         item.setIsJudge(0);
                     }
                 }

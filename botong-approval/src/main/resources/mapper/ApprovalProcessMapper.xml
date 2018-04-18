@@ -11,6 +11,7 @@
         <result column="create_time" property="createTime"/>
         <result column="user_id" property="userId"/>
         <result column="reason" property="message"/>
+        <result column="seq" property="sort"/>
     </resultMap>
     <select id="getWaitedMeApprovalList" resultMap="ApprovalMap">
         SELECT ap.id, ap.approval_id, a.user_id, ap.process_state, a.title, a.state,a.result, ap.seq, ap.process_time,
@@ -90,9 +91,10 @@
         <result column="process_time" property="approvalTime"/>
         <result column="reason" property="content"/>
         <result column="id" property="userId"/>
+        <result column="seq" property="sort"/>
     </resultMap>
     <select id="getApprovalUserList" resultMap="ApprovalUserMap">
-        SELECT ap.approval_id, ap.user_id, ap.process_state, ap.seq, ap.process_time,ap.reason, au.id,au.name,au.avatar,au.mobile
+        SELECT ap.approval_id, ap.user_id, ap.process_state, ap.seq, ap.process_time,ap.reason, au.id,au.name,au.avatar,au.mobile,au.color
         FROM approval_process ap
         LEFT JOIN approval_user au ON ap.user_id = au.id
         WHERE ap.approval_id = #{approvalId}

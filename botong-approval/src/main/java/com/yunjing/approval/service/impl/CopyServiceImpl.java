@@ -9,6 +9,7 @@ import com.yunjing.approval.model.entity.Copy;
 import com.yunjing.approval.model.vo.UserVO;
 import com.yunjing.approval.service.IApprovalUserService;
 import com.yunjing.approval.service.ICopyService;
+import com.yunjing.approval.util.ApproConstants;
 import com.yunjing.mommon.global.exception.BaseException;
 import com.yunjing.mommon.utils.IDUtils;
 import org.apache.commons.lang.ArrayUtils;
@@ -103,7 +104,7 @@ public class CopyServiceImpl extends BaseServiceImpl<CopyMapper, Copy> implement
             if (user.getAvatar() != null && !"".equals(user.getAvatar())) {
                 uservo.setProfile(user.getAvatar());
             } else {
-                uservo.setColor(user.getColor()!= null ? user.getColor():"#1E90FF");
+                uservo.setColor(user.getColor()!= null ? user.getColor(): ApproConstants.DEFAULT_COLOR);
             }
             uservos.add(uservo);
         }

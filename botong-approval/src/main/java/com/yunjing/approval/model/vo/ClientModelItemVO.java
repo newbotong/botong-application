@@ -40,14 +40,9 @@ public class ClientModelItemVO {
     private List<ModelItemVO> items;
 
     /**
-     * 部门主键
+     * 部门
      */
-    private String deptId;
-
-    /**
-     * 部门名称
-     */
-    private String deptName;
+    private List<DeptVO> deptList;
 
     /**
      * 审批流程设置  0:不分条件设置审批人 1:分条件设置审批人

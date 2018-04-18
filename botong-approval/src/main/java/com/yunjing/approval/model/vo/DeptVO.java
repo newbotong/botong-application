@@ -9,8 +9,6 @@ import lombok.Data;
 @Data
 public class DeptVO {
 
-    private String userId;
-
     private String deptId;
 
     private String deptName;

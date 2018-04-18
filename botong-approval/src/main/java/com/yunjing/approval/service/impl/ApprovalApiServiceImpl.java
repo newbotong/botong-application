@@ -14,6 +14,7 @@ import com.yunjing.approval.param.FilterParam;
 import com.yunjing.approval.processor.okhttp.AppCenterService;
 import com.yunjing.approval.processor.task.async.ApprovalPushTask;
 import com.yunjing.approval.service.*;
+import com.yunjing.approval.util.ApproConstants;
 import com.yunjing.mommon.global.exception.InsertMessageFailureException;
 import com.yunjing.mommon.global.exception.UpdateMessageFailureException;
 import com.yunjing.mommon.utils.IDUtils;
@@ -23,10 +24,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.stream.Collectors;
 
 /**
@@ -163,7 +161,7 @@ public class ApprovalApiServiceImpl implements IApprovalApiService {
                     message += " （拒绝）";
                 }
             } else if (contentVO.getState() == 2) {
-                message = "已撤回";
+                message = "已撤销";
             }
             contentVO.setMessage(message);
         }
@@ -207,21 +205,30 @@ public class ApprovalApiServiceImpl implements IApprovalApiService {
             if (StringUtils.isNotBlank(approvalById.getAvatar())) {
                 clientApprovalDetailVO.setAvatar(approvalById.getAvatar());
             } else {
-                clientApprovalDetailVO.setColor("");
+                clientApprovalDetailVO.setColor(ApproConstants.DEFAULT_COLOR);
             }
             clientApprovalDetailVO.setState(approvalById.getState());
             clientApprovalDetailVO.setResult(approvalById.getResult() != null ? approvalById.getResult() : null);
         }
         // 获取审批人信息
         List<ApprovalUserVO> approvalUserList = approvalProcessMapper.getApprovalUserList(approvalId);
+        // 审批发起人
+        ApprovalUserVO initiator = new ApprovalUserVO();
+        initiator.setName(approvalById.getName());
+        initiator.setAvatar(approvalById.getAvatar());
+        initiator.setApprovalTime(approvalById.getCreateTime());
+        initiator.setColor(approvalById.getColor() != null ? approvalById.getColor() : ApproConstants.DEFAULT_COLOR);
+        initiator.setMessage("发起申请");
+        initiator.setSort(0);
+        approvalUserList.add(initiator);
         int index = 1;
         for (ApprovalUserVO approvalUserVO : approvalUserList) {
-            approvalUserVO.setColor(approvalUserVO.getColor() != null ? approvalUserVO.getColor() : "#1E90FF");
+            approvalUserVO.setColor(approvalUserVO.getColor() != null ? approvalUserVO.getColor() : ApproConstants.DEFAULT_COLOR);
             if (StringUtils.isBlank(approvalUserVO.getAvatar())) {
-                approvalUserVO.setColor(approvalUserVO.getColor() != null ? approvalUserVO.getColor() : "#1E90FF");
+                approvalUserVO.setColor(approvalUserVO.getColor() != null ? approvalUserVO.getColor() : ApproConstants.DEFAULT_COLOR);
                 approvalUserVO.setAvatarName(approvalUserVO.getName().length() <= 2 ? approvalUserVO.getName() : approvalUserVO.getName().substring(1, 3));
             }
-            if (approvalUserVO.getProcessState() == 0) {
+            if (approvalUserVO.getProcessState() != null && approvalUserVO.getProcessState() == 0) {
                 if (approvalUserVO.getUserId().equals(memberId)) {
                     //描述提醒用户信息
                     clientApprovalDetailVO.setProcessState(approvalUserVO.getProcessState());
@@ -235,13 +242,25 @@ public class ApprovalApiServiceImpl implements IApprovalApiService {
                 }
             }
         }
+        Collections.sort(approvalUserList, new Comparator<ApprovalUserVO>() {
+            @Override
+            public int compare(ApprovalUserVO o1, ApprovalUserVO o2) {
+                if (o1.getSort() > o2.getSort()) {
+                    return 1;
+                } else if (o1.getSort()<(o2.getSort())) {
+                    return -1;
+                } else {
+                    return 0;
+                }
+            }
+        });
         clientApprovalDetailVO.setApprovalUserList(approvalUserList);
 
         // 获取抄送人信息
         List<CopyUserVO> copyUserList = copysMapper.getCopyUserList(approvalId);
         copyUserList.forEach(copyUserVO -> {
             if (StringUtils.isBlank(copyUserVO.getAvatar())) {
-                copyUserVO.setColor(copyUserVO.getColor() != null ? copyUserVO.getColor() : "#1E90FF");
+                copyUserVO.setColor(copyUserVO.getColor() != null ? copyUserVO.getColor() : ApproConstants.DEFAULT_COLOR);
                 copyUserVO.setAvatarName(copyUserVO.getName().length() <= 2 ? copyUserVO.getName() : copyUserVO.getName().substring(1, 3));
             }
         });
@@ -424,7 +443,7 @@ public class ApprovalApiServiceImpl implements IApprovalApiService {
                 contentDTO.setUserNick(user.getName());
                 contentDTO.setUserAvatar(user.getAvatar());
                 if (StringUtils.isBlank(contentDTO.getUserAvatar())) {
-                    contentDTO.setColor(user.getColor() != null ? user.getColor() : "#1E90FF");
+                    contentDTO.setColor(user.getColor() != null ? user.getColor() : ApproConstants.DEFAULT_COLOR);
                 }
             }
             ClientApprovalVO clientApprovalVO = new ClientApprovalVO(contentDTO);

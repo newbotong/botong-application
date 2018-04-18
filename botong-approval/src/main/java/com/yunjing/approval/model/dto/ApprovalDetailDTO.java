@@ -86,6 +86,11 @@ public class ApprovalDetailDTO {
     private String avatar;
 
     /**
+     * 颜色
+     */
+    private String color;
+
+    /**
      * 手机号
      */
     private String mobile;
