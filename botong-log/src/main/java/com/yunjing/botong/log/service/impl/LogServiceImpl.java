@@ -1,5 +1,6 @@
 package com.yunjing.botong.log.service.impl;
 
+import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 import com.yunjing.botong.log.cache.MemberRedisOperator;
@@ -71,6 +72,8 @@ public class LogServiceImpl implements LogService {
         param.setNotificationTitle("伯通");
         String[] userIdArray = new String[logParam.getSendToUser().size()];
         logParam.getSendToUser().toArray(userIdArray);
+
+        log.info("提交日志 SendToUser:{}", JSON.toJSONString(logParam.getSendToUser()));
 
         List<Member> list = memberRedisOperator.getMemberList(logParam.getSendToUser());
         List<String> passportIdList = new ArrayList<>();
