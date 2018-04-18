@@ -425,6 +425,9 @@ public class LogSearchServiceImpl implements ILogSearchService {
             throw new ParameterErrorException("用户Id不能为空");
         }
         LogDetail detail = logDetailDao.findByLogId(receviedParam.getLogId(), receviedParam.getUserId());
+        if (detail == null) {
+            return  null;
+        }
         PageWrapper<LogDetail> detailResult = new PageWrapper();
         List<LogDetail> details = new ArrayList<>();
         details.add(detail);
