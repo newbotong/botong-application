@@ -31,7 +31,6 @@ public class MemberRedisOperator {
         Type memberType = new TypeReference<List<Member>>() {
         }.getType();
         List listT = template.opsForHash().multiGet(com.yunjing.botong.log.constant.LogConstant.BOTONG_ORG_MEMBER, userIds);
-        Member memberVO;
         List<Member> list = new ArrayList<>();
         if (listT != null && !listT.isEmpty()) {
             list = JSON.parseObject(listT.toString(), memberType);

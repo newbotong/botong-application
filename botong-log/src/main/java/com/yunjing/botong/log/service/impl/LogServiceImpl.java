@@ -1,6 +1,5 @@
 package com.yunjing.botong.log.service.impl;
 
-import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 import com.yunjing.botong.log.cache.MemberRedisOperator;
@@ -20,6 +19,7 @@ import org.springframework.data.mongodb.core.MongoTemplate;
 import org.springframework.stereotype.Service;
 
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 /**
@@ -70,7 +70,13 @@ public class LogServiceImpl implements LogService {
         param.setNotificationTitle("伯通");
         String[] userIdArray = new String[logParam.getSendToUser().size()];
         logParam.getSendToUser().toArray(userIdArray);
-        param.setAlias(userIdArray);
+
+        List<Member> list = memberRedisOperator.getMemberList(logParam.getSendToUser());
+        String[] passportIdArray = new String[list.size()];
+        for (int i = 0; i < list.size(); i++) {
+            passportIdArray[i] = list.get(i).getPassportId();
+        }
+        param.setAlias(passportIdArray);
 
 
         Map<String, String> map = new HashMap<>(2);
