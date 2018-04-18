@@ -41,6 +41,9 @@ public class MemberRedisOperator {
         Set<Object> passportIds = new HashSet<>();
         Map<String, Member> map = new HashMap<>();
         for (Member member : list) {
+            if (member == null) {
+                continue;
+            }
             passportIds.add(member.getPassportId());
             map.put(member.getPassportId(), member);
         }
