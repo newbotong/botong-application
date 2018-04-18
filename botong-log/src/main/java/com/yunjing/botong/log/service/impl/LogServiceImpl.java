@@ -70,6 +70,7 @@ public class LogServiceImpl implements LogService {
 
         param.setTitle(member.getName() + "向你提交了日志：" + vo.getName() + "，请及时查阅！");
         param.setNotificationTitle("伯通");
+        param.setMsg(member.getName() + "向你提交了日志：" + vo.getName() + "，请及时查阅！");
         String[] userIdArray = new String[logParam.getSendToUser().size()];
         logParam.getSendToUser().toArray(userIdArray);
 
