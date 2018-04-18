@@ -247,8 +247,8 @@ public class RemindMessageConsumer extends AbstractMessageConsumerWithQueueDecla
         pushParam.setAppId(appId);
         pushParam.setCompanyId(companyId);
         pushParam.setMsg("您收到一条日志提醒");
-        pushParam.setNotificationTitle("伯通");
         pushParam.setTitle(MESSAGE[submitType - 1]);
+        pushParam.setNotificationTitle("您收到一条日志提醒");
         pushParam.setAlias(alias);
 
 

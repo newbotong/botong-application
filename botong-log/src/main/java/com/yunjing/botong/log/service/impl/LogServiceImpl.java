@@ -5,11 +5,13 @@ import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 import com.yunjing.botong.log.cache.MemberRedisOperator;
 import com.yunjing.botong.log.entity.LogDetail;
+import com.yunjing.botong.log.params.LogItemParam;
 import com.yunjing.botong.log.params.LogParam;
 import com.yunjing.botong.log.processor.okhttp.AppCenterService;
 import com.yunjing.botong.log.service.LogService;
 import com.yunjing.botong.log.service.LogTemplateService;
 import com.yunjing.botong.log.vo.AppPushParam;
+import com.yunjing.botong.log.vo.LogTemplateFieldVo;
 import com.yunjing.botong.log.vo.LogTemplateVo;
 import com.yunjing.botong.log.vo.Member;
 import com.yunjing.mommon.global.exception.BaseRuntimeException;
@@ -68,9 +70,11 @@ public class LogServiceImpl implements LogService {
         param.setAppId(appId);
         param.setCompanyId(member.getCompanyId());
 
-        param.setTitle(member.getName() + "向你提交了日志：" + vo.getName() + "，请及时查阅！");
-        param.setNotificationTitle("伯通");
-        param.setMsg(member.getName() + "向你提交了日志：" + vo.getName() + "，请及时查阅！");
+        String title = member.getName() + "向你提交了日志：" + vo.getName() + "，请及时查阅！";
+        param.setMsg(title);
+        param.setTitle(title);
+        param.setNotificationTitle(title);
+
         String[] userIdArray = new String[logParam.getSendToUser().size()];
         logParam.getSendToUser().toArray(userIdArray);
 
@@ -96,14 +100,51 @@ public class LogServiceImpl implements LogService {
 
         //日志提醒
         JSONArray array = new JSONArray();
-        JSONObject json = new JSONObject();
-        json.put("subTitle", "您收到一条日报提醒");
+        JSONObject json;
+
+        json = new JSONObject();
+        String logType;
+        switch (vo.getSubmitType()) {
+            case 1:
+                logType = "日";
+                break;
+            case 2:
+                logType = "周";
+                break;
+            case 3:
+                logType = "月";
+                break;
+            case 4:
+                logType = "季";
+                break;
+            case 5:
+                logType = "年";
+                break;
+            default:
+                logType = "日";
+                break;
+        }
+        logType = member.getName() + "的" + logType + "报";
+        json.put("subTitle", logType);
         json.put("type", "5");
         array.add(json);
+
+        Map<String, String> fieldMap = new HashMap<>(16);
+        for (LogTemplateFieldVo fieldVo : vo.getItems()) {
+            fieldMap.put(fieldVo.getId(), fieldVo.getFieldLabel());
+        }
+
+        for (LogItemParam item : logParam.getLogValues()) {
+            json = new JSONObject();
+            json.put("title", fieldMap.get(item.getFiledId()));
+            json.put("content", item.getValue());
+            json.put("type", "0");
+            array.add(json);
+        }
+
         map.put("content", array.toJSONString());
 
         param.setMap(map);
-
 
         this.appCenterService.push(param);
         return entity.getLogId();
