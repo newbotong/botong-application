@@ -132,9 +132,16 @@ public class LogReportDao extends BaseMongoDaoImpl<LogDetail> {
         criteria.and("submitType").is(submitType);
 
         if (startDate != 0 && endDate != 0) {
-            String start = DateFormatUtils.format(new Date(startDate), "yyyy-MM-dd");
-            String end = DateFormatUtils.format(new Date(endDate), "yyyy-MM-dd");
-            criteria.andOperator(Criteria.where("submitTime").lte(end + "00:00:00").gte(start + "23:59:59"));
+            String start = DateFormatUtils.format(new Date(startDate), "yyyy-MM-dd") + " 00:00:00";
+            String end = DateFormatUtils.format(new Date(endDate), "yyyy-MM-dd") + " 23:59:59";
+
+            try {
+                Date s = DateUtils.parseDate(start, "yyyy-MM-dd HH:mm:ss");
+                Date e = DateUtils.parseDate(end, "yyyy-MM-dd HH:mm:ss");
+                criteria.andOperator(Criteria.where("submitTime").lte(e).gte(s));
+            } catch (ParseException e) {
+                e.printStackTrace();
+            }
         }
         Query query = new Query(criteria);
         query.with(new Sort(Sort.Direction.DESC, "submitTime"));
