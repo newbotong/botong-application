@@ -48,7 +48,7 @@ public class Test {
     @org.junit.Test
     public void test1() {
         ManagerListParam param = new ManagerListParam();
-        param.setAppId("");
+        // param.setAppId("");
         param.setDate("");
         param.setMemberId("");
         param.setOrgId("");
@@ -78,4 +78,6 @@ public class Test {
 
         System.out.println(gson.toJson(remindVo));
     }
+
+
 }
