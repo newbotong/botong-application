@@ -98,7 +98,7 @@ public class RemindMessageConsumer extends AbstractMessageConsumerWithQueueDecla
 
         StringRedisTemplate redisTemplate = redisReadonly.getTemple();
 
-        log.info("接收任务调度参数:{}", JSON.toJSONString(message));
+        log.error("接收任务调度参数:{}", JSON.toJSONString(message));
         String memberId = message.getWhat();
 
         Map<String, String> map = (Map<String, String>) JSONObject.parse(message.getObj().toString());
