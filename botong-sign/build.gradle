@@ -19,7 +19,7 @@ dependencies {
 	// 用于json自动转换解析
 	compile 'com.squareup.retrofit2:converter-gson:2.3.0'
 	compile 'org.ligboy.retrofit2:converter-fastjson:2.1.0'
-	compile('com.yunjing.botong:commons:2.0.0.1-SNAPSHOT'){
+	compile('com.yunjing.botong:commons:2.0.0.4-SNAPSHOT'){
 		changing = true //实时更新jar包
 	}
 	compile('com.yunjing.botong:commons-mybatisplus:2.0.0-SNAPSHOT'){

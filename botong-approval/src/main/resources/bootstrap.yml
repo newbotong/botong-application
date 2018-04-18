@@ -9,3 +9,13 @@ spring:
 #      uri: http://10.1.24.15:10020/
   mvc:
     static-path-pattern: /**
+
+
+## elk 相关
+logback:
+  redisKey: botong:file:log           # rediskey 保存日志list的key 不用改
+  hostName: 192.168.10.45           # Redis 服务器地址 不用改
+  database: 2                       # 日志对应缓存的数据库 不用改
+  port: 6379                        # 端口号 不用改
+  type: ${spring.application.name}            # 根据模块定义类型，kibana 会根据这个查找 禁止有大写字母
+  password:
