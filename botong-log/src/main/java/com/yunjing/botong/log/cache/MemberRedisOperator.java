@@ -2,6 +2,7 @@ package com.yunjing.botong.log.cache;
 
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.TypeReference;
+import com.common.redis.share.UserInfo;
 import com.yunjing.botong.log.config.LogConstant;
 import com.yunjing.botong.log.vo.Member;
 import org.springframework.data.redis.core.StringRedisTemplate;
@@ -9,9 +10,7 @@ import org.springframework.stereotype.Component;
 
 import javax.annotation.Resource;
 import java.lang.reflect.Type;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Set;
+import java.util.*;
 
 /**
  * @author auth
@@ -27,6 +26,10 @@ public class MemberRedisOperator {
         return JSON.parseObject(String.valueOf(template.opsForHash().get(LogConstant.LOG_MEMBER_INFO, memberId)), Member.class);
     }
 
+    public UserInfo getUserInfo(String passportId) {
+        return JSON.parseObject(String.valueOf(template.opsForHash().get(com.yunjing.botong.log.constant.LogConstant.BOTONG_ORG_USER, passportId)), UserInfo.class);
+    }
+
     public List<Member> getMemberList(Set userIds) {
         Type memberType = new TypeReference<List<Member>>() {
         }.getType();
@@ -35,7 +38,24 @@ public class MemberRedisOperator {
         if (listT != null && !listT.isEmpty()) {
             list = JSON.parseObject(listT.toString(), memberType);
         }
-        return list;
+        Set<Object> passportIds = new HashSet<>();
+        Map<String, Member> map = new HashMap<>();
+        for (Member member : list) {
+            passportIds.add(member.getPassportId());
+            map.put(member.getPassportId(), member);
+        }
+        List listPasswort = template.opsForHash().multiGet(com.yunjing.botong.log.constant.LogConstant.BOTONG_ORG_USER, passportIds);
+        Type passportType = new TypeReference<List<UserInfo>>() {
+        }.getType();
+        List<UserInfo> passportList = new ArrayList<>();
+        if (listPasswort != null && !listPasswort.isEmpty()) {
+            passportList = JSON.parseObject(listPasswort.toString(), passportType);
+            for (UserInfo userInfo : passportList) {
+                map.get(userInfo.getPassportId()).setColor(userInfo.getColor());
+                map.get(userInfo.getPassportId()).setProfile(userInfo.getProfile());
+            }
+        }
+        return new ArrayList<>(map.values());
     }
 
 }

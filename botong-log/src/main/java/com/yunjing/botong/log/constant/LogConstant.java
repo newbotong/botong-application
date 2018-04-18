@@ -26,6 +26,7 @@ public class LogConstant implements Serializable {
 
 
     public final static String  BOTONG_ORG_MEMBER = "botong:org:member";
+    public final static String  BOTONG_ORG_USER = "botong:org:user";
 
     public final static String  BOTONG_ONE_STR = "1";
     public final static String  BOTONG_ZERO_STR = "0";

@@ -8,6 +8,7 @@ import com.alibaba.fastjson.TypeReference;
 import com.common.mongo.dao.Page;
 import com.common.mongo.util.BeanUtils;
 import com.common.mongo.util.PageWrapper;
+import com.common.redis.share.UserInfo;
 import com.netflix.discovery.converters.Auto;
 import com.yunjing.botong.log.cache.MemberRedisOperator;
 import com.yunjing.botong.log.constant.LogConstant;
@@ -266,7 +267,10 @@ public class LogSearchServiceImpl implements ILogSearchService {
                     throw new ParameterErrorException(StatusCode.NOT_ADMIN_AUTH);
                 }
             } else {
-                Member user = memberRedisOperator.getMember(searchParam.getMemberId());;
+                Member user = memberRedisOperator.getMember(searchParam.getMemberId());
+                UserInfo userInfo = memberRedisOperator.getUserInfo(user.getPassportId());
+                user.setProfile(userInfo.getProfile());
+                user.setColor(userInfo.getColor());
                 // 不是管理员查自己的
                 memList.add(user);
             }
