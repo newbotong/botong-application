@@ -1,5 +1,6 @@
 package com.yunjing.botong.log.dao;
 
+import com.alibaba.fastjson.JSON;
 import com.common.mongo.dao.Page;
 import com.common.mongo.dao.impl.BaseMongoDaoImpl;
 import com.yunjing.botong.log.entity.LogDetail;
@@ -106,6 +107,7 @@ public class LogReportDao extends BaseMongoDaoImpl<LogDetail> {
             Date start = DateUtils.parseDate(date, "yyyy-MM-dd");
             Date end = DateUtils.parseDate(date + " 23:23:59", "yyyy-MM-dd HH:mm:ss");
             query.addCriteria(Criteria.where("submitTime").gte(start).lte(end));
+            log.info("日志管理列表统计查询参数：{}", JSON.toJSONString(query));
         } catch (ParseException e) {
             throw new ParameterErrorException("日期格式错误，请传入(yyyy-MM-dd)");
         }
@@ -136,6 +138,7 @@ public class LogReportDao extends BaseMongoDaoImpl<LogDetail> {
         }
         Query query = new Query(criteria);
         query.with(new Sort(Sort.Direction.DESC, "submitTime"));
+        log.info("日志报表统计查询参数：{}", JSON.toJSONString(query));
         return findPage(new Page<>(pageNo, pageSize), query);
     }
 }
