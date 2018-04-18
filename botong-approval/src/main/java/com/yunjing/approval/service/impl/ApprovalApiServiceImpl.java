@@ -219,6 +219,7 @@ public class ApprovalApiServiceImpl implements IApprovalApiService {
         initiator.setApprovalTime(approvalById.getCreateTime());
         initiator.setColor(approvalById.getColor() != null ? approvalById.getColor() : ApproConstants.DEFAULT_COLOR);
         initiator.setMessage("发起申请");
+        initiator.setProcessState(10);
         initiator.setSort(0);
         approvalUserList.add(initiator);
         int index = 1;
