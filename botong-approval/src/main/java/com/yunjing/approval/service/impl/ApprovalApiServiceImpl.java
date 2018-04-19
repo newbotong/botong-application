@@ -214,7 +214,7 @@ public class ApprovalApiServiceImpl implements IApprovalApiService {
         List<ApprovalUserVO> approvalUserList = approvalProcessMapper.getApprovalUserList(approvalId);
         // 审批发起人
         ApprovalUserVO initiator = new ApprovalUserVO();
-//        initiator.setName(null != approvalById.getName() ? approvalById.getName() : "");
+        initiator.setName(null != approvalById.getName() ? approvalById.getName() : "");
         initiator.setAvatar(approvalById.getAvatar() != null ? approvalById.getAvatar() : "");
         initiator.setApprovalTime(approvalById.getCreateTime() != null ? approvalById.getCreateTime() : null);
         initiator.setColor(approvalById.getColor() != null ? approvalById.getColor() : ApproConstants.DEFAULT_COLOR);
@@ -234,13 +234,23 @@ public class ApprovalApiServiceImpl implements IApprovalApiService {
                     //描述提醒用户信息
                     clientApprovalDetailVO.setProcessState(approvalUserVO.getProcessState());
                     clientApprovalDetailVO.setMessage("等待我审批");
+                    approvalUserVO.setMessage("等待审批");
                 } else {
                     int flag = index++;
                     //描述提醒用户信息
                     if (flag == 1) {
                         clientApprovalDetailVO.setMessage("等待" + approvalUserVO.getName() + "审批");
+                        approvalUserVO.setMessage("审批中");
+                    }else {
+                        approvalUserVO.setMessage("等待审批");
                     }
                 }
+            }else if (approvalUserVO.getProcessState() != null && approvalUserVO.getProcessState() == 1){
+                approvalUserVO.setMessage("已同意");
+            } else if (approvalUserVO.getProcessState() != null && approvalUserVO.getProcessState() == 2){
+                approvalUserVO.setMessage("已拒绝");
+            } else if (approvalUserVO.getProcessState() != null && approvalUserVO.getProcessState() == 3){
+                approvalUserVO.setMessage("已转交");
             }
         }
         Collections.sort(approvalUserList, new Comparator<ApprovalUserVO>() {
