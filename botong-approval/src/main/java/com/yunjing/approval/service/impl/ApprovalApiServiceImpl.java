@@ -214,9 +214,9 @@ public class ApprovalApiServiceImpl implements IApprovalApiService {
         List<ApprovalUserVO> approvalUserList = approvalProcessMapper.getApprovalUserList(approvalId);
         // 审批发起人
         ApprovalUserVO initiator = new ApprovalUserVO();
-        initiator.setName(approvalById.getName());
-        initiator.setAvatar(approvalById.getAvatar());
-        initiator.setApprovalTime(approvalById.getCreateTime());
+//        initiator.setName(null != approvalById.getName() ? approvalById.getName() : "");
+        initiator.setAvatar(approvalById.getAvatar() != null ? approvalById.getAvatar() : "");
+        initiator.setApprovalTime(approvalById.getCreateTime() != null ? approvalById.getCreateTime() : null);
         initiator.setColor(approvalById.getColor() != null ? approvalById.getColor() : ApproConstants.DEFAULT_COLOR);
         initiator.setMessage("发起申请");
         initiator.setProcessState(10);
@@ -248,7 +248,7 @@ public class ApprovalApiServiceImpl implements IApprovalApiService {
             public int compare(ApprovalUserVO o1, ApprovalUserVO o2) {
                 if (o1.getSort() > o2.getSort()) {
                     return 1;
-                } else if (o1.getSort()<(o2.getSort())) {
+                } else if (o1.getSort() < (o2.getSort())) {
                     return -1;
                 } else {
                     return 0;

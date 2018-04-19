@@ -23,5 +23,8 @@ public interface LogConstant {
      */
     String LOG_SET_MONTH_REMIND = "botong:log:month-remind:";
 
+    /**
+     * 成员信息
+     */
     String LOG_MEMBER_INFO = "botong:org:member";
 }

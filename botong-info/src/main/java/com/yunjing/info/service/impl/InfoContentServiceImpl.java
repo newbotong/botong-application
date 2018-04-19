@@ -15,6 +15,7 @@ import com.yunjing.info.model.InfoCatalog;
 import com.yunjing.info.model.InfoContent;
 import com.yunjing.info.param.InfoCategoryEditParam;
 import com.yunjing.info.param.InfoCategoryParam;
+import com.yunjing.info.processor.okhttp.AuthorityService;
 import com.yunjing.info.processor.okhttp.CollectService;
 import com.yunjing.info.processor.okhttp.OrgStructureService;
 import com.yunjing.info.service.InfoContentService;
@@ -25,6 +26,7 @@ import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.lang.StringUtils;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -35,6 +37,8 @@ import java.io.IOException;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+
+import static com.netflix.config.DeploymentContext.ContextKey.appId;
 
 /**
  * 资讯内容Service实现类
@@ -53,7 +57,13 @@ public class InfoContentServiceImpl extends ServiceImpl<InfoContentMapper, InfoC
     private CollectService collectService;
 
     @Autowired
+    private AuthorityService authorityService;
+
+    @Autowired
     private OrgStructureService orgStructureService;
+
+    @Value("${info.appId}")
+    private String appId;
 
     /**
      * 查询资讯详情接口
@@ -223,5 +233,27 @@ public class InfoContentServiceImpl extends ServiceImpl<InfoContentMapper, InfoC
             throw new BaseException("该资讯已被删除");
         }
         return infoContent;
+    }
+
+
+    /**
+     * 查询用户权限
+     *
+     * @param userId 成员id
+     * @return
+     * @throws BaseException
+     * @throws IOException
+     */
+    @Override
+    public Boolean selectAuthority(String userId) throws BaseException, IOException {
+        Call<ResponseEntityWrapper> call = authorityService.authority(appId, userId);
+        Response<ResponseEntityWrapper> execute = call.execute();
+        ResponseEntityWrapper body = execute.body();
+        //判断是否为管理员
+        boolean results = false;
+        if (null != body.getData()) {
+            results = (boolean) body.getData();
+        }
+        return results;
     }
 }

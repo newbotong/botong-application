@@ -174,7 +174,7 @@ public class RemindMessageConsumer extends AbstractMessageConsumerWithQueueDecla
                     manageScopeList.add(info.getId());
                 }
                 // 3.1 查询出当天所有已经发送日志的人员
-                List<String> submitList = logReportDao.submitList(memberInfo.getCompanyId(), remind.getSubmitType(), current, manageScopeList);
+                Set<String> submitList = logReportDao.submitList(memberInfo.getCompanyId(), remind.getSubmitType(), current, manageScopeList);
 
                 // 求交集
                 Collection intersection = CollectionUtils.intersection(submitList, manageScopeList);

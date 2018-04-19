@@ -98,6 +98,7 @@ public class NoticeApi extends BaseController {
         noticeService.insertNotice(body);
         return success();
     }
+
     /**
      * 逻辑删除公告
      *
@@ -134,13 +135,15 @@ public class NoticeApi extends BaseController {
     /**
      * 根据公告id查询公告详情接口
      *
-     * @param id 公告id
+     * @param id     公告id
+     * @param userId 成员id
      * @return
      * @throws BaseException
+     * @throws IOException
      */
     @PostMapping("/detail")
-    public ResponseEntityWrapper selectNoticeDetail(@RequestParam String id, @RequestParam String userId) throws BaseException,IOException {
-        if (StringUtils.isAnyBlank(id,userId)) {
+    public ResponseEntityWrapper selectNoticeDetail(@RequestParam String id, @RequestParam String userId) throws BaseException, IOException {
+        if (StringUtils.isAnyBlank(id, userId)) {
             throw new BaseException("参数不能为空");
         }
         NoticeDetailBody noticeDetailBody = noticeService.selectNoticeDetail(id, userId);
@@ -164,6 +167,20 @@ public class NoticeApi extends BaseController {
         return success(page);
     }
 
+
+    /**
+     * 查询用户权限
+     *
+     * @param userId 成员id
+     * @return
+     * @throws BaseException
+     * @throws IOException
+     */
+    @PostMapping("/authority")
+    public ResponseEntityWrapper selectAuthority(@RequestParam String userId) throws BaseException,IOException {
+        Boolean result = noticeService.selectAuthority(userId);
+        return success(result);
+    }
 
     /**
      * 数据导入

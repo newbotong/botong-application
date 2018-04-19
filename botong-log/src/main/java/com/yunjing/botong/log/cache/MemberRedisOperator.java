@@ -39,7 +39,7 @@ public class MemberRedisOperator {
             list = JSON.parseObject(listT.toString(), memberType);
         }
         Set<Object> passportIds = new HashSet<>();
-        Map<String, Member> map = new HashMap<>();
+        Map<String, Member> map = new HashMap<>(16);
         for (Member member : list) {
             if (member == null) {
                 continue;
@@ -47,12 +47,12 @@ public class MemberRedisOperator {
             passportIds.add(member.getPassportId());
             map.put(member.getPassportId(), member);
         }
-        List listPasswort = template.opsForHash().multiGet(com.yunjing.botong.log.constant.LogConstant.BOTONG_ORG_USER, passportIds);
+        List listPassport = template.opsForHash().multiGet(com.yunjing.botong.log.constant.LogConstant.BOTONG_ORG_USER, passportIds);
         Type passportType = new TypeReference<List<UserInfo>>() {
         }.getType();
-        List<UserInfo> passportList = new ArrayList<>();
-        if (listPasswort != null && !listPasswort.isEmpty()) {
-            passportList = JSON.parseObject(listPasswort.toString(), passportType);
+        List<UserInfo> passportList;
+        if (listPassport != null && !listPassport.isEmpty()) {
+            passportList = JSON.parseObject(listPassport.toString(), passportType);
             for (UserInfo userInfo : passportList) {
                 map.get(userInfo.getPassportId()).setColor(userInfo.getColor());
                 map.get(userInfo.getPassportId()).setProfile(userInfo.getProfile());
@@ -63,3 +63,4 @@ public class MemberRedisOperator {
     }
 
 }
+
