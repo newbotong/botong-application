@@ -33,9 +33,22 @@
         WHERE om.org_id= #{ orgId }
         AND m.model_type=2  AND m.is_def=0 ORDER BY m.sort ASC,mc.update_time DESC
     </select>
-    <select id="selectModelListByOrgId" resultType="com.yunjing.approval.model.entity.ModelL">
-        SELECT m.id, m.model_name AS modelName, m.logo AS logo, m.introduce AS introduce,m.sort AS sort,
-        m.is_disabled AS isDisabled, m.is_def AS isDef, m.provider AS provider, m.model_type AS modelType, m.model_version AS modelVersion
+
+    <resultMap id="ModelListMap" type="com.yunjing.approval.model.entity.ModelL">
+        <id column="id" property="id"/>
+        <result column="model_name" property="modelName" />
+        <result column="logo" property="logo" />
+        <result column="introduce" property="introduce" />
+        <result column="sort" property="sort" />
+        <result column="is_disabled" property="isDisabled" />
+        <result column="is_def" property="isDef" />
+        <result column="provider" property="provider" />
+        <result column="model_type" property="modelType" />
+        <result column="model_version" property="modelVersion" />
+    </resultMap>
+    <select id="selectModelListByOrgId" resultMap="ModelListMap">
+        SELECT m.id, m.model_name, m.logo, m.introduce, m.sort,
+        m.is_disabled, m.is_def, m.provider, m.model_type, m.model_version
         FROM model m
         JOIN org_model o ON m.id = o.model_id
         WHERE o.org_id = #{ orgId }AND m.is_def = 0 ORDER BY m.sort ASC
