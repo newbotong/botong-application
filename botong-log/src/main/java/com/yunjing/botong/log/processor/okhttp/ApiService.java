@@ -91,9 +91,9 @@ public interface ApiService {
 
     /**
      * 获取所有的人员id
-     *
      * @param deptIds
      * @param memberIds
+     * @param simplify
      * @return
      */
     @GET("/api/microapps/appcenter/org/find-sub-lists")
