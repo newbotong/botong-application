@@ -3,7 +3,7 @@ package com.yunjing.botong.log.api;
 import com.common.mongo.util.PageWrapper;
 import com.yunjing.botong.log.params.ManagerListParam;
 import com.yunjing.botong.log.service.LogReportService;
-import com.yunjing.botong.log.vo.Member;
+import com.yunjing.botong.log.vo.ManagerMemberInfoVo;
 import com.yunjing.mommon.base.BaseController;
 import com.yunjing.mommon.global.exception.ParameterErrorException;
 import com.yunjing.mommon.validate.BeanFieldValidator;
@@ -74,7 +74,7 @@ public class LogReportApi extends BaseController {
     @PostMapping("/manager-submit-list")
     public ResponseEntityWrapper submitList(@RequestBody ManagerListParam param) {
         BeanFieldValidator.getInstance().validate(param);
-        PageWrapper<Member> wrapper = logReportService.submitList(param.getMemberId(), param.getOrgId(), appId, param.getSubmitType(), param.getDate(), param.getPageNo(), param.getPageSize());
+        PageWrapper<ManagerMemberInfoVo> wrapper = logReportService.submitList(param.getMemberId(), param.getOrgId(), appId, param.getSubmitType(), param.getDate(), param.getPageNo(), param.getPageSize());
         return success(wrapper);
     }
 
@@ -87,7 +87,7 @@ public class LogReportApi extends BaseController {
     @PostMapping("/manager-unsubmit-list")
     public ResponseEntityWrapper unSubmitList(@RequestBody ManagerListParam param) {
         BeanFieldValidator.getInstance().validate(param);
-        PageWrapper<Member> wrapper = logReportService.unSubmitList(param.getMemberId(), param.getOrgId(), appId, param.getSubmitType(), param.getDate(), param.getPageNo(), param.getPageSize());
+        PageWrapper<ManagerMemberInfoVo> wrapper = logReportService.unSubmitList(param.getMemberId(), param.getOrgId(), appId, param.getSubmitType(), param.getDate(), param.getPageNo(), param.getPageSize());
         return success(wrapper);
     }
 }

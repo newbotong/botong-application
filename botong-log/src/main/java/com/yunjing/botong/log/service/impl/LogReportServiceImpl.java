@@ -3,6 +3,7 @@ package com.yunjing.botong.log.service.impl;
 import com.alibaba.fastjson.JSON;
 import com.common.mongo.dao.Page;
 import com.common.mongo.util.PageWrapper;
+import com.yunjing.botong.log.cache.MemberRedisOperator;
 import com.yunjing.botong.log.config.LogConstant;
 import com.yunjing.botong.log.dao.LogReportDao;
 import com.yunjing.botong.log.entity.LogDetail;
@@ -10,6 +11,7 @@ import com.yunjing.botong.log.processor.okhttp.AppCenterService;
 import com.yunjing.botong.log.service.LogReportService;
 import com.yunjing.botong.log.util.ListPage;
 import com.yunjing.botong.log.vo.LogDetailVO;
+import com.yunjing.botong.log.vo.ManagerMemberInfoVo;
 import com.yunjing.botong.log.vo.Member;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections.CollectionUtils;
@@ -45,6 +47,10 @@ public class LogReportServiceImpl implements LogReportService {
 
     @Autowired
     private StringRedisTemplate redisTemplate;
+
+
+    @Autowired
+    private MemberRedisOperator redisOperator;
 
     /**
      * 日志报表统计
@@ -140,64 +146,35 @@ public class LogReportServiceImpl implements LogReportService {
     }
 
     @Override
-    public PageWrapper<Member> submitList(String memberId, String orgId, String appId, int submitType, String date, int pageNo, int pageSize) {
-        // 获取管理范围集合
-        List<Member> list = manageScopeList(memberId, appId);
-        if (list == null) {
-            list = new ArrayList<>();
-        }
-        List<String> memberIdList = new ArrayList<>();
-        if (CollectionUtils.isEmpty(list)) {
-            memberIdList.add(memberId);
-        }
-        for (Member member : list) {
-            memberIdList.add(member.getId());
-        }
-
-        // 指定日期以提交列表
-        Page<String> page = logReportDao.submitList(orgId, submitType, date, pageNo, pageSize, memberIdList);
-
-        List<Member> members = buildData(list, page.getRows());
-
-        PageWrapper<Member> wrapper = new PageWrapper<>();
-        wrapper.setRecords(members);
-        wrapper.setSize(page.getSize());
-        wrapper.setCurrent(page.getCurrent());
-        wrapper.setPages(page.getPages());
-        wrapper.setTotal(page.getTotal());
-        return wrapper;
+    public PageWrapper<ManagerMemberInfoVo> submitList(String memberId, String orgId, String appId, int submitType, String date, int pageNo, int pageSize) {
+        // 指定时间已提交列表
+        List<Member> members = manageScope(memberId, orgId, appId, submitType, date);
+        return buildWrapper(members, pageNo, pageSize);
     }
 
-    private List<Member> buildData(List<Member> list, List<String> rows) {
-        List<Member> members = new ArrayList<>();
-        for (String mId : rows) {
-            for (Member member : list) {
-                if (member.getId().equals(mId)) {
-                    members.add(member);
-                    break;
-                }
-            }
-        }
-        return members;
-    }
 
     @Override
-    public PageWrapper<Member> unSubmitList(String memberId, String orgId, String appId, int submitType, String date, int pageNo, int pageSize) {
+    public PageWrapper<ManagerMemberInfoVo> unSubmitList(String memberId, String orgId, String appId, int submitType, String date, int pageNo, int pageSize) {
         // 获取管理范围集合
         List<Member> list = manageScopeList(memberId, appId);
-        if (list == null) {
+        if (CollectionUtils.isEmpty(list)) {
             list = new ArrayList<>();
         }
-        List<String> memberIdList = new ArrayList<>();
-        if (CollectionUtils.isEmpty(list)) {
-            memberIdList.add(memberId);
-        }
+        // 加上自己的
+        list.add(redisOperator.getMember(memberId));
+        // 管理的成员id集合
+        Set<String> memberIdList = new HashSet<>();
         for (Member member : list) {
             memberIdList.add(member.getId());
         }
 
+        // 已提交成员集合
+        Set<String> submitList = new HashSet<>();
         // 指定日期所有已提交列表
-        List<String> submitList = logReportDao.submitList(orgId, submitType, date, memberIdList);
+        List<Member> members = manageScope(memberId, orgId, appId, submitType, date);
+        for (Member member : members) {
+            submitList.add(member.getId());
+        }
 
         // 取交集
         Collection collection = CollectionUtils.intersection(memberIdList, submitList);
@@ -205,17 +182,32 @@ public class LogReportServiceImpl implements LogReportService {
         // 去除已提交列表，其余为未提交列表
         memberIdList.removeAll(collection);
 
-        PageWrapper<Member> wrapper = new PageWrapper<>();
-        if (CollectionUtils.isNotEmpty(list)) {
-            ListPage<Member> page = new ListPage<>(list, pageSize);
+        members = redisOperator.getMemberList(memberIdList);
+
+        return buildWrapper(members, pageNo, pageSize);
+    }
+
+
+    /**
+     * members 分页
+     *
+     * @param members
+     * @param pageNo
+     * @param pageSize
+     * @return
+     */
+    private PageWrapper<ManagerMemberInfoVo> buildWrapper(List<Member> members, int pageNo, int pageSize) {
+        List<ManagerMemberInfoVo> infoVos = com.yunjing.mommon.utils.BeanUtils.mapList(members, ManagerMemberInfoVo.class);
+
+        PageWrapper<ManagerMemberInfoVo> wrapper = new PageWrapper<>();
+        if (CollectionUtils.isNotEmpty(infoVos)) {
+            ListPage<ManagerMemberInfoVo> page = new ListPage<>(infoVos, pageSize);
             wrapper.setRecords(page.getPagedList(pageNo));
             wrapper.setSize(page.getPageSize());
             wrapper.setCurrent(pageNo);
             wrapper.setPages(page.getPageCount());
-            wrapper.setTotal(list.size());
+            wrapper.setTotal(infoVos.size());
         }
-
-
         return wrapper;
     }
 
@@ -230,5 +222,36 @@ public class LogReportServiceImpl implements LogReportService {
     private List<Member> manageScopeList(String memberId, String appId) {
         // 根据memberId 查询管理范围
         return appCenterService.manageScope(appId, memberId);
+    }
+
+    /**
+     * 管理范围下指定日期提交列表
+     *
+     * @param memberId
+     * @param orgId
+     * @param appId
+     * @param submitType
+     * @param date
+     * @return
+     */
+    private List<Member> manageScope(String memberId, String orgId, String appId, int submitType, String date) {
+        List<Member> members = appCenterService.manageScope(appId, memberId);
+        if (CollectionUtils.isEmpty(members)) {
+            members = new ArrayList<>();
+        }
+        // 根据memberId获取member信息
+        Member member = redisOperator.getMember(memberId);
+        members.add(member);
+
+
+        List<String> memberIdList = new ArrayList<>();
+        for (Member m : members) {
+            memberIdList.add(m.getId());
+        }
+
+        // 指定日期所有已提交列表
+        Set<String> submitMemberIdList = logReportDao.submitList(orgId, submitType, date, memberIdList);
+
+        return redisOperator.getMemberList(submitMemberIdList);
     }
 }

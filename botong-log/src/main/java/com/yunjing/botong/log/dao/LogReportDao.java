@@ -14,9 +14,10 @@ import org.springframework.data.mongodb.core.query.Query;
 import org.springframework.stereotype.Service;
 
 import java.text.ParseException;
-import java.util.ArrayList;
 import java.util.Date;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 /**
  * <p>
@@ -32,44 +33,6 @@ public class LogReportDao extends BaseMongoDaoImpl<LogDetail> {
 
 
     /**
-     * 根据时间分页查询指定日志已提交的列表
-     *
-     * @param orgId
-     * @param submitType
-     * @param date
-     * @param pageNo
-     * @param pageSize
-     * @param memberIdList
-     * @return
-     */
-    public Page<String> submitList(String orgId, int submitType, String date, int pageNo, int pageSize, List<String> memberIdList) {
-        Criteria criteria = Criteria.where("orgId").is(orgId);
-        criteria.and("memberId").in(memberIdList);
-        if (submitType != 0) {
-            criteria.and("submitType").is(submitType);
-        }
-        Query query = new Query(criteria);
-        buildQueryDate(query, date);
-
-        // 根据时间查询指定日志已提交的列表
-        Page<LogDetail> page = findPage(new Page<>(pageNo, pageSize), query);
-
-        List<String> list = new ArrayList<>();
-        Page<String> submitMemberIdPage = new Page<>();
-        for (LogDetail detail : page.getRows()) {
-            list.add(String.valueOf(detail.getMemberId()));
-        }
-
-        submitMemberIdPage.setRows(list);
-        submitMemberIdPage.setCurrent(page.getCurrent());
-        submitMemberIdPage.setPages(page.getPages());
-        submitMemberIdPage.setSize(page.getSize());
-        submitMemberIdPage.setTotal(page.getTotal());
-
-        return submitMemberIdPage;
-    }
-
-    /**
      * 根据时间查询指定日志已提交的列表
      *
      * @param orgId
@@ -78,7 +41,7 @@ public class LogReportDao extends BaseMongoDaoImpl<LogDetail> {
      * @param memberIdList
      * @return
      */
-    public List<String> submitList(String orgId, int submitType, String date, List<String> memberIdList) {
+    public Set<String> submitList(String orgId, int submitType, String date, List<String> memberIdList) {
         Criteria criteria = Criteria.where("orgId").is(orgId);
         criteria.and("memberId").in(memberIdList);
         if (submitType != 0) {
@@ -87,11 +50,11 @@ public class LogReportDao extends BaseMongoDaoImpl<LogDetail> {
         Query query = new Query(criteria);
         buildQueryDate(query, date);
 
-        List<String> list = new ArrayList<>();
+        Set<String> list = new HashSet<>();
         List<LogDetail> details = find(query);
 
         for (LogDetail detail : details) {
-            list.add(String.valueOf(detail.getMemberId()));
+            list.add(detail.getMemberId());
         }
         return list;
     }

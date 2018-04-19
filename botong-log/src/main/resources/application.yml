@@ -94,6 +94,7 @@ botong:
     appId: ${botong.log.appId}
   write-log: ${botong.log.write-log}
   look-log: ${botong.log.look-log}
+  logShare: ${botong.log.logShare}
 
 # 写入文件日志
 logging:

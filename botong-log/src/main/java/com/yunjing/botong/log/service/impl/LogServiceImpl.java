@@ -39,6 +39,14 @@ public class LogServiceImpl implements LogService {
     @Value("${botong.log.look-log}")
     private String lookLog;
 
+    /**
+     * http://192.168.10.89:1300/#/logShare
+     * <p>
+     * http://192.168.10.89:1300/#/logShare?logId=xxxxxx&userId=这里是menberId
+     */
+    @Value("${botong.log.logShare}")
+    private String logShare;
+
     @Autowired
     private LogTemplateService logTemplateService;
 
@@ -96,7 +104,7 @@ public class LogServiceImpl implements LogService {
 
         Map<String, String> map = new HashMap<>(2);
         map.put("subModuleName", "日报提醒");
-        map.put("url", lookLog + entity.getLogId());
+        map.put("url", logShare + "?" + entity.getLogId() + "&userId=" + logParam.getMemberId());
 
         //日志提醒
         JSONArray array = new JSONArray();
