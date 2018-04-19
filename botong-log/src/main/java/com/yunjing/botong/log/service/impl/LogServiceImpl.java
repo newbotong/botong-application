@@ -104,7 +104,7 @@ public class LogServiceImpl implements LogService {
 
         Map<String, String> map = new HashMap<>(2);
         map.put("subModuleName", "日报提醒");
-        map.put("url", logShare + "?" + entity.getLogId() + "&userId=" + logParam.getMemberId());
+        map.put("url", logShare + "?logId=" + entity.getLogId() + "&userId=" + logParam.getMemberId());
 
         //日志提醒
         JSONArray array = new JSONArray();
