@@ -50,7 +50,7 @@
         SELECT m.id, m.model_name, m.logo, m.introduce, m.sort,
         m.is_disabled, m.is_def, m.provider, m.model_type, m.model_version
         FROM model m
-        JOIN org_model o ON m.id = o.model_id
+        LEFT JOIN org_model o ON (m.id = o.model_id)
         WHERE o.org_id = #{ orgId }AND m.is_def = 0 ORDER BY m.sort ASC
     </select>
     <select id="getMaxSort" resultType="java.lang.Integer">

@@ -23,6 +23,23 @@ spring:
     driver-class-name: com.mysql.jdbc.Driver
     initialize: true
     continue-on-error: true
+    autoReconnect: true
+    useUnicode: true
+    characterEncoding: utf8
+    type: com.alibaba.druid.pool.DruidDataSource   #这里是配置druid连接池，以下都是druid的配置信息
+    maxActive: 20
+    initialSize: 1
+    maxWait: 60000
+    minIdle: 1
+    timeBetweenEvictionRunsMillis: 60000
+    minEvictableIdleTimeMillis: 300000
+    validationQuery: select 'x'
+    testWhileIdle: true
+    testOnBorrow: false
+    testOnReturn: false
+    poolPreparedStatements: true
+    maxOpenPreparedStatements: 20
+
   ##Redis配置
   # Redis数据库索引（默认为0）
   redis:
