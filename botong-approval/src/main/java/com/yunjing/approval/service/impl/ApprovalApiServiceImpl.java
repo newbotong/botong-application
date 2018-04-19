@@ -241,16 +241,18 @@ public class ApprovalApiServiceImpl implements IApprovalApiService {
                     if (flag == 1) {
                         clientApprovalDetailVO.setMessage("等待" + approvalUserVO.getName() + "审批");
                         approvalUserVO.setMessage("审批中");
-                    }else {
+                    } else {
                         approvalUserVO.setMessage("等待审批");
                     }
                 }
-            }else if (approvalUserVO.getProcessState() != null && approvalUserVO.getProcessState() == 1){
+            } else if (approvalUserVO.getProcessState() != null && approvalUserVO.getProcessState() == 1) {
                 approvalUserVO.setMessage("已同意");
-            } else if (approvalUserVO.getProcessState() != null && approvalUserVO.getProcessState() == 2){
+            } else if (approvalUserVO.getProcessState() != null && approvalUserVO.getProcessState() == 2) {
                 approvalUserVO.setMessage("已拒绝");
-            } else if (approvalUserVO.getProcessState() != null && approvalUserVO.getProcessState() == 3){
+            } else if (approvalUserVO.getProcessState() != null && approvalUserVO.getProcessState() == 3) {
                 approvalUserVO.setMessage("已转交");
+            } else if (approvalUserVO.getProcessState() != null && approvalUserVO.getProcessState() == 4) {
+                approvalUserVO.setMessage("已撤销");
             }
         }
         Collections.sort(approvalUserList, new Comparator<ApprovalUserVO>() {
@@ -265,8 +267,16 @@ public class ApprovalApiServiceImpl implements IApprovalApiService {
                 }
             }
         });
-        clientApprovalDetailVO.setApprovalUserList(approvalUserList);
-
+        // 当发起人做撤销操作后审批详情中审批人情况集合
+        Set<ApprovalUserVO> collect = approvalUserList.stream().filter(approvalUserVO -> approvalUserVO.getProcessState() == 4).collect(Collectors.toSet());
+        if (collect.size() > 0) {
+            boolean b = approvalUserList.removeIf(approvalUserVO -> approvalUserVO.getProcessState() == 0);
+            if(b){
+                clientApprovalDetailVO.setApprovalUserList(approvalUserList);
+            }
+        } else {
+            clientApprovalDetailVO.setApprovalUserList(approvalUserList);
+        }
         // 获取抄送人信息
         List<CopyUserVO> copyUserList = copysMapper.getCopyUserList(approvalId);
         copyUserList.forEach(copyUserVO -> {
@@ -367,9 +377,9 @@ public class ApprovalApiServiceImpl implements IApprovalApiService {
     }
 
     @Override
-    public boolean revokeApproval(String orgId, String userId, String approvalId) {
+    public boolean revokeApproval(String companyId, String memberId, String approvalId) {
         boolean flag = false;
-        List<ApprovalProcess> processList = approvalProcessService.selectList(Condition.create().where("approval_id={0}", approvalId));
+        List<ApprovalProcess> processList = approvalProcessService.selectList(Condition.create().where("approval_id={0}", approvalId).and("user_id={0}", memberId));
         processList.forEach(approvalProcess -> {
             approvalProcess.setProcessState(4);
             approvalProcess.setProcessTime(System.currentTimeMillis());
