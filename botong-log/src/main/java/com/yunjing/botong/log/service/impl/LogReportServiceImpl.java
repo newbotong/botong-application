@@ -1,10 +1,8 @@
 package com.yunjing.botong.log.service.impl;
 
-import com.alibaba.fastjson.JSON;
 import com.common.mongo.dao.Page;
 import com.common.mongo.util.PageWrapper;
 import com.yunjing.botong.log.cache.MemberRedisOperator;
-import com.yunjing.botong.log.config.LogConstant;
 import com.yunjing.botong.log.dao.LogReportDao;
 import com.yunjing.botong.log.entity.LogDetail;
 import com.yunjing.botong.log.processor.okhttp.AppCenterService;
@@ -68,7 +66,7 @@ public class LogReportServiceImpl implements LogReportService {
 
         // 1. 校验是否是管理员
         boolean manager = appCenterService.isManager(appId, memberId, true);
-        List<String> memberIdList = new ArrayList<>();
+        Set<String> memberIdList = new HashSet<>();
         if (manager) {
             // 管理员查询他所在企业的管理的memberId
             List<Member> list = manageScopeList(memberId, appId);
@@ -87,12 +85,10 @@ public class LogReportServiceImpl implements LogReportService {
         }
 
         Map<String, Member> userVOMap = new HashMap<>(16);
-        List<Object> list = redisTemplate.opsForHash().multiGet(LogConstant.LOG_MEMBER_INFO, new HashSet<>(memberIdList));
-        for (Object o : list) {
-            Member vo = JSON.parseObject(String.valueOf(o), Member.class);
-            if (vo != null) {
-                userVOMap.put(vo.getId(), vo);
-            }
+
+        List<Member> members = redisOperator.getMemberList(memberIdList);
+        for (Member member : members) {
+            userVOMap.put(member.getId(), member);
         }
 
         Page<LogDetail> report = logReportDao.report(pageNo, pageSize, orgId, memberIdList, submitType, startDate, endDate);

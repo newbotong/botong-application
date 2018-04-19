@@ -24,6 +24,11 @@ import java.util.Map;
 public class Test {
 
     @org.junit.Test
+    public void test4(){
+        System.out.println("123123".split("-")[0]);
+    }
+
+    @org.junit.Test
     public void test3() {
         Jedis jedis = new Jedis("192.168.10.48", 10352);
         Map<String, String> map = jedis.hgetAll("botong:org:member");
