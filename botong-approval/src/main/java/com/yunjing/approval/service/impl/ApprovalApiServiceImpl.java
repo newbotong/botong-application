@@ -65,7 +65,6 @@ public class ApprovalApiServiceImpl implements IApprovalApiService {
     private RedisApproval redisApproval;
 
     @Override
-    @Transactional(propagation = Propagation.REQUIRED, rollbackFor = Exception.class)
     public List<ClientModelVO> getList(String orgId) {
         List<ModelL> modelLList = modelMapper.selectModelListByOrgId(orgId);
         List<ClientModelVO> list = new ArrayList<>();
@@ -77,7 +76,6 @@ public class ApprovalApiServiceImpl implements IApprovalApiService {
     }
 
     @Override
-    @Transactional(propagation = Propagation.REQUIRED, rollbackFor = Exception.class)
     public Page<ClientApprovalVO> getWaited(Page page, String companyId, String memberId, FilterParam filterParam) {
 
         int current = page.getCurrentPage();
@@ -102,7 +100,6 @@ public class ApprovalApiServiceImpl implements IApprovalApiService {
     }
 
     @Override
-    @Transactional(propagation = Propagation.REQUIRED, rollbackFor = Exception.class)
     public Page<ClientApprovalVO> getCompleted(Page page, String orgId, String userId, FilterParam filterParam) {
         int current = page.getCurrentPage();
         int size = page.getPageSize();

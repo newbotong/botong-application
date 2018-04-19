@@ -47,7 +47,6 @@ public class ModelServiceImpl extends BaseServiceImpl<ModelMapper, ModelL> imple
     private ModelItemMapper modelItemMapper;
 
     @Override
-    @Transactional(propagation = Propagation.REQUIRED, rollbackFor = Exception.class)
     public List<ModelListVO> findModelList(String orgId) {
         List<ModelItem> modelItems = modelItemMapper.selectAll(orgId);
         List<ModelVO> modelVOList = modelMapper.selectLists(orgId);
@@ -115,7 +114,6 @@ public class ModelServiceImpl extends BaseServiceImpl<ModelMapper, ModelL> imple
     }
 
     @Override
-    @Transactional(propagation = Propagation.REQUIRED, rollbackFor = Exception.class)
     public boolean sortedModel(String categoryId, String sortArray) throws Exception {
         boolean isUpdated = false;
         Map<String, Integer> modelSortMap = null;
@@ -151,7 +149,6 @@ public class ModelServiceImpl extends BaseServiceImpl<ModelMapper, ModelL> imple
     }
 
     @Override
-    @Transactional(propagation = Propagation.REQUIRED, rollbackFor = Exception.class)
     public boolean moveModel(String categoryId, String modelId) throws Exception {
 
         ModelL modelL = this.selectById(modelId);
@@ -164,14 +161,12 @@ public class ModelServiceImpl extends BaseServiceImpl<ModelMapper, ModelL> imple
     }
 
     @Override
-    @Transactional(propagation = Propagation.REQUIRED, rollbackFor = Exception.class)
     public List<ModelVO> findModelListByOrgId(String orgId) {
         List<ModelVO> modelVOList = modelMapper.selectLists(orgId);
         return modelVOList;
     }
 
     @Override
-    @Transactional(propagation = Propagation.REQUIRED, rollbackFor = Exception.class)
     public boolean updateVisibleRange(String modelId, String deptIds, String userIds) throws Exception {
         // TODO 调用rpc接口处理可见范围权限业务
         ModelL modelL = this.selectById(modelId);
@@ -179,7 +174,6 @@ public class ModelServiceImpl extends BaseServiceImpl<ModelMapper, ModelL> imple
     }
 
     @Override
-    @Transactional(propagation = Propagation.REQUIRED, rollbackFor = Exception.class)
     public boolean updateIsDisabled(String modelId, Integer isDisabled) throws Exception {
         ModelL modelL = this.selectById(modelId);
         if (modelL == null) {

@@ -71,7 +71,6 @@ public class ModelItemServiceImpl extends BaseServiceImpl<ModelItemMapper, Model
     private final int[] types = {1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11};
 
     @Override
-    @Transactional(propagation = Propagation.REQUIRED, rollbackFor = Exception.class)
     public ClientModelItemVO getModelItem(String modelId, String memberId) throws Exception {
         ModelL modelL = modelService.selectById(modelId);
         List<ModelItem> itemList = this.selectList(Condition.create().where("model_id={0}", modelId).and("item_version={0}", modelL.getModelVersion()).orderBy("priority"));
@@ -187,7 +186,6 @@ public class ModelItemServiceImpl extends BaseServiceImpl<ModelItemMapper, Model
     }
 
     @Override
-    @Transactional(propagation = Propagation.REQUIRED, rollbackFor = Exception.class)
     public ModelVO saveModelItem(String companyId, String memberId, String categoryId, String json) throws Exception {
         if (StringUtils.isBlank(json)) {
             throw new BaseException("模型数据不存在");

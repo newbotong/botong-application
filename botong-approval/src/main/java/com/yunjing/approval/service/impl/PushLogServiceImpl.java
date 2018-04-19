@@ -16,7 +16,6 @@ import org.springframework.transaction.annotation.Transactional;
  * @date 2017/11/29
  */
 @Service
-@Transactional(propagation = Propagation.REQUIRED, rollbackFor = Exception.class)
 public class PushLogServiceImpl extends BaseServiceImpl<PushLogMapper, PushLog> implements IPushLogService {
 
 }

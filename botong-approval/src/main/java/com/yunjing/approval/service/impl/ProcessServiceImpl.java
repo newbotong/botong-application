@@ -31,7 +31,6 @@ import java.util.stream.Collectors;
  * @date 2017/12/21
  */
 @Service
-@Transactional(propagation = Propagation.REQUIRED, rollbackFor = Exception.class)
 public class ProcessServiceImpl extends BaseServiceImpl<ProcessMapper, SetsProcess> implements IProcessService {
 
 

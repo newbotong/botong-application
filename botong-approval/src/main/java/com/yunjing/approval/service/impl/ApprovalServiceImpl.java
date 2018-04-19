@@ -48,7 +48,6 @@ import static java.util.Comparator.comparing;
  * @date 2018/1/15
  */
 @Service
-@Transactional(propagation = Propagation.REQUIRED, rollbackFor = Exception.class)
 public class ApprovalServiceImpl extends BaseServiceImpl<ApprovalMapper, Approval> implements IApprovalService {
 
     private final Log logger = LogFactory.getLog(ApprovalServiceImpl.class);
