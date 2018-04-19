@@ -4,6 +4,7 @@ import com.common.mybatis.page.Page;
 import com.yunjing.approval.model.vo.ClientModelVO;
 import com.yunjing.approval.model.vo.Member;
 import com.yunjing.approval.model.vo.MemberInfo;
+import com.yunjing.approval.model.vo.OrgMemberVo;
 import com.yunjing.approval.param.FilterParam;
 import com.yunjing.approval.processor.okhttp.AppCenterService;
 import com.yunjing.approval.service.IApprovalApiService;
@@ -52,7 +53,7 @@ public class ClientApprovalController extends BaseController {
      * 获取审批模型详情
      *
      * @param modelId 模型主键
-     * @param memberId 成员id
+     * @param memberId
      * @return
      * @throws Exception
      */
@@ -169,9 +170,9 @@ public class ClientApprovalController extends BaseController {
     private AppCenterService appCenterService;
 
     @GetMapping("/test")
-    public ResponseEntityWrapper test(String[] deptIds, String[] memberIds) {
-        List<Member> subList = appCenterService.findSubLists(deptIds, memberIds);
-        return success(subList);
+    public ResponseEntityWrapper test(String companyId) {
+        List<OrgMemberVo> allOrgMember = appCenterService.findAllOrgMember(companyId, true);
+        return success(allOrgMember);
     }
 
 }
