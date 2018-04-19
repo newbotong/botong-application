@@ -201,8 +201,11 @@ public class InfoContentServiceImpl extends ServiceImpl<InfoContentMapper, InfoC
         if (!result) {
             throw new BaseException("修改失败");
         }
+        ParentInfoDetailDto infoDTO = new ParentInfoDetailDto();
         Object object = redisTemplate.opsForHash().get(InfoConstant.REDIS_HOME + ":" + infoCategoryParam.getOrgId(), infoCategoryParam.getOneCatalogId());
-        ParentInfoDetailDto infoDTO = JSONObject.parseObject(object.toString(), ParentInfoDetailDto.class);
+        if (null != object) {
+            infoDTO = JSONObject.parseObject(object.toString(), ParentInfoDetailDto.class);
+        }
         if (null != infoDTO) {
             if (infoCategoryParam.getId().equals(infoDTO.getId())) {
                 redisTemplate.opsForHash().delete(InfoConstant.REDIS_HOME + ":" + infoCategoryParam.getOrgId(), infoCategoryParam.getOneCatalogId());
