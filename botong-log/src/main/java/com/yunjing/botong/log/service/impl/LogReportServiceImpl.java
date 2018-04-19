@@ -200,11 +200,11 @@ public class LogReportServiceImpl implements LogReportService {
         List<ManagerMemberInfoVo> infoVos = com.yunjing.mommon.utils.BeanUtils.mapList(members, ManagerMemberInfoVo.class);
 
         PageWrapper<ManagerMemberInfoVo> wrapper = new PageWrapper<>();
+        wrapper.setSize(pageSize);
+        wrapper.setCurrent(pageNo);
         if (CollectionUtils.isNotEmpty(infoVos)) {
             ListPage<ManagerMemberInfoVo> page = new ListPage<>(infoVos, pageSize);
             wrapper.setRecords(page.getPagedList(pageNo));
-            wrapper.setSize(page.getPageSize());
-            wrapper.setCurrent(pageNo);
             wrapper.setPages(page.getPageCount());
             wrapper.setTotal(infoVos.size());
         }
