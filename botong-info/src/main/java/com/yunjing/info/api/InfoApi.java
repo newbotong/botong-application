@@ -109,4 +109,20 @@ public class InfoApi extends BaseController {
         Page<InfoDto> page = infoContentService.searchPage(orgId, title, pageNo, pageSize);
         return success(page);
     }
+
+    /**
+     * 查询用户权限
+     *
+     * @param userId 成员id
+     * @return
+     * @throws BaseException
+     * @throws IOException
+     */
+    @PostMapping("/authority")
+    public ResponseEntityWrapper selectAuthority(@RequestParam String userId) throws BaseException,IOException {
+        Boolean result = infoContentService.selectAuthority(userId);
+        return success(result);
+    }
+
+
 }

@@ -152,16 +152,16 @@ public class InfoCatalogServiceImpl extends ServiceImpl<InfoCatalogMapper, InfoC
         List<InfoDto> infoDtoList = infoCatalogMapper.selectInfoCatalog(map, page);
         page.setRecords(infoDtoList);
         resultMap.put("page", page);
-        //OKHttp调用
-        Call<ResponseEntityWrapper> call = authorityService.authority(appId, userId);
-        Response<ResponseEntityWrapper> execute = call.execute();
-        ResponseEntityWrapper body = execute.body();
-        Boolean results = false;
-        if (null != body && null != body.getData()) {
-            //判断是否为管理员
-            results = (boolean) body.getData();
-        }
-        resultMap.put("admin", results);
+//        //OKHttp调用
+//        Call<ResponseEntityWrapper> call = authorityService.authority(appId, userId);
+//        Response<ResponseEntityWrapper> execute = call.execute();
+//        ResponseEntityWrapper body = execute.body();
+//        Boolean results = false;
+//        if (null != body && null != body.getData()) {
+//            //判断是否为管理员
+//            results = (boolean) body.getData();
+//        }
+//        resultMap.put("admin", results);
         return resultMap;
     }
 
