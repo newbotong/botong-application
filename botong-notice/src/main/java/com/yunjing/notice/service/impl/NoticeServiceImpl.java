@@ -398,7 +398,8 @@ public class NoticeServiceImpl extends ServiceImpl<NoticeMapper, NoticeEntity> i
     /**
      * 根据公告id查询公告详情接口
      *
-     * @param id 公告id
+     * @param id     公告id
+     * @param userId 用户id
      * @return
      * @throws BaseException
      */
@@ -430,7 +431,7 @@ public class NoticeServiceImpl extends ServiceImpl<NoticeMapper, NoticeEntity> i
         }
         //H5分享地址(?)
         if (noticeEntity.getSecrecyState() == 1) {
-            noticeDetailBody.setNoticeH5Address(H5Address + "?" + "id=" + id);
+            noticeDetailBody.setNoticeH5Address(H5Address + "?" + "id=" + id + "&" + userId);
         } else {
             noticeDetailBody.setNoticeH5Address(null);
         }
@@ -448,5 +449,26 @@ public class NoticeServiceImpl extends ServiceImpl<NoticeMapper, NoticeEntity> i
         NoticeDetailsBody noticeDetailsBody = new NoticeDetailsBody();
         BeanUtils.copyProperties(noticeEntity, noticeDetailsBody);
         return noticeDetailsBody;
+    }
+
+    /**
+     * 查询用户权限
+     *
+     * @param userId 成员id
+     * @return
+     * @throws BaseException
+     * @throws IOException
+     */
+    @Override
+    public Boolean selectAuthority(String userId) throws BaseException, IOException {
+        Call<ResponseEntityWrapper> call = authorityService.authority(appId, userId);
+        Response<ResponseEntityWrapper> execute = call.execute();
+        ResponseEntityWrapper body = execute.body();
+        //判断是否为管理员
+        boolean results = false;
+        if (null != body.getData()) {
+            results = (boolean) body.getData();
+        }
+        return results;
     }
 }
