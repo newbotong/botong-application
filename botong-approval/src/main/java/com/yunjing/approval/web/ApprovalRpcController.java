@@ -77,7 +77,7 @@ public class ApprovalRpcController extends BaseController {
      * @param dtoList
      * @return ResponseEntityWrapper
      */
-    @PostMapping("/save-setprocess")
+    @PostMapping("/save-condition")
     public ResponseEntityWrapper addSetsCondition(@RequestBody List<SetsConditionDTO> dtoList) throws Exception {
         return success(transferService.addSetsCondition(dtoList));
     }
@@ -123,5 +123,15 @@ public class ApprovalRpcController extends BaseController {
     @PostMapping("/save-orgmodel")
     public ResponseEntityWrapper addOrgModel(@RequestBody List<OrgModelDTO> dtoList) throws Exception {
         return success(transferService.addOrgModel(dtoList));
+    }
+    /**
+     * 保存botong1.0 approval_attr 表数据到 botong2.0数据库中
+     *
+     * @param dtoList
+     * @return ResponseEntityWrapper
+     */
+    @PostMapping("/save-attr")
+    public ResponseEntityWrapper addAttr(@RequestBody List<ApprovalAttrDTO> dtoList) throws Exception {
+        return success(transferService.addApprovalAttr(dtoList));
     }
 }
