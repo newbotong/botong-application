@@ -230,6 +230,7 @@ public class ApprovalApiServiceImpl implements IApprovalApiService {
                 approvalUserVO.setAvatarName(approvalUserVO.getName().length() <= 2 ? approvalUserVO.getName() : approvalUserVO.getName().substring(1, 3));
             }
             if (approvalUserVO.getProcessState() != null && approvalUserVO.getProcessState() == 0) {
+                approvalUserVO.setApprovalTime(null);
                 if (approvalUserVO.getUserId().equals(memberId)) {
                     //描述提醒用户信息
                     clientApprovalDetailVO.setProcessState(approvalUserVO.getProcessState());
