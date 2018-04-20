@@ -90,4 +90,10 @@ public class NoticeBody implements Serializable {
     @NotNullOrEmpty(message = "企业id不能为空")
     private String orgId;
 
+    /**
+     * 发送人的手机号码
+     */
+    @NotNullOrEmpty(message = "发送者手机号码不能为空")
+    private Long phone;
+
 }

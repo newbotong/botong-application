@@ -63,8 +63,8 @@ public class NoticeServiceImpl extends ServiceImpl<NoticeMapper, NoticeEntity> i
     @Value("${notice.appId}")
     private String appId;
 
-    @Value("${H5Address}")
-    private String H5Address;
+    @Value("${h5Address}")
+    private String h5Address;
 
     @Autowired
     private OrgStructureService orgStructureService;
@@ -127,7 +127,7 @@ public class NoticeServiceImpl extends ServiceImpl<NoticeMapper, NoticeEntity> i
         noticeUserService.insertBatch(userInfoBodyList);
 
         //推送请求URL
-        String url = H5Address + "?" + "id=" + noticeEntity.getId();
+        String url = h5Address + "?" + "id=" + noticeEntity.getId();
 
         //添加公告模块子标题
         Map<String, String> map = new HashMap<>(32);
@@ -203,6 +203,7 @@ public class NoticeServiceImpl extends ServiceImpl<NoticeMapper, NoticeEntity> i
                 dangParam.setUserId(passportId[0]);
             }
             dangParam.setBizId(noticeEntity.getId());
+            dangParam.setSendTelephone(noticeBody.getPhone());
             dangParam.setBizType(1);
             dangParam.setReceiveBody(userInfoModelList);
             dangParam.setDangType(1);
@@ -431,7 +432,7 @@ public class NoticeServiceImpl extends ServiceImpl<NoticeMapper, NoticeEntity> i
         }
         //H5分享地址(?)
         if (noticeEntity.getSecrecyState() == 1) {
-            noticeDetailBody.setNoticeH5Address(H5Address + "?" + "id=" + id + "&" + userId);
+            noticeDetailBody.setNoticeH5Address(h5Address + "?" + "id=" + id + "&" + userId);
         } else {
             noticeDetailBody.setNoticeH5Address(null);
         }

@@ -118,7 +118,7 @@ public class DataTransferServiceImpl implements IDataTransferService {
     @Override
     public boolean addModelItem(List<ModelItemDTO> dtoList) {
         boolean isInserted = false;
-        Set<String> mids = modelDTOS.stream().filter(modelDTO -> modelDTO.getModelName().equals("请假")).map(ModelDTO::getModelId).collect(Collectors.toSet());
+        Set<String> mids = modelDTOS.stream().filter(modelDTO -> "请假".equals(modelDTO.getModelName())).map(ModelDTO::getModelId).collect(Collectors.toSet());
         List<ModelItem> modelItemList = new ArrayList<>();
         for (ModelItemDTO dto : dtoList) {
 
@@ -145,7 +145,7 @@ public class DataTransferServiceImpl implements IDataTransferService {
                 modelItem.setDateFormat("yyyy-MM-dd HH:mm");
                 modelItem.setId(dto.getModelItemId());
                 modelItemList.add(modelItem);
-            } else if (mids.contains(dto.getModelId()) && dto.getItemLabel().equals("附件")) {
+            } else if (mids.contains(dto.getModelId()) && "附件".equals(dto.getItemLabel())) {
                 ModelItem modelItem = new ModelItem();
                 modelItem.setDataType(10);
                 modelItem.setDateFormat(dto.getDateFormat());

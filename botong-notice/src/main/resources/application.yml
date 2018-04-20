@@ -107,4 +107,4 @@ logging:
   file: ${user.dir}/logs/${spring.application.name}.log
 
 #H5分享地址
-H5Address: ${H5Address-notice}
+h5Address: ${H5Address-notice}

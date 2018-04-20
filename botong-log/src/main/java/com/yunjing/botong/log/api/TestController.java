@@ -68,18 +68,6 @@ public class TestController {
 
     @RequestMapping("/dang")
     public String dang() {
-        DangParam param = new DangParam();
-        param.setIsAccessory(0);
-        param.setSendTelephone(18562818246L);
-        param.setUserId(6386505037916409856L);
-        List<UserInfoModel> infoModels = new ArrayList<>();
-        infoModels.add(new UserInfoModel(18562818246L, 6386505037916409856L));
-        param.setReceiveBody(infoModels);
-        param.setDangType(1);
-        param.setRemindType(1);
-        param.setSendType(1);
-        param.setSendContent("dang消息内容");
-        appCenterService.dang(param);
         return "success";
     }
 

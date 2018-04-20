@@ -13,7 +13,6 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 public class UserInfoModel {
 
-    private Long userId;
+    private String userId;
 
-    private Long userTelephone;
 }
