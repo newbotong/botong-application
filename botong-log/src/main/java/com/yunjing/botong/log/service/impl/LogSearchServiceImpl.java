@@ -305,6 +305,7 @@ public class LogSearchServiceImpl implements ILogSearchService {
             LogExcelVO logExcelVO;
             List<AttrValueVO> logData;
             AttrValueVO attrValueVO;
+            //日志明细转为导出对应的数据对象
             for (LogDetail detail : detailResult) {
                 logExcelVO = new LogExcelVO();
                 logExcelVO.setSender(memberMap.get(detail.getMemberId()).getName());
