@@ -50,7 +50,6 @@ public class RemindMessageConsumer extends AbstractMessageConsumerWithQueueDecla
 
     private final static String[] SMS_TEMPLATE = {"当日的日报", "本周的周报", "本月的月报"};
 
-
     @Value("${botong.log.write-log}")
     private String writeLog;
 
@@ -104,7 +103,7 @@ public class RemindMessageConsumer extends AbstractMessageConsumerWithQueueDecla
 
         StringRedisTemplate redisTemplate = redisReadonly.getTemple();
 
-        log.error("接收任务调度参数:{}", JSON.toJSONString(message));
+        log.info("接收任务调度参数:{}", JSON.toJSONString(message));
         String memberId = message.getWhat();
 
         Map<String, String> map = (Map<String, String>) JSONObject.parse(message.getObj().toString());
@@ -155,6 +154,7 @@ public class RemindMessageConsumer extends AbstractMessageConsumerWithQueueDecla
                     case 3:
                         // dang
                         List<UserInfoModel> infoModels = new ArrayList<>();
+                        infoModels.add(new UserInfoModel(memberInfo.getPassportId()));
                         dang(infoModels, memberInfo.getPassportId(), memberInfo.getMobile(), remind.getSubmitType());
                         break;
                     default:
@@ -168,7 +168,6 @@ public class RemindMessageConsumer extends AbstractMessageConsumerWithQueueDecla
             boolean isManager = appCenterService.isManager(appId, memberId);
             if (isManager) {
                 // 3. 如果是管理员
-
                 Date date = new Date();
                 String current = DateFormatUtils.format(date, "yyyy-MM-dd");
                 // 3.2 查询出所有管理的人员
@@ -216,20 +215,14 @@ public class RemindMessageConsumer extends AbstractMessageConsumerWithQueueDecla
                     case 3:
                         // dang
                         List<UserInfoModel> infoModels = new ArrayList<>();
-                        UserInfoModel userInfoModel;
                         for (int i = 0; i < phoneNumbers.size(); i++) {
-                            userInfoModel = new UserInfoModel();
-                            userInfoModel.setUserId(passportIdList.get(i));
-
-                            infoModels.add(userInfoModel);
+                            infoModels.add(new UserInfoModel(passportIdList.get(i)));
                         }
                         dang(infoModels, memberInfo.getPassportId(), memberInfo.getMobile(), remind.getSubmitType());
                         break;
                     default:
                         break;
                 }
-
-
             } else {
                 // 已经不是管理员，不做任何处理
                 log.warn("已经不是管理员!");
@@ -273,10 +266,12 @@ public class RemindMessageConsumer extends AbstractMessageConsumerWithQueueDecla
         json.put("subTitle", "您收到一条日报提醒");
         json.put("type", "5");
 
+
         array.add(json);
         map.put("content", array.toJSONString());
         pushParam.setMap(map);
 
+        log.info("推送参数：{}", JSON.toJSONString(pushParam));
         appCenterService.push(pushParam);
     }
 
@@ -296,6 +291,9 @@ public class RemindMessageConsumer extends AbstractMessageConsumerWithQueueDecla
         param.setMapParam(map);
         param.setSignName("伯通");
         param.setTemplateId("SMS_130830537");
+
+        log.info("发送短信参数:{}", JSON.toJSONString(param));
+
         smsService.sendSmSMessage(phoneNumbers, param.getTemplateId(), param.getSignName(), param.getMapParam());
     }
 
@@ -318,6 +316,9 @@ public class RemindMessageConsumer extends AbstractMessageConsumerWithQueueDecla
         param.setSendType(1);
         param.setBizId(UUID.randomUUID().toString().replace("-", ""));
         param.setSendContent(MESSAGE[submitType - 1]);
+
+        log.info("dang 参数：{}", JSON.toJSONString(param));
+
         appCenterService.dang(param);
     }
 }
