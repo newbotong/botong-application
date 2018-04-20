@@ -289,6 +289,7 @@ public class ApprovalApiServiceImpl implements IApprovalApiService {
     }
 
     @Override
+    @Transactional(rollbackFor = Exception.class)
     public boolean solveApproval(String orgId, String userId, String approvalId, Integer state) {
         boolean flag = false;
         List<ApprovalProcess> processList = approvalProcessService.selectList(Condition.create().where("approval_id={0}", approvalId));
@@ -375,6 +376,7 @@ public class ApprovalApiServiceImpl implements IApprovalApiService {
     }
 
     @Override
+    @Transactional(rollbackFor = Exception.class)
     public boolean revokeApproval(String companyId, String memberId, String approvalId) {
         boolean flag = false;
         List<ApprovalProcess> processList = approvalProcessService.selectList(Condition.create().where("approval_id={0}", approvalId).and("user_id={0}", memberId));
@@ -399,6 +401,7 @@ public class ApprovalApiServiceImpl implements IApprovalApiService {
     }
 
     @Override
+    @Transactional(rollbackFor = Exception.class)
     public boolean transferApproval(String orgId, String userId, String transferredUserId, String approvalId) {
 
         List<ApprovalProcess> processList = approvalProcessService.selectList(Condition.create().where("approval_id={0}", approvalId));

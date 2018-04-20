@@ -78,6 +78,7 @@ public class ApprovalServiceImpl extends BaseServiceImpl<ApprovalMapper, Approva
     private RedisApproval redisTemplate;
 
     @Override
+    @Transactional(rollbackFor = Exception.class)
     public boolean submit(String companyId, String memberId, String modelId, JSONArray jsonData, String sendUserIds, String sendCopyIds) throws Exception {
         ModelL modelL = modelService.selectById(modelId);
         Approval approval = new Approval();
@@ -280,6 +281,7 @@ public class ApprovalServiceImpl extends BaseServiceImpl<ApprovalMapper, Approva
     }
 
     @Override
+    @Transactional(rollbackFor = Exception.class)
     public boolean delete(String approvalId) throws Exception {
         boolean flag = false;
 
