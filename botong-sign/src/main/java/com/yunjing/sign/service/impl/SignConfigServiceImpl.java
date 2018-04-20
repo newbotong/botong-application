@@ -50,6 +50,7 @@ public class SignConfigServiceImpl extends ServiceImpl<SignConfigMapper, SignCon
         SignConfigModel signConfig = BeanUtils.map(signConfigParam, SignConfigModel.class);
         SignConfigModel signConfigModel = new SignConfigModel().selectOne(new EntityWrapper<SignConfigModel>().eq("org_id", signConfigParam.getOrgId()));
         boolean result = false;
+        //判断是否存在数据库中，存在就更新，不存在新增
         if (signConfigModel != null) {
             signConfig.setId(signConfigModel.getId());
             if (signConfig.getTimeStatus() == SignConstant.BOTONG_ZERO_VALUE.intValue()) {

@@ -8,7 +8,6 @@ import com.yunjing.botong.log.processor.okhttp.ApiService;
 import com.yunjing.botong.log.processor.okhttp.AppCenterService;
 import com.yunjing.botong.log.vo.AppPushParam;
 import com.yunjing.botong.log.vo.Member;
-import com.yunjing.mommon.base.PushParam;
 import com.yunjing.mommon.constant.StatusCode;
 import com.yunjing.mommon.wrapper.ResponseEntityWrapper;
 import lombok.extern.slf4j.Slf4j;
@@ -39,7 +38,8 @@ public class AppCenterServiceImpl implements AppCenterService {
      * 这里需要在启动参数时指定，无法放在配置中心加载
      */
     @Value("${okhttp.botong.zuul}")
-    private String appCenterUrl = ApiService.BASE_URL;
+    private String appCenterUrl;
+    // = ApiService.BASE_URL;
 
     /**
      * api 服务
@@ -104,6 +104,8 @@ public class AppCenterServiceImpl implements AppCenterService {
             init();
         }
 
+        log.info("应用中心url:{}", appCenterUrl);
+
         log.info("推送参数：{}", JSON.toJSONString(param));
 
         apiService.push(param).enqueue(new Callback<ResponseEntityWrapper>() {
@@ -141,6 +143,7 @@ public class AppCenterServiceImpl implements AppCenterService {
         if (apiService == null) {
             init();
         }
+        log.info("应用中心url:{}", appCenterUrl);
         apiService.dang(param).enqueue(new Callback<ResponseEntityWrapper>() {
             @Override
             public void onResponse(Call<ResponseEntityWrapper> call, Response<ResponseEntityWrapper> response) {
@@ -160,49 +163,27 @@ public class AppCenterServiceImpl implements AppCenterService {
     }
 
     @Override
-    public boolean isManager(String appId, String memberId, boolean isSync) {
-
-
+    public boolean isManager(String appId, String memberId) {
         if (apiService == null) {
             init();
         }
-
+        log.info("检测管理员参数，appId:{},memberId:{},应用中心url:{}", appId, memberId, appCenterUrl);
         Call<ResponseEntityWrapper<Boolean>> call = apiService.verifyManager(appId, memberId);
-        if (isSync) {
-            try {
-                // 同步方式请求
-                Response<ResponseEntityWrapper<Boolean>> response = call.execute();
-                ResponseEntityWrapper<Boolean> body = response.body();
-                if (body != null) {
-                    log.info("获取是否是管理员结果，code:{},message:{},data:{}", body.getStatusCode(), body.getStatusMessage(), JSON.toJSON(body.getData()));
-                    if (response.isSuccessful() && body.getStatusCode() == StatusCode.SUCCESS.getStatusCode()) {
-                        return body.getData();
-                    }
-                } else {
-                    log.error("body is null");
+        try {
+            // 同步方式请求
+            Response<ResponseEntityWrapper<Boolean>> response = call.execute();
+            log.info("服务器响应码:{}", response.code());
+            ResponseEntityWrapper<Boolean> body = response.body();
+            if (body != null) {
+                log.info("获取是否是管理员结果，code:{},message:{},data:{}", body.getStatusCode(), body.getStatusMessage(), JSON.toJSON(body.getData()));
+                if (response.isSuccessful() && body.getStatusCode() == StatusCode.SUCCESS.getStatusCode()) {
+                    return body.getData();
                 }
-                return false;
-            } catch (IOException e) {
-                e.printStackTrace();
+            } else {
+                log.error("获取管理员结果 body is null");
             }
-        } else {
-            call.enqueue(new Callback<ResponseEntityWrapper<Boolean>>() {
-                @Override
-                public void onResponse(Call<ResponseEntityWrapper<Boolean>> call, Response<ResponseEntityWrapper<Boolean>> response) {
-                    ResponseEntityWrapper<Boolean> body = response.body();
-                    if (body != null && verifyManagerCallback != null) {
-                        log.info("code:{},message:{}", body.getStatusCode(), body.getStatusMessage());
-                        verifyManagerCallback.verify(body.getData());
-                    } else {
-                        log.error("body is null");
-                    }
-                }
-
-                @Override
-                public void onFailure(Call<ResponseEntityWrapper<Boolean>> call, Throwable t) {
-
-                }
-            });
+        } catch (IOException e) {
+            e.printStackTrace();
         }
         return false;
     }
@@ -214,7 +195,7 @@ public class AppCenterServiceImpl implements AppCenterService {
         if (apiService == null) {
             init();
         }
-
+        log.info("应用中心url:{}", appCenterUrl);
         Call<ResponseEntityWrapper<List<Member>>> call = apiService.findAllOrgMember(orgId);
         if (isSync) {
             try {
@@ -256,7 +237,7 @@ public class AppCenterServiceImpl implements AppCenterService {
 
     @Override
     public String setTask(SchedulerParam param) {
-
+        log.info("应用中心url:{}", appCenterUrl);
         if (apiService == null) {
             init();
         }
@@ -283,6 +264,7 @@ public class AppCenterServiceImpl implements AppCenterService {
         if (apiService == null) {
             init();
         }
+        log.info("应用中心url:{}", appCenterUrl);
         log.info("获取管理范围 appId:{},memberId:{}", appId, memberId);
         try {
             Response<ResponseEntityWrapper<List<Member>>> response = apiService.manageScope(appId, memberId).execute();
@@ -314,6 +296,7 @@ public class AppCenterServiceImpl implements AppCenterService {
         if (apiService == null) {
             init();
         }
+
         try {
             Response<ResponseEntityWrapper<List<Member>>> response = apiService.findSubLists(deptIds, memberIds, LogConstant.BOTONG_ZERO_NUM).execute();
             ResponseEntityWrapper<List<Member>> body = response.body();

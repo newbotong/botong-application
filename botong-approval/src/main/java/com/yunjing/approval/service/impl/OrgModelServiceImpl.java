@@ -47,7 +47,6 @@ public class OrgModelServiceImpl extends BaseServiceImpl<OrgModelMapper, OrgMode
     private static final Log logger = LogFactory.getLog(OrgModelServiceImpl.class);
 
     @Override
-    @Transactional(propagation = Propagation.REQUIRED, rollbackFor = Exception.class)
     public boolean createApprovalModel(String orgId) {
         boolean flag;
         // 查询系统的审批模板
@@ -69,7 +68,6 @@ public class OrgModelServiceImpl extends BaseServiceImpl<OrgModelMapper, OrgMode
     }
 
     @Override
-    @Transactional(propagation = Propagation.REQUIRED, rollbackFor = Exception.class)
     public boolean deleteApprovalModel(String orgId) {
         boolean flag = false;
         // 查询审批模板使用后产生的数据

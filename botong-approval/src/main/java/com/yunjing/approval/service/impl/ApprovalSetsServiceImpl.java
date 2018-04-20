@@ -27,7 +27,6 @@ import java.util.List;
  * @date 2017/11/30
  */
 @Service
-@Transactional(propagation = Propagation.REQUIRED, rollbackFor = Exception.class)
 public class ApprovalSetsServiceImpl extends ServiceImpl<ApprovalSetsMapper, ApprovalSets> implements IApprovalSetsService {
 
 

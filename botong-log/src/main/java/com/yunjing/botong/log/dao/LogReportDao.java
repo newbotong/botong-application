@@ -89,7 +89,7 @@ public class LogReportDao extends BaseMongoDaoImpl<LogDetail> {
      * @param endDate
      * @return
      */
-    public Page<LogDetail> report(int pageNo, int pageSize, String orgId, List<String> memberId, int submitType, long startDate, long endDate) {
+    public Page<LogDetail> report(int pageNo, int pageSize, String orgId, Set<String> memberId, int submitType, long startDate, long endDate) {
         Criteria criteria = Criteria.where("orgId").is(orgId);
         criteria.and("memberId").in(memberId);
         criteria.and("submitType").is(submitType);

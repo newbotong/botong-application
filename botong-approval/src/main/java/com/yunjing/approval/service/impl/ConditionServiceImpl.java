@@ -37,7 +37,6 @@ import java.util.stream.Collectors;
  * @date 2017/12/21
  */
 @Service
-@Transactional(propagation = Propagation.REQUIRED, rollbackFor = Exception.class)
 public class ConditionServiceImpl extends BaseServiceImpl<ConditionMapper, SetsCondition> implements IConditionService {
 
     @Autowired
@@ -151,6 +150,7 @@ public class ConditionServiceImpl extends BaseServiceImpl<ConditionMapper, SetsC
     }
 
     @Override
+    @Transactional(propagation = Propagation.REQUIRED, rollbackFor = Exception.class)
     public List<SetConditionVO> save(String modelId, String judge, String memberIds) throws Exception {
         // 解析
         Map<String, String> cdnMap = new HashMap<>(1);

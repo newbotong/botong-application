@@ -86,7 +86,7 @@ public class TestController {
 
     @RequestMapping("/is-manager")
     public String isManager() {
-        appCenterService.isManager("611564163546121654982", "6386505038969180166", true);
+        appCenterService.isManager("611564163546121654982", "6386505038969180166");
         return "success";
     }
 

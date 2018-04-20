@@ -29,11 +29,15 @@ public class Content {
     private String columnId;
 
 
-    //资讯标题
+    /**
+     * 资讯标题
+     */
     @TableField("content_title")
     private String contentTitle;
 
-    //内容子标题
+    /**
+     * 内容子标题
+     */
     @TableField("content_sub_title")
     private String contentSubTitle;
 
@@ -51,33 +55,49 @@ public class Content {
     @TableField("content_img")
     private String contentImg;
 
-    //    展示顺序
+    /**
+     * 展示顺序
+     */
     @TableField("is_carousel")
     private Integer isCarousel;
 
-    //是否轮播 0轮播 1不轮播
+    /**
+     * 是否轮播 0轮播 1不轮播
+     */
     @TableField("is_common")
     private Integer isCommon;
 
-    //状态 0正常 1已删除
+    /**
+     *状态 0正常 1已删除
+     */
     @TableField("status")
     private Integer status;
 
-    //是否显示 0:否 1:是
+    /**
+     * 是否显示 0:否 1:是
+     */
     @TableField("is_view")
     private Integer isView;
 
-    // 操作人id
+    /**
+     * 操作人id
+     */
     @TableField("operator_id")
     private String operatorId;
-
+    /**
+     * 展示顺序
+     */
     @TableField("sort")
-    private Integer sort;// 展示顺序
-
+    private Integer sort;
+    /**
+     * 最后更改时间
+     */
     @TableField("last_mdf_time")
-    private Date lastMdfTime;// 最后更改时间
-
+    private Date lastMdfTime;
+    /**
+     * 发布时间
+     */
     @TableField("create_time")
-    private Date createTime;// 发布时间
+    private Date createTime;
 
 }
