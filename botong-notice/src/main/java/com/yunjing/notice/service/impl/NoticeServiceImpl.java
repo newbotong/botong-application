@@ -203,6 +203,7 @@ public class NoticeServiceImpl extends ServiceImpl<NoticeMapper, NoticeEntity> i
                 dangParam.setUserId(passportId[0]);
             }
             dangParam.setBizId(noticeEntity.getId());
+            dangParam.setSendTelephone(noticeBody.getPhone());
             dangParam.setBizType(1);
             dangParam.setReceiveBody(userInfoModelList);
             dangParam.setDangType(1);
