@@ -32,7 +32,7 @@ public class LogTemplateApi extends BaseController {
 
     @GetMapping("/verify-manager")
     public ResponseEntityWrapper verifyManager(@RequestParam("memberId") String memberId) {
-        boolean manager = appCenterService.isManager(appId, memberId, true);
+        boolean manager = appCenterService.isManager(appId, memberId);
         return success(manager);
     }
 

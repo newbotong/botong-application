@@ -8,7 +8,6 @@ import com.yunjing.botong.log.processor.okhttp.ApiService;
 import com.yunjing.botong.log.processor.okhttp.AppCenterService;
 import com.yunjing.botong.log.vo.AppPushParam;
 import com.yunjing.botong.log.vo.Member;
-import com.yunjing.mommon.base.PushParam;
 import com.yunjing.mommon.constant.StatusCode;
 import com.yunjing.mommon.wrapper.ResponseEntityWrapper;
 import lombok.extern.slf4j.Slf4j;
@@ -164,47 +163,27 @@ public class AppCenterServiceImpl implements AppCenterService {
     }
 
     @Override
-    public boolean isManager(String appId, String memberId, boolean isSync) {
+    public boolean isManager(String appId, String memberId) {
         if (apiService == null) {
             init();
         }
-        log.info("appid:{},memberId:{},应用中心url:{}", appId, memberId, appCenterUrl);
+        log.info("检测管理员参数，appId:{},memberId:{},应用中心url:{}", appId, memberId, appCenterUrl);
         Call<ResponseEntityWrapper<Boolean>> call = apiService.verifyManager(appId, memberId);
-        if (isSync) {
-            try {
-                // 同步方式请求
-                Response<ResponseEntityWrapper<Boolean>> response = call.execute();
-                ResponseEntityWrapper<Boolean> body = response.body();
-                if (body != null) {
-                    log.info("获取是否是管理员结果，code:{},message:{},data:{}", body.getStatusCode(), body.getStatusMessage(), JSON.toJSON(body.getData()));
-                    if (response.isSuccessful() && body.getStatusCode() == StatusCode.SUCCESS.getStatusCode()) {
-                        return body.getData();
-                    }
-                } else {
-                    log.error("body is null");
+        try {
+            // 同步方式请求
+            Response<ResponseEntityWrapper<Boolean>> response = call.execute();
+            log.info("服务器响应码:{}", response.code());
+            ResponseEntityWrapper<Boolean> body = response.body();
+            if (body != null) {
+                log.info("获取是否是管理员结果，code:{},message:{},data:{}", body.getStatusCode(), body.getStatusMessage(), JSON.toJSON(body.getData()));
+                if (response.isSuccessful() && body.getStatusCode() == StatusCode.SUCCESS.getStatusCode()) {
+                    return body.getData();
                 }
-                return false;
-            } catch (IOException e) {
-                e.printStackTrace();
+            } else {
+                log.error("获取管理员结果 body is null");
             }
-        } else {
-            call.enqueue(new Callback<ResponseEntityWrapper<Boolean>>() {
-                @Override
-                public void onResponse(Call<ResponseEntityWrapper<Boolean>> call, Response<ResponseEntityWrapper<Boolean>> response) {
-                    ResponseEntityWrapper<Boolean> body = response.body();
-                    if (body != null && verifyManagerCallback != null) {
-                        log.info("code:{},message:{}", body.getStatusCode(), body.getStatusMessage());
-                        verifyManagerCallback.verify(body.getData());
-                    } else {
-                        log.error("body is null");
-                    }
-                }
-
-                @Override
-                public void onFailure(Call<ResponseEntityWrapper<Boolean>> call, Throwable t) {
-
-                }
-            });
+        } catch (IOException e) {
+            e.printStackTrace();
         }
         return false;
     }

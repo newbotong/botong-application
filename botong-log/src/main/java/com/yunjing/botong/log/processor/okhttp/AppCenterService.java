@@ -40,10 +40,9 @@ public interface AppCenterService {
      *
      * @param appId
      * @param memberId
-     * @param isSync   是否同步方式执行
      * @return
      */
-    boolean isManager(String appId, String memberId, boolean isSync);
+    boolean isManager(String appId, String memberId);
 
     /**
      * 获取指定企业所有成员信息
