@@ -21,7 +21,7 @@ public class SignUserInfoVO {
     /**
      * 姓名
      */
-    @SerializedName(value = "memberName")
+    @SerializedName(value = "nick")
     private String name;
 
     /**
@@ -31,11 +31,6 @@ public class SignUserInfoVO {
 
     @SerializedName(value = "passportId")
     private String userId;
-
-    /**
-     * 昵称
-     */
-    private String nick;
 
     /**
      * 颜色
