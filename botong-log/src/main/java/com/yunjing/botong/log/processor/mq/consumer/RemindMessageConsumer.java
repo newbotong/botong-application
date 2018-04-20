@@ -263,11 +263,14 @@ public class RemindMessageConsumer extends AbstractMessageConsumerWithQueueDecla
         //日志提醒
         JSONArray array = new JSONArray();
         JSONObject json = new JSONObject();
-        json.put("subTitle", "您收到一条日报提醒");
+        if (StringUtils.isNotEmpty(managerName)) {
+            json.put("subTitle", managerName + "提醒您：" + MESSAGE[submitType - 1]);
+        } else {
+            json.put("subTitle", MESSAGE[submitType - 1]);
+        }
         json.put("type", "5");
-
-
         array.add(json);
+
         map.put("content", array.toJSONString());
         pushParam.setMap(map);
 
