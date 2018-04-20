@@ -6,6 +6,7 @@ import com.baomidou.mybatisplus.mapper.Wrapper;
 import com.common.mybatis.service.impl.BaseServiceImpl;
 import com.google.gson.Gson;
 import com.yunjing.botong.log.config.AbstractRedisConfiguration;
+import com.yunjing.botong.log.config.CycleType;
 import com.yunjing.botong.log.config.LogConstant;
 import com.yunjing.botong.log.entity.RemindEntity;
 import com.yunjing.botong.log.mapper.RemindMapper;
@@ -23,7 +24,9 @@ import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 /**
@@ -148,11 +151,29 @@ public class RemindServiceImpl extends BaseServiceImpl<RemindMapper, RemindEntit
             taskId = vo.getTaskId();
         }
         SchedulerParam param = new SchedulerParam();
-        if (REMIND_DAY.equals(remind.getCycleType())) {
-            remind.setCycle("1,2,3,4,5,6,7");
+        String cycle = null;
+        if (CycleType.DAY.toString().equals(remind.getCycleType())) {
+            List<Object> list = new ArrayList<>();
+            for (int i = 1; i < 32; i++) {
+                list.add(i);
+            }
+            // 日报其实用的是week，1-31
+            cycle = list.toString();
+            cycle = new StringBuffer(list.toString()).deleteCharAt(cycle.length() - 1).deleteCharAt(0).toString();
+            remind.setCycle(cycle);
+            param.setCycleType(CycleType.DAY.toString());
+
+        } else if (CycleType.WEEK.toString().equals(remind.getCycleType())) {
+            // 周报提醒
+            param.setCycle(remind.getCycle());
+            param.setCycleType(CycleType.WEEK.toString());
+        } else if (CycleType.MONTH.toString().equals(remind.getCycleType())) {
+
+            param.setCycle(remind.getCycle());
+            param.setCycleType(CycleType.DAY.toString());
         }
-        param.setCycle(remind.getCycle());
-        param.setCycleType(remind.getCycleType());
+
+
         param.setOutKey(key);
         Map<String, Object> map = new HashMap<>(2);
         map.put("appId", appId);
