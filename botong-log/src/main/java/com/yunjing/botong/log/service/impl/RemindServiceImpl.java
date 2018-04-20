@@ -24,9 +24,7 @@ import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 
 /**
@@ -152,16 +150,8 @@ public class RemindServiceImpl extends BaseServiceImpl<RemindMapper, RemindEntit
             taskId = vo.getTaskId();
         }
         SchedulerParam param = new SchedulerParam();
-        String cycle = null;
         if (CycleType.DAY.toString().equalsIgnoreCase(remind.getCycleType())) {
-            List<Object> list = new ArrayList<>();
-            for (int i = 1; i < 8; i++) {
-                list.add(i);
-            }
-            // 日报其实用的是week，1-31
-            cycle = list.toString();
-            cycle = new StringBuffer(list.toString()).deleteCharAt(cycle.length() - 1).deleteCharAt(0).toString();
-            param.setCycle(cycle);
+            param.setCycle("*");
             param.setCycleType(CycleType.WEEK.toString());
 
         } else if (CycleType.WEEK.toString().equalsIgnoreCase(remind.getCycleType())) {
