@@ -3,6 +3,8 @@ package com.yunjing.botong.log.processor.mq.consumer;
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
+import com.common.redis.share.UserInfo;
+import com.yunjing.botong.log.cache.MemberRedisOperator;
 import com.yunjing.botong.log.config.AbstractRedisConfiguration;
 import com.yunjing.botong.log.config.LogConstant;
 import com.yunjing.botong.log.dao.LogReportDao;
@@ -20,6 +22,7 @@ import com.yunjing.message.model.Message;
 import com.yunjing.mommon.base.SmSParam;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections.CollectionUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.time.DateFormatUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
@@ -62,6 +65,9 @@ public class RemindMessageConsumer extends AbstractMessageConsumerWithQueueDecla
      */
     @Autowired
     private AppCenterService appCenterService;
+
+    @Autowired
+    private MemberRedisOperator redisOperator;
 
     /**
      * 短信
@@ -139,7 +145,7 @@ public class RemindMessageConsumer extends AbstractMessageConsumerWithQueueDecla
                 // 不是管理员，根据remindMode提醒
                 switch (remind.getRemindMode()) {
                     case 1:
-                        push(memberInfo.getCompanyId(), new String[]{memberInfo.getPassportId()}, remind.getSubmitType());
+                        push(memberInfo.getCompanyId(), new String[]{memberInfo.getPassportId()}, remind.getSubmitType(), null);
                         break;
                     case 2:
                         List<String> phoneNumbers = new ArrayList<>();
@@ -195,14 +201,15 @@ public class RemindMessageConsumer extends AbstractMessageConsumerWithQueueDecla
                 }
                 // 3.4 根据remindMode处理3.3的结果
 
-                // 不是管理员，根据remindMode提醒
+                // 管理员，根据remindMode提醒
                 switch (remind.getRemindMode()) {
                     case 1:
                         String[] idList = new String[passportIdList.size()];
                         for (int i = 0; i < passportIdList.size(); i++) {
                             idList[i] = passportIdList.get(i);
                         }
-                        push(memberInfo.getCompanyId(), idList, remind.getSubmitType());
+                        UserInfo info = redisOperator.getUserInfo(redisOperator.getMember(memberId).getPassportId());
+                        push(memberInfo.getCompanyId(), idList, remind.getSubmitType(), info != null ? info.getNick() : null);
                         break;
                     case 2:
                         sms(phoneNumbers, remind.getSubmitType());
@@ -239,15 +246,21 @@ public class RemindMessageConsumer extends AbstractMessageConsumerWithQueueDecla
      * @param companyId
      * @param alias
      * @param submitType
+     * @param managerName
      */
-    private void push(String companyId, String[] alias, int submitType) {
+    private void push(String companyId, String[] alias, int submitType, String managerName) {
 
         AppPushParam pushParam = new AppPushParam();
 
         pushParam.setAppId(appId);
         pushParam.setCompanyId(companyId);
-        pushParam.setMsg("您收到一条日志提醒");
-        pushParam.setTitle(MESSAGE[submitType - 1]);
+
+        if (StringUtils.isNotEmpty(managerName)) {
+            pushParam.setMsg(managerName + "提醒您：" + MESSAGE[submitType - 1]);
+        } else {
+            pushParam.setMsg(MESSAGE[submitType - 1]);
+        }
+        pushParam.setTitle("您收到一条日志提醒");
         pushParam.setNotificationTitle("您收到一条日志提醒");
         pushParam.setAlias(alias);
 
