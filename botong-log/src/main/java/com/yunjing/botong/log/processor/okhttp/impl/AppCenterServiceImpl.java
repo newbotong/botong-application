@@ -104,6 +104,8 @@ public class AppCenterServiceImpl implements AppCenterService {
             init();
         }
 
+        log.info("应用中心url:{}", appCenterUrl);
+
         log.info("推送参数：{}", JSON.toJSONString(param));
 
         apiService.push(param).enqueue(new Callback<ResponseEntityWrapper>() {
@@ -141,6 +143,7 @@ public class AppCenterServiceImpl implements AppCenterService {
         if (apiService == null) {
             init();
         }
+        log.info("应用中心url:{}", appCenterUrl);
         apiService.dang(param).enqueue(new Callback<ResponseEntityWrapper>() {
             @Override
             public void onResponse(Call<ResponseEntityWrapper> call, Response<ResponseEntityWrapper> response) {
@@ -161,12 +164,10 @@ public class AppCenterServiceImpl implements AppCenterService {
 
     @Override
     public boolean isManager(String appId, String memberId, boolean isSync) {
-
-
         if (apiService == null) {
             init();
         }
-
+        log.info("应用中心url:{}", appCenterUrl);
         Call<ResponseEntityWrapper<Boolean>> call = apiService.verifyManager(appId, memberId);
         if (isSync) {
             try {
@@ -214,7 +215,7 @@ public class AppCenterServiceImpl implements AppCenterService {
         if (apiService == null) {
             init();
         }
-
+        log.info("应用中心url:{}", appCenterUrl);
         Call<ResponseEntityWrapper<List<Member>>> call = apiService.findAllOrgMember(orgId);
         if (isSync) {
             try {
@@ -256,7 +257,7 @@ public class AppCenterServiceImpl implements AppCenterService {
 
     @Override
     public String setTask(SchedulerParam param) {
-
+        log.info("应用中心url:{}", appCenterUrl);
         if (apiService == null) {
             init();
         }
@@ -283,6 +284,7 @@ public class AppCenterServiceImpl implements AppCenterService {
         if (apiService == null) {
             init();
         }
+        log.info("应用中心url:{}", appCenterUrl);
         log.info("获取管理范围 appId:{},memberId:{}", appId, memberId);
         try {
             Response<ResponseEntityWrapper<List<Member>>> response = apiService.manageScope(appId, memberId).execute();
@@ -314,6 +316,7 @@ public class AppCenterServiceImpl implements AppCenterService {
         if (apiService == null) {
             init();
         }
+        log.info("应用中心url:{}", appCenterUrl);
         try {
             Response<ResponseEntityWrapper<List<Member>>> response = apiService.findSubLists(deptIds, memberIds, LogConstant.BOTONG_ZERO_NUM).execute();
             ResponseEntityWrapper<List<Member>> body = response.body();

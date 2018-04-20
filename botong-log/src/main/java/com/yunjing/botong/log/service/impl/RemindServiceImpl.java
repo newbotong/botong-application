@@ -125,6 +125,7 @@ public class RemindServiceImpl extends BaseServiceImpl<RemindMapper, RemindEntit
      * @param remind
      */
     private void setTask(RemindVo remind) {
+        log.info("提醒参数：{}", JSON.toJSONString(remind));
         StringRedisTemplate redisTemplate = redisLog.getTemple();
         Gson gson = new Gson();
         String key = String.valueOf(remind.getMemberId());
@@ -152,7 +153,7 @@ public class RemindServiceImpl extends BaseServiceImpl<RemindMapper, RemindEntit
         }
         SchedulerParam param = new SchedulerParam();
         String cycle = null;
-        if (CycleType.DAY.toString().equals(remind.getCycleType())) {
+        if (CycleType.DAY.toString().equalsIgnoreCase(remind.getCycleType())) {
             List<Object> list = new ArrayList<>();
             for (int i = 1; i < 32; i++) {
                 list.add(i);
@@ -160,15 +161,14 @@ public class RemindServiceImpl extends BaseServiceImpl<RemindMapper, RemindEntit
             // 日报其实用的是week，1-31
             cycle = list.toString();
             cycle = new StringBuffer(list.toString()).deleteCharAt(cycle.length() - 1).deleteCharAt(0).toString();
-            remind.setCycle(cycle);
+            param.setCycle(cycle);
             param.setCycleType(CycleType.DAY.toString());
 
-        } else if (CycleType.WEEK.toString().equals(remind.getCycleType())) {
+        } else if (CycleType.WEEK.toString().equalsIgnoreCase(remind.getCycleType())) {
             // 周报提醒
             param.setCycle(remind.getCycle());
             param.setCycleType(CycleType.WEEK.toString());
-        } else if (CycleType.MONTH.toString().equals(remind.getCycleType())) {
-
+        } else if (CycleType.MONTH.toString().equalsIgnoreCase(remind.getCycleType())) {
             param.setCycle(remind.getCycle());
             param.setCycleType(CycleType.DAY.toString());
         }
