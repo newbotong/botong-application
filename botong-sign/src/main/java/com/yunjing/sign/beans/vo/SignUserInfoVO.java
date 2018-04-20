@@ -30,10 +30,18 @@ public class SignUserInfoVO {
     private String profile;
 
     /**
+     * 昵称
+     */
+    private String nick;
+
+    /**
+     * 颜色
+     */
+    private String color;
+    /**
      * 部门
      */
     private String[] deptNames;
-
 
 
     /**
