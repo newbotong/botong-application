@@ -155,8 +155,7 @@ public class RemindMessageConsumer extends AbstractMessageConsumerWithQueueDecla
                     case 3:
                         // dang
                         List<UserInfoModel> infoModels = new ArrayList<>();
-                        infoModels.add(new UserInfoModel(Long.parseLong(memberInfo.getPassportId()), Long.parseLong(memberInfo.getMobile())));
-                        dang(infoModels, Long.parseLong(memberInfo.getPassportId()), Long.parseLong(memberInfo.getMobile()), remind.getSubmitType());
+                        dang(infoModels, memberInfo.getPassportId(), memberInfo.getMobile(), remind.getSubmitType());
                         break;
                     default:
                         break;
@@ -220,12 +219,11 @@ public class RemindMessageConsumer extends AbstractMessageConsumerWithQueueDecla
                         UserInfoModel userInfoModel;
                         for (int i = 0; i < phoneNumbers.size(); i++) {
                             userInfoModel = new UserInfoModel();
-                            userInfoModel.setUserId(Long.parseLong(passportIdList.get(i)));
-                            userInfoModel.setUserTelephone(Long.parseLong(phoneNumbers.get(i)));
+                            userInfoModel.setUserId(passportIdList.get(i));
 
                             infoModels.add(userInfoModel);
                         }
-                        dang(infoModels, Long.parseLong(memberInfo.getPassportId()), Long.parseLong(memberInfo.getMobile()), remind.getSubmitType());
+                        dang(infoModels, memberInfo.getPassportId(), memberInfo.getMobile(), remind.getSubmitType());
                         break;
                     default:
                         break;
@@ -309,15 +307,16 @@ public class RemindMessageConsumer extends AbstractMessageConsumerWithQueueDecla
      * @param mobile
      * @param submitType
      */
-    private void dang(List<UserInfoModel> infoModels, long userId, long mobile, int submitType) {
+    private void dang(List<UserInfoModel> infoModels, String userId, String mobile, int submitType) {
         DangParam param = new DangParam();
         param.setIsAccessory(0);
-        param.setSendTelephone(mobile);
+        param.setSendTelephone(Long.parseLong(mobile));
         param.setUserId(userId);
         param.setReceiveBody(infoModels);
         param.setDangType(1);
         param.setRemindType(1);
         param.setSendType(1);
+        param.setBizId(UUID.randomUUID().toString().replace("-", ""));
         param.setSendContent(MESSAGE[submitType - 1]);
         appCenterService.dang(param);
     }
