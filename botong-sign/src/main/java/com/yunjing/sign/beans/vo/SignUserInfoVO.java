@@ -29,6 +29,9 @@ public class SignUserInfoVO {
      */
     private String profile;
 
+    @SerializedName(value = "passportId")
+    private String userId;
+
     /**
      * 昵称
      */
