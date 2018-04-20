@@ -168,7 +168,7 @@ public class AppCenterServiceImpl implements AppCenterService {
         if (apiService == null) {
             init();
         }
-        log.info("应用中心url:{}", appCenterUrl);
+        log.info("appid:{},memberId:{},应用中心url:{}", appId, memberId, appCenterUrl);
         Call<ResponseEntityWrapper<Boolean>> call = apiService.verifyManager(appId, memberId);
         if (isSync) {
             try {
