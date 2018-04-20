@@ -179,7 +179,7 @@ public class NoticeServiceImpl extends ServiceImpl<NoticeMapper, NoticeEntity> i
         // okhttp调用工作通知
         informService.pushAllTargetByUser(pushParam);
         //Dang
-        if (noticeEntity.getDangState() == 0) {
+        if (noticeBody.getDangState() == 0) {
             //批量查询用户信息
             DangParam dangParam = new DangParam();
             Call<ResponseEntityWrapper<List<Member>>> ca = orgStructureService.findSubLists(noticeBody.getDepartmentIds(), noticeBody.getMemberIds(), 0);
