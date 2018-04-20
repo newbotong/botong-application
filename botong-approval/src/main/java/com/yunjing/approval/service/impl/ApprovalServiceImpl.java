@@ -35,7 +35,6 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.*;
@@ -80,6 +79,7 @@ public class ApprovalServiceImpl extends BaseServiceImpl<ApprovalMapper, Approva
     @Override
     @Transactional(rollbackFor = Exception.class)
     public boolean submit(String companyId, String memberId, String modelId, JSONArray jsonData, String sendUserIds, String sendCopyIds) throws Exception {
+        logger.info("companyId: " + companyId + " memberId: " + memberId + " modelId: " + modelId + " jsonData： " + jsonData.toJSONString() + " sendUserIds： " + sendUserIds + " sendCopyIds: " + sendCopyIds);
         ModelL modelL = modelService.selectById(modelId);
         Approval approval = new Approval();
         approval.setId(IDUtils.uuid());

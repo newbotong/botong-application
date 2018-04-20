@@ -106,16 +106,19 @@ mybatis-plus:
 #  jackson:
 #    default-property-inclusion: non_empty
 
+#okHttp调用
 okhttp:
   botong:
-    zuul: ${okhttp-botong-zuul}
+    zuul: ${okhttp.botong.zuul}
 
 # 写入文件日志
 logging:
   file: ${user.dir}/logs/${spring.application.name}.log
 
-approval:
-     appId: 861c643f34714df3bf99bffde9ae20ea
+botong:
+  approval:
+    appId: ${botong.approval.appId}
+
 
 
 
