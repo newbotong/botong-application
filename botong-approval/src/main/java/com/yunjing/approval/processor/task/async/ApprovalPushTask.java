@@ -14,6 +14,8 @@ import com.yunjing.approval.processor.okhttp.AppCenterService;
 import com.yunjing.approval.service.*;
 import com.yunjing.approval.util.ApproConstants;
 import com.yunjing.mommon.global.exception.InsertMessageFailureException;
+import com.yunjing.mommon.utils.DateUtil;
+import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -213,33 +215,69 @@ public class ApprovalPushTask extends BaseTask {
         ModelL modelL = modelService.selectById(approval.getModelId());
         String message = "您收到一条审批消息";
         logger.info("passportId: " + passportId + "  passportIds: " + passportIds[0] + "  message: " + message);
+
         PushParam pushParam = new PushParam();
         pushParam.setAppId(appId);
+        pushParam.setCompanyId(companyId);
         pushParam.setMsg(message);
         pushParam.setAlias(passportIds);
         pushParam.setNotificationTitle(message);
-        pushParam.setCompanyId(companyId);
         pushParam.setRegistrationId(passportId);
         pushParam.setTitle(message);
+
         Map<String, String> maps = new HashMap<>(5);
-        maps.put("appName", "审批");
         maps.put("subModuleName", modelL.getModelName());
-        maps.put("logo", modelL.getLogo());
         maps.put("url", "http://www.shenpi.com");
+
         // 审批提醒
         JSONArray array = new JSONArray();
-        JSONObject json = new JSONObject();
-        json.put("subTitle", approval.getTitle()+"需要您审批");
+        JSONObject json;
+
+        json = new JSONObject();
+        json.put("subTitle", approval.getTitle()+" 需要您审批");
         json.put("type", "5");
-        JSONArray array2 = new JSONArray();
-        for (ApproveAttrVO vo : approveAttrVO) {
-            JSONObject json2 = new JSONObject();
-            if(vo.getType()== ApproConstants.RADIO_TYPE_3|| vo.getType() == ApproConstants.TIME_INTERVAL_TYPE_5)
-            json2.put(vo.getLabel(), vo.getValue());
-            array2.add(json2);
+
+        if(CollectionUtils.isNotEmpty(approveAttrVO)){
+            for (ApproveAttrVO vo : approveAttrVO) {
+                if(vo.getType()== ApproConstants.RADIO_TYPE_3|| vo.getType() == ApproConstants.TIME_INTERVAL_TYPE_5){
+                    json = new JSONObject();
+                    json.put("title", vo.getLabel());
+                    json.put("content", vo.getValue());
+                    json.put("type", "0");
+                    array.add(json);
+                }
+            }
+            json = new JSONObject();
+            json.put("bottom", approvalDetail.getName() + "  " + DateUtil.convert(approval.getCreateTime()));
+            json.put("type", "4");
+            array.add(json);
+
+            json = new JSONObject();
+            switch (approval.getResult()){
+                case 1:
+                    json.put("status", "已同意");
+                    json.put("color", "#4FA97B");
+                    break;
+                case 2:
+                    json.put("status", "已拒绝");
+                    json.put("color", "#EA6262");
+                    break;
+                case 3:
+                    json.put("status", "已转交");
+                    json.put("color", "#EA6262");
+                    break;
+                case 4:
+                    json.put("status", "已撤销");
+                    json.put("color", "#848484");
+                    break;
+                default:
+                    json.put("status", "待审批");
+                    json.put("color", "#848484");
+
+            }
+            json.put("type", "3");
+            array.add(json);
         }
-        json.put("description", array2.toJSONString());
-        array.add(json);
         maps.put("content", array.toJSONString());
         pushParam.setMap(maps);
         logger.info("pushParam: " + pushParam.toString());
@@ -247,3 +285,4 @@ public class ApprovalPushTask extends BaseTask {
 
     }
 }
+

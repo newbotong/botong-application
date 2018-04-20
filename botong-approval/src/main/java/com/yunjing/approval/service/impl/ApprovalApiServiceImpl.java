@@ -96,7 +96,24 @@ public class ApprovalApiServiceImpl implements IApprovalApiService {
         Page<ClientApprovalVO> clientApprovalVOPage = new Page<>(current, size);
         List<ClientApprovalVO> clientApprovalVOS = new ArrayList<>();
         List<ApprovalContentDTO> waitedMeApprovalList = approvalProcessMapper.getWaitedMeApprovalList(index, size, companyId, userIds, filterParam);
-        convertList(clientApprovalVOS, waitedMeApprovalList);
+        List<ApprovalContentDTO> result = new ArrayList<>();
+        for (ApprovalContentDTO contentDTO : waitedMeApprovalList) {
+            List<ApprovalProcess> processList = approvalProcessService.selectList(Condition.create().where("approval_id={0}", contentDTO.getApprovalId()).and("user_id={0}",memberId));
+            for (ApprovalProcess process : processList) {
+                if (process.getSeq() == 1) {
+                    result.add(contentDTO);
+                } else {
+                    List<ApprovalProcess> processList1 = approvalProcessService.selectList(Condition.create().where("approval_id={0}", contentDTO.getApprovalId()));
+                    for (ApprovalProcess aProcess : processList1) {
+                        //判断上一个审批人的审批状态，如果是1（同意）或者是3（转让）显示当前审批人
+                        if (aProcess.getSeq() + 1 == process.getSeq() && aProcess.getProcessState() == 1) {
+                            result.add(contentDTO);
+                        }
+                    }
+                }
+            }
+        }
+        convertList(clientApprovalVOS, result);
         clientApprovalVOPage.build(clientApprovalVOS != null ? clientApprovalVOS : new ArrayList<>());
         clientApprovalVOPage.setTotalCount(clientApprovalVOS.size());
         return clientApprovalVOPage;
@@ -275,8 +292,17 @@ public class ApprovalApiServiceImpl implements IApprovalApiService {
         // 当发起人做撤销操作后审批详情中审批人情况集合
         Set<ApprovalUserVO> collect = approvalUserList.stream().filter(approvalUserVO -> approvalUserVO.getProcessState() == 4).collect(Collectors.toSet());
         if (collect.size() > 0) {
-            boolean b = approvalUserList.removeIf(approvalUserVO -> approvalUserVO.getProcessState() == 0);
+            boolean b = approvalUserList.removeIf(approvalUserVO -> approvalUserVO.getProcessState() == 4);
             if (b) {
+                ApprovalUserVO initiator2 = new ApprovalUserVO();
+                initiator2.setName(null != approvalById.getName() ? approvalById.getName() : "");
+                initiator2.setAvatar(approvalById.getAvatar() != null ? approvalById.getAvatar() : "");
+                initiator2.setApprovalTime(approvalById.getCreateTime() != null ? approvalById.getCreateTime() : null);
+                initiator2.setColor(approvalById.getColor() != null ? approvalById.getColor() : ApproConstants.DEFAULT_COLOR);
+                initiator2.setMessage("已撤销");
+                initiator2.setProcessState(4);
+                initiator2.setSort(1);
+                approvalUserList.add(initiator2);
                 clientApprovalDetailVO.setApprovalUserList(approvalUserList);
             }
         } else {
@@ -388,7 +414,7 @@ public class ApprovalApiServiceImpl implements IApprovalApiService {
     public boolean revokeApproval(String companyId, String memberId, String approvalId) {
         logger.info("companyId: " + companyId + " memberId: " + memberId + " approvalId: " + approvalId);
         boolean flag = false;
-        List<ApprovalProcess> processList = approvalProcessService.selectList(Condition.create().where("approval_id={0}", approvalId).and("user_id={0}", memberId));
+        List<ApprovalProcess> processList = approvalProcessService.selectList(Condition.create().where("approval_id={0}", approvalId));
         processList.forEach(approvalProcess -> {
             approvalProcess.setProcessState(4);
             approvalProcess.setProcessTime(System.currentTimeMillis());
