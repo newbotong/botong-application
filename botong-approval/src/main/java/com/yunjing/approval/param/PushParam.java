@@ -3,6 +3,7 @@ package com.yunjing.approval.param;
 import com.yunjing.mommon.validate.annotation.NotNullOrEmpty;
 import lombok.Data;
 
+import java.util.Arrays;
 import java.util.Map;
 
 /**
@@ -41,4 +42,17 @@ public class PushParam {
     @NotNullOrEmpty
     private String msg;
 
+    @Override
+    public String toString() {
+        return "PushParam{" +
+                "appId='" + appId + '\'' +
+                ", companyId='" + companyId + '\'' +
+                ", notificationTitle='" + notificationTitle + '\'' +
+                ", title='" + title + '\'' +
+                ", map=" + map +
+                ", registrationId='" + registrationId + '\'' +
+                ", alias=" + Arrays.toString(alias) +
+                ", msg='" + msg + '\'' +
+                '}';
+    }
 }

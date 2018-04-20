@@ -10,6 +10,7 @@ import redis.clients.jedis.Pipeline;
 import redis.clients.jedis.Response;
 
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
@@ -24,8 +25,15 @@ import java.util.Map;
 public class Test {
 
     @org.junit.Test
-    public void test4(){
-        System.out.println("123123".split("-")[0]);
+    public void test4() {
+        List<Object> list = new ArrayList<>();
+        for (int i = 1; i < 32; i++) {
+            list.add(i);
+        }
+        String cycle = list.toString();
+        cycle = new StringBuffer(list.toString()).deleteCharAt(cycle.length() - 1).deleteCharAt(0).toString();
+
+        System.out.println(cycle);
     }
 
     @org.junit.Test

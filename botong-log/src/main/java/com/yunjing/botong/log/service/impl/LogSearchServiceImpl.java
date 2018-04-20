@@ -259,7 +259,7 @@ public class LogSearchServiceImpl implements ILogSearchService {
         //如果没有选择范围
         if (searchParam.getDeptIds() == null && searchParam.getUserIds() == null) {
             // 校验是否是管理员
-            boolean manager1 = appCenterService.isManager(searchParam.getAppId(), searchParam.getMemberId(), true);
+            boolean manager1 = appCenterService.isManager(searchParam.getAppId(), searchParam.getMemberId());
             if (manager1) {
                 // 管理员查询他所在企业的管理的memberId
                 memList = appCenterService.manageScope(searchParam.getAppId(), searchParam.getMemberId());
@@ -305,6 +305,7 @@ public class LogSearchServiceImpl implements ILogSearchService {
             LogExcelVO logExcelVO;
             List<AttrValueVO> logData;
             AttrValueVO attrValueVO;
+            //日志明细转为导出对应的数据对象
             for (LogDetail detail : detailResult) {
                 logExcelVO = new LogExcelVO();
                 logExcelVO.setSender(memberMap.get(detail.getMemberId()).getName());

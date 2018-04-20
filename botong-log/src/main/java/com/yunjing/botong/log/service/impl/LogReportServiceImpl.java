@@ -65,7 +65,7 @@ public class LogReportServiceImpl implements LogReportService {
         log.info("日志报表统计参数：memberId={},orgId={},appId={}", memberId, orgId, appId);
 
         // 1. 校验是否是管理员
-        boolean manager = appCenterService.isManager(appId, memberId, true);
+        boolean manager = appCenterService.isManager(appId, memberId);
         Set<String> memberIdList = new HashSet<>();
         if (manager) {
             // 管理员查询他所在企业的管理的memberId

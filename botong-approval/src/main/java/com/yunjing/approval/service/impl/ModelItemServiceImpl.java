@@ -72,6 +72,7 @@ public class ModelItemServiceImpl extends BaseServiceImpl<ModelItemMapper, Model
 
     @Override
     public ClientModelItemVO getModelItem(String modelId, String memberId) throws Exception {
+        logger.info("companyId: " + modelId + " memberId: " + memberId);
         ModelL modelL = modelService.selectById(modelId);
         List<ModelItem> itemList = this.selectList(Condition.create().where("model_id={0}", modelId).and("item_version={0}", modelL.getModelVersion()).orderBy("priority"));
         ModelVO modelVO = new ModelVO();
@@ -187,6 +188,7 @@ public class ModelItemServiceImpl extends BaseServiceImpl<ModelItemMapper, Model
 
     @Override
     public ModelVO saveModelItem(String companyId, String memberId, String categoryId, String json) throws Exception {
+        logger.info("companyId: " + companyId + " memberId: " + memberId + " categoryId: " + categoryId + " json: " +json);
         if (StringUtils.isBlank(json)) {
             throw new BaseException("模型数据不存在");
         }

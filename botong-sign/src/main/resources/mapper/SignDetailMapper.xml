@@ -9,7 +9,7 @@
 
 
     <select id="getCountInfo" resultMap="BaseResultMap">
-        select de.user_id
+        select DISTINCT de.user_id
         from sign_detail de
         where de.user_id in (${userIds}) and de.create_time >= #{startDate} and de.create_time <![CDATA[ < ]]> #{endDate}
     </select>

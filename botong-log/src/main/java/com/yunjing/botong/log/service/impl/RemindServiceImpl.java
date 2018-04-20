@@ -6,6 +6,7 @@ import com.baomidou.mybatisplus.mapper.Wrapper;
 import com.common.mybatis.service.impl.BaseServiceImpl;
 import com.google.gson.Gson;
 import com.yunjing.botong.log.config.AbstractRedisConfiguration;
+import com.yunjing.botong.log.config.CycleType;
 import com.yunjing.botong.log.config.LogConstant;
 import com.yunjing.botong.log.entity.RemindEntity;
 import com.yunjing.botong.log.mapper.RemindMapper;
@@ -38,9 +39,6 @@ import java.util.Map;
 @Service
 public class RemindServiceImpl extends BaseServiceImpl<RemindMapper, RemindEntity> implements IRemindService {
 
-    private final static String REMIND_DAY = "DAY";
-
-
     @Value("${botong.log.appId}")
     private String appId;
 
@@ -54,6 +52,7 @@ public class RemindServiceImpl extends BaseServiceImpl<RemindMapper, RemindEntit
     @Override
     @Transactional(rollbackFor = Exception.class)
     public boolean saveOrUpdate(RemindVo remind) {
+        log.info("保存提醒接口参数：{}", JSON.toJSONString(remind));
         int res;
         RemindEntity entity = new RemindEntity();
 
@@ -122,6 +121,7 @@ public class RemindServiceImpl extends BaseServiceImpl<RemindMapper, RemindEntit
      * @param remind
      */
     private void setTask(RemindVo remind) {
+        log.info("提醒参数：{}", JSON.toJSONString(remind));
         StringRedisTemplate redisTemplate = redisLog.getTemple();
         Gson gson = new Gson();
         String key = String.valueOf(remind.getMemberId());
@@ -148,11 +148,22 @@ public class RemindServiceImpl extends BaseServiceImpl<RemindMapper, RemindEntit
             taskId = vo.getTaskId();
         }
         SchedulerParam param = new SchedulerParam();
-        if (REMIND_DAY.equals(remind.getCycleType())) {
-            remind.setCycle("1,2,3,4,5,6,7");
+        if (CycleType.DAY.toString().equalsIgnoreCase(remind.getCycleType())) {
+            param.setCycle("*");
+            param.setCycleType(CycleType.WEEK.toString());
+
+        } else if (CycleType.WEEK.toString().equalsIgnoreCase(remind.getCycleType())) {
+            // 周报提醒
+            param.setCycle(remind.getCycle());
+            param.setCycleType(CycleType.WEEK.toString());
+
+        } else if (CycleType.MONTH.toString().equalsIgnoreCase(remind.getCycleType())) {
+
+            param.setCycle(remind.getCycle());
+            param.setCycleType(CycleType.DAY.toString());
         }
-        param.setCycle(remind.getCycle());
-        param.setCycleType(remind.getCycleType());
+
+
         param.setOutKey(key);
         Map<String, Object> map = new HashMap<>(2);
         map.put("appId", appId);

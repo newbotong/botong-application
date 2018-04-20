@@ -19,9 +19,10 @@ import com.yunjing.mommon.global.exception.InsertMessageFailureException;
 import com.yunjing.mommon.global.exception.UpdateMessageFailureException;
 import com.yunjing.mommon.utils.IDUtils;
 import org.apache.commons.lang.StringUtils;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.*;
@@ -63,10 +64,12 @@ public class ApprovalApiServiceImpl implements IApprovalApiService {
 
     @Autowired
     private RedisApproval redisApproval;
+    private final Log logger = LogFactory.getLog(ApprovalApiServiceImpl.class);
 
     @Override
-    public List<ClientModelVO> getList(String orgId) {
-        List<ModelL> modelLList = modelMapper.selectModelListByOrgId(orgId);
+    public List<ClientModelVO> getList(String companyId) {
+        logger.info("companyId: " + companyId);
+        List<ModelL> modelLList = modelMapper.selectModelListByOrgId(companyId);
         List<ClientModelVO> list = new ArrayList<>();
         for (ModelL model : modelLList) {
             ClientModelVO modelVO1 = new ClientModelVO(model);
@@ -77,7 +80,7 @@ public class ApprovalApiServiceImpl implements IApprovalApiService {
 
     @Override
     public Page<ClientApprovalVO> getWaited(Page page, String companyId, String memberId, FilterParam filterParam) {
-
+        logger.info("companyId: " + companyId + " memberId: " + memberId + " filterParam: " + filterParam.toString());
         int current = page.getCurrentPage();
         int size = page.getPageSize();
         int index = (current - 1) * size;
@@ -100,7 +103,8 @@ public class ApprovalApiServiceImpl implements IApprovalApiService {
     }
 
     @Override
-    public Page<ClientApprovalVO> getCompleted(Page page, String orgId, String userId, FilterParam filterParam) {
+    public Page<ClientApprovalVO> getCompleted(Page page, String companyId, String memberId, FilterParam filterParam) {
+        logger.info("companyId: " + companyId + " memberId: " + memberId + " filterParam: " + filterParam.toString());
         int current = page.getCurrentPage();
         int size = page.getPageSize();
         int index = (current - 1) * size;
@@ -112,10 +116,10 @@ public class ApprovalApiServiceImpl implements IApprovalApiService {
         if (members != null) {
             userIds = members.stream().map(Member::getId).collect(Collectors.toList());
         }
-        userIds.add(userId);
+        userIds.add(memberId);
         Page<ClientApprovalVO> clientApprovalVOPage = new Page<>(current, size);
         List<ClientApprovalVO> clientApprovalVOS = new ArrayList<>();
-        List<ApprovalContentDTO> completedMeApprovalList = approvalProcessMapper.getCompletedApprovalList(index, size, orgId, userIds, filterParam);
+        List<ApprovalContentDTO> completedMeApprovalList = approvalProcessMapper.getCompletedApprovalList(index, size, companyId, userIds, filterParam);
         convertList(clientApprovalVOS, completedMeApprovalList);
         clientApprovalVOPage.build(clientApprovalVOS != null ? clientApprovalVOS : new ArrayList<>());
         clientApprovalVOPage.setTotalCount(clientApprovalVOS.size());
@@ -123,13 +127,14 @@ public class ApprovalApiServiceImpl implements IApprovalApiService {
     }
 
     @Override
-    public Page<ClientApprovalVO> getLaunched(Page page, String orgId, String userId, FilterParam filterParam) {
+    public Page<ClientApprovalVO> getLaunched(Page page, String companyId, String memberId, FilterParam filterParam) {
+        logger.info("companyId: " + companyId + " memberId: " + memberId + " filterParam: " + filterParam.toString());
         int current = page.getCurrentPage();
         int size = page.getPageSize();
         int index = (current - 1) * size;
         Page<ClientApprovalVO> clientApprovalVOPage = new Page<>(current, size);
         List<ClientApprovalVO> clientApprovalVOS = new ArrayList<>();
-        List<ApprovalContentDTO> launchedMeApprovalList = approvalProcessMapper.getLaunchedApprovalList(index, size, orgId, userId, filterParam);
+        List<ApprovalContentDTO> launchedMeApprovalList = approvalProcessMapper.getLaunchedApprovalList(index, size, companyId, memberId, filterParam);
         List<ApprovalUser> userList = approvalUserService.selectList(Condition.create());
         String message = "";
         int i = 1;
@@ -169,13 +174,14 @@ public class ApprovalApiServiceImpl implements IApprovalApiService {
     }
 
     @Override
-    public Page<ClientApprovalVO> getCopied(Page page, String orgId, String userId, FilterParam filterParam) {
+    public Page<ClientApprovalVO> getCopied(Page page, String companyId, String memberId, FilterParam filterParam) {
+        logger.info("companyId: " + companyId + " memberId: " + memberId + " filterParam: " + filterParam.toString());
         int current = page.getCurrentPage();
         int size = page.getPageSize();
         int index = (current - 1) * size;
         Page<ClientApprovalVO> clientApprovalVOPage = new Page<>(current, size);
         List<ClientApprovalVO> clientApprovalVOS = new ArrayList<>();
-        List<ApprovalContentDTO> copyApprovalList = copysMapper.getCopiedApprovalList(index, size, orgId, userId, filterParam);
+        List<ApprovalContentDTO> copyApprovalList = copysMapper.getCopiedApprovalList(index, size, companyId, memberId, filterParam);
         convertList(clientApprovalVOS, copyApprovalList);
         clientApprovalVOPage.build(clientApprovalVOS != null ? clientApprovalVOS : new ArrayList<>());
         clientApprovalVOPage.setTotalCount(clientApprovalVOS.size());
@@ -183,7 +189,8 @@ public class ApprovalApiServiceImpl implements IApprovalApiService {
     }
 
     @Override
-    public ClientApprovalDetailVO getApprovalDetail(String orgId, String memberId, String approvalId) {
+    public ClientApprovalDetailVO getApprovalDetail(String companyId, String memberId, String approvalId) {
+        logger.info("companyId: " + companyId + " memberId: " + memberId + " approvalId: " + approvalId);
         ClientApprovalDetailVO clientApprovalDetailVO = new ClientApprovalDetailVO();
         // 获取审批详情
         List<ApproveAttrVO> detail = getDetail(approvalId);
@@ -269,7 +276,7 @@ public class ApprovalApiServiceImpl implements IApprovalApiService {
         Set<ApprovalUserVO> collect = approvalUserList.stream().filter(approvalUserVO -> approvalUserVO.getProcessState() == 4).collect(Collectors.toSet());
         if (collect.size() > 0) {
             boolean b = approvalUserList.removeIf(approvalUserVO -> approvalUserVO.getProcessState() == 0);
-            if(b){
+            if (b) {
                 clientApprovalDetailVO.setApprovalUserList(approvalUserList);
             }
         } else {
@@ -289,14 +296,16 @@ public class ApprovalApiServiceImpl implements IApprovalApiService {
     }
 
     @Override
-    public boolean solveApproval(String orgId, String userId, String approvalId, Integer state) {
+    @Transactional(rollbackFor = Exception.class)
+    public boolean solveApproval(String companyId, String memberId, String approvalId, Integer state) {
+        logger.info("companyId: " + companyId + " memberId: " + memberId + " approvalId: " + approvalId + "state: " + state);
         boolean flag = false;
         List<ApprovalProcess> processList = approvalProcessService.selectList(Condition.create().where("approval_id={0}", approvalId));
         if (processList != null && !processList.isEmpty()) {
             for (ApprovalProcess process : processList) {
                 // 当审批流程中的审批未处理时（0：未处理）
                 if (process.getProcessState() == 0) {
-                    if (process.getUserId().equals(userId)) {
+                    if (process.getUserId().equals(memberId)) {
                         process.setProcessState(state);
                         process.setProcessTime(System.currentTimeMillis());
                         boolean update = approvalProcessService.update(process, Condition.create().where("approval_id={0}", approvalId));
@@ -369,13 +378,15 @@ public class ApprovalApiServiceImpl implements IApprovalApiService {
         }
         //异步推送给下一个审批人
         if (flag) {
-            approvalPushTask.init(approvalId, orgId, userId).run();
+            approvalPushTask.init(approvalId, companyId, memberId).run();
         }
         return flag;
     }
 
     @Override
+    @Transactional(rollbackFor = Exception.class)
     public boolean revokeApproval(String companyId, String memberId, String approvalId) {
+        logger.info("companyId: " + companyId + " memberId: " + memberId + " approvalId: " + approvalId);
         boolean flag = false;
         List<ApprovalProcess> processList = approvalProcessService.selectList(Condition.create().where("approval_id={0}", approvalId).and("user_id={0}", memberId));
         processList.forEach(approvalProcess -> {
@@ -399,8 +410,9 @@ public class ApprovalApiServiceImpl implements IApprovalApiService {
     }
 
     @Override
-    public boolean transferApproval(String orgId, String userId, String transferredUserId, String approvalId) {
-
+    @Transactional(rollbackFor = Exception.class)
+    public boolean transferApproval(String companyId, String memberId, String transferredUserId, String approvalId) {
+        logger.info("companyId: " + companyId + " memberId: " + memberId + " transferredUserId: " + transferredUserId + "approvalId: " + approvalId);
         List<ApprovalProcess> processList = approvalProcessService.selectList(Condition.create().where("approval_id={0}", approvalId));
         int num = 0;
         List<ApprovalProcess> newProcessList = new ArrayList<>();
@@ -433,13 +445,14 @@ public class ApprovalApiServiceImpl implements IApprovalApiService {
         }
         //转让成功推送下一个
         if (batchById) {
-            approvalPushTask.init(approvalId, orgId, userId).run();
+            approvalPushTask.init(approvalId, companyId, memberId).run();
         }
         return batchById;
     }
 
     @Override
     public boolean updateCopyReadState(String[] approvalId) {
+        logger.info("approvalId: " + approvalId.toString());
         boolean isUpdated = false;
 
         List<Copys> copysList = copySService.selectList(Condition.create().in("approval_id", approvalId));
