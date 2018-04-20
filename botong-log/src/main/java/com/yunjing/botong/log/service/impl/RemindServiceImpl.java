@@ -91,7 +91,7 @@ public class RemindServiceImpl extends BaseServiceImpl<RemindMapper, RemindEntit
     }
 
     @Override
-    public RemindVo info(String memberId, String appId, int submitType) {
+    public RemindVo info(String memberId, int submitType) {
         StringRedisTemplate redisTemplate = redisLog.getTemple();
         switch (submitType) {
             case 1:
