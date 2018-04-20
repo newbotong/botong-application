@@ -52,7 +52,7 @@ public class RemindServiceImpl extends BaseServiceImpl<RemindMapper, RemindEntit
     @Override
     @Transactional(rollbackFor = Exception.class)
     public boolean saveOrUpdate(RemindVo remind) {
-        log.info("保存提醒接口参数", JSON.toJSONString(remind));
+        log.info("保存提醒接口参数：{}", JSON.toJSONString(remind));
         int res;
         RemindEntity entity = new RemindEntity();
 
