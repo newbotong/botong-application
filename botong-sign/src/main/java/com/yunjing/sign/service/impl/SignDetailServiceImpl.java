@@ -78,6 +78,7 @@ public class SignDetailServiceImpl extends ServiceImpl<SignDetailMapper, SignDet
         if (StringUtils.isNotBlank(signDetailParam.getImgUrls())) {
             SignDetailImg detailImg;
             int i = 1;
+            //构建图片对象
             List<SignDetailImg> list = new ArrayList<>();
             for (String imgUrl : signDetailParam.getImgUrls().split(SignConstant.SEPARATE_STR)) {
                 detailImg = new SignDetailImg();
@@ -112,23 +113,25 @@ public class SignDetailServiceImpl extends ServiceImpl<SignDetailMapper, SignDet
      * 签到统计接口
      *
      * @param userAndDeptParam 部门id和用户id组合
-     * @return
+     * @return                  签到对象
      */
     @Override
     public SignListVO getCountInfo(UserAndDeptParam userAndDeptParam, SignBaseMapper mapper) {
         String[] deptIds = StringUtils.split(userAndDeptParam.getDeptIds(),",");
         String[] userIdCs = StringUtils.split(userAndDeptParam.getUserIds(),",");
-        //okhttp
+        //okhttp 查询成员列表
         List<SignUserInfoVO> userList = userRemoteApiService.findSubLists(deptIds, userIdCs);
         if(userList == null || userList.size() == 0) {
             return null;
         }
         Map<String, SignUserInfoVO> map = new HashMap<>(userList.size());
+        //组装map，方便业务对象直接根据memberId获取
         List<String>  ids = new ArrayList<>();
         for(SignUserInfoVO obj : userList) {
             map.put(obj.getMemberId(), obj);
             ids.add(obj.getMemberId());
         }
+        //拼接成员Id查询
         String userIds = SignConstant.QUOTES_STR + StringUtils.join(ids, SignConstant.SEPARATE_QUOTES_COMMA_STR) + SignConstant.QUOTES_STR;
         long startDate = DateUtil.stringToDate(userAndDeptParam.getSignDate()).getTime();
         long endDate = DateUtil.addDay(DateUtil.stringToDate(userAndDeptParam.getSignDate()), 1).getTime();
@@ -139,11 +142,12 @@ public class SignDetailServiceImpl extends ServiceImpl<SignDetailMapper, SignDet
         List<SignUserInfoVO> userIdList = mapper.getCountInfo(signMapperParam);
         List<SignUserInfoVO> signList = new ArrayList<>();
         List<SignUserInfoVO> unSignList = new ArrayList<>();
-
+        //组装已经签到的成员列表
         for(SignUserInfoVO vo : userIdList) {
             map.get(vo.getMemberId()).setSignState(1);
             signList.add(map.get(vo.getMemberId()));
         }
+        //组装未签到的成员列表
         for (String key : map.keySet()) {
             if (map.get(key).getSignState() == null || map.get(key).getSignState() != 1) {
                 unSignList.add(map.get(key));
@@ -159,7 +163,7 @@ public class SignDetailServiceImpl extends ServiceImpl<SignDetailMapper, SignDet
      * 按月查询我签到的明细
      *
      * @param signDetailParam 签到明细
-     * @return
+     * @return                我的签到对象
      */
     @Override
     public MySignVO queryMonthInfo(SignDetailParam signDetailParam, SignBaseMapper mapper) {
@@ -178,6 +182,7 @@ public class SignDetailServiceImpl extends ServiceImpl<SignDetailMapper, SignDet
         Map<String, List<SignDetailVO>> map = new LinkedHashMap<>();
         String dateKey;
         List<SignDetailVO> signDetailVOS;
+        //组装map结构，根据日期为key，签到次数对象实体
         for (SignDetailVO vo : signList) {
             dateKey = DateUtil.DateToString(DateUtil.convertLongToDate(vo.getSignDate()),DateStyle.YYYY_MM_DD);
             if (map.get(dateKey) != null) {
@@ -190,6 +195,7 @@ public class SignDetailServiceImpl extends ServiceImpl<SignDetailMapper, SignDet
         }
         SignDateVO dateVO;
         List<SignDateVO> dateList = new ArrayList<>();
+        //人员和签到明细拼接组装列表
         for (String key : map.keySet()) {
             dateVO = new SignDateVO();
             dateVO.setSignDate(key);
@@ -203,16 +209,16 @@ public class SignDetailServiceImpl extends ServiceImpl<SignDetailMapper, SignDet
     /**
      * 按月统计指定部门和人员的考勤信息
      *
-     * @param userAndDeptParam 部门和人员
-     * @return
+     * @param userAndDeptParam  部门和人员
+     * @return                  分页对象
      */
     @Override
     public PageWrapper<UserMonthListVO> staticsMonthInfo(UserAndDeptParam userAndDeptParam, SignBaseMapper mapper) {
         String[] deptIds = StringUtils.split(userAndDeptParam.getDeptIds(),",");
         String[] userIdCs = StringUtils.split(userAndDeptParam.getUserIds(),",");
-
+        //okhttp 分页查询人员列表
         PageWrapper<SignUserInfoVO> page  = userRemoteApiService.findMemberPage(deptIds, userIdCs, userAndDeptParam.getPageNo(), userAndDeptParam.getPageSize());
-
+        //判断是否为空
         List<SignUserInfoVO> userList;
         if (page != null) {
             userList = page.getRecords();
@@ -222,7 +228,11 @@ public class SignDetailServiceImpl extends ServiceImpl<SignDetailMapper, SignDet
         } else {
             return null;
         }
-
+        /**
+         * 1、根据用户明细先组装人员对应的整月日期的对象，放入map中
+         * 2、查询签到明细列表
+         * 3、map和签到明细列表组装完整数据
+         */
         Map<String, UserMonthVO> map = new HashMap<>(userList.size());
         List<String>  ids = new ArrayList<>();
         Date startD = DateUtil.StringToDate(userAndDeptParam.getSignDate() + "-01", DateStyle.YYYY_MM_DD);
@@ -280,14 +290,15 @@ public class SignDetailServiceImpl extends ServiceImpl<SignDetailMapper, SignDet
 
     /**
      * 获取导出的签到信息列表
-     * @param userAndDeptParam
-     * @return
+     * @param userAndDeptParam  人员和部门对象
+     * @param  mapper           对应的mapper
+     * @return                  excel对象列表
      */
     @Override
     public List<SignExcelVO> getSignInList(UserAndDeptParam userAndDeptParam, SignBaseMapper mapper){
         String[] deptIds = StringUtils.split(userAndDeptParam.getDeptIds(),",");
         String[] userIdCs = StringUtils.split(userAndDeptParam.getUserIds(),",");
-        //okhttp
+        //okhttp 查询成员列表
         List<SignUserInfoVO> userList = userRemoteApiService.findSubLists(deptIds, userIdCs);
         if(userList == null || userList.size() == 0) {
             return null;
@@ -310,7 +321,7 @@ public class SignDetailServiceImpl extends ServiceImpl<SignDetailMapper, SignDet
         signMapperParam.setUserIds(userIds);
         signMapperParam.setStartDate(startD.getTime());
         signMapperParam.setEndDate(endDate.getTime());
-        //查询明细数据后，组装
+        //查询明细数据后，组装excel对象
         List<SignExcelVO> list = mapper.querySignDetail(signMapperParam);
         for (SignExcelVO excelVO : list) {
             SignUserInfoVO signUserInfoVO = map.get(excelVO.getUserId());
@@ -338,8 +349,8 @@ public class SignDetailServiceImpl extends ServiceImpl<SignDetailMapper, SignDet
     /**
      * 获取所有的签到明细
      *
-     * @param signDetailParam
-     * @return
+     * @param signDetailParam   签到对象
+     * @return                  签到明细列表
      */
     @Override
     public List<SignDetail> queryDetailList(SignDetailParam signDetailParam) {
@@ -352,8 +363,8 @@ public class SignDetailServiceImpl extends ServiceImpl<SignDetailMapper, SignDet
     /**
      * 获取导出模板
      *
-     * @param userAndDeptParam
-     * @return
+     * @param userAndDeptParam  部门和人员对象
+     * @return                  excel文档对象
      */
     @Override
     public BaseExModel createTempExcel(UserAndDeptParam userAndDeptParam) {

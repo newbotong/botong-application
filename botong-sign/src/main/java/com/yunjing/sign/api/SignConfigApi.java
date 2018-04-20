@@ -58,6 +58,11 @@ public class SignConfigApi extends BaseController {
         return success(vo);
     }
 
+    /**
+     * 判断是否具有管理员权限
+     * @param memberId  成员id
+     * @return          是与否
+     */
     @PostMapping("/is-admin")
     public ResponseEntityWrapper isAdmin(@RequestParam String memberId){
         // 基础校验

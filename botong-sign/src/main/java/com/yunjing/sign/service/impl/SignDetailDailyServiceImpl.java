@@ -70,6 +70,11 @@ public class SignDetailDailyServiceImpl extends ServiceImpl<SignDetailDailyMappe
             if (signConfigModel.getTimeStatus() == 1) {
                 Date start = DateUtil.StringToDate(DateUtil.getDate(new Date()) + SignConstant.SEPARATE_STR_SPACE + signConfigModel.getStartTime(), DateStyle.YYYY_MM_DD_HH_MM);
                 Date end = DateUtil.StringToDate(DateUtil.getDate(new Date())  + SignConstant.SEPARATE_STR_SPACE + signConfigModel.getEndTime(), DateStyle.YYYY_MM_DD_HH_MM);
+                /**
+                 * 1、如果开始时间为空，只比较结束时间是否到期。没到期，就不能打卡
+                 * 2、开始时间不为空，结束时间不为空，比较开始时间和结束时间是否在范围
+                 * 3、开始时间部位空，结束时间为空，只判断开始时间
+                 */
                 if (start == null) {
                     if (end != null && DateUtil.compareDate(new Date(), end) < 0) {
                         throw new UpdateMessageFailureException(600, "未到打卡时间");
@@ -94,6 +99,7 @@ public class SignDetailDailyServiceImpl extends ServiceImpl<SignDetailDailyMappe
             SignDetailImgDaily detailImg;
             int i = 1;
             List<SignDetailImgDaily> list = new ArrayList<>();
+            //组装图片对象
             for (String imgUrl : signDetailParam.getImgUrls().split(SignConstant.SEPARATE_STR)) {
                 detailImg = new SignDetailImgDaily();
                 detailImg.setSignDetailId(signDetail.getId());
@@ -127,7 +133,7 @@ public class SignDetailDailyServiceImpl extends ServiceImpl<SignDetailDailyMappe
      * 签到统计接口
      *
      * @param userAndDeptParam 部门id和用户id组合
-     * @return
+     * @return                  对象
      */
     @Override
     public SignListVO getCountInfo(UserAndDeptParam userAndDeptParam) {
@@ -138,7 +144,7 @@ public class SignDetailDailyServiceImpl extends ServiceImpl<SignDetailDailyMappe
      * 按月查询我签到的明细
      *
      * @param signDetailParam 签到明细
-     * @return
+     * @return                对象
      */
     @Override
     public MySignVO queryMonthInfo(SignDetailParam signDetailParam) {
@@ -195,7 +201,7 @@ public class SignDetailDailyServiceImpl extends ServiceImpl<SignDetailDailyMappe
      * 按月统计指定部门和人员的考勤信息
      *
      * @param userAndDeptParam 部门和人员
-     * @return
+     * @return                  分页对象
      */
     @Override
     public PageWrapper<UserMonthListVO> staticsMonthInfo(UserAndDeptParam userAndDeptParam) {
@@ -205,8 +211,8 @@ public class SignDetailDailyServiceImpl extends ServiceImpl<SignDetailDailyMappe
     /**
      * 获取所有的签到明细
      *
-     * @param signDetailParam
-     * @return
+     * @param signDetailParam       签到对象
+     * @return                      签到列表
      */
     @Override
     public List<SignDetailDaily> queryDetailList(SignDetailParam signDetailParam) {

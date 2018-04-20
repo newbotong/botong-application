@@ -34,19 +34,19 @@ public class SignConfigDailyServiceImpl extends ServiceImpl<SignConfigDailyMappe
     @Override
     @Transactional(rollbackFor = Exception.class)
     public boolean setSignConfig(SignConfigParam signConfigParam) {
-        SignConfigDaily signConfig = BeanUtils.map(signConfigParam, SignConfigDaily.class);
+        SignConfigDaily signConfigDaily = BeanUtils.map(signConfigParam, SignConfigDaily.class);
         SignConfigDaily signConfigModel = new SignConfigDaily().selectOne(new EntityWrapper<SignConfigDaily>().eq("org_id", signConfigParam.getOrgId()));
         boolean result = false;
         if (signConfigModel != null) {
-            signConfig.setId(signConfigModel.getId());
-            if (signConfig.getTimeStatus() == SignConstant.BOTONG_ZERO_VALUE.intValue()) {
-                signConfig.setStartTime(SignConstant.EMPTY_STR);
-                signConfig.setEndTime(SignConstant.EMPTY_STR);
+            signConfigDaily.setId(signConfigModel.getId());
+            if (SignConstant.BOTONG_ZERO_VALUE.intValue() == signConfigDaily.getTimeStatus()) {
+                signConfigDaily.setStartTime(SignConstant.EMPTY_STR);
+                signConfigDaily.setEndTime(SignConstant.EMPTY_STR);
             }
-            result = signConfig.updateById();
+            result = signConfigDaily.updateById();
         } else {
-            signConfig.setId(IDUtils.uuid());
-            result = signConfig.insert();
+            signConfigDaily.setId(IDUtils.uuid());
+            result = signConfigDaily.insert();
         }
         return result;
     }
@@ -54,8 +54,8 @@ public class SignConfigDailyServiceImpl extends ServiceImpl<SignConfigDailyMappe
     /**
      * 查询签到规则
      *
-     * @param orgId
-     * @return
+     * @param orgId     企业Id
+     * @return          签到设置对象
      */
     @Override
     public SignConfigVO getSignConfig(String orgId) {

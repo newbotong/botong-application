@@ -52,6 +52,7 @@ public class SignConfigServiceImpl extends ServiceImpl<SignConfigMapper, SignCon
         boolean result = false;
         //判断是否存在数据库中，存在就更新，不存在新增
         if (signConfigModel != null) {
+            //是否设置签到时间
             signConfig.setId(signConfigModel.getId());
             if (signConfig.getTimeStatus() == SignConstant.BOTONG_ZERO_VALUE.intValue()) {
                 signConfig.setStartTime(SignConstant.EMPTY_STR);
