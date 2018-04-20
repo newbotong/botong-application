@@ -65,6 +65,6 @@ public class SignConfigParam {
     /**
      * 原点的打卡距离
      */
-    private String range;
+    private Integer range;
 
 }
