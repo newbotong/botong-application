@@ -41,4 +41,15 @@ public class FilterParam {
      */
     private String searchKey;
 
+    @Override
+    public String toString() {
+        return "FilterParam{" +
+                "state=" + state +
+                ", result=" + result +
+                ", modelId=" + modelId +
+                ", time=" + time +
+                ", deptId='" + deptId + '\'' +
+                ", searchKey='" + searchKey + '\'' +
+                '}';
+    }
 }

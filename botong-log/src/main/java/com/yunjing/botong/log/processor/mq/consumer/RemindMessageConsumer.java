@@ -160,7 +160,7 @@ public class RemindMessageConsumer extends AbstractMessageConsumerWithQueueDecla
             }
         } else {
             // 设置提醒时是管理员，校验是否是管理员
-            boolean isManager = appCenterService.isManager(appId, memberId, false);
+            boolean isManager = appCenterService.isManager(appId, memberId);
             if (isManager) {
                 // 3. 如果是管理员
 
