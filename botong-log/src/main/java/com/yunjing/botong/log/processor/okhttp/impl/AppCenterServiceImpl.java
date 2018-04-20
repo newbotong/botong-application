@@ -39,7 +39,8 @@ public class AppCenterServiceImpl implements AppCenterService {
      * 这里需要在启动参数时指定，无法放在配置中心加载
      */
     @Value("${okhttp.botong.zuul}")
-    private String appCenterUrl = ApiService.BASE_URL;
+    private String appCenterUrl;
+    // = ApiService.BASE_URL;
 
     /**
      * api 服务
@@ -316,7 +317,7 @@ public class AppCenterServiceImpl implements AppCenterService {
         if (apiService == null) {
             init();
         }
-        log.info("应用中心url:{}", appCenterUrl);
+
         try {
             Response<ResponseEntityWrapper<List<Member>>> response = apiService.findSubLists(deptIds, memberIds, LogConstant.BOTONG_ZERO_NUM).execute();
             ResponseEntityWrapper<List<Member>> body = response.body();
