@@ -15,8 +15,10 @@ import com.yunjing.approval.processor.okhttp.AppCenterService;
 import com.yunjing.approval.processor.task.async.ApprovalPushTask;
 import com.yunjing.approval.service.*;
 import com.yunjing.approval.util.ApproConstants;
+import com.yunjing.mommon.Enum.DateStyle;
 import com.yunjing.mommon.global.exception.InsertMessageFailureException;
 import com.yunjing.mommon.global.exception.UpdateMessageFailureException;
+import com.yunjing.mommon.utils.DateUtil;
 import com.yunjing.mommon.utils.IDUtils;
 import org.apache.commons.lang.StringUtils;
 import org.apache.commons.logging.Log;
@@ -98,7 +100,7 @@ public class ApprovalApiServiceImpl implements IApprovalApiService {
         List<ApprovalContentDTO> waitedMeApprovalList = approvalProcessMapper.getWaitedMeApprovalList(index, size, companyId, userIds, filterParam);
         List<ApprovalContentDTO> result = new ArrayList<>();
         for (ApprovalContentDTO contentDTO : waitedMeApprovalList) {
-            List<ApprovalProcess> processList = approvalProcessService.selectList(Condition.create().where("approval_id={0}", contentDTO.getApprovalId()).and("user_id={0}",memberId));
+            List<ApprovalProcess> processList = approvalProcessService.selectList(Condition.create().where("approval_id={0}", contentDTO.getApprovalId()).and("user_id={0}", memberId));
             for (ApprovalProcess process : processList) {
                 if (process.getSeq() == 1) {
                     result.add(contentDTO);
@@ -145,6 +147,10 @@ public class ApprovalApiServiceImpl implements IApprovalApiService {
 
     @Override
     public Page<ClientApprovalVO> getLaunched(Page page, String companyId, String memberId, FilterParam filterParam) {
+        if (filterParam.getTime() != null) {
+            String date = DateUtil.convert(filterParam.getTime()).replace("00:00:00", "08:00:00");
+            filterParam.setTime(DateUtil.StringToDate(date, DateStyle.YYYY_MM_DD_HH_MM_SS).getTime());
+        }
         logger.info("companyId: " + companyId + " memberId: " + memberId + " filterParam: " + filterParam.toString());
         int current = page.getCurrentPage();
         int size = page.getPageSize();
@@ -193,6 +199,10 @@ public class ApprovalApiServiceImpl implements IApprovalApiService {
     @Override
     public Page<ClientApprovalVO> getCopied(Page page, String companyId, String memberId, FilterParam filterParam) {
         logger.info("companyId: " + companyId + " memberId: " + memberId + " filterParam: " + filterParam.toString());
+        if (filterParam.getTime() != null) {
+            String date = DateUtil.convert(filterParam.getTime()).replace("00:00:00", "08:00:00");
+            filterParam.setTime(DateUtil.StringToDate(date, DateStyle.YYYY_MM_DD_HH_MM_SS).getTime());
+        }
         int current = page.getCurrentPage();
         int size = page.getPageSize();
         int index = (current - 1) * size;
@@ -297,7 +307,7 @@ public class ApprovalApiServiceImpl implements IApprovalApiService {
                 ApprovalUserVO initiator2 = new ApprovalUserVO();
                 initiator2.setName(null != approvalById.getName() ? approvalById.getName() : "");
                 initiator2.setAvatar(approvalById.getAvatar() != null ? approvalById.getAvatar() : "");
-                initiator2.setApprovalTime(approvalById.getFinishTime()!= null ? approvalById.getFinishTime() : null);
+                initiator2.setApprovalTime(approvalById.getFinishTime() != null ? approvalById.getFinishTime() : null);
                 initiator2.setColor(approvalById.getColor() != null ? approvalById.getColor() : ApproConstants.DEFAULT_COLOR);
                 initiator2.setMessage("已撤销");
                 initiator2.setProcessState(4);
