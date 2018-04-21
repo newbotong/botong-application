@@ -224,7 +224,7 @@ public class ApprovalPushTask extends BaseTask {
         Map<String, String> maps = new HashMap<>(5);
         maps.put("appName", "审批");
         maps.put("subModuleName", modelL.getModelName());
-        maps.put("url", "http://192.168.10.90:1300/#/examineHandle?approvalId = "+approval.getId());
+        maps.put("url", "http://192.168.10.90:1300/#/examineHandle?approvalId="+approval.getId());
         // 审批提醒
         JSONArray array = new JSONArray();
         JSONObject json1 = new JSONObject();
