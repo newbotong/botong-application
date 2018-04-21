@@ -1,5 +1,6 @@
 package com.yunjing.approval.api;
 
+import com.yunjing.approval.processor.task.async.ApprovalPushTask;
 import com.yunjing.approval.service.IOrgModelService;
 import com.yunjing.mommon.base.BaseController;
 import com.yunjing.mommon.wrapper.ResponseEntityWrapper;
@@ -44,5 +45,14 @@ public class TestController extends BaseController{
         return success(approvalModel);
     }
 
+    @Autowired
+    private ApprovalPushTask pushTask;
+    @PostMapping("/test/push")
+    public ResponseEntityWrapper testPush(@RequestParam("companyId") String companyId,
+                                          @RequestParam("memberId") String memberId,@RequestParam("approvalId") String approvalId) throws Exception {
+
+        pushTask.init(approvalId, companyId, memberId).run();
+        return success();
+    }
 
 }

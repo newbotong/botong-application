@@ -7,13 +7,11 @@ import com.yunjing.approval.dao.mapper.CopysMapper;
 import com.yunjing.approval.model.entity.Approval;
 import com.yunjing.approval.model.entity.ApprovalUser;
 import com.yunjing.approval.model.entity.ModelL;
-import com.yunjing.approval.model.entity.PushLog;
 import com.yunjing.approval.model.vo.*;
 import com.yunjing.approval.param.PushParam;
 import com.yunjing.approval.processor.okhttp.AppCenterService;
 import com.yunjing.approval.service.*;
 import com.yunjing.approval.util.ApproConstants;
-import com.yunjing.mommon.global.exception.InsertMessageFailureException;
 import com.yunjing.mommon.utils.DateUtil;
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.logging.Log;
@@ -121,7 +119,7 @@ public class ApprovalPushTask extends BaseTask {
     public void submitApproval(String approvalId, String companyId, String memberId) {
         logger.info("approval: " + approvalId + "  companyId: " + companyId + "  memberId: " + memberId);
         Approval approval = approvalService.selectById(approvalId);
-        ApprovalUser user = approvalUserService.selectById(companyId);
+        ApprovalUser user = approvalUserService.selectById(memberId);
         String[] members = new String[1];
         members[0] = memberId;
         List<Member> memberList = appCenterService.findSubLists(null, members);
@@ -152,8 +150,7 @@ public class ApprovalPushTask extends BaseTask {
                         }
                     }
                 } else {
-
-                    passportIds[0] = user.getId();
+                    passportIds[0] = passportId;
                     // 审批推送入参
                     PushParam pushParam = setPushParam(passportId, passportIds, approval);
                     // 推送审批
@@ -209,75 +206,70 @@ public class ApprovalPushTask extends BaseTask {
         }
     }
 
-    private PushParam setPushParam(String passportId, String[] passportIds,Approval approval) {
+    private PushParam setPushParam(String passportId, String[] passportIds, Approval approval) {
         ClientApprovalDetailVO approvalDetail = approvalApiService.getApprovalDetail(companyId, memberId, approval.getId());
         List<ApproveAttrVO> approveAttrVO = approvalDetail.getApproveAttrVO();
         ModelL modelL = modelService.selectById(approval.getModelId());
         String message = "您收到一条审批消息";
         logger.info("passportId: " + passportId + "  passportIds: " + passportIds[0] + "  message: " + message);
-
         PushParam pushParam = new PushParam();
         pushParam.setAppId(appId);
-        pushParam.setCompanyId(companyId);
         pushParam.setMsg(message);
         pushParam.setAlias(passportIds);
         pushParam.setNotificationTitle(message);
+        pushParam.setCompanyId(companyId);
         pushParam.setRegistrationId(passportId);
         pushParam.setTitle(message);
-
         Map<String, String> maps = new HashMap<>(5);
+        maps.put("appName", "审批");
         maps.put("subModuleName", modelL.getModelName());
-        maps.put("url", "http://www.shenpi.com");
-
+        maps.put("url", "http://192.168.10.229:1300/#/examineHandle?approvalId = "+approval.getId());
         // 审批提醒
         JSONArray array = new JSONArray();
-        JSONObject json;
-
-        json = new JSONObject();
-        json.put("subTitle", approval.getTitle()+" 需要您审批");
-        json.put("type", "5");
-
-        if(CollectionUtils.isNotEmpty(approveAttrVO)){
+        JSONObject json1 = new JSONObject();
+        json1.put("subTitle", approval.getTitle() + "需要您审批");
+        json1.put("type", "5");
+        array.add(json1);
+        if (CollectionUtils.isNotEmpty(approveAttrVO)) {
             for (ApproveAttrVO vo : approveAttrVO) {
-                if(vo.getType()== ApproConstants.RADIO_TYPE_3|| vo.getType() == ApproConstants.TIME_INTERVAL_TYPE_5){
-                    json = new JSONObject();
-                    json.put("title", vo.getLabel());
-                    json.put("content", vo.getValue());
-                    json.put("type", "0");
-                    array.add(json);
+                JSONObject json2 = new JSONObject();
+                if (vo.getType() == ApproConstants.RADIO_TYPE_3 || vo.getType() == ApproConstants.TIME_INTERVAL_TYPE_5 || vo.getType() == ApproConstants.SINGLE_LINE_TYPE_6) {
+                    json2.put("title", vo.getLabel());
+                    json2.put("content", vo.getValue());
+                    json2.put("title", vo.getLabels());
+                    json2.put("content", vo.getValues());
+                    json2.put("type", "0");
+                    array.add(json2);
                 }
-            }
-            json = new JSONObject();
-            json.put("bottom", approvalDetail.getName() + "  " + DateUtil.convert(approval.getCreateTime()));
-            json.put("type", "4");
-            array.add(json);
 
-            json = new JSONObject();
-            switch (approval.getResult()){
+            }
+        }
+        JSONObject json3 = new JSONObject();
+        json3.put("type", "3");
+        if (approval.getResult() != null) {
+            switch (approval.getResult()) {
                 case 1:
-                    json.put("status", "已同意");
-                    json.put("color", "#4FA97B");
+                    json3.put("status", "已同意");
+                    json3.put("color", "#4FA97B");
                     break;
                 case 2:
-                    json.put("status", "已拒绝");
-                    json.put("color", "#EA6262");
-                    break;
-                case 3:
-                    json.put("status", "已转交");
-                    json.put("color", "#EA6262");
+                    json3.put("status", "已拒绝");
+                    json3.put("color", "#EA6262");
                     break;
                 case 4:
-                    json.put("status", "已撤销");
-                    json.put("color", "#848484");
+                    json3.put("status", "已撤销");
+                    json3.put("color", "#848484");
                     break;
-                default:
-                    json.put("status", "待审批");
-                    json.put("color", "#848484");
-
             }
-            json.put("type", "3");
-            array.add(json);
+        } else {
+            json3.put("status", "待审批");
+            json3.put("color", "#848484");
         }
+        array.add(json3);
+        JSONObject json4 = new JSONObject();
+        json4.put("bottom", approvalDetail.getName() + "  " + DateUtil.convert(approval.getCreateTime()));
+        json4.put("type", "4");
+        array.add(json4);
         maps.put("content", array.toJSONString());
         pushParam.setMap(maps);
         logger.info("pushParam: " + pushParam.toString());
@@ -285,4 +277,3 @@ public class ApprovalPushTask extends BaseTask {
 
     }
 }
-

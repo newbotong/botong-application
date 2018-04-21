@@ -71,6 +71,11 @@ public class ApprovalDetailDTO {
     private Long createTime;
 
     /**
+     * 修改时间
+     */
+    private Long updateTime;
+
+    /**
      * 用户主键
      */
     private String userId;

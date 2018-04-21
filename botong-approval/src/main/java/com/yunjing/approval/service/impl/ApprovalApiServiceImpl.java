@@ -256,7 +256,7 @@ public class ApprovalApiServiceImpl implements IApprovalApiService {
                     //描述提醒用户信息
                     clientApprovalDetailVO.setProcessState(approvalUserVO.getProcessState());
                     clientApprovalDetailVO.setMessage("等待我审批");
-                    approvalUserVO.setMessage("等待审批");
+                    approvalUserVO.setMessage("审批中");
                 } else {
                     int flag = index++;
                     //描述提醒用户信息
@@ -297,7 +297,7 @@ public class ApprovalApiServiceImpl implements IApprovalApiService {
                 ApprovalUserVO initiator2 = new ApprovalUserVO();
                 initiator2.setName(null != approvalById.getName() ? approvalById.getName() : "");
                 initiator2.setAvatar(approvalById.getAvatar() != null ? approvalById.getAvatar() : "");
-                initiator2.setApprovalTime(approvalById.getCreateTime() != null ? approvalById.getCreateTime() : null);
+                initiator2.setApprovalTime(approvalById.getUpdateTime()!= null ? approvalById.getUpdateTime() : null);
                 initiator2.setColor(approvalById.getColor() != null ? approvalById.getColor() : ApproConstants.DEFAULT_COLOR);
                 initiator2.setMessage("已撤销");
                 initiator2.setProcessState(4);
@@ -313,7 +313,6 @@ public class ApprovalApiServiceImpl implements IApprovalApiService {
         copyUserList.forEach(copyUserVO -> {
             if (StringUtils.isBlank(copyUserVO.getAvatar())) {
                 copyUserVO.setColor(copyUserVO.getColor() != null ? copyUserVO.getColor() : ApproConstants.DEFAULT_COLOR);
-                copyUserVO.setAvatarName(copyUserVO.getName().length() <= 2 ? copyUserVO.getName() : copyUserVO.getName().substring(1, 3));
             }
         });
         // 注入抄送人信息
