@@ -11,13 +11,14 @@
 		<result column="attr_value" property="attrValue"/>
 		<result column="opt_value" property="optValue"/>
 		<result column="create_time" property="createTime"/>
+		<result column="finish_time" property="finishTime"/>
 		<result column="user_id" property="userId"/>
 		<result column="dept_name" property="deptName"/>
 		<result column="name" property="name"/>
 		<result column="avatar" property="avatar"/>
 	</resultMap>
 	<select id="getApprovalById" resultMap="ApprovalDetailMap">
-		SELECT a.state,a.result,a.create_time,m.model_id,a.user_id,u.name,u.avatar,u.mobile,u.dept_name,u.position,u.color
+		SELECT a.state,a.result,a.create_time,a.finish_time,m.model_id,a.user_id,u.name,u.avatar,u.mobile,u.dept_name,u.position,u.color
 		FROM approval a
 		LEFT JOIN model_item m ON a.model_id = m.model_id
 		LEFT JOIN approval_user u ON u.id = a.user_id

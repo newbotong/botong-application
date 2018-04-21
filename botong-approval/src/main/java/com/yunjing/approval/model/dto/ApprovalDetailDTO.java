@@ -73,7 +73,7 @@ public class ApprovalDetailDTO {
     /**
      * 修改时间
      */
-    private Long updateTime;
+    private Long finishTime;
 
     /**
      * 用户主键

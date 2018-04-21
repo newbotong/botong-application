@@ -297,7 +297,7 @@ public class ApprovalApiServiceImpl implements IApprovalApiService {
                 ApprovalUserVO initiator2 = new ApprovalUserVO();
                 initiator2.setName(null != approvalById.getName() ? approvalById.getName() : "");
                 initiator2.setAvatar(approvalById.getAvatar() != null ? approvalById.getAvatar() : "");
-                initiator2.setApprovalTime(approvalById.getUpdateTime()!= null ? approvalById.getUpdateTime() : null);
+                initiator2.setApprovalTime(approvalById.getFinishTime()!= null ? approvalById.getFinishTime() : null);
                 initiator2.setColor(approvalById.getColor() != null ? approvalById.getColor() : ApproConstants.DEFAULT_COLOR);
                 initiator2.setMessage("已撤销");
                 initiator2.setProcessState(4);
@@ -426,6 +426,7 @@ public class ApprovalApiServiceImpl implements IApprovalApiService {
         if (approval != null) {
             approval.setState(2);
             approval.setResult(4);
+            approval.setFinishTime(System.currentTimeMillis());
             flag = approvalService.updateById(approval);
             if (!flag) {
                 throw new UpdateMessageFailureException("审批撤销操作--修改审批信息失败");

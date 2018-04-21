@@ -1,22 +1,23 @@
 package com.yunjing.approval.api;
 
 import com.common.mybatis.page.Page;
+import com.yunjing.approval.model.dto.OrgMemberMessage;
 import com.yunjing.approval.model.vo.ClientModelVO;
 import com.yunjing.approval.model.vo.Member;
 import com.yunjing.approval.model.vo.MemberInfo;
 import com.yunjing.approval.model.vo.OrgMemberVo;
 import com.yunjing.approval.param.FilterParam;
 import com.yunjing.approval.processor.okhttp.AppCenterService;
-import com.yunjing.approval.service.IApprovalApiService;
-import com.yunjing.approval.service.ICopyService;
-import com.yunjing.approval.service.IModelItemService;
-import com.yunjing.approval.service.IProcessService;
+import com.yunjing.approval.service.*;
 import com.yunjing.mommon.base.BaseController;
 import com.yunjing.mommon.wrapper.ResponseEntityWrapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
+import java.util.stream.Collectors;
 
 
 /**
@@ -169,10 +170,31 @@ public class ClientApprovalController extends BaseController {
     @Autowired
     private AppCenterService appCenterService;
 
+    @Autowired
+    private IApprovalUserService approvalUserService;
     @GetMapping("/test")
     public ResponseEntityWrapper test(String companyId) {
         List<OrgMemberVo> allOrgMember = appCenterService.findAllOrgMember(companyId, true);
-        return success(allOrgMember);
+        List<String> memberIds = allOrgMember.stream().map(OrgMemberVo::getMemberId).collect(Collectors.toList());
+        String[] ids = new String[memberIds.size()];
+        String[] strings = memberIds.toArray(ids);
+        List<Member> subLists = appCenterService.findSubLists(null, strings);
+        List<OrgMemberMessage> list = new ArrayList<>();
+        for (Member member : subLists) {
+            OrgMemberMessage orgMemeber = new OrgMemberMessage();
+            orgMemeber.setMemberId(member.getId());
+            orgMemeber.setColor(member.getColor());
+            orgMemeber.setCompanyId(member.getCompanyId());
+            orgMemeber.setDeptIds(new ArrayList<>(member.getDeptIds()));
+            orgMemeber.setDeptNames(member.getDeptNames());
+            orgMemeber.setMemberName(member.getMemberName());
+            orgMemeber.setMobile(member.getMobile());
+            orgMemeber.setPosition(member.getPosition());
+            orgMemeber.setProfile(member.getProfile());
+            list.add(orgMemeber);
+        }
+        boolean b = approvalUserService.addMember(list);
+        return success(b);
     }
 
 }

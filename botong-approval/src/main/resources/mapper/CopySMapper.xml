@@ -32,11 +32,10 @@
 
     <resultMap id="CopyUserMap" type="com.yunjing.approval.model.vo.CopyUserVO">
         <result column="user_id" property="userId"/>
-        <result column="is_activated" property="isActivated"/>
     </resultMap>
     <select id="getCopyUserList" resultMap="CopyUserMap">
         SELECT au.name, co.user_id,au.avatar,au.mobile,au.color
-        FROM approval_copys co LEFT JOIN approval_user au ON co.user_id = au.id
+        FROM approval_copys co JOIN approval_user au ON co.user_id = au.id
         WHERE co.approval_id=#{approvalId}
 
     </select>
