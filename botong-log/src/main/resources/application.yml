@@ -17,6 +17,9 @@ spring:
   sleuth:
     sampler:
       percentage: 1
+  zipkin:
+    service:
+      name: botong-zipkin
   datasource:
     url: ${mysql.url}
     username: ${mysql.username}

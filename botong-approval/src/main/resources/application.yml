@@ -11,6 +11,9 @@ spring:
   sleuth:
     sampler:
       percentage: 1
+  zipkin:
+    service:
+      name: botong-zipkin
   rabbitmq:
       host: ${rabbitmq.server}
       port: ${rabbitmq.port}

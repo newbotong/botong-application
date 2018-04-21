@@ -21,7 +21,7 @@ repositories {
 dependencies {
 
     // commons
-    compile('com.yunjing.botong:commons:2.0.0.5-SNAPSHOT') {
+    compile('com.yunjing.botong:commons:2.0.0.6-SNAPSHOT') {
         changing = true //实时更新jar包
     }
     compile('com.yunjing.botong:commons-mybatisplus:2.0.0-SNAPSHOT') {
