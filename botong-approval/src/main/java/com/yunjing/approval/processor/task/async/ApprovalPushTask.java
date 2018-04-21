@@ -235,17 +235,21 @@ public class ApprovalPushTask extends BaseTask {
             for (ApproveAttrVO vo : approveAttrVO) {
                 JSONObject json2 = new JSONObject();
                 if (vo.getType() == ApproConstants.RADIO_TYPE_3 || vo.getType() == ApproConstants.TIME_INTERVAL_TYPE_5 || vo.getType() == ApproConstants.SINGLE_LINE_TYPE_6) {
+                    json2.put("title", vo.getLabel());
+                    if("开始时间".equals(vo.getLabel())){
+                        json2.put("content", DateUtil.convert(Long.valueOf(vo.getValue())));
+                    }else {
+                        json2.put("content", vo.getValue());
+                    }
+                    json2.put("type", "0");
+                    array.add(json2);
                     if(StringUtils.isNotBlank(vo.getLabels())){
                         JSONObject json5 = new JSONObject();
                         json5.put("title", vo.getLabels());
-                        json5.put("content", vo.getValues());
+                        json5.put("content", DateUtil.convert(Long.valueOf(vo.getValues())));
                         json5.put("type", "0");
                         array.add(json5);
                     }
-                    json2.put("title", vo.getLabel());
-                    json2.put("content", vo.getValue());
-                    json2.put("type", "0");
-                    array.add(json2);
                 }
 
             }
