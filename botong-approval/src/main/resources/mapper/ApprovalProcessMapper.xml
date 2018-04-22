@@ -33,7 +33,7 @@
                 and a.state = #{filterParam.state}
             </if>
             <if test="filterParam.searchKey != null and filterParam.searchKey != ''">
-                and concat(a.id,a.title,ap.reason) like CONCAT('%',#{filterParam.searchKey},'%')
+                and concat(a.id,a.title) like CONCAT('%',#{filterParam.searchKey},'%')
             </if>
         </where>
         ORDER BY ap.process_time DESC
@@ -58,7 +58,7 @@
                 and a.state = #{filterParam.state}
             </if>
             <if test="filterParam.searchKey != null and filterParam.searchKey != ''">
-                and concat(a.id,a.title,ap.reason) like CONCAT('%',#{filterParam.searchKey},'%')
+                and concat(a.id,a.title) like CONCAT('%',#{filterParam.searchKey},'%')
             </if>
         </where>
         ORDER BY ap.process_time DESC

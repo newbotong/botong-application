@@ -148,7 +148,7 @@ public class ApprovalServiceImpl extends BaseServiceImpl<ApprovalMapper, Approva
                     attr1.setId(IDUtils.uuid());
                     attr1.setApprovalId(approval.getId());
                     JSONObject contents = (JSONObject) content.next();
-                    JSONArray array1 = contents.getJSONArray("modelItems");
+                    JSONArray array1 = contents.getJSONArray("items");
                     String field = contents.getString("field");
                     attr1.setAttrType(type);
                     attr1.setAttrName(field);
