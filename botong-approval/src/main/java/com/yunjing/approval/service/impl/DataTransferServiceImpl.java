@@ -93,18 +93,62 @@ public class DataTransferServiceImpl implements IDataTransferService {
         boolean isInserted = false;
         List<ModelL> modelLList = new ArrayList<>();
         for (ModelDTO dto : dtoList) {
-            ModelL modelL = new ModelL();
-            modelL.setId(dto.getModelId());
-            modelL.setVisibleRange("全部可见");
-            modelL.setIsDisabled(dto.getIsDisabled());
-            modelL.setModelVersion(dto.getModelVersion());
-            modelL.setSort(dto.getSort());
-            modelL.setIntroduce(dto.getIntroduce());
-            modelL.setIsDef(dto.getIsDef());
-            modelL.setLogo(dto.getLogo());
-            modelL.setProvider(dto.getProvider());
-            modelL.setModelType(dto.getModelType());
-            modelLList.add(modelL);
+            if(dto.getModelType() == 2){
+
+                ModelL modelL = new ModelL();
+                modelL.setId(dto.getModelId());
+                modelL.setVisibleRange("全部可见");
+                modelL.setIsDisabled(dto.getIsDisabled());
+                modelL.setModelVersion(dto.getModelVersion());
+                modelL.setSort(dto.getSort());
+                modelL.setIntroduce(dto.getIntroduce());
+                modelL.setIsDef(dto.getIsDef());
+                modelL.setModelName(dto.getModelName());
+                if("请假".equals(modelL.getModelName())){
+                    modelL.setLogo("http://192.168.1.218:8082/group1/M00/00/16/wKgK6FrLLK-EZRAKAAAAAADM1Po171.png");
+                }else if("报销".equals(modelL.getModelName())){
+                    modelL.setLogo("http://192.168.1.218:8082/group1/M00/00/16/wKgK6FrLKgOECgqqAAAAAMxO4pE961.png");
+                }else if("出差".equals(modelL.getModelName())){
+                    modelL.setLogo("http://192.168.1.218:8082/group1/M00/00/16/wKgK6FrLKxSEEZSIAAAAAG9PwlQ492.png");
+                }else if("外出".equals(modelL.getModelName())){
+                    modelL.setLogo("http://192.168.1.218:8082/group1/M00/00/16/wKgK6FrLLSGER-r6AAAAALJcqiM336.png");
+                }else if("物品领用".equals(modelL.getModelName())){
+                    modelL.setLogo("http://192.168.1.218:8082/group1/M00/00/16/wKgK6FrLLOmEJ3OUAAAAAEYArX0949.png");
+                }else if("采购".equals(modelL.getModelName())){
+                    modelL.setLogo("http://192.168.1.218:8082/group1/M00/00/16/wKgK6FrLKuqEZ77nAAAAAFWicdM495.png");
+                }else if("通用审批".equals(modelL.getModelName())){
+                    modelL.setLogo("http://192.168.1.218:8082/group1/M00/00/16/wKgK6FrLLOmEJ3OUAAAAAEYArX0949.png");
+                }else if("转正申请".equals(modelL.getModelName())){
+                    modelL.setLogo("http://192.168.1.218:8082/group1/M00/00/16/wKgK6FrLLhSEAXIJAAAAAOwQlHI173.png");
+                }else if("离职申请".equals(modelL.getModelName())){
+                    modelL.setLogo("http://192.168.1.218:8082/group1/M00/00/16/wKgK6FrLLByEDtjlAAAAAHDza6I863.png");
+                }else if("用车申请".equals(modelL.getModelName())){
+                    modelL.setLogo("http://192.168.1.218:8082/group1/M00/00/16/wKgK6FrLLX2EXFtjAAAAALHMY78501.png");
+                }else if("用印申请".equals(modelL.getModelName())){
+                    modelL.setLogo("http://192.168.1.218:8082/group1/M00/00/16/wKgK6FrLLaKEaK0GAAAAAIPoYq8986.png");
+                }else if("礼品领用申请".equals(modelL.getModelName())){
+                    modelL.setLogo("http://192.168.1.218:8082/group1/M00/00/16/wKgK6FrLLE6Ee-NAAAAAAHUICl8552.png");
+                }else if("合同审批".equals(modelL.getModelName())){
+                    modelL.setLogo("http://192.168.1.218:8082/group1/M00/00/16/wKgK6FrLK4qETVVAAAAAAAcnIfo108.png");
+                }else if("招聘申请".equals(modelL.getModelName())){
+                    modelL.setLogo("http://192.168.1.218:8082/group1/M00/00/16/wKgK6FrLLeCEfwhvAAAAAGIWFno144.png");
+                }else if("备用金申请".equals(modelL.getModelName())){
+                    modelL.setLogo("http://192.168.1.218:8082/group1/M00/00/16/wKgK6FrLKlGEa1XLAAAAABF2Nvs138.png");
+                }else if("部门协作".equals(modelL.getModelName())){
+                    modelL.setLogo("http://192.168.1.218:8082/group1/M00/00/16/wKgK6FrLKpaET2ODAAAAAA571Pw532.png");
+                }else if("发文申请".equals(modelL.getModelName())){
+                    modelL.setLogo("http://192.168.1.218:8082/group1/M00/00/16/wKgK6FrLK1CEEzsrAAAAAMhfmC8675.png");
+                }else if("名片申请".equals(modelL.getModelName())){
+                    modelL.setLogo("http://192.168.1.218:8082/group1/M00/00/16/wKgK6FrLLIeEShe2AAAAAA_tcvI932.png");
+                }else if("加班申请".equals(modelL.getModelName())){
+                    modelL.setLogo("http://192.168.1.218:8082/group1/M00/00/16/wKgK6FrLK7SEROcaAAAAACpcZZU206.png");
+                }else if("接待申请".equals(modelL.getModelName())){
+                    modelL.setLogo("http://192.168.1.218:8082/group1/M00/00/16/wKgK6FrLK_CEA6-hAAAAAAm_yMk601.png");
+                }
+                modelL.setProvider(dto.getProvider());
+                modelL.setModelType(dto.getModelType());
+                modelLList.add(modelL);
+            }
         }
         if (!modelLList.isEmpty()) {
             isInserted = modelService.insertBatch(modelLList);
@@ -320,6 +364,7 @@ public class DataTransferServiceImpl implements IDataTransferService {
             copys.setCopySType(sdto.getCopySType());
             copys.setApprovalId(sdto.getApprovalId());
             copys.setId(sdto.getCopySId());
+            copys.setUserId(sdto.getUserId());
             copysList.add(copys);
         }
         if (!copysList.isEmpty()) {

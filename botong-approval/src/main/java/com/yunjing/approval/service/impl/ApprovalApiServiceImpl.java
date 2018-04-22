@@ -160,23 +160,27 @@ public class ApprovalApiServiceImpl implements IApprovalApiService {
         List<ApprovalContentDTO> launchedMeApprovalList = approvalProcessMapper.getLaunchedApprovalList(index, size, companyId, memberId, filterParam);
         List<ApprovalUser> userList = approvalUserService.selectList(Condition.create());
         String message = "";
-        int i = 1;
         ApprovalUser user = new ApprovalUser();
         for (ApprovalContentDTO contentVO : launchedMeApprovalList) {
-            List<ApprovalUser> users = userList.stream().filter(approvalUser -> approvalUser.getId().equals(contentVO.getUserId())).collect(Collectors.toList());
-            for (ApprovalUser approvalUser : users) {
-                user = approvalUser;
-            }
-            if (contentVO.getProcessState() == 0 && contentVO.getState() == 0) {
-                int critical = i++;
-                String name = StringUtils.isNotBlank(user.getName()) ? user.getName() : "";
-                if (name.length() > 2) {
-                    message = "等待" + name.substring(1, 3) + "审批";
-                } else {
-                    message = "等待" + name + "审批";
-                }
-                if (critical == 1) {
-                    contentVO.setMessage(message);
+            if (contentVO.getState() == 0) {
+                List<ApprovalProcess> processList = approvalProcessService.selectList(Condition.create().where("approval_id={0}", contentVO.getApprovalId()).orderBy("seq", true));
+                if (processList != null && CollectionUtils.isNotEmpty(processList)) {
+                    for (ApprovalProcess process : processList) {
+                        if (process.getProcessState() == 0) {
+                            List<ApprovalUser> users = userList.stream().filter(approvalUser -> approvalUser.getId().equals(process.getUserId())).collect(Collectors.toList());
+                            for (ApprovalUser approvalUser : users) {
+                                user = approvalUser;
+                            }
+                            String name = StringUtils.isNotBlank(user.getName()) ? user.getName() : "";
+                            if (name.length() > 2) {
+                                message = "等待" + name.substring(1, 3) + "审批";
+                            } else {
+                                message = "等待" + name + "审批";
+                            }
+                            contentVO.setMessage(message);
+                            break;
+                        }
+                    }
                 }
             } else if (contentVO.getState() == 1) {
                 message = "审批完成";

@@ -4,6 +4,7 @@
 
     <resultMap id="ApprovalMap" type="com.yunjing.approval.model.dto.ApprovalContentDTO">
         <result column="approval_id" property="approvalId"/>
+        <result column="id" property="approvalId"/>
         <result column="model_id" property="modelId"/>
         <result column="model_name" property="modelName"/>
         <result column="state" property="state"/>
@@ -64,11 +65,10 @@
         limit #{index},#{size}
     </select>
     <select id="getLaunchedApprovalList" resultMap="ApprovalMap">
-        SELECT ap.id, ap.approval_id, ap.user_id, ap.process_state,a.title, a.state,a.result, ap.seq, ap.process_time,
-        ap.reason, a.model_id,a.create_time,m.model_name,m.logo
-        FROM approval_process ap,approval a,model m
+        SELECT a.id,a.title, a.state,a.result,a.model_id,a.create_time,m.model_name,m.logo
+        FROM approval a,model m
         <where>
-            ap. approval_id = a.id AND m.id = a.model_id AND a.user_id = #{userId} AND a.org_id = #{orgId}
+             m.id = a.model_id AND a.user_id = #{userId} AND a.org_id = #{orgId}
             <if test="filterParam.state != null">
                 and a.state = #{filterParam.state}
             </if>
@@ -79,7 +79,7 @@
                 and from_unixtime(a.create_time/1000, '%Y%m%d') = from_unixtime(#{filterParam.time}/1000,'%Y%m%d')
             </if>
             <if test="filterParam.searchKey != null and filterParam.searchKey != ''">
-                and concat(a.id,a.title,ap.reason) like CONCAT('%',#{filterParam.searchKey},'%')
+                and concat(a.id,a.title) like CONCAT('%',#{filterParam.searchKey},'%')
             </if>
         </where>
         ORDER BY a.create_time DESC
