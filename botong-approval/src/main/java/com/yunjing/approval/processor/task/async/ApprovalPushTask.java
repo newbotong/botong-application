@@ -12,6 +12,7 @@ import com.yunjing.approval.param.PushParam;
 import com.yunjing.approval.processor.okhttp.AppCenterService;
 import com.yunjing.approval.service.*;
 import com.yunjing.approval.util.ApproConstants;
+import com.yunjing.mommon.Enum.DateStyle;
 import com.yunjing.mommon.utils.DateUtil;
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.lang.StringUtils;
@@ -224,7 +225,7 @@ public class ApprovalPushTask extends BaseTask {
         Map<String, String> maps = new HashMap<>(5);
         maps.put("appName", "审批");
         maps.put("subModuleName", modelL.getModelName());
-        maps.put("url", "http://192.168.10.90:1300/#/examineHandle?approvalId="+approval.getId());
+        maps.put("url", "http://192.168.10.90:1300/#/examineHandle?approvalId=" + approval.getId());
         // 审批提醒
         JSONArray array = new JSONArray();
         JSONObject json1 = new JSONObject();
@@ -236,17 +237,17 @@ public class ApprovalPushTask extends BaseTask {
                 JSONObject json2 = new JSONObject();
                 if (vo.getType() == ApproConstants.RADIO_TYPE_3 || vo.getType() == ApproConstants.TIME_INTERVAL_TYPE_5 || vo.getType() == ApproConstants.SINGLE_LINE_TYPE_6) {
                     json2.put("title", vo.getLabel());
-                    if("开始时间".equals(vo.getLabel())){
-                        json2.put("content", DateUtil.convert(Long.valueOf(vo.getValue())));
-                    }else {
+                    if ("开始时间".equals(vo.getLabel())) {
+                        json2.put("content", DateUtil.StringToString(DateUtil.convert(Long.valueOf(vo.getValue())), DateStyle.YYYY_MM_DD_HH_MM));
+                    } else {
                         json2.put("content", vo.getValue());
                     }
                     json2.put("type", "0");
                     array.add(json2);
-                    if(StringUtils.isNotBlank(vo.getLabels())){
+                    if (StringUtils.isNotBlank(vo.getLabels())) {
                         JSONObject json5 = new JSONObject();
                         json5.put("title", vo.getLabels());
-                        json5.put("content", DateUtil.convert(Long.valueOf(vo.getValues())));
+                        json5.put("content", DateUtil.StringToString(DateUtil.convert(Long.valueOf(vo.getValues())), DateStyle.YYYY_MM_DD_HH_MM));
                         json5.put("type", "0");
                         array.add(json5);
                     }
@@ -266,10 +267,6 @@ public class ApprovalPushTask extends BaseTask {
                     json3.put("status", "已拒绝");
                     json3.put("color", "#EA6262");
                     break;
-                case 4:
-                    json3.put("status", "已撤销");
-                    json3.put("color", "#848484");
-                    break;
             }
         } else {
             json3.put("status", "待审批");
@@ -277,7 +274,7 @@ public class ApprovalPushTask extends BaseTask {
         }
         array.add(json3);
         JSONObject json4 = new JSONObject();
-        json4.put("bottom", approvalDetail.getName() + "  " + DateUtil.convert(approval.getCreateTime()));
+        json4.put("bottom", approvalDetail.getName() + "  " + DateUtil.StringToString(DateUtil.convert(approval.getCreateTime()), DateStyle.YYYY_MM_DD_HH_MM));
         json4.put("type", "4");
         array.add(json4);
         maps.put("content", array.toJSONString());
