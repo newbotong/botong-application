@@ -15,7 +15,7 @@
         <result column="seq" property="sort"/>
     </resultMap>
     <select id="getWaitedMeApprovalList" resultMap="ApprovalMap">
-        SELECT ap.id, ap.approval_id, a.user_id, ap.process_state, a.title, a.state,a.result, ap.seq, ap.process_time,
+        SELECT ap.approval_id, a.user_id, ap.process_state, a.title, a.state,a.result, ap.seq, ap.process_time,
         ap.reason, a.model_id,a.create_time,m.model_name
         FROM approval_process ap,approval a,model m
         <where>
@@ -40,7 +40,7 @@
         limit #{index},#{size}
     </select>
     <select id="getCompletedApprovalList" resultMap="ApprovalMap">
-        SELECT ap.id, ap.approval_id, a.user_id, ap.process_state,a.title, a.state,a.result, ap.seq, ap.process_time,
+        SELECT ap.approval_id, a.user_id, ap.process_state,a.title, a.state,a.result, ap.seq, ap.process_time,
         ap.reason, a.model_id,a.create_time,m.model_name
         FROM approval_process ap,approval a,model m
         <where>
