@@ -64,5 +64,13 @@ public interface UserApiService {
     Call<ResponseEntityWrapper<Boolean>> verifyManager(@Query("appId") String appId, @Query("memberId") String memberId);
 
 
+    /**
+     * 获取指定企业所有成员信息
+     *
+     * @param orgId
+     * @return
+     */
+    @GET("/api/microapps/appcenter/user/find-all-org-member")
+    Call<ResponseEntityWrapper<List<SignUserInfoVO>>> findAllOrgMember(@Query("orgId") String orgId);
 
 }

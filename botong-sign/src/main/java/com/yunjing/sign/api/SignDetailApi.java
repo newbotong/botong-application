@@ -37,6 +37,9 @@ public class SignDetailApi extends BaseController {
     @Autowired
     private SignDetailMapper signDetailMapper;
 
+
+    
+
     /**
      * 外出签到
      * @param signDetailParam       签到明细参数

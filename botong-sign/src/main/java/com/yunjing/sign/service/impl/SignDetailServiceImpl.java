@@ -3,7 +3,10 @@ package com.yunjing.sign.service.impl;
 import com.alibaba.fastjson.JSONObject;
 import com.baomidou.mybatisplus.mapper.EntityWrapper;
 import com.baomidou.mybatisplus.service.impl.ServiceImpl;
+import com.common.redis.share.UserInfo;
 import com.yunjing.mommon.Enum.DateStyle;
+import com.yunjing.mommon.constant.StatusCode;
+import com.yunjing.mommon.global.exception.ParameterErrorException;
 import com.yunjing.mommon.global.exception.UpdateMessageFailureException;
 import com.yunjing.mommon.utils.BeanUtils;
 import com.yunjing.mommon.utils.DateUtil;
@@ -17,6 +20,7 @@ import com.yunjing.sign.beans.param.SignDetailParam;
 import com.yunjing.sign.beans.param.SignMapperParam;
 import com.yunjing.sign.beans.param.UserAndDeptParam;
 import com.yunjing.sign.beans.vo.*;
+import com.yunjing.sign.cache.MemberRedisOperator;
 import com.yunjing.sign.constant.SignConstant;
 import com.yunjing.sign.dao.SignBaseMapper;
 import com.yunjing.sign.dao.mapper.SignDetailMapper;
@@ -29,6 +33,7 @@ import com.yunjing.sign.processor.okhttp.UserRemoteApiService;
 import com.yunjing.sign.service.ISignDetailImgService;
 import com.yunjing.sign.service.ISignDetailService;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -59,6 +64,9 @@ public class SignDetailServiceImpl extends ServiceImpl<SignDetailMapper, SignDet
 
     @Autowired
     private UserRemoteApiService userRemoteApiService;
+
+    @Autowired
+    MemberRedisOperator memberRedisOperator;
 
     /**
      * 签到
@@ -120,7 +128,7 @@ public class SignDetailServiceImpl extends ServiceImpl<SignDetailMapper, SignDet
         String[] deptIds = StringUtils.split(userAndDeptParam.getDeptIds(),",");
         String[] userIdCs = StringUtils.split(userAndDeptParam.getUserIds(),",");
         //okhttp 查询成员列表
-        List<SignUserInfoVO> userList = userRemoteApiService.findSubLists(deptIds, userIdCs);
+        List<SignUserInfoVO> userList = getUsersList(userAndDeptParam);
         if(userList == null || userList.size() == 0) {
             return null;
         }
@@ -286,6 +294,33 @@ public class SignDetailServiceImpl extends ServiceImpl<SignDetailMapper, SignDet
         BeanUtils.copy(page, result);
         result.setRecords(list);
         return result;
+    }
+
+    /**
+     * 根据条件查询人员列表
+     * @param searchParam       参数
+     * @return                  人员列表
+     */
+    private List<SignUserInfoVO> getUsersList(UserAndDeptParam searchParam) {
+        List<SignUserInfoVO> memList = new ArrayList<>();
+        //如果没有选择范围
+        if (StringUtils.isEmpty(searchParam.getDeptIds()) && StringUtils.isEmpty(searchParam.getUserIds())) {
+            // 查询该企业下面的所有人
+            memList = userRemoteApiService.findAllOrgMember(searchParam.getOrgId());
+        } else {
+            //选择了发送人范围
+            String[] deptIds = StringUtils.split(searchParam.getDeptIds(), SignConstant.SEPARATE_STR);
+            String[] userIds = StringUtils.split(searchParam.getUserIds(), SignConstant.SEPARATE_STR);
+            memList = userRemoteApiService.findSubLists(deptIds, userIds);
+        }
+        if (!memList.isEmpty()) {
+            Set<Object> memberIds = new HashSet<>();
+            for (SignUserInfoVO vo : memList) {
+                memberIds.add(vo.getMemberId());
+            }
+            memList = memberRedisOperator.getMemberList(memberIds);
+        }
+        return memList;
     }
 
     /**

@@ -47,7 +47,18 @@ spring:
       max-idle: 8
   # 连接池中的最小空闲连接
       min-idle: 0
-
+  ##Redis配置-只读库
+  redis-readonly:
+    database: ${redis-readonly.dbindex}
+    host: ${redis-readonly.host}
+    port: ${redis-readonly.port}
+    password: ${redis-readonly.password}
+    timeout: 0
+    pool:
+      max-active: 8
+      max-wait: -1
+      max-idle: 8
+      min-idle: 0
 ##配置注册中心
 eureka:
   client:
