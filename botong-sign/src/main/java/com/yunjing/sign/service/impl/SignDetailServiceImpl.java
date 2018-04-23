@@ -125,11 +125,9 @@ public class SignDetailServiceImpl extends ServiceImpl<SignDetailMapper, SignDet
      */
     @Override
     public SignListVO getCountInfo(UserAndDeptParam userAndDeptParam, SignBaseMapper mapper) {
-        String[] deptIds = StringUtils.split(userAndDeptParam.getDeptIds(),",");
-        String[] userIdCs = StringUtils.split(userAndDeptParam.getUserIds(),",");
         //okhttp 查询成员列表
         List<SignUserInfoVO> userList = getUsersList(userAndDeptParam);
-        if(userList == null || userList.size() == 0) {
+        if(userList == null || userList.isEmpty()) {
             return null;
         }
         Map<String, SignUserInfoVO> map = new HashMap<>(userList.size());
@@ -305,8 +303,10 @@ public class SignDetailServiceImpl extends ServiceImpl<SignDetailMapper, SignDet
         List<SignUserInfoVO> memList = new ArrayList<>();
         //如果没有选择范围
         if (StringUtils.isEmpty(searchParam.getDeptIds()) && StringUtils.isEmpty(searchParam.getUserIds())) {
-            // 查询该企业下面的所有人
-            memList = userRemoteApiService.findAllOrgMember(searchParam.getOrgId());
+            if (StringUtils.isNotEmpty(searchParam.getOrgId())) {
+                // 查询该企业下面的所有人
+                memList = userRemoteApiService.findAllOrgMember(searchParam.getOrgId());
+            }
         } else {
             //选择了发送人范围
             String[] deptIds = StringUtils.split(searchParam.getDeptIds(), SignConstant.SEPARATE_STR);
