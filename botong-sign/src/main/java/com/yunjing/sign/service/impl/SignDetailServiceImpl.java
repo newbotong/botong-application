@@ -228,7 +228,7 @@ public class SignDetailServiceImpl extends ServiceImpl<SignDetailMapper, SignDet
         List<SignUserInfoVO> userList;
         if (page != null) {
             userList = page.getRecords();
-            if(userList == null || userList.size() == 0) {
+            if(userList == null || userList.isEmpty()) {
                 return null;
             }
         } else {
