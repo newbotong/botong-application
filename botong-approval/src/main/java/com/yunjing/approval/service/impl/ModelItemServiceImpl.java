@@ -115,10 +115,6 @@ public class ModelItemServiceImpl extends BaseServiceImpl<ModelItemMapper, Model
         modelVO.setItems(modelItemVOS);
         ClientModelItemVO clientModelItemVO = new ClientModelItemVO(modelVO);
 
-        // 获取审批流程设置类型，set=0:不分条件设置审批人 set=1:分条件设置审批人
-        ApprovalSetVO approvalSet = approvalSetsService.getApprovalSet(modelId);
-        clientModelItemVO.setSet(approvalSet.getSetting());
-
         // 获取预设人员筛选字段
         Set<String> keys = new HashSet<>();
         if (StringUtils.isNotBlank(modelId)) {
