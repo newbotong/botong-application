@@ -233,6 +233,7 @@ public class ApprovalApiServiceImpl implements IApprovalApiService {
         if (approvalById != null) {
             // 审批主体信息
             clientApprovalDetailVO.setName(approvalById.getName());
+            clientApprovalDetailVO.setMemberId(approvalById.getUserId());
             ModelL modelL = modelService.selectOne(Condition.create().where("id={0}", approvalById.getModelId()));
             clientApprovalDetailVO.setModelName(modelL.getModelName() != null ? modelL.getModelName() : null);
             clientApprovalDetailVO.setDeptName(approvalById.getDeptName());

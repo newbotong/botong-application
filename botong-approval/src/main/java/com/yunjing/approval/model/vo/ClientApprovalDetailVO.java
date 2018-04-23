@@ -14,6 +14,11 @@ import java.util.List;
 public class ClientApprovalDetailVO {
 
     /**
+     * 审批发起人id
+     */
+    private String memberId;
+
+    /**
      * 审批发起人姓名
      */
     private String name;
