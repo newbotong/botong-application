@@ -266,15 +266,19 @@ public class ApprovalApiServiceImpl implements IApprovalApiService {
             }
             if (approvalUserVO.getProcessState() != null && approvalUserVO.getProcessState() == 0) {
                 approvalUserVO.setApprovalTime(null);
+                int i = index++;
                 if (approvalUserVO.getUserId().equals(memberId)) {
                     //描述提醒用户信息
                     clientApprovalDetailVO.setProcessState(approvalUserVO.getProcessState());
                     clientApprovalDetailVO.setMessage("等待我审批");
-                    approvalUserVO.setMessage("审批中");
+                    if(i == 1){
+                        approvalUserVO.setMessage("审批中");
+                    }else {
+                        approvalUserVO.setMessage("等待审批");
+                    }
                 } else {
-                    int flag = index++;
                     //描述提醒用户信息
-                    if (flag == 1) {
+                    if (i == 1) {
                         clientApprovalDetailVO.setMessage("等待" + approvalUserVO.getName() + "审批");
                         approvalUserVO.setMessage("审批中");
                     } else {

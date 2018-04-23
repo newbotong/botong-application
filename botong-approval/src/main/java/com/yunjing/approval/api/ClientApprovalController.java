@@ -166,35 +166,4 @@ public class ClientApprovalController extends BaseController {
                                                    @RequestParam(value = "judge",required = false) String judge) throws Exception {
         return success(processService.getApprover(companyId, memberId, modelId, deptId, conditionId, judge));
     }
-
-    @Autowired
-    private AppCenterService appCenterService;
-
-    @Autowired
-    private IApprovalUserService approvalUserService;
-    @GetMapping("/test")
-    public ResponseEntityWrapper test(String companyId) {
-        List<OrgMemberVo> allOrgMember = appCenterService.findAllOrgMember(companyId, true);
-        List<String> memberIds = allOrgMember.stream().map(OrgMemberVo::getMemberId).collect(Collectors.toList());
-        String[] ids = new String[memberIds.size()];
-        String[] strings = memberIds.toArray(ids);
-        List<Member> subLists = appCenterService.findSubLists(null, strings);
-        List<OrgMemberMessage> list = new ArrayList<>();
-        for (Member member : subLists) {
-            OrgMemberMessage orgMemeber = new OrgMemberMessage();
-            orgMemeber.setMemberId(member.getId());
-            orgMemeber.setColor(member.getColor());
-            orgMemeber.setCompanyId(member.getCompanyId());
-            orgMemeber.setDeptIds(new ArrayList<>(member.getDeptIds()));
-            orgMemeber.setDeptNames(member.getDeptNames());
-            orgMemeber.setMemberName(member.getMemberName());
-            orgMemeber.setMobile(member.getMobile());
-            orgMemeber.setPosition(member.getPosition());
-            orgMemeber.setProfile(member.getProfile());
-            list.add(orgMemeber);
-        }
-        boolean b = approvalUserService.addMember(list);
-        return success(b);
-    }
-
 }
