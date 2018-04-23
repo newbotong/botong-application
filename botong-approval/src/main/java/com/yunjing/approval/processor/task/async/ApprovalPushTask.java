@@ -42,6 +42,7 @@ public class ApprovalPushTask extends BaseTask {
      */
     @Value("${botong.approval.appId}")
     private String appId;
+
     @Autowired
     private IApprovalUserService approvalUserService;
     @Autowired
@@ -50,8 +51,6 @@ public class ApprovalPushTask extends BaseTask {
     private ApprovalProcessMapper approvalProcessMapper;
     @Autowired
     private CopysMapper copySMapper;
-    @Autowired
-    private IPushLogService pushLogService;
     @Autowired
     private AppCenterService appCenterService;
     @Autowired
@@ -225,7 +224,7 @@ public class ApprovalPushTask extends BaseTask {
         Map<String, String> maps = new HashMap<>(5);
         maps.put("appName", "审批");
         maps.put("subModuleName", modelL.getModelName());
-        maps.put("url", "http://192.168.10.90:1300/#/examineHandle?approvalId=" + approval.getId());
+        maps.put("url", "http://192.168.10.230:1300/#/examineHandle?approvalId=" + approval.getId());
         // 审批提醒
         JSONArray array = new JSONArray();
         JSONObject json1 = new JSONObject();
