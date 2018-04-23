@@ -51,4 +51,15 @@ public class SignUserInfoVO {
      * 签到状态
      */
     private Integer signState;
+
+
+    @JSONField(name="id")
+    public void setMemberId(String memberId) {
+        this.memberId = memberId;
+    }
+
+    @JSONField(name="passportId")
+    public void setUserId(String userId) {
+        this.userId = userId;
+    }
 }

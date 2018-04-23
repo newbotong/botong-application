@@ -24,7 +24,7 @@ public class FilterParam {
     /**
      * 审批类型
      */
-    private Long modelId;
+    private String modelId;
 
     /**
      * 审批时间

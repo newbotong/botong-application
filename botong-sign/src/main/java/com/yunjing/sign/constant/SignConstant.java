@@ -29,4 +29,13 @@ public class SignConstant implements Serializable {
 
     public final static Integer  BOTONG_ZERO_VALUE = 0;
 
+    /**
+     * 成员信息
+     */
+    public final static String  BOTONG_ORG_MEMBER = "botong:org:member";
+    public final static String  BOTONG_ORG_USER = "botong:org:user";
+
+
+
+
 }

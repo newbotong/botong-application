@@ -58,4 +58,11 @@ public interface UserRemoteApiService {
      * @return
      */
     boolean verifyManager(String appId, String memberId);
+
+    /**
+     * 根据企业Id查询成员列表
+     * @param orgId     企业id
+     * @return          签到用户列表
+     */
+    List<SignUserInfoVO> findAllOrgMember(@Query("orgId") String orgId);
 }

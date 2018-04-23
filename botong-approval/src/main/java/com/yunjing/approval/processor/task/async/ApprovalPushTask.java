@@ -5,12 +5,14 @@ import com.alibaba.fastjson.JSONObject;
 import com.yunjing.approval.dao.mapper.ApprovalProcessMapper;
 import com.yunjing.approval.dao.mapper.CopysMapper;
 import com.yunjing.approval.model.entity.Approval;
-import com.yunjing.approval.model.entity.ApprovalUser;
 import com.yunjing.approval.model.entity.ModelL;
 import com.yunjing.approval.model.vo.*;
 import com.yunjing.approval.param.PushParam;
 import com.yunjing.approval.processor.okhttp.AppCenterService;
-import com.yunjing.approval.service.*;
+import com.yunjing.approval.service.IApprovalApiService;
+import com.yunjing.approval.service.IApprovalService;
+import com.yunjing.approval.service.IApprovalUserService;
+import com.yunjing.approval.service.IModelService;
 import com.yunjing.approval.util.ApproConstants;
 import com.yunjing.mommon.Enum.DateStyle;
 import com.yunjing.mommon.utils.DateUtil;
@@ -42,6 +44,7 @@ public class ApprovalPushTask extends BaseTask {
      */
     @Value("${botong.approval.appId}")
     private String appId;
+
     @Autowired
     private IApprovalUserService approvalUserService;
     @Autowired
@@ -50,8 +53,6 @@ public class ApprovalPushTask extends BaseTask {
     private ApprovalProcessMapper approvalProcessMapper;
     @Autowired
     private CopysMapper copySMapper;
-    @Autowired
-    private IPushLogService pushLogService;
     @Autowired
     private AppCenterService appCenterService;
     @Autowired
@@ -121,7 +122,6 @@ public class ApprovalPushTask extends BaseTask {
     public void submitApproval(String approvalId, String companyId, String memberId) {
         logger.info("approval: " + approvalId + "  companyId: " + companyId + "  memberId: " + memberId);
         Approval approval = approvalService.selectById(approvalId);
-        ApprovalUser user = approvalUserService.selectById(memberId);
         String[] members = new String[1];
         members[0] = memberId;
         List<Member> memberList = appCenterService.findSubLists(null, members);
@@ -132,12 +132,24 @@ public class ApprovalPushTask extends BaseTask {
         if (companyId != null && memberId != null) {
             String message = "您收到一条审批消息";
             List<ApprovalUserVO> approvalUserList = approvalProcessMapper.getApprovalUserList(approvalId);
-            Set<ApprovalUserVO> approvalProcessSet = new HashSet<>(approvalUserList);
-            if (approvalProcessSet != null && !approvalProcessSet.isEmpty()) {
+            List<ApprovalUserVO> approvalUserVOS = approvalUserList.stream().collect(Collectors.toSet()).stream().collect(Collectors.toList());
+            Collections.sort(approvalUserVOS, new Comparator<ApprovalUserVO>() {
+                @Override
+                public int compare(ApprovalUserVO o1, ApprovalUserVO o2) {
+                    if (o1.getSort() > o2.getSort()) {
+                        return 1;
+                    } else if (o1.getSort() < o2.getSort()) {
+                        return -1;
+                    } else {
+                        return 0;
+                    }
+                }
+            });
+            if (approvalUserVOS != null && !approvalUserVOS.isEmpty()) {
                 String[] passportIds = new String[1];
                 String[] mid = new String[1];
                 if (approval.getResult() == null) {
-                    for (ApprovalUserVO approvalUserVO : approvalProcessSet) {
+                    for (ApprovalUserVO approvalUserVO : approvalUserVOS) {
                         if (approvalUserVO.getProcessState() == 0) {
                             mid[0] = approvalUserVO.getUserId();
                             List<Member> mlist = appCenterService.findSubLists(null, mid);
@@ -225,7 +237,7 @@ public class ApprovalPushTask extends BaseTask {
         Map<String, String> maps = new HashMap<>(5);
         maps.put("appName", "审批");
         maps.put("subModuleName", modelL.getModelName());
-        maps.put("url", "http://192.168.10.90:1300/#/examineHandle?approvalId=" + approval.getId());
+        maps.put("url", "http://192.168.10.230:1300/#/examineHandle?approvalId=" + approval.getId());
         // 审批提醒
         JSONArray array = new JSONArray();
         JSONObject json1 = new JSONObject();

@@ -169,4 +169,34 @@ public class UserRemoteApiServiceImpl implements UserRemoteApiService {
         }
         return false;
     }
+
+    /**
+     * 根据企业Id查询成员列表
+     *
+     * @param orgId 企业id
+     * @return 签到用户列表
+     */
+    @Override
+    public List<SignUserInfoVO> findAllOrgMember(String orgId) {
+        if(userRemoteApiService == null){
+            initRetrofit();
+        }
+        Call<ResponseEntityWrapper<List<SignUserInfoVO>>> call = userRemoteApiService.findAllOrgMember(orgId);
+        try {
+            Response<ResponseEntityWrapper<List<SignUserInfoVO>>> response = call.execute();
+            ResponseEntityWrapper<List<SignUserInfoVO>> body = response.body();
+            if (body != null) {
+                log.info("获取指定企业所有成员信息:code:{},message:{}", body.getStatusCode(), body.getStatusMessage());
+                if (response.isSuccessful() && body.getStatusCode() == StatusCode.SUCCESS.getStatusCode()) {
+                    return body.getData();
+                }
+            } else {
+                log.error("body is null");
+            }
+            return null;
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        return null;
+    }
 }

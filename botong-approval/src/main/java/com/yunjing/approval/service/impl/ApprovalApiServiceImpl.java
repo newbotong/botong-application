@@ -108,7 +108,7 @@ public class ApprovalApiServiceImpl implements IApprovalApiService {
                     List<ApprovalProcess> processList1 = approvalProcessService.selectList(Condition.create().where("approval_id={0}", contentDTO.getApprovalId()));
                     for (ApprovalProcess aProcess : processList1) {
                         //判断上一个审批人的审批状态，如果是1（同意）或者是3（转让）显示当前审批人
-                        if (aProcess.getSeq() + 1 == process.getSeq() && aProcess.getProcessState() == 1) {
+                        if (aProcess.getSeq() + 1 == process.getSeq() && aProcess.getProcessState() == 1 || aProcess.getProcessState() == 3) {
                             result.add(contentDTO);
                         }
                     }
@@ -266,15 +266,19 @@ public class ApprovalApiServiceImpl implements IApprovalApiService {
             }
             if (approvalUserVO.getProcessState() != null && approvalUserVO.getProcessState() == 0) {
                 approvalUserVO.setApprovalTime(null);
+                int i = index++;
                 if (approvalUserVO.getUserId().equals(memberId)) {
                     //描述提醒用户信息
                     clientApprovalDetailVO.setProcessState(approvalUserVO.getProcessState());
                     clientApprovalDetailVO.setMessage("等待我审批");
-                    approvalUserVO.setMessage("审批中");
+                    if(i == 1){
+                        approvalUserVO.setMessage("审批中");
+                    }else {
+                        approvalUserVO.setMessage("等待审批");
+                    }
                 } else {
-                    int flag = index++;
                     //描述提醒用户信息
-                    if (flag == 1) {
+                    if (i == 1) {
                         clientApprovalDetailVO.setMessage("等待" + approvalUserVO.getName() + "审批");
                         approvalUserVO.setMessage("审批中");
                     } else {
@@ -347,7 +351,7 @@ public class ApprovalApiServiceImpl implements IApprovalApiService {
                     if (process.getUserId().equals(memberId)) {
                         process.setProcessState(state);
                         process.setProcessTime(System.currentTimeMillis());
-                        boolean update = approvalProcessService.update(process, Condition.create().where("approval_id={0}", approvalId));
+                        boolean update = approvalProcessService.update(process, Condition.create().where("approval_id={0}", approvalId).and("user_id={0}",memberId));
                         if (!update) {
                             throw new UpdateMessageFailureException("同意审批--更新审批流程信息失败");
                         }

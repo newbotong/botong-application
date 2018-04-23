@@ -162,6 +162,9 @@ public class SignDetailDailyServiceImpl extends ServiceImpl<SignDetailDailyMappe
         Date startD = DateUtil.StringToDate(userAndDeptParam.getSignDate() + "-01", DateStyle.YYYY_MM_DD);
         Date endDate = DateUtil.getLastDayOfMonth(startD);
         List<SignExcelVO> exportData = iSignDetailService.getSignInList(userAndDeptParam, signDetailDailyMapper);
+        if (exportData == null) {
+            exportData = new ArrayList<>();
+        }
         SignExModel signExModel = new SignExModel();
 
         List<ExcelModel> excelModelList = new ArrayList<>();
