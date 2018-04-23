@@ -42,4 +42,11 @@ public interface IApprovalUserService extends IBaseService<ApprovalUser> {
     boolean deleteMember(List<OrgMemberMessage> orgMemberMessages);
 
 
+    /**
+     * 手动更新联系人信息
+     *
+     * @param companyId
+     * @return boolean
+     */
+    boolean updateContract(String companyId,String userId,Integer choiceContacts);
 }

@@ -13,6 +13,7 @@ import com.yunjing.approval.dao.mapper.ProcessMapper;
 import com.yunjing.approval.model.entity.*;
 import com.yunjing.approval.model.vo.ApproverVO;
 import com.yunjing.approval.model.vo.UserVO;
+import com.yunjing.approval.processor.okhttp.AppCenterService;
 import com.yunjing.approval.service.*;
 import com.yunjing.approval.util.ApproConstants;
 import com.yunjing.mommon.global.exception.BaseException;
@@ -38,8 +39,6 @@ public class ProcessServiceImpl extends BaseServiceImpl<ProcessMapper, SetsProce
     private IApprovalSetsService approvalSetsService;
 
     @Autowired
-    private ConditionMapper conditionMapper;
-    @Autowired
     private IConditionService conditionService;
     @Autowired
     private IProcessService processService;
@@ -50,11 +49,9 @@ public class ProcessServiceImpl extends BaseServiceImpl<ProcessMapper, SetsProce
     private IApprovalUserService approvalUserService;
     @Autowired
     private ICopyService copyService;
-    @Autowired
-    private ApprovalProcessMapper approvalProcessMapper;
-    @Autowired
-    private CopyMapper copyMapper;
 
+    @Autowired
+    private AppCenterService appCenterService;
     @Override
     public boolean delete(String modelId, String conditions) throws Exception {
 
@@ -77,6 +74,7 @@ public class ProcessServiceImpl extends BaseServiceImpl<ProcessMapper, SetsProce
 
     @Override
     public List<UserVO> getProcess(String modelId, List<String> conditionIds) throws Exception {
+
         List<UserVO> users = new ArrayList<>();
         List<SetsProcess> list;
         if (conditionIds != null && !conditionIds.isEmpty()) {
@@ -86,9 +84,9 @@ public class ProcessServiceImpl extends BaseServiceImpl<ProcessMapper, SetsProce
         }
         List<ApprovalUser> userList = approvalUserService.selectList(Condition.create());
 
-        String passportId = "default";
         for (SetsProcess process : list) {
             String userId = process.getApprover();
+            String passportId = "";
             String userNick = "";
             String userAvatar = null;
             if (userId.indexOf("admin_") != -1) {
@@ -100,6 +98,7 @@ public class ProcessServiceImpl extends BaseServiceImpl<ProcessMapper, SetsProce
                     if (user != null) {
                         userNick = user.getName();
                         userAvatar = user.getAvatar();
+                        passportId = user.getPassportId();
                     }
                 }
 

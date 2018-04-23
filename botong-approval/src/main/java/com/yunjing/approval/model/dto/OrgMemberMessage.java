@@ -30,6 +30,10 @@ public class OrgMemberMessage implements Serializable {
      */
     String memberId;
 
+    /**
+     * 账号id
+     */
+    String passportId;
 
     /**
      * 成员名称
