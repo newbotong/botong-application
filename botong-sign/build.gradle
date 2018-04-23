@@ -22,7 +22,7 @@ dependencies {
 	compile('com.yunjing.botong:commons-mybatisplus:2.0.0-SNAPSHOT'){
 		changing = true //实时更新jar包
 	}
-	compile('com.yunjing.botong:commons-redis:2.0.0-SNAPSHOT'){
+	compile('com.yunjing.botong:commons-redis:2.0.3-SNAPSHOT'){
 		changing = true //实时更新jar包
 	}
 	compile('org.apache.poi:poi:3.14')
