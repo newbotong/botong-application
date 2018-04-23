@@ -273,8 +273,6 @@ public class SignDetailServiceImpl extends ServiceImpl<SignDetailMapper, SignDet
         signMapperParam.setStartDate(startD.getTime());
         signMapperParam.setEndDate(endDate.getTime());
         List<SignMonthVO> userIdList = mapper.staticsMonthInfo(signMapperParam);
-        List<SignUserInfoVO> signList = new ArrayList<>();
-        List<SignUserInfoVO> unSignList = new ArrayList<>();
         for(SignMonthVO vo1 : userIdList) {
             map.get(vo1.getUserId()).getMonthList().get(vo1.getSignDate()).setSignCount(vo1.getSignCount());
         }
