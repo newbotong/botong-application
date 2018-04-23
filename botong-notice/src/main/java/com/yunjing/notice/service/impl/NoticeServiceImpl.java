@@ -182,7 +182,7 @@ public class NoticeServiceImpl extends ServiceImpl<NoticeMapper, NoticeEntity> i
         if (noticeBody.getDangState() == 0) {
             //批量查询用户信息
             DangParam dangParam = new DangParam();
-            Call<ResponseEntityWrapper<List<Member>>> ca = orgStructureService.findSubLists(noticeBody.getDepartmentIds(), noticeBody.getMemberIds(), 0);
+            Call<ResponseEntityWrapper<List<Member>>> ca = orgStructureService.findSubLists("", noticeBody.getIssueUserId(), 0);
             Response<ResponseEntityWrapper<List<Member>>> re = ca.execute();
             ResponseEntityWrapper<List<Member>> result = re.body();
             //查询发布人的账户id
@@ -197,10 +197,12 @@ public class NoticeServiceImpl extends ServiceImpl<NoticeMapper, NoticeEntity> i
                 }
                 userInfoModelList.add(userInfoModel);
             }
-            if (null != result.getData()) {
-                List<Member> listMember = result.getData();
-                String[] passportId = listMember.stream().map(Member::getPassportId).toArray(String[]::new);
-                dangParam.setUserId(passportId[0]);
+            if (null != result) {
+                if (null != result.getData()) {
+                    List<Member> listMember = result.getData();
+                    String[] passportId = listMember.stream().map(Member::getPassportId).toArray(String[]::new);
+                    dangParam.setUserId(passportId[0]);
+                }
             }
             dangParam.setBizId(noticeEntity.getId());
             dangParam.setSendTelephone(noticeBody.getPhone());
