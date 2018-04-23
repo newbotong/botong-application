@@ -108,7 +108,7 @@ public class ApprovalApiServiceImpl implements IApprovalApiService {
                     List<ApprovalProcess> processList1 = approvalProcessService.selectList(Condition.create().where("approval_id={0}", contentDTO.getApprovalId()));
                     for (ApprovalProcess aProcess : processList1) {
                         //判断上一个审批人的审批状态，如果是1（同意）或者是3（转让）显示当前审批人
-                        if (aProcess.getSeq() + 1 == process.getSeq() && aProcess.getProcessState() == 1) {
+                        if (aProcess.getSeq() + 1 == process.getSeq() && aProcess.getProcessState() == 1 || aProcess.getProcessState() == 3) {
                             result.add(contentDTO);
                         }
                     }
