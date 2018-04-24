@@ -11,13 +11,10 @@ repositories {
 dependencies {
     compile('org.apache.poi:poi:3.14')
     compile('org.apache.poi:poi-ooxml:3.14')
-    compile('com.yunjing.botong:commons:2.0.0-SNAPSHOT') {
-        changing = true //实时更新jar包
-    }
     compile('com.yunjing.botong:commons-mybatisplus:2.0.0-SNAPSHOT') {
         changing = true //实时更新jar包
     }
-    compile('com.yunjing.botong:commons-redis:2.0.0-SNAPSHOT') {
+    compile('com.yunjing.botong:commons-redis:2.0.3-SNAPSHOT') {
         changing = true //实时更新jar包
     }
     //RabbitMQ
@@ -40,4 +37,6 @@ dependencies {
     // 用于json自动转换解析
     compile 'com.squareup.retrofit2:converter-gson:2.3.0'
     compile 'org.ligboy.retrofit2:converter-fastjson:2.1.0'
+    //Logback-redis-appender
+    compile("com.cwbase:logback-redis-appender:1.1.5")
 }

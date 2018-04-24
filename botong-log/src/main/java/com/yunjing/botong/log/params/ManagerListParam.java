@@ -1,5 +1,6 @@
 package com.yunjing.botong.log.params;
 
+import com.yunjing.mommon.validate.annotation.NotNullOrEmpty;
 import lombok.Data;
 
 import java.io.Serializable;
@@ -18,21 +19,19 @@ public class ManagerListParam implements Serializable {
     /**
      * 管理员id
      */
+    @NotNullOrEmpty
     private String memberId;
 
     /**
      * 组织机构id
      */
+    @NotNullOrEmpty
     private String orgId;
-
-    /**
-     * 应用id
-     */
-    private String appId;
 
     /**
      * 提交类型（1-日报 2-周报 3-月报）
      */
+    @NotNullOrEmpty
     private int submitType;
 
     /**

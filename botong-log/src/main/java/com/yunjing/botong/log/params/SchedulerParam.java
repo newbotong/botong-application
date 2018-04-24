@@ -18,10 +18,6 @@ public class SchedulerParam {
      */
     private String id;
 
-    /**
-     * 任务id
-     */
-    private String taskId;
 
     /**
      * 周期

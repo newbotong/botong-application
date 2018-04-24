@@ -20,6 +20,21 @@ public class UserAndDeptParam {
     private Integer pageSize;
 
     /**
+     * 成员Id
+     */
+    private String memberId;
+
+    /**
+     * 企业Id
+     */
+    private String orgId;
+
+    /**
+     * appId
+     */
+    private String appId;
+
+    /**
      * 部门id 逗号间隔
      */
     private String deptIds;

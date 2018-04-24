@@ -18,6 +18,12 @@ import lombok.EqualsAndHashCode;
 public class ApprovalUser extends BaseModel<ApprovalUser>{
 
     /**
+     * 账号id
+     */
+    @TableField("passport_id")
+    private String passportId;
+
+    /**
      * 用户名
      */
     @TableField("name")

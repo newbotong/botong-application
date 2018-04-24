@@ -95,4 +95,8 @@ public class ApprovalContentDTO {
      */
     private Integer isRead;
 
+    /**
+     * 顺序
+     */
+    private Integer sort;
 }

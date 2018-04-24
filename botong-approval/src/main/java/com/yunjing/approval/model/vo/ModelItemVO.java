@@ -27,7 +27,7 @@ public class ModelItemVO {
         this.format = item.getDateFormat();
         this.display = item.getIsDisplay();
         this.required = item.getIsRequired();
-        this.isJudge = item.getIsJudge();
+        this.judge = item.getIsJudge();
     }
 
     private String modelId;
@@ -89,7 +89,7 @@ public class ModelItemVO {
     /**
      * 是否为审批条件
      */
-    private Integer isJudge;
+    private Integer judge;
 
     /**
      * 模型项主键

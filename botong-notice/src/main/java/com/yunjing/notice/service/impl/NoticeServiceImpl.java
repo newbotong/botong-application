@@ -5,7 +5,10 @@ import com.alibaba.fastjson.JSONObject;
 import com.baomidou.mybatisplus.mapper.EntityWrapper;
 import com.baomidou.mybatisplus.plugins.Page;
 import com.baomidou.mybatisplus.service.impl.ServiceImpl;
+import com.esotericsoftware.minlog.Log;
+import com.yunjing.mommon.constant.StatusCode;
 import com.yunjing.mommon.global.exception.BaseException;
+import com.yunjing.mommon.global.exception.BaseRuntimeException;
 import com.yunjing.mommon.utils.DateUtil;
 import com.yunjing.mommon.utils.IDUtils;
 import com.yunjing.mommon.wrapper.ResponseEntityWrapper;
@@ -16,12 +19,14 @@ import com.yunjing.notice.entity.NoticeEntity;
 import com.yunjing.notice.entity.NoticeUserEntity;
 import com.yunjing.notice.mapper.NoticeMapper;
 import com.yunjing.notice.processor.feign.param.DangParam;
+import com.yunjing.notice.processor.feign.param.UserInfoModel;
 import com.yunjing.notice.processor.okhttp.AuthorityService;
 import com.yunjing.notice.processor.okhttp.DangService;
 import com.yunjing.notice.processor.okhttp.InformService;
 import com.yunjing.notice.processor.okhttp.OrgStructureService;
 import com.yunjing.notice.service.NoticeService;
 import com.yunjing.notice.service.NoticeUserService;
+import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.BeanUtils;
@@ -42,6 +47,7 @@ import java.util.*;
  * @since 2018/03/20/.
  */
 @Service
+@Slf4j
 public class NoticeServiceImpl extends ServiceImpl<NoticeMapper, NoticeEntity> implements NoticeService {
 
     @Autowired
@@ -62,8 +68,8 @@ public class NoticeServiceImpl extends ServiceImpl<NoticeMapper, NoticeEntity> i
     @Value("${notice.appId}")
     private String appId;
 
-    @Value("${H5Address}")
-    private String H5Address;
+    @Value("${h5Address}")
+    private String h5Address;
 
     @Autowired
     private OrgStructureService orgStructureService;
@@ -89,26 +95,29 @@ public class NoticeServiceImpl extends ServiceImpl<NoticeMapper, NoticeEntity> i
         BeanUtils.copyProperties(noticeBody, noticeEntity);
         noticeEntity.setLogicDelete(NoticeConstant.LOGIC_DELETE_NORMAL);
         if (StringUtils.isEmpty(noticeBody.getMemberIds()) && StringUtils.isEmpty(noticeBody.getDepartmentIds())) {
-            throw new BaseException("成员不能为空");
+            throw new BaseRuntimeException(StatusCode.ADMIN_USER_NOT_FOUND.getStatusCode(),"成员不能为空");
         }
         //okhttp
+
         Call<ResponseEntityWrapper<List<Member>>> call = orgStructureService.findSubLists(noticeBody.getDepartmentIds(), noticeBody.getMemberIds(), 0);
+        Log.info(call.toString());
         Response<ResponseEntityWrapper<List<Member>>> execute = call.execute();
         ResponseEntityWrapper<List<Member>> body = execute.body();
         List<Member> memberList;
         if (null != body.getData()) {
             memberList = body.getData();
         } else {
-            throw new BaseException("该用户查询不到");
+            throw new BaseRuntimeException(StatusCode.ROLE_LIST_NOT_EXISTS.getStatusCode(),"该用户查询不到");
         }
         String[] passportIds = memberList.stream().map(Member::getPassportId).toArray(String[]::new);
         String[] memberIds = memberList.stream().map(Member::getId).toArray(String[]::new);
+
         List<String> userInfoBodies = Arrays.asList(memberIds);
         if (CollectionUtils.isNotEmpty(userInfoBodies)) {
             noticeEntity.setNotReadNum(userInfoBodies.size());
             noticeEntity.setReadNum(0);
         } else {
-            throw new BaseException("选择用户不能为空");
+            throw new BaseRuntimeException(StatusCode.ROLE_LIST_NOT_EXISTS.getStatusCode(),"选择用户不能为空");
         }
         List<NoticeUserEntity> userInfoBodyList = new ArrayList<>();
 
@@ -125,7 +134,7 @@ public class NoticeServiceImpl extends ServiceImpl<NoticeMapper, NoticeEntity> i
         noticeUserService.insertBatch(userInfoBodyList);
 
         //推送请求URL
-        String url = H5Address + "?" + "id=" + noticeEntity.getId();
+        String url = h5Address + "?" + "id=" + noticeEntity.getId();
 
         //添加公告模块子标题
         Map<String, String> map = new HashMap<>(32);
@@ -138,32 +147,32 @@ public class NoticeServiceImpl extends ServiceImpl<NoticeMapper, NoticeEntity> i
 
         //添加公告标题
         json = new JSONObject();
-        json.put("subTitle",noticeEntity.getTitle());
-        json.put("type","5");
+        json.put("subTitle", noticeEntity.getTitle());
+        json.put("type", "5");
         array.add(json);
 
         //判断是否存在图片
         if (StringUtils.isNotEmpty(noticeEntity.getCover())) {
             json = new JSONObject();
             json.put("imgPath", noticeEntity.getCover());
-            json.put("type","1");
+            json.put("type", "1");
             array.add(json);
         }
 
         //添加公告内容
         json = new JSONObject();
         json.put("description", noticeEntity.getContent());
-        json.put("type","2");
+        json.put("type", "2");
         array.add(json);
 
         //添加公告发送人
         json = new JSONObject();
         json.put("bottom", noticeEntity.getAuthor() + "  " + DateUtil.convert(System.currentTimeMillis()));
-        json.put("type","4");
+        json.put("type", "4");
         array.add(json);
 
         //保存公告内容体
-        map.put("content",array.toJSONString());
+        map.put("content", array.toJSONString());
 
         //构建发送公告参数
         AppPushParam pushParam = new AppPushParam();
@@ -175,23 +184,45 @@ public class NoticeServiceImpl extends ServiceImpl<NoticeMapper, NoticeEntity> i
         pushParam.setCompanyId(noticeBody.getOrgId());
         pushParam.setAppId(appId);
         // okhttp调用工作通知
-        informService.pushAllTargetByUser(pushParam);
+
+        Call<ResponseEntityWrapper> push = informService.pushAllTargetByUser(pushParam);
+        Response<ResponseEntityWrapper> ex = push.execute();
+        ResponseEntityWrapper response = ex.body();
+        if (null != response) {
+            if (response.getStatusCode() != StatusCode.SUCCESS.getStatusCode()) {
+                throw new BaseRuntimeException(response.getStatusCode(), response.getStatusMessage());
+            }
+        }
         //Dang
-        if (noticeEntity.getDangState() == 0) {
+        if (noticeBody.getDangState() == 0) {
             //批量查询用户信息
             DangParam dangParam = new DangParam();
-            Call<ResponseEntityWrapper<List<Member>>> ca = orgStructureService.findSubLists(noticeBody.getDepartmentIds(), noticeBody.getMemberIds(), 0);
+            Call<ResponseEntityWrapper<List<Member>>> ca = orgStructureService.findSubLists("", noticeBody.getIssueUserId(), 0);
             Response<ResponseEntityWrapper<List<Member>>> re = ca.execute();
             ResponseEntityWrapper<List<Member>> result = re.body();
             //查询发布人的账户id
-            if (null != result.getData()) {
-                List<Member> listMember = result.getData();
-                String[] passportId = listMember.stream().map(Member::getPassportId).toArray(String[]::new);
-                dangParam.setUserId(passportId[0]);
+            List<UserInfoModel> userInfoModelList = new ArrayList<>();
+            for (Member member : memberList) {
+                UserInfoModel userInfoModel = new UserInfoModel();
+                if (StringUtils.isNotEmpty(member.getPassportId())) {
+                    userInfoModel.setUserId(member.getPassportId());
+                }
+                if (StringUtils.isNotEmpty(member.getMobile())) {
+                    userInfoModel.setUserTelephone(Long.parseLong(member.getMobile()));
+                }
+                userInfoModelList.add(userInfoModel);
+            }
+            if (null != result) {
+                if (null != result.getData()) {
+                    List<Member> listMember = result.getData();
+                    String[] passportId = listMember.stream().map(Member::getPassportId).toArray(String[]::new);
+                    dangParam.setUserId(passportId[0]);
+                }
             }
             dangParam.setBizId(noticeEntity.getId());
+            dangParam.setSendTelephone(noticeBody.getPhone());
             dangParam.setBizType(1);
-            dangParam.setReceiveBody(JSONObject.toJSONString(passportIds));
+            dangParam.setReceiveBody(userInfoModelList);
             dangParam.setDangType(1);
             dangParam.setRemindType(1);
             dangParam.setSendType(1);
@@ -212,7 +243,14 @@ public class NoticeServiceImpl extends ServiceImpl<NoticeMapper, NoticeEntity> i
                 dangParam.setAccessorySize("");
             }
             // okhttp调用发送dang消息
-            dangService.sendDang(dangParam);
+            Call<ResponseEntityWrapper> dPush = dangService.sendDang(dangParam);
+            Response<ResponseEntityWrapper> e = dPush.execute();
+            ResponseEntityWrapper r = e.body();
+            if (null != r) {
+                if (r.getStatusCode() != StatusCode.SUCCESS.getStatusCode()) {
+                    throw new BaseRuntimeException(r.getStatusCode(), r.getStatusMessage());
+                }
+            }
         }
     }
 
@@ -258,7 +296,7 @@ public class NoticeServiceImpl extends ServiceImpl<NoticeMapper, NoticeEntity> i
         List<NoticeEntity> noticeEntityList = new NoticeEntity().selectList(new EntityWrapper<NoticeEntity>()
                 .eq("logic_delete", NoticeConstant.LOGIC_DELETE_NORMAL).in("id", Arrays.asList(idArrays)));
         if (CollectionUtils.isEmpty(noticeEntityList)) {
-            throw new BaseException("公告已经被删除");
+            throw new BaseRuntimeException(StatusCode.RESOURCE_NOT_MESSAGE_EXIT.getStatusCode(),"公告已被删除");
         }
         for (NoticeEntity noticeEntity : noticeEntityList) {
             noticeEntity.setLogicDelete(NoticeConstant.LOGIC_DELETE_DELETE);
@@ -274,7 +312,7 @@ public class NoticeServiceImpl extends ServiceImpl<NoticeMapper, NoticeEntity> i
             b = noticeUserService.updateBatchById(noticeUserEntityList);
         }
         if (!a && !b) {
-            throw new BaseException("删除失败");
+            throw new BaseRuntimeException(StatusCode.RESOURCE_DELETE_FAILED.getStatusCode(),StatusCode.RESOURCE_DELETE_FAILED.getStatusMessage());
         }
     }
 
@@ -296,7 +334,7 @@ public class NoticeServiceImpl extends ServiceImpl<NoticeMapper, NoticeEntity> i
         Map<String, Object> map = new HashMap<>(4);
         Map<String, Object> maps = new HashMap<String, Object>(3);
         if (StringUtils.isEmpty(orgId)) {
-            throw new BaseException("企业id不能为空");
+            throw new BaseRuntimeException(StatusCode.MISSING_REQUIRE_FIELD.getStatusCode(),"企业id不能为空");
         }
         map.put("orgId", orgId);
         if (null == state) {
@@ -311,8 +349,10 @@ public class NoticeServiceImpl extends ServiceImpl<NoticeMapper, NoticeEntity> i
             ResponseEntityWrapper body = execute.body();
             //判断是否为管理员
             boolean results = false;
-            if (null != body.getData()) {
-                results = (boolean) body.getData();
+            if (null != body) {
+                if (null != body.getData()) {
+                    results = (boolean) body.getData();
+                }
             }
             maps.put("admin", results);
             map.put("userId", userId);
@@ -350,30 +390,32 @@ public class NoticeServiceImpl extends ServiceImpl<NoticeMapper, NoticeEntity> i
             return page;
         }
         String[] memberIds = list.stream().map(NoticeUserEntity::getUserId).toArray(String[]::new);
-        Call<ResponseEntityWrapper<List<Member>>> call = orgStructureService.findSubLists("",StringUtils.join(memberIds,","), 0);
+        Call<ResponseEntityWrapper<List<Member>>> call = orgStructureService.findSubLists("", StringUtils.join(memberIds, ","), 0);
         Response<ResponseEntityWrapper<List<Member>>> execute = call.execute();
         ResponseEntityWrapper<List<Member>> body = execute.body();
         List<UserInfoBody> userInfoBodyList = new ArrayList<>();
         List<Member> memberList;
-        if (null != body.getData()) {
-            memberList = body.getData();
-            if (CollectionUtils.isNotEmpty(memberList)) {
-                for (Member object : memberList) {
-                    UserInfoBody userInfoBody = new UserInfoBody();
-                    userInfoBody.setId(object.getId());
-                    if (StringUtils.isNotEmpty(object.getColor())) {
-                        userInfoBody.setColor(object.getColor());
+        if (null != body) {
+            if (null != body.getData()) {
+                memberList = body.getData();
+                if (CollectionUtils.isNotEmpty(memberList)) {
+                    for (Member object : memberList) {
+                        UserInfoBody userInfoBody = new UserInfoBody();
+                        userInfoBody.setId(object.getId());
+                        if (StringUtils.isNotEmpty(object.getColor())) {
+                            userInfoBody.setColor(object.getColor());
+                        }
+                        if (StringUtils.isNotEmpty(object.getProfile())) {
+                            userInfoBody.setImg(object.getProfile());
+                        }
+                        if (StringUtils.isNotEmpty(object.getMemberName())) {
+                            userInfoBody.setName(object.getMemberName());
+                        }
+                        if (null != object.getMobile()) {
+                            userInfoBody.setPhone(Long.parseLong(object.getMobile()));
+                        }
+                        userInfoBodyList.add(userInfoBody);
                     }
-                    if (StringUtils.isNotEmpty(object.getProfile())) {
-                        userInfoBody.setImg(object.getProfile());
-                    }
-                    if (StringUtils.isNotEmpty(object.getMemberName())) {
-                        userInfoBody.setName(object.getMemberName());
-                    }
-                    if (null != object.getMobile()) {
-                        userInfoBody.setPhone(Long.parseLong(object.getMobile()));
-                    }
-                    userInfoBodyList.add(userInfoBody);
                 }
             }
         }
@@ -385,7 +427,8 @@ public class NoticeServiceImpl extends ServiceImpl<NoticeMapper, NoticeEntity> i
     /**
      * 根据公告id查询公告详情接口
      *
-     * @param id 公告id
+     * @param id     公告id
+     * @param userId 用户id
      * @return
      * @throws BaseException
      */
@@ -393,7 +436,7 @@ public class NoticeServiceImpl extends ServiceImpl<NoticeMapper, NoticeEntity> i
     public NoticeDetailBody selectNoticeDetail(String id, String userId) throws BaseException, IOException {
         NoticeEntity noticeEntity = new NoticeEntity().selectOne(new EntityWrapper<NoticeEntity>().eq("id", id).eq("logic_delete", NoticeConstant.LOGIC_DELETE_NORMAL));
         if (null == noticeEntity) {
-            throw new BaseException("该公告已被删除");
+            throw new BaseRuntimeException(StatusCode.RESOURCE_NOT_MESSAGE_EXIT.getStatusCode(),"公告已被删除");
         }
         Integer i = this.updateNoticeState(userId, id);
         NoticeDetailBody noticeDetailBody = new NoticeDetailBody();
@@ -405,19 +448,21 @@ public class NoticeServiceImpl extends ServiceImpl<NoticeMapper, NoticeEntity> i
             Response<ResponseEntityWrapper<List<Member>>> execute = call.execute();
             ResponseEntityWrapper<List<Member>> body = execute.body();
             List<Member> memberList;
-            if (null != body.getData()) {
-                memberList = body.getData();
-                if (CollectionUtils.isNotEmpty(memberList)) {
-                    Member member = memberList.get(0);
-                    if (null != member && StringUtils.isNotEmpty(member.getMemberName())) {
-                        noticeDetailBody.setIssueUserName(member.getMemberName());
+            if (null != body) {
+                if (null != body.getData()) {
+                    memberList = body.getData();
+                    if (CollectionUtils.isNotEmpty(memberList)) {
+                        Member member = memberList.get(0);
+                        if (null != member && StringUtils.isNotEmpty(member.getMemberName())) {
+                            noticeDetailBody.setIssueUserName(member.getMemberName());
+                        }
                     }
                 }
             }
         }
         //H5分享地址(?)
         if (noticeEntity.getSecrecyState() == 1) {
-            noticeDetailBody.setNoticeH5Address(H5Address + "?" + "id=" + id);
+            noticeDetailBody.setNoticeH5Address(h5Address + "?" + "id=" + id + "&" + userId);
         } else {
             noticeDetailBody.setNoticeH5Address(null);
         }
@@ -435,5 +480,26 @@ public class NoticeServiceImpl extends ServiceImpl<NoticeMapper, NoticeEntity> i
         NoticeDetailsBody noticeDetailsBody = new NoticeDetailsBody();
         BeanUtils.copyProperties(noticeEntity, noticeDetailsBody);
         return noticeDetailsBody;
+    }
+
+    /**
+     * 查询用户权限
+     *
+     * @param userId 成员id
+     * @return
+     * @throws BaseException
+     * @throws IOException
+     */
+    @Override
+    public Boolean selectAuthority(String userId) throws BaseException, IOException {
+        Call<ResponseEntityWrapper> call = authorityService.authority(appId, userId);
+        Response<ResponseEntityWrapper> execute = call.execute();
+        ResponseEntityWrapper body = execute.body();
+        //判断是否为管理员
+        boolean results = false;
+        if (null != body.getData()) {
+            results = (boolean) body.getData();
+        }
+        return results;
     }
 }

@@ -71,6 +71,11 @@ public class ApprovalDetailDTO {
     private Long createTime;
 
     /**
+     * 修改时间
+     */
+    private Long finishTime;
+
+    /**
      * 用户主键
      */
     private String userId;
@@ -84,6 +89,11 @@ public class ApprovalDetailDTO {
      * 头像
      */
     private String avatar;
+
+    /**
+     * 颜色
+     */
+    private String color;
 
     /**
      * 手机号

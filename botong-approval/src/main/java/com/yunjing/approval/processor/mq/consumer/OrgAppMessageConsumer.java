@@ -1,6 +1,9 @@
 package com.yunjing.approval.processor.mq.consumer;
 
+import com.yunjing.approval.model.dto.OrgMemberMessage;
+import com.yunjing.approval.model.entity.ApprovalUser;
 import com.yunjing.approval.processor.mq.configuration.OrgAppMessageConfiguration;
+import com.yunjing.approval.service.IApprovalUserService;
 import com.yunjing.approval.service.IOrgModelService;
 import com.yunjing.message.annotation.MessageQueueDeclarable;
 import com.yunjing.message.declare.consumer.AbstractMessageConsumerWithQueueDeclare;
@@ -10,6 +13,9 @@ import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
+
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  * <p>

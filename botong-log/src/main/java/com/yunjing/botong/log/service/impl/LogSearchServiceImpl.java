@@ -8,6 +8,7 @@ import com.alibaba.fastjson.TypeReference;
 import com.common.mongo.dao.Page;
 import com.common.mongo.util.BeanUtils;
 import com.common.mongo.util.PageWrapper;
+import com.common.redis.share.UserInfo;
 import com.netflix.discovery.converters.Auto;
 import com.yunjing.botong.log.cache.MemberRedisOperator;
 import com.yunjing.botong.log.constant.LogConstant;
@@ -192,7 +193,7 @@ public class LogSearchServiceImpl implements ILogSearchService {
      */
     private PageWrapper<LogDetailVO> convertResults(ReceviedParam receviedParam, PageWrapper<LogDetail> detailResult){
         PageWrapper<LogDetailVO> result = new PageWrapper<>();
-        if (detailResult.getRecords() != null && detailResult.getSize() > 0) {
+        if (detailResult.getRecords() != null && detailResult.getRecords().size() > 0) {
             LogDetailVO vo;
             List<LogDetailVO> resultRecord = new ArrayList<>();
             Member userVO;
@@ -258,7 +259,7 @@ public class LogSearchServiceImpl implements ILogSearchService {
         //如果没有选择范围
         if (searchParam.getDeptIds() == null && searchParam.getUserIds() == null) {
             // 校验是否是管理员
-            boolean manager1 = appCenterService.isManager(searchParam.getAppId(), searchParam.getMemberId(), true);
+            boolean manager1 = appCenterService.isManager(searchParam.getAppId(), searchParam.getMemberId());
             if (manager1) {
                 // 管理员查询他所在企业的管理的memberId
                 memList = appCenterService.manageScope(searchParam.getAppId(), searchParam.getMemberId());
@@ -266,7 +267,11 @@ public class LogSearchServiceImpl implements ILogSearchService {
                     throw new ParameterErrorException(StatusCode.NOT_ADMIN_AUTH);
                 }
             } else {
-                Member user = memberRedisOperator.getMember(searchParam.getMemberId());;
+                Member user = memberRedisOperator.getMember(searchParam.getMemberId());
+                UserInfo userInfo = memberRedisOperator.getUserInfo(user.getPassportId());
+                user.setProfile(userInfo.getProfile());
+                user.setColor(userInfo.getColor());
+                user.setName(userInfo.getNick());
                 // 不是管理员查自己的
                 memList.add(user);
             }
@@ -300,6 +305,7 @@ public class LogSearchServiceImpl implements ILogSearchService {
             LogExcelVO logExcelVO;
             List<AttrValueVO> logData;
             AttrValueVO attrValueVO;
+            //日志明细转为导出对应的数据对象
             for (LogDetail detail : detailResult) {
                 logExcelVO = new LogExcelVO();
                 logExcelVO.setSender(memberMap.get(detail.getMemberId()).getName());
@@ -405,5 +411,35 @@ public class LogSearchServiceImpl implements ILogSearchService {
         Date time3 = new Date();
         log.info("数据注入excel表耗时：" + (time3.getTime() - time2.getTime()));
         return logExModel;
+    }
+
+    /**
+     * 获取日志详情
+     * @param receviedParam 参数对象
+     * @return 日志对象
+     */
+    @Override
+    public LogDetailVO get(ReceviedParam receviedParam) {
+        if (StringUtils.isEmpty(receviedParam.getLogId())) {
+            throw new ParameterErrorException("日志Id不能为空");
+        }
+        if (StringUtils.isEmpty(receviedParam.getUserId())) {
+            throw new ParameterErrorException("用户Id不能为空");
+        }
+        LogDetail detail = logDetailDao.findByLogId(receviedParam.getLogId(), receviedParam.getUserId());
+        if (detail == null) {
+            return  null;
+        }
+        PageWrapper<LogDetail> detailResult = new PageWrapper();
+        List<LogDetail> details = new ArrayList<>();
+        details.add(detail);
+        detailResult.setRecords(details);
+        PageWrapper<LogDetailVO> resultPage = convertResults(receviedParam, detailResult);
+        LogDetailVO result = null;
+        if (resultPage.getRecords() != null && resultPage.getRecords().size() > 0) {
+            result = resultPage.getRecords().get(0);
+        }
+
+        return result;
     }
 }

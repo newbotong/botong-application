@@ -75,6 +75,8 @@ public class ExcelModel {
         item[ApprovalExConsts.CELL_NUM_TITLE_0] = approvalData.getTitle();
         item[ApprovalExConsts.CELL_NUM_STATE_1] = approvalData.getState();
         item[ApprovalExConsts.CELL_NUM_RESULT_2] = approvalData.getResult();
+        item[ApprovalExConsts.CELL_NUM_CREATE_TIME_3] = approvalData.getCreateTime();
+        item[ApprovalExConsts.CELL_NUM_FINISH_TIME_4] = approvalData.getFinishTime();
         item[ApprovalExConsts.CELL_NUM_USERNAME_5] = approvalData.getUserName();
         item[ApprovalExConsts.CELL_NUM_DEPT_NAME_6] = approvalData.getDeptName();
         item[ApprovalExConsts.CELL_NUM_APPROVAL_NAME_7] = approvalData.getApprovalName();

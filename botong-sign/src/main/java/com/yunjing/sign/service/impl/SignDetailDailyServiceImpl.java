@@ -70,8 +70,23 @@ public class SignDetailDailyServiceImpl extends ServiceImpl<SignDetailDailyMappe
             if (signConfigModel.getTimeStatus() == 1) {
                 Date start = DateUtil.StringToDate(DateUtil.getDate(new Date()) + SignConstant.SEPARATE_STR_SPACE + signConfigModel.getStartTime(), DateStyle.YYYY_MM_DD_HH_MM);
                 Date end = DateUtil.StringToDate(DateUtil.getDate(new Date())  + SignConstant.SEPARATE_STR_SPACE + signConfigModel.getEndTime(), DateStyle.YYYY_MM_DD_HH_MM);
-                if (DateUtil.compareDate(new Date(), start) > 0 && DateUtil.compareDate(new Date(), end) < 0) {
-                    throw new UpdateMessageFailureException(600, "时间未到，不能打卡");
+                /**
+                 * 1、如果开始时间为空，只比较结束时间是否到期。没到期，就不能打卡
+                 * 2、开始时间不为空，结束时间不为空，比较开始时间和结束时间是否在范围
+                 * 3、开始时间部位空，结束时间为空，只判断开始时间
+                 */
+                if (start == null) {
+                    if (end != null && DateUtil.compareDate(new Date(), end) < 0) {
+                        throw new UpdateMessageFailureException(600, "未到打卡时间");
+                    }
+                } else {
+                    boolean compareFirst = DateUtil.compareDate(new Date(), start) > 0 && (end != null && DateUtil.compareDate(new Date(), end) < 0);
+                    if (compareFirst) {
+                        throw new UpdateMessageFailureException(600, "打卡未在时间范围");
+                    }
+                    if (DateUtil.compareDate(new Date(), start) > 0 && end == null) {
+                        throw new UpdateMessageFailureException(600, "打卡时间超出范围");
+                    }
                 }
             }
         }
@@ -84,6 +99,7 @@ public class SignDetailDailyServiceImpl extends ServiceImpl<SignDetailDailyMappe
             SignDetailImgDaily detailImg;
             int i = 1;
             List<SignDetailImgDaily> list = new ArrayList<>();
+            //组装图片对象
             for (String imgUrl : signDetailParam.getImgUrls().split(SignConstant.SEPARATE_STR)) {
                 detailImg = new SignDetailImgDaily();
                 detailImg.setSignDetailId(signDetail.getId());
@@ -117,7 +133,7 @@ public class SignDetailDailyServiceImpl extends ServiceImpl<SignDetailDailyMappe
      * 签到统计接口
      *
      * @param userAndDeptParam 部门id和用户id组合
-     * @return
+     * @return                  对象
      */
     @Override
     public SignListVO getCountInfo(UserAndDeptParam userAndDeptParam) {
@@ -128,7 +144,7 @@ public class SignDetailDailyServiceImpl extends ServiceImpl<SignDetailDailyMappe
      * 按月查询我签到的明细
      *
      * @param signDetailParam 签到明细
-     * @return
+     * @return                对象
      */
     @Override
     public MySignVO queryMonthInfo(SignDetailParam signDetailParam) {
@@ -144,8 +160,11 @@ public class SignDetailDailyServiceImpl extends ServiceImpl<SignDetailDailyMappe
     @Override
     public BaseExModel createTempExcel(UserAndDeptParam userAndDeptParam) {
         Date startD = DateUtil.StringToDate(userAndDeptParam.getSignDate() + "-01", DateStyle.YYYY_MM_DD);
-        Date endDate = DateUtil.getLastDayOfMonth(startD);
+        Date endDate = DateUtil.addDay(DateUtil.getLastDayOfMonth(startD), 1);
         List<SignExcelVO> exportData = iSignDetailService.getSignInList(userAndDeptParam, signDetailDailyMapper);
+        if (exportData == null) {
+            exportData = new ArrayList<>();
+        }
         SignExModel signExModel = new SignExModel();
 
         List<ExcelModel> excelModelList = new ArrayList<>();
@@ -185,7 +204,7 @@ public class SignDetailDailyServiceImpl extends ServiceImpl<SignDetailDailyMappe
      * 按月统计指定部门和人员的考勤信息
      *
      * @param userAndDeptParam 部门和人员
-     * @return
+     * @return                  分页对象
      */
     @Override
     public PageWrapper<UserMonthListVO> staticsMonthInfo(UserAndDeptParam userAndDeptParam) {
@@ -195,8 +214,8 @@ public class SignDetailDailyServiceImpl extends ServiceImpl<SignDetailDailyMappe
     /**
      * 获取所有的签到明细
      *
-     * @param signDetailParam
-     * @return
+     * @param signDetailParam       签到对象
+     * @return                      签到列表
      */
     @Override
     public List<SignDetailDaily> queryDetailList(SignDetailParam signDetailParam) {

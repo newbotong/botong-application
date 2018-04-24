@@ -16,10 +16,11 @@ public interface IModelItemService extends IBaseService<ModelItem> {
      * 获取模型
      *
      * @param modelId 模型主键
+     * @param memberId 成员id
      * @return 模型视图
      * @throws Exception 异常
      */
-    ClientModelItemVO getModelItem(String modelId) throws Exception;
+    ClientModelItemVO getModelItem(String modelId,String memberId) throws Exception;
 
     /**
      * 获取模型
@@ -33,16 +34,18 @@ public interface IModelItemService extends IBaseService<ModelItem> {
     /**
      * 保存模型
      *
-     * @param companyId 公司id
-     * @param memberId  成员id
-     * @param json      字段数据
+     * @param companyId  公司id
+     * @param memberId   成员id
+     * @param categoryId 分组id
+     * @param json       字段数据
      * @return 模型视图
      * @throws Exception 异常
      */
-    ModelVO saveModelItem(String companyId, String memberId, String json) throws Exception;
+    ModelVO saveModelItem(String companyId, String memberId, String categoryId, String json) throws Exception;
 
     /**
      * 删除企业下的模板子项
+     *
      * @param orgId 企业主键
      * @return
      */

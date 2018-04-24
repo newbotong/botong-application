@@ -90,4 +90,11 @@ public interface ILogSearchService  {
      * @throws Exception        异常
      */
     BaseExModel createLogExcel(SearchParam searchParam) throws Exception;
+
+    /**
+     * 获取日志详情
+     * @param receviedParam     参数对象
+     * @return                  日志对象
+     */
+    LogDetailVO get(ReceviedParam receviedParam);
 }

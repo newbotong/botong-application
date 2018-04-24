@@ -17,7 +17,9 @@ import com.yunjing.info.model.*;
 import com.yunjing.info.param.InfoCategoryParam;
 import com.yunjing.info.processor.okhttp.AuthorityService;
 import com.yunjing.info.service.InfoCatalogService;
+import com.yunjing.mommon.constant.StatusCode;
 import com.yunjing.mommon.global.exception.BaseException;
+import com.yunjing.mommon.global.exception.BaseRuntimeException;
 import com.yunjing.mommon.utils.IDUtils;
 import com.yunjing.mommon.wrapper.PageWrapper;
 import com.yunjing.mommon.wrapper.ResponseEntityWrapper;
@@ -152,16 +154,16 @@ public class InfoCatalogServiceImpl extends ServiceImpl<InfoCatalogMapper, InfoC
         List<InfoDto> infoDtoList = infoCatalogMapper.selectInfoCatalog(map, page);
         page.setRecords(infoDtoList);
         resultMap.put("page", page);
-        //OKHttp调用
-        Call<ResponseEntityWrapper> call = authorityService.authority(appId, userId);
-        Response<ResponseEntityWrapper> execute = call.execute();
-        ResponseEntityWrapper body = execute.body();
-        Boolean results = false;
-        if (null != body && null != body.getData()) {
-            //判断是否为管理员
-            results = (boolean) body.getData();
-        }
-        resultMap.put("admin", results);
+//        //OKHttp调用
+//        Call<ResponseEntityWrapper> call = authorityService.authority(appId, userId);
+//        Response<ResponseEntityWrapper> execute = call.execute();
+//        ResponseEntityWrapper body = execute.body();
+//        Boolean results = false;
+//        if (null != body && null != body.getData()) {
+//            //判断是否为管理员
+//            results = (boolean) body.getData();
+//        }
+//        resultMap.put("admin", results);
         return resultMap;
     }
 
@@ -184,7 +186,7 @@ public class InfoCatalogServiceImpl extends ServiceImpl<InfoCatalogMapper, InfoC
                 BeanUtils.copyProperties(infoDictionary, infoRedisInit);
                 list.add(infoRedisInit);
                 ids.add(infoDictionary.getId());
-                redisTemplate.opsForHash().put(InfoConstant.REDIS_CATALOG_ONE, infoDictionary.getId().toString(), JSONObject.toJSONString(infoRedisInit));
+                redisTemplate.opsForHash().put(InfoConstant.REDIS_CATALOG_ONE, infoDictionary.getId(), JSONObject.toJSONString(infoRedisInit));
             }
             if (CollectionUtils.isNotEmpty(ids)) {
                 for (String id : ids) {
@@ -197,7 +199,7 @@ public class InfoCatalogServiceImpl extends ServiceImpl<InfoCatalogMapper, InfoC
                 }
             }
         } else {
-            throw new BaseException("请先初始化公共类目缓存");
+            throw new BaseRuntimeException(StatusCode.ADMIN_USER_UPDATE_FAILED.getStatusCode(),"请先初始化公共类目缓存");
         }
     }
 

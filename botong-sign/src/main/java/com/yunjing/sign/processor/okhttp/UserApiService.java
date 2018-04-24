@@ -24,6 +24,7 @@ public interface UserApiService {
      *
      * @param deptIds
      * @param memberIds
+     * @param simplify
      * @return
      */
     @GET("/api/microapps/appcenter/org/find-sub-lists")
@@ -51,5 +52,25 @@ public interface UserApiService {
     @GET("/api/microapps/appcenter/org/find-member-page")
     Call<ResponseEntityWrapper<PageWrapper<SignUserInfoVO>>> findMemberPage(@Query("deptIds") String[] deptIds, @Query("memberIds") String[] memberIds,
                                                                             @Query("pageNo") int pageNo, @Query("pageSize")int pageSize);
+
+    /**
+     * 校验用户权限
+     *
+     * @param appId
+     * @param memberId
+     * @return
+     */
+    @GET("/api/microapps/appcenter/org/verify-manager")
+    Call<ResponseEntityWrapper<Boolean>> verifyManager(@Query("appId") String appId, @Query("memberId") String memberId);
+
+
+    /**
+     * 获取指定企业所有成员信息
+     *
+     * @param orgId
+     * @return
+     */
+    @GET("/api/microapps/appcenter/user/find-all-org-member")
+    Call<ResponseEntityWrapper<List<SignUserInfoVO>>> findAllOrgMember(@Query("orgId") String orgId);
 
 }

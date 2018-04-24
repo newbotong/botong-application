@@ -17,6 +17,9 @@ spring:
   sleuth:
     sampler:
       percentage: 1
+  zipkin:
+    service:
+      name: botong-zipkin
   datasource:
     url: ${mysql.url}
     username: ${mysql.username}
@@ -29,11 +32,6 @@ spring:
     port: ${rabbitmq.port}
     username: ${rabbitmq.username}
     password: ${rabbitmq.password}
-  redis:
-    host: ${redis.host}
-    port: ${redis.port}
-    database: ${redis.dbindex}
-    password: ${redis.password}
   data:
     mongodb:
       host: ${mongo.host}
@@ -68,6 +66,11 @@ spring:
       max-wait: -1
       max-idle: 8
       min-idle: 0
+  redis:
+    host: ${redis.host}
+    port: ${redis.port}
+    password: ${redis.password}
+    database: ${redis.dbindex}
 
 
 ##配置mybatis-plus
@@ -92,7 +95,15 @@ ali:
 botong:
   log:
     appId: ${botong.log.appId}
+  write-log: ${botong.log.write-log}
+  look-log: ${botong.log.look-log}
+  logShare: ${botong.log.logShare}
 
 # 写入文件日志
 logging:
   file: ${user.dir}/logs/${spring.application.name}.log
+
+#okHttp调用
+okhttp:
+  botong:
+    zuul: ${okhttp.botong.zuul}

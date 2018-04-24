@@ -12,6 +12,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import retrofit2.Call;
+import retrofit2.Callback;
 import retrofit2.Response;
 import retrofit2.Retrofit;
 import retrofit2.converter.gson.GsonConverterFactory;
@@ -124,6 +125,68 @@ public class UserRemoteApiServiceImpl implements UserRemoteApiService {
             ResponseEntityWrapper<List<SignUserInfoVO>> body = response.body();
             if (body != null) {
                 log.info("获取管理范围：code:{}，message:{}，data:{}", body.getStatusCode(), body.getStatusMessage(), JSON.toJSON(body.getData()));
+                if (response.isSuccessful() && body.getStatusCode() == StatusCode.SUCCESS.getStatusCode()) {
+                    return body.getData();
+                }
+            } else {
+                log.error("body is null");
+            }
+            return null;
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        return null;
+    }
+
+    /**
+     * 校验用户权限
+     *
+     * @param appId    appId
+     * @param memberId 成员Id
+     * @return
+     */
+    @Override
+    public boolean verifyManager(String appId, String memberId) {
+        if(userRemoteApiService == null){
+            initRetrofit();
+        }
+        Call<ResponseEntityWrapper<Boolean>> call = userRemoteApiService.verifyManager(appId, memberId);
+        try {
+            // 同步方式请求
+            Response<ResponseEntityWrapper<Boolean>> response = call.execute();
+            ResponseEntityWrapper<Boolean> body = response.body();
+            if (body != null) {
+                log.info("获取是否是管理员结果，code:{},message:{},data:{}", body.getStatusCode(), body.getStatusMessage(), JSON.toJSON(body.getData()));
+                if (response.isSuccessful() && body.getStatusCode() == StatusCode.SUCCESS.getStatusCode()) {
+                    return body.getData();
+                }
+            } else {
+                log.error("body is null");
+            }
+            return false;
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        return false;
+    }
+
+    /**
+     * 根据企业Id查询成员列表
+     *
+     * @param orgId 企业id
+     * @return 签到用户列表
+     */
+    @Override
+    public List<SignUserInfoVO> findAllOrgMember(String orgId) {
+        if(userRemoteApiService == null){
+            initRetrofit();
+        }
+        Call<ResponseEntityWrapper<List<SignUserInfoVO>>> call = userRemoteApiService.findAllOrgMember(orgId);
+        try {
+            Response<ResponseEntityWrapper<List<SignUserInfoVO>>> response = call.execute();
+            ResponseEntityWrapper<List<SignUserInfoVO>> body = response.body();
+            if (body != null) {
+                log.info("获取指定企业所有成员信息:code:{},message:{}", body.getStatusCode(), body.getStatusMessage());
                 if (response.isSuccessful() && body.getStatusCode() == StatusCode.SUCCESS.getStatusCode()) {
                     return body.getData();
                 }

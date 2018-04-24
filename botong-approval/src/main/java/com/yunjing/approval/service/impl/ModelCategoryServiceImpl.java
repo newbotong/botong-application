@@ -12,9 +12,8 @@ import com.yunjing.approval.model.vo.ModelListVO;
 import com.yunjing.approval.model.vo.ModelVO;
 import com.yunjing.approval.service.IModelCategoryService;
 import com.yunjing.approval.service.IModelService;
-import com.yunjing.approval.util.DateUtil;
-import com.yunjing.mommon.global.exception.BaseException;
 import com.yunjing.mommon.global.exception.MessageNotExitException;
+import com.yunjing.mommon.global.exception.MissingRequireFieldException;
 import com.yunjing.mommon.global.exception.UpdateMessageFailureException;
 import com.yunjing.mommon.utils.IDUtils;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -38,16 +37,16 @@ public class ModelCategoryServiceImpl extends BaseServiceImpl<ModelCategoryMappe
         ModelCategory modelCategory = new ModelCategory();
         if (categoryId == null) {
             modelCategory.setId(IDUtils.uuid());
-            modelCategory.setCreateTime(DateUtil.getCurrentTime().getTime());
+            modelCategory.setCreateTime(System.currentTimeMillis());
         } else {
             modelCategory = this.selectById(categoryId);
             if (modelCategory == null) {
                 modelCategory = new ModelCategory();
                 modelCategory.setId(IDUtils.uuid());
-                modelCategory.setCreateTime(DateUtil.getCurrentTime().getTime());
+                modelCategory.setCreateTime(System.currentTimeMillis());
             }
         }
-        modelCategory.setUpdateTime(DateUtil.getCurrentTime().getTime());
+        modelCategory.setUpdateTime(System.currentTimeMillis());
         modelCategory.setCategoryName(categoryName);
         modelCategory.setOrgId(orgId);
         modelCategory.setSort(0);
@@ -68,7 +67,7 @@ public class ModelCategoryServiceImpl extends BaseServiceImpl<ModelCategoryMappe
             for (ModelVO modelVO : modelVOList) {
                 modelIds.add(modelVO.getModelId());
             }
-            List<ModelL> modelLS = modelService.selectList(Condition.create().in("id",modelIds));
+            List<ModelL> modelLS = modelService.selectList(Condition.create().in("id", modelIds));
             ModelCategory modelCategory = this.selectOne(Condition.create().where("category_name={0}", "其他"));
             for (ModelL modelL : modelLS) {
                 modelL.setCategoryId(modelCategory.getId());
@@ -82,7 +81,7 @@ public class ModelCategoryServiceImpl extends BaseServiceImpl<ModelCategoryMappe
     }
 
     @Override
-    public boolean sortedCategory(String orgId, String sortArray) throws BaseException {
+    public boolean sortedCategory(String orgId, String sortArray) throws Exception {
         boolean isUpdated = false;
         try {
             // 解析排序数据
@@ -108,7 +107,7 @@ public class ModelCategoryServiceImpl extends BaseServiceImpl<ModelCategoryMappe
                 throw new MessageNotExitException("当前企业下不存在分组");
             }
         } catch (Exception e) {
-            throw new BaseException("解析分组排序数据错误");
+            throw new MissingRequireFieldException("解析分组排序数据错误");
         }
         return isUpdated;
     }

@@ -27,7 +27,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 @RunWith(SpringRunner.class)
 @SpringBootTest
 @AutoConfigureMockMvc
-public class SignConfigApiTest { 
+public class SignConfigApiTest extends BaseTest {
 
     @Autowired
     private MockMvc mvc; 
@@ -35,25 +35,6 @@ public class SignConfigApiTest {
     private final MediaType mediaType = MediaType.APPLICATION_JSON_UTF8;
 
     private final MediaType mediaTypeGET = MediaType.APPLICATION_FORM_URLENCODED;
-
-
-    /**
-     * @param url
-     * @param jsonContent
-     * @param params
-     */
-    private void postTest(String url, MediaType mediaType, String jsonContent, MultiValueMap<String, String> params){
-        try {
-            if(StringUtils.isNotBlank(jsonContent)){
-                mvc.perform(post(url).contentType(mediaType).content(jsonContent)).andExpect(status().isOk()).andDo(print());
-            } else {
-                mvc.perform(post(url).contentType(mediaType).params(params)).andExpect(status().isOk()).andDo(print());
-            }
-    
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-    }
 
     /** 
     * 
@@ -85,10 +66,8 @@ public class SignConfigApiTest {
     */ 
     @Test
     public void testGetSetting() throws Exception {
-        String url = "/sign/out/get-setting";
-        SignConfigParam body = new SignConfigParam();
-        body.setOrgId("00000");
-        postTest(url, mediaTypeGET, JSONObject.toJSONString(body), null);
+        String url = "/sign/out/get-setting?orgId=0000";
+        getTest(url, mediaTypeGET, null, null);
     } 
 
 

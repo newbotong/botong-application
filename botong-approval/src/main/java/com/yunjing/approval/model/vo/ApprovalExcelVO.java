@@ -35,11 +35,11 @@ public class ApprovalExcelVO {
     /**
      * 审批发起时间
      */
-    private Long createTime;
+    private String createTime;
     /**
      * 审批结束时间
      */
-    private Long finishTime;
+    private String finishTime;
     /**
      * 发起人姓名
      */

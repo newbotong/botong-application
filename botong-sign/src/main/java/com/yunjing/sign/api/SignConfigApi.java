@@ -7,6 +7,7 @@ import com.yunjing.sign.beans.param.SignConfigParam;
 import com.yunjing.sign.beans.vo.SignConfigVO;
 import com.yunjing.sign.service.ISignConfigService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.*;
 
@@ -26,6 +27,9 @@ public class SignConfigApi extends BaseController {
 
     @Autowired
     private ISignConfigService iSignConfigService;
+
+    @Value("${botong.log.appId}")
+    private String appId;
 
     /**
      * 设置签到规则
@@ -53,5 +57,18 @@ public class SignConfigApi extends BaseController {
         SignConfigVO vo = iSignConfigService.getSignConfig(orgId);
         return success(vo);
     }
+
+    /**
+     * 判断是否具有管理员权限
+     * @param memberId  成员id
+     * @return          是与否
+     */
+    @PostMapping("/is-admin")
+    public ResponseEntityWrapper isAdmin(@RequestParam String memberId){
+        // 基础校验
+        boolean isAdd = iSignConfigService.verifyManager(appId, memberId);
+        return success(isAdd);
+    }
+
 	
 }

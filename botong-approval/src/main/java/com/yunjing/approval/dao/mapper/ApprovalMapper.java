@@ -22,7 +22,6 @@ public interface ApprovalMapper extends IBaseMapper<Approval> {
      * @param approvalId 审批主键
      * @return
      */
-    List<ApprovalDetailDTO> getApprovalDetail(String approvalId);
 
     /**
      * 查询审批信息

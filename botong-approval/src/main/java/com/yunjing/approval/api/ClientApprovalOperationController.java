@@ -12,8 +12,6 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
-import java.util.List;
-
 
 /**
  * 客户端-审批服务接口
@@ -57,7 +55,7 @@ public class ClientApprovalOperationController extends BaseController {
                                         @RequestParam("memberId") String memberId,
                                         @RequestParam("modelId") String modelId,
                                         @RequestParam("jsonData") String jsonData,
-                                        @RequestParam(value = "deptId",required = false) String deptId,
+                                        @RequestParam(value = "deptId", required = false) String deptId,
                                         @RequestParam("sendUserIds") String sendUserIds,
                                         @RequestParam(value = "sendCopyIds", required = false) String sendCopyIds) throws Exception {
         JSONArray list = JSONArray.parseArray(jsonData);
@@ -104,6 +102,7 @@ public class ClientApprovalOperationController extends BaseController {
      * @param companyId  公司id
      * @param memberId   成员id
      * @param approvalId 审批主键
+     * @param userId     转让的审批人id
      * @return
      * @throws Exception
      */

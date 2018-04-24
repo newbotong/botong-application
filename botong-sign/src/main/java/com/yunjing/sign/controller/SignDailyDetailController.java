@@ -18,6 +18,7 @@ import com.yunjing.sign.service.ISignDetailService;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.poi.ss.usermodel.Workbook;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.web.bind.annotation.*;
 
 import javax.servlet.http.HttpServletResponse;
@@ -43,6 +44,9 @@ public class SignDailyDetailController extends BaseController {
     @Autowired
     private ISignConfigDailyService iSignConfigDailyService;
 
+    @Value("${botong.log.appId}")
+    private String appId;
+
 
     /**
      * 签到统计
@@ -53,6 +57,7 @@ public class SignDailyDetailController extends BaseController {
     public ResponseEntityWrapper statistics(@RequestBody UserAndDeptParam userAndDeptParam){
         // 基础校验
         BeanFieldValidator.getInstance().validate(userAndDeptParam);
+        userAndDeptParam.setAppId(appId);
         PageWrapper<UserMonthListVO> page = iSignDetailDailyService.staticsMonthInfo(userAndDeptParam);
         return success(page);
     }
@@ -97,11 +102,13 @@ public class SignDailyDetailController extends BaseController {
      * @throws Exception        异常
      */
     @GetMapping("/export")
-    public ResponseEntityWrapper export(HttpServletResponse response, String userIds, String deptIds, String signDate) throws Exception {
+    public ResponseEntityWrapper export(HttpServletResponse response, String userIds, String deptIds, String signDate, String memberId) throws Exception {
         UserAndDeptParam userAndDeptParamT = new UserAndDeptParam();
         userAndDeptParamT.setDeptIds(deptIds);
         userAndDeptParamT.setUserIds(userIds);
         userAndDeptParamT.setSignDate(signDate);
+        userAndDeptParamT.setMemberId(memberId);
+        userAndDeptParamT.setAppId(appId);
         boolean exportFlag = false;
         BaseExModel excel = iSignDetailDailyService.createTempExcel(userAndDeptParamT);
         String fileName = excel.getFileName();

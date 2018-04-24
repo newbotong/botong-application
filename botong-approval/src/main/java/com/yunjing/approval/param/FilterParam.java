@@ -24,7 +24,7 @@ public class FilterParam {
     /**
      * 审批类型
      */
-    private Long modelId;
+    private String modelId;
 
     /**
      * 审批时间
@@ -41,4 +41,15 @@ public class FilterParam {
      */
     private String searchKey;
 
+    @Override
+    public String toString() {
+        return "FilterParam{" +
+                "state=" + state +
+                ", result=" + result +
+                ", modelId=" + modelId +
+                ", time=" + time +
+                ", deptId='" + deptId + '\'' +
+                ", searchKey='" + searchKey + '\'' +
+                '}';
+    }
 }

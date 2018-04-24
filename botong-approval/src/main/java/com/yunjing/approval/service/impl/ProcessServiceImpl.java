@@ -6,40 +6,33 @@ import com.alibaba.fastjson.JSONObject;
 import com.baomidou.mybatisplus.mapper.Condition;
 import com.baomidou.mybatisplus.mapper.Wrapper;
 import com.common.mybatis.service.impl.BaseServiceImpl;
-import com.yunjing.approval.dao.mapper.ApprovalProcessMapper;
-import com.yunjing.approval.dao.mapper.ConditionMapper;
-import com.yunjing.approval.dao.mapper.CopyMapper;
 import com.yunjing.approval.dao.mapper.ProcessMapper;
 import com.yunjing.approval.model.entity.*;
 import com.yunjing.approval.model.vo.ApproverVO;
 import com.yunjing.approval.model.vo.UserVO;
+import com.yunjing.approval.processor.okhttp.AppCenterService;
 import com.yunjing.approval.service.*;
-import com.yunjing.approval.util.ApproConstants;
-import com.yunjing.mommon.global.exception.BaseException;
+import com.yunjing.mommon.global.exception.InsertMessageFailureException;
+import com.yunjing.mommon.global.exception.ParameterErrorException;
 import com.yunjing.mommon.utils.IDUtils;
 import org.apache.commons.lang.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Propagation;
-import org.springframework.transaction.annotation.Transactional;
 
 import java.util.*;
 import java.util.stream.Collectors;
 
 /**
- * @author roc
+ * @author 刘小鹏
  * @date 2017/12/21
  */
 @Service
-@Transactional(propagation = Propagation.REQUIRED, rollbackFor = Exception.class)
 public class ProcessServiceImpl extends BaseServiceImpl<ProcessMapper, SetsProcess> implements IProcessService {
 
 
     @Autowired
     private IApprovalSetsService approvalSetsService;
 
-    @Autowired
-    private ConditionMapper conditionMapper;
     @Autowired
     private IConditionService conditionService;
     @Autowired
@@ -51,16 +44,15 @@ public class ProcessServiceImpl extends BaseServiceImpl<ProcessMapper, SetsProce
     private IApprovalUserService approvalUserService;
     @Autowired
     private ICopyService copyService;
+
     @Autowired
-    private ApprovalProcessMapper approvalProcessMapper;
-    @Autowired
-    private CopyMapper copyMapper;
+    private AppCenterService appCenterService;
 
     @Override
     public boolean delete(String modelId, String conditions) throws Exception {
 
         if (null == modelId) {
-            throw new BaseException("模型主键不存在");
+            throw new ParameterErrorException("模型主键不存在");
         }
 
         Wrapper<SetsProcess> wrapper;
@@ -78,6 +70,7 @@ public class ProcessServiceImpl extends BaseServiceImpl<ProcessMapper, SetsProce
 
     @Override
     public List<UserVO> getProcess(String modelId, List<String> conditionIds) throws Exception {
+
         List<UserVO> users = new ArrayList<>();
         List<SetsProcess> list;
         if (conditionIds != null && !conditionIds.isEmpty()) {
@@ -87,9 +80,9 @@ public class ProcessServiceImpl extends BaseServiceImpl<ProcessMapper, SetsProce
         }
         List<ApprovalUser> userList = approvalUserService.selectList(Condition.create());
 
-        String passportId = "default";
         for (SetsProcess process : list) {
             String userId = process.getApprover();
+            String passportId = "";
             String userNick = "";
             String userAvatar = null;
             if (userId.indexOf("admin_") != -1) {
@@ -101,6 +94,7 @@ public class ProcessServiceImpl extends BaseServiceImpl<ProcessMapper, SetsProce
                     if (user != null) {
                         userNick = user.getName();
                         userAvatar = user.getAvatar();
+                        passportId = user.getPassportId();
                     }
                 }
 
@@ -118,26 +112,6 @@ public class ProcessServiceImpl extends BaseServiceImpl<ProcessMapper, SetsProce
     @Override
     public boolean updateProcess(String modelId, String conditionId, String userArray) throws Exception {
         String[] userIds = userArray.split(",");
-        int setting = ApproConstants.SET_TYPE_0;
-        if (null != conditionId) {
-            setting = ApproConstants.SET_TYPE_1;
-        }
-        if (null == conditionId) {
-            conditionId = null;
-        }
-        ApprovalSets approvalSets = approvalSetsService.selectOne(Condition.create().where("model_id={0}", modelId));
-        if (approvalSets == null) {
-            approvalSets = new ApprovalSets();
-            approvalSets.setId(modelId);
-        }
-        approvalSets.setSetting(setting);
-        boolean insertOrUpdate = approvalSetsService.insertOrUpdate(approvalSets);
-        if (!insertOrUpdate) {
-            throw new BaseException("审批设置项保存失败");
-        }
-        // 先删除旧的审批条件，再设置新的审批条件
-        this.delete(modelId, conditionId);
-
         // 批量保存审批人信息
         List<SetsProcess> list = new ArrayList<>();
         for (int i = 0; i < userIds.length; i++) {
@@ -151,7 +125,7 @@ public class ProcessServiceImpl extends BaseServiceImpl<ProcessMapper, SetsProce
         }
         boolean insertBatch = this.insertBatch(list);
         if (!insertBatch) {
-            throw new BaseException("批量保存审批人信息失败");
+            throw new InsertMessageFailureException("批量保存审批人信息失败");
         }
         return true;
     }
@@ -196,7 +170,7 @@ public class ProcessServiceImpl extends BaseServiceImpl<ProcessMapper, SetsProce
                         String field = sc.getCdn().substring(0, sc.getCdn().indexOf(" "));
                         String value = sc.getCdn().substring(sc.getCdn().lastIndexOf(" "), sc.getCdn().length()).trim();
                         for (Map.Entry<String, String> m : param.entrySet()) {
-                            if (sc != null && field.equals(m.getKey()) && value.equals(m.getValue())) {
+                            if (sc != null && field.equals(m.getKey()) && m.getValue().equals(value)) {
                                 cdnIds.add(sc.getId());
                             }
 
@@ -206,7 +180,6 @@ public class ProcessServiceImpl extends BaseServiceImpl<ProcessMapper, SetsProce
                 } else {
                     cdnIds.addAll(conditionIds);
                 }
-
                 if (cdnIds.isEmpty()) {
                     return null;
                 }
@@ -252,7 +225,7 @@ public class ProcessServiceImpl extends BaseServiceImpl<ProcessMapper, SetsProce
     }
 
     @Override
-    public boolean saveDefaultApprover(String modelId, String approverIds, String copyIds) throws BaseException {
+    public boolean saveDefaultApprover(String modelId, String approverIds, String copyIds) {
         boolean isInserted = false;
         String[] aIds = approverIds.split(",");
         String[] cIds = copyIds.split(",");
@@ -269,7 +242,7 @@ public class ProcessServiceImpl extends BaseServiceImpl<ProcessMapper, SetsProce
         if (!list.isEmpty()) {
             boolean insertBatch = this.insertBatch(list);
             if (!insertBatch) {
-                throw new BaseException("批量保存审批人信息失败");
+                throw new InsertMessageFailureException("批量保存审批人信息失败");
             }
         }
         List<Copy> copyList = new ArrayList<>();
@@ -285,7 +258,7 @@ public class ProcessServiceImpl extends BaseServiceImpl<ProcessMapper, SetsProce
         if (!copyList.isEmpty()) {
             isInserted = copyService.insertBatch(copyList);
             if (!isInserted) {
-                throw new BaseException("批量保存抄送人信息失败");
+                throw new InsertMessageFailureException("批量保存抄送人信息失败");
             }
         }
         return isInserted;

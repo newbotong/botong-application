@@ -19,11 +19,14 @@ import com.yunjing.approval.param.DataParam;
 import com.yunjing.approval.processor.task.async.ApprovalPushTask;
 import com.yunjing.approval.service.*;
 import com.yunjing.approval.util.ApproConstants;
-import com.yunjing.approval.util.DateUtil;
 import com.yunjing.approval.util.EmojiFilterUtils;
-import com.yunjing.mommon.global.exception.BaseException;
+import com.yunjing.mommon.Enum.DateStyle;
+import com.yunjing.mommon.global.exception.DeleteMessageFailureException;
 import com.yunjing.mommon.global.exception.InsertMessageFailureException;
+import com.yunjing.mommon.global.exception.MessageNotExitException;
+import com.yunjing.mommon.global.exception.ParameterErrorException;
 import com.yunjing.mommon.utils.BeanUtils;
+import com.yunjing.mommon.utils.DateUtil;
 import com.yunjing.mommon.utils.IDUtils;
 import com.yunjing.mommon.wrapper.PageWrapper;
 import org.apache.commons.collections.CollectionUtils;
@@ -33,7 +36,6 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.*;
@@ -46,7 +48,6 @@ import static java.util.Comparator.comparing;
  * @date 2018/1/15
  */
 @Service
-@Transactional(propagation = Propagation.REQUIRED, rollbackFor = Exception.class)
 public class ApprovalServiceImpl extends BaseServiceImpl<ApprovalMapper, Approval> implements IApprovalService {
 
     private final Log logger = LogFactory.getLog(ApprovalServiceImpl.class);
@@ -77,14 +78,16 @@ public class ApprovalServiceImpl extends BaseServiceImpl<ApprovalMapper, Approva
     private RedisApproval redisTemplate;
 
     @Override
+    @Transactional(rollbackFor = Exception.class)
     public boolean submit(String companyId, String memberId, String modelId, JSONArray jsonData, String sendUserIds, String sendCopyIds) throws Exception {
+        logger.info("companyId: " + companyId + " memberId: " + memberId + " modelId: " + modelId + " jsonData： " + jsonData.toJSONString() + " sendUserIds： " + sendUserIds + " sendCopyIds: " + sendCopyIds);
         ModelL modelL = modelService.selectById(modelId);
         Approval approval = new Approval();
         approval.setId(IDUtils.uuid());
         approval.setModelId(modelId);
         approval.setOrgId(companyId);
         approval.setUserId(memberId);
-        approval.setCreateTime(DateUtil.getCurrentTime().getTime());
+        approval.setCreateTime(System.currentTimeMillis());
         approval.setState(0);
         approval.setModelVersion(modelL.getModelVersion());
         // 处理审批标题
@@ -117,7 +120,6 @@ public class ApprovalServiceImpl extends BaseServiceImpl<ApprovalMapper, Approva
         Set<ApprovalAttr> attrSet = new HashSet<>();
         Set<ApprovalAttr> contentSet = new HashSet<>();
         // 解析并保存审批信息
-//        JSONArray jsonArray = JSON.parseArray(jsonData);
         Iterator<Object> it = jsonData.iterator();
         while (it.hasNext()) {
             JSONObject obj = (JSONObject) it.next();
@@ -147,7 +149,7 @@ public class ApprovalServiceImpl extends BaseServiceImpl<ApprovalMapper, Approva
                     attr1.setId(IDUtils.uuid());
                     attr1.setApprovalId(approval.getId());
                     JSONObject contents = (JSONObject) content.next();
-                    JSONArray array1 = contents.getJSONArray("modelItems");
+                    JSONArray array1 = contents.getJSONArray("items");
                     String field = contents.getString("field");
                     attr1.setAttrType(type);
                     attr1.setAttrName(field);
@@ -241,20 +243,20 @@ public class ApprovalServiceImpl extends BaseServiceImpl<ApprovalMapper, Approva
         List<ApprovalProcess> approvalProcessList = approvalProcessService.selectList(new EntityWrapper<ApprovalProcess>().in("approval_id", approvaIds).and("is_delete=0"));
 
         if (CollectionUtils.isEmpty(approvalProcessList)) {
-            throw new BaseException("审批流程信息不存在");
+            throw new MessageNotExitException("审批流程信息不存在");
         }
 
         Set<String> userIdSet = approvalProcessList.stream().map(ApprovalProcess::getUserId).collect(Collectors.toSet());
 
         if (CollectionUtils.isEmpty(userIdSet)) {
-            throw new BaseException("审批人信息不存在");
+            throw new MessageNotExitException("审批人信息不存在");
         }
 
         List<String> userIds = new ArrayList<>(userIdSet.size());
         userIds.addAll(userIdSet);
         List<ApprovalUser> users = approvalUserService.selectList(Condition.create().in("id", userIds));
         if (CollectionUtils.isEmpty(users)) {
-            throw new BaseException("获取审批人信息不存在");
+            throw new MessageNotExitException("获取审批人信息不存在");
         }
 
         // key = id, value = nick
@@ -280,6 +282,7 @@ public class ApprovalServiceImpl extends BaseServiceImpl<ApprovalMapper, Approva
     }
 
     @Override
+    @Transactional(rollbackFor = Exception.class)
     public boolean delete(String approvalId) throws Exception {
         boolean flag = false;
 
@@ -297,7 +300,7 @@ public class ApprovalServiceImpl extends BaseServiceImpl<ApprovalMapper, Approva
         // 删除审批结果数据
         flag = approvalService.delete(Condition.create().where("id={0}", approvalId));
         if (!flag) {
-            throw new BaseException("审批结果数据删除异常或已经被删除");
+            throw new DeleteMessageFailureException("审批结果数据删除异常或已经被删除");
         }
         return true;
     }
@@ -309,7 +312,6 @@ public class ApprovalServiceImpl extends BaseServiceImpl<ApprovalMapper, Approva
         String modelId = dataParam.getModelId();
 
         List<ApprovalExcelVO> exportData = getExportData(dataParam);
-
         ApprovalExModel approvalExModel = new ApprovalExModel();
         // 从redis缓存中获取approvalExData
         ApprovalExData approvalExData = approvalRedisService.get(orgId + userId);
@@ -329,10 +331,10 @@ public class ApprovalServiceImpl extends BaseServiceImpl<ApprovalMapper, Approva
             modelLS = new ArrayList<>();
         }
         // 文件名
-        String currentTime = DateUtil.dateFormmat(DateUtil.getCurrentTime(), "yyyyMMddHHmmss");
+        String currentTime = DateUtil.DateToString(new Date(), DateStyle.YYYYMMDDHHMMSS);
         StringBuilder fileName = new StringBuilder().append(currentTime).append(ApprovalExConsts.SEPARATOR_POINT).append(ApprovalExConsts.Type_xls);
         List<ExcelModel> excelModelList = new ArrayList<>();
-        String tableHead = "报表生成日期：" + DateUtil.dateFormmat(DateUtil.getCurrentTime(), DateUtil.DATE_FORMAT_1);
+        String tableHead = "报表生成日期：" + DateUtil.DateToString(new Date(), DateStyle.YYYY_MM_DD_HH_MM_SS);
         if (!modelLS.isEmpty()) {
             for (ModelL modelL : modelLS) {
                 int length = modelL.getModelVersion() + 1;
@@ -351,12 +353,7 @@ public class ApprovalServiceImpl extends BaseServiceImpl<ApprovalMapper, Approva
                     if (null != dataParam.getCreateTimeStart() && null != dataParam.getCreateTimeEnd()) {
                         statisticDate = statisticDate + dataParam.getCreateTimeStart() + " —— " + dataParam.getCreateTimeEnd() + "       ";
                     } else {
-                        CompanyDTO companyDTO = (CompanyDTO) redisTemplate.getTemple().opsForHash().get(ApproConstants.BOTONG_ORG, orgId);
-                        String orgCreateTime = "";
-                        if (companyDTO != null) {
-                            orgCreateTime = com.yunjing.mommon.utils.DateUtil.convert(companyDTO.getStartTime());
-                        }
-                        statisticDate = statisticDate + orgCreateTime + " —— " + DateUtil.dateFormmat(new Date(), DateUtil.DATE_FORMAT_2) + "       ";
+                        statisticDate = getExportTime(orgId, statisticDate);
                     }
                     excelModel.setTableHeader(statisticDate + tableHead);
                     if (!exportData.isEmpty() && exportData.get(0).getModelVersion() == null) {
@@ -406,8 +403,7 @@ public class ApprovalServiceImpl extends BaseServiceImpl<ApprovalMapper, Approva
             if (null != dataParam.getCreateTimeStart() && null != dataParam.getCreateTimeEnd()) {
                 statisticDate = statisticDate + dataParam.getCreateTimeStart() + " —— " + dataParam.getCreateTimeEnd() + "       ";
             } else {
-                String orgCreateTime = "";
-                statisticDate = statisticDate + orgCreateTime + " —— " + DateUtil.dateFormmat(new Date(), DateUtil.DATE_FORMAT_2) + "       ";
+                statisticDate = getExportTime(orgId, statisticDate);
             }
 
             excelModel.setTableHeader(statisticDate + tableHead);
@@ -419,6 +415,16 @@ public class ApprovalServiceImpl extends BaseServiceImpl<ApprovalMapper, Approva
         //  保存导出记录
         saveExportLog(orgId, userId, modelId, fileName.toString(), exportData);
         return approvalExModel;
+    }
+
+    private String getExportTime(String orgId, String statisticDate) {
+        CompanyDTO companyDTO = (CompanyDTO) redisTemplate.getTemple().opsForHash().get(ApproConstants.BOTONG_ORG, orgId);
+        String orgCreateTime = "";
+        if (companyDTO != null) {
+            orgCreateTime = DateUtil.convert(companyDTO.getStartTime());
+        }
+        statisticDate = statisticDate + DateUtil.StringToString(orgCreateTime, DateStyle.YYYY_MM_DD) + " —— " + DateUtil.DateToString(new Date(), DateStyle.YYYY_MM_DD) + "       ";
+        return statisticDate;
     }
 
     /**
@@ -440,28 +446,22 @@ public class ApprovalServiceImpl extends BaseServiceImpl<ApprovalMapper, Approva
         List<ApprovalProcess> approvalProcessList = approvalProcessService.selectList(new EntityWrapper<ApprovalProcess>().in("approval_id", approvalIds));
         if (CollectionUtils.isEmpty(approvalProcessList)) {
             logger.error("审批流程信息不存在");
-            throw new BaseException("审批流程信息不存在");
+            throw new MessageNotExitException("审批流程信息不存在");
         }
         Set<String> userIdSet = approvalProcessList.stream().map(ApprovalProcess::getUserId).collect(Collectors.toSet());
         if (CollectionUtils.isEmpty(userIdSet)) {
             logger.error("审批人信息不存在");
-            throw new BaseException("审批人信息不存在");
+            throw new MessageNotExitException("审批人信息不存在");
         }
         List<String> userIds = new ArrayList<>(userIdSet.size());
         userIds.addAll(userIdSet);
         List<ApprovalUser> users = approvalUserService.selectList(Condition.create().in("id", userIds));
         if (CollectionUtils.isEmpty(users)) {
             logger.error("获取审批人信息不存在");
-//            throw new BaseException("获取审批人信息不存在");
+            throw new MessageNotExitException("获取审批人信息不存在");
         }
         // 封装审批人主键与昵称 （key = id, value = nick）
         Map<String, String> userMap = users.stream().collect(Collectors.toMap(ApprovalUser::getId, ApprovalUser::getName));
-        // 审批状态
-        String status = "";
-        // 审批结果
-        String result = "";
-        String timeConsuming = "";
-
 
         // 获取该企业下所有modelItem
         List<ModelItem> modelItems = modelItemMapper.selectAll(orgId);
@@ -476,6 +476,12 @@ public class ApprovalServiceImpl extends BaseServiceImpl<ApprovalMapper, Approva
         // 查询编辑审批表单后填写的所有审批信息数据
         List<ApproveAttributeVO> approveAttrList = approvalAttrMapper.selectAttrListByOrgId(orgId);
         for (Approval approval : approvalList) {
+            // 审批状态
+            String status = "";
+            // 审批结果
+            String result = "";
+            // 耗时
+            String timeConsuming = "";
             ApprovalExcelVO excelVO = new ApprovalExcelVO();
             // 模型主键
             if (approval != null) {
@@ -491,7 +497,6 @@ public class ApprovalServiceImpl extends BaseServiceImpl<ApprovalMapper, Approva
                     status = "已撤回";
                 }
                 excelVO.setState(status);
-                status = "";
                 // 审批结果
                 if (null != approval.getResult() && approval.getResult() == 1) {
                     result = "同意";
@@ -501,11 +506,10 @@ public class ApprovalServiceImpl extends BaseServiceImpl<ApprovalMapper, Approva
                     result = "已撤销";
                 }
                 excelVO.setResult(result);
-                result = "";
                 // 审批发起时间
-                excelVO.setCreateTime(null != approval.getCreateTime() ? approval.getCreateTime() : null);
+                excelVO.setCreateTime(approval.getCreateTime() != null ? DateUtil.convert(approval.getCreateTime()) : null);
                 // 审批结束时间
-                excelVO.setFinishTime(null != approval.getFinishTime() ? approval.getFinishTime() : null);
+                excelVO.setFinishTime(approval.getFinishTime() != null ? DateUtil.convert(approval.getFinishTime()) : null);
                 List<ApprovalUser> userVO1 = userList.parallelStream().filter(userVO -> userVO.getId().equals(approval.getUserId())).collect(Collectors.toList());
                 if (!userVO1.isEmpty()) {
                     // 发起人姓名
@@ -524,7 +528,7 @@ public class ApprovalServiceImpl extends BaseServiceImpl<ApprovalMapper, Approva
                 // 耗时
                 if (null != approval.getFinishTime() && null != approval.getCreateTime()) {
                     long time = approval.getFinishTime() - approval.getCreateTime();
-                    timeConsuming = DateUtil.getTime(time);
+                    timeConsuming = getTime(time);
                     excelVO.setTimeConsuming(timeConsuming);
                 } else {
                     excelVO.setTimeConsuming(timeConsuming);
@@ -740,13 +744,13 @@ public class ApprovalServiceImpl extends BaseServiceImpl<ApprovalMapper, Approva
      * @param exportData 导出数据
      * @return
      */
-    private boolean saveExportLog(String orgId, String userId, String modelId, String fileName, List<ApprovalExcelVO> exportData) throws BaseException {
+    private boolean saveExportLog(String orgId, String userId, String modelId, String fileName, List<ApprovalExcelVO> exportData) throws Exception {
 
         if (null == orgId) {
-            throw new BaseException("该企业不存在");
+            throw new ParameterErrorException("该企业不存在");
         }
         if (null == userId) {
-            throw new BaseException("该用户不存在");
+            throw new ParameterErrorException("该用户不存在");
         }
         String modelIds;
         Set<String> set = new HashSet<>();
@@ -769,21 +773,21 @@ public class ApprovalServiceImpl extends BaseServiceImpl<ApprovalMapper, Approva
         }
         exportLog.setFileName(fileName);
         exportLog.setId(IDUtils.uuid());
-        exportLog.setCreateTime(DateUtil.getCurrentTime().getTime());
+        exportLog.setCreateTime(System.currentTimeMillis());
         exportLog.setOrgId(orgId);
         exportLog.setUserId(userId);
         boolean insert = exportLogService.insert(exportLog);
 
         if (!insert) {
-            throw new BaseException("保存导出记录失败");
+            throw new InsertMessageFailureException("保存导出记录失败");
         }
         return true;
     }
 
-    private Wrapper<Approval> getWrapper(DataParam dataParam) throws BaseException {
+    private Wrapper<Approval> getWrapper(DataParam dataParam) throws Exception {
         Wrapper<Approval> wrapper = new EntityWrapper<>();
         if (StringUtils.isBlank(dataParam.getCompanyId())) {
-            throw new BaseException("主键不存在");
+            throw new ParameterErrorException("主键不存在");
         }
         wrapper.eq("org_id", dataParam.getCompanyId());
         if (StringUtils.isNotBlank(dataParam.getModelId())) {
@@ -815,11 +819,11 @@ public class ApprovalServiceImpl extends BaseServiceImpl<ApprovalMapper, Approva
         return wrapper;
     }
 
-    private List<Approval> getList(DataParam dataParam) throws BaseException {
+    private List<Approval> getList(DataParam dataParam) throws Exception {
         return this.selectList(getWrapper(dataParam).orderBy("model_id", true));
     }
 
-    private PageWrapper<Approval> getPage(DataParam dataParam) throws BaseException {
+    private PageWrapper<Approval> getPage(DataParam dataParam) throws Exception {
         com.baomidou.mybatisplus.plugins.Page page = new com.baomidou.mybatisplus.plugins.Page(dataParam.getCurrentPage(), dataParam.getPageSize());
         com.baomidou.mybatisplus.plugins.Page page1 = this.selectPage(page, getWrapper(dataParam));
         PageWrapper<Approval> pageWrapper = BeanUtils.mapPage(page1, Approval.class);
@@ -833,7 +837,7 @@ public class ApprovalServiceImpl extends BaseServiceImpl<ApprovalMapper, Approva
      * @param approval    审批对象
      * @return
      */
-    private boolean saveApprovalUser(String sendUserIds, Approval approval) throws BaseException {
+    private boolean saveApprovalUser(String sendUserIds, Approval approval) throws Exception {
         boolean flag = false;
         if (sendUserIds != null) {
             // 去除可能的重复数据
@@ -856,7 +860,7 @@ public class ApprovalServiceImpl extends BaseServiceImpl<ApprovalMapper, Approva
                         ApprovalProcess approvalProcess = new ApprovalProcess();
                         approvalProcess.setId(IDUtils.uuid());
                         approvalProcess.setApprovalId(String.valueOf(approval.getId()));
-                        approvalProcess.setProcessTime(DateUtil.getCurrentTime().getTime());
+                        approvalProcess.setProcessTime(System.currentTimeMillis());
                         approvalProcess.setProcessState(0);
                         approvalProcess.setSeq(j + 1);
                         approvalProcess.setUserId(String.valueOf(user.getId()));
@@ -882,7 +886,7 @@ public class ApprovalServiceImpl extends BaseServiceImpl<ApprovalMapper, Approva
      * @param approval    审批对象
      * @return
      */
-    private boolean saveCopyUser(String sendCopyIds, Approval approval) throws BaseException {
+    private boolean saveCopyUser(String sendCopyIds, Approval approval) throws Exception {
         boolean flag = false;
         if (StringUtils.isNotBlank(sendCopyIds)) {
             // 去除可能的重复数据
@@ -905,7 +909,7 @@ public class ApprovalServiceImpl extends BaseServiceImpl<ApprovalMapper, Approva
                 copys1.setUserId(user.getId());
                 copys1.setId(IDUtils.uuid());
                 copys1.setCopySType(0);
-                copys1.setCreateTime(DateUtil.getCurrentTime().getTime());
+                copys1.setCreateTime(System.currentTimeMillis());
                 copies.add(copys1);
             }
             if (!copies.isEmpty()) {
@@ -922,5 +926,22 @@ public class ApprovalServiceImpl extends BaseServiceImpl<ApprovalMapper, Approva
     private String convertDate(Long time) {
         String date = com.yunjing.mommon.utils.DateUtil.convert(time);
         return date.substring(0, date.indexOf("")).replaceAll("-", "");
+    }
+
+    /**
+     * 将给定的时间毫秒值转换为格式为时分秒（比如：1小时30分15秒）
+     *
+     * @param time 时间毫秒值
+     * @return
+     */
+    private String getTime(long time) {
+        String str = "";
+        time = time / 1000;
+        int s = (int) (time % 60);
+        int m = (int) (time / 60 % 60);
+        int h = (int) (time / 3600 % 24);
+        int d = (int) time / (3600 * 24);
+        str = d + "天" + h + "小时" + m + "分" + s + "秒";
+        return str;
     }
 }

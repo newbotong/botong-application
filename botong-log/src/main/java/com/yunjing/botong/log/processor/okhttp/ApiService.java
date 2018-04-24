@@ -2,6 +2,7 @@ package com.yunjing.botong.log.processor.okhttp;
 
 import com.yunjing.botong.log.params.DangParam;
 import com.yunjing.botong.log.params.SchedulerParam;
+import com.yunjing.botong.log.vo.AppPushParam;
 import com.yunjing.botong.log.vo.Member;
 import com.yunjing.mommon.base.PushParam;
 import com.yunjing.mommon.wrapper.ResponseEntityWrapper;
@@ -23,7 +24,7 @@ public interface ApiService {
     /**
      * 服务器地址，必须以 / 结尾
      */
-    String BASE_URL = "http://192.168.10.233:8000/";
+    String BASE_URL = "http://192.168.10.229:8000/";
 
     /**
      * 推送
@@ -34,7 +35,7 @@ public interface ApiService {
     @POST("/api/microapps/appcenter/push/push-target-user")
     // 设置请求头，post body方式提交
     @Headers({"Content-Type: application/json;charset=UTF-8"})
-    Call<ResponseEntityWrapper> push(@Body PushParam param);
+    Call<ResponseEntityWrapper> push(@Body AppPushParam param);
 
     /**
      * dang
@@ -90,9 +91,9 @@ public interface ApiService {
 
     /**
      * 获取所有的人员id
-     *
      * @param deptIds
      * @param memberIds
+     * @param simplify
      * @return
      */
     @GET("/api/microapps/appcenter/org/find-sub-lists")

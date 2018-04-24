@@ -2,6 +2,7 @@ package com.yunjing.botong.log.processor.okhttp;
 
 import com.yunjing.botong.log.params.DangParam;
 import com.yunjing.botong.log.params.SchedulerParam;
+import com.yunjing.botong.log.vo.AppPushParam;
 import com.yunjing.botong.log.vo.Member;
 import com.yunjing.mommon.base.PushParam;
 
@@ -23,7 +24,7 @@ public interface AppCenterService {
      *
      * @param param
      */
-    void push(PushParam param);
+    void push(AppPushParam param);
 
 
     /**
@@ -39,10 +40,9 @@ public interface AppCenterService {
      *
      * @param appId
      * @param memberId
-     * @param isSync   是否同步方式执行
      * @return
      */
-    boolean isManager(String appId, String memberId, boolean isSync);
+    boolean isManager(String appId, String memberId);
 
     /**
      * 获取指定企业所有成员信息

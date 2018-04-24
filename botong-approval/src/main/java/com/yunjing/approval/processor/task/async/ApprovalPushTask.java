@@ -2,28 +2,32 @@ package com.yunjing.approval.processor.task.async;
 
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
+import com.baomidou.mybatisplus.mapper.Condition;
 import com.yunjing.approval.dao.mapper.ApprovalProcessMapper;
 import com.yunjing.approval.dao.mapper.CopysMapper;
 import com.yunjing.approval.model.entity.Approval;
 import com.yunjing.approval.model.entity.ApprovalUser;
-import com.yunjing.approval.model.entity.PushLog;
-import com.yunjing.approval.model.vo.ApprovalUserVO;
-import com.yunjing.approval.model.vo.CopyUserVO;
+import com.yunjing.approval.model.entity.ModelL;
+import com.yunjing.approval.model.vo.*;
 import com.yunjing.approval.param.PushParam;
 import com.yunjing.approval.processor.okhttp.AppCenterService;
+import com.yunjing.approval.service.IApprovalApiService;
 import com.yunjing.approval.service.IApprovalService;
 import com.yunjing.approval.service.IApprovalUserService;
-import com.yunjing.approval.service.ICopysService;
-import com.yunjing.approval.service.IPushLogService;
-import com.yunjing.approval.util.DateUtil;
-import com.yunjing.mommon.global.exception.InsertMessageFailureException;
-import com.yunjing.mommon.utils.IDUtils;
+import com.yunjing.approval.service.IModelService;
+import com.yunjing.approval.util.ApproConstants;
+import com.yunjing.mommon.Enum.DateStyle;
+import com.yunjing.mommon.utils.DateUtil;
+import org.apache.commons.collections.CollectionUtils;
+import org.apache.commons.lang.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
 import java.util.*;
+import java.util.stream.Collectors;
 
 /**
  * 审批推送任务
@@ -37,6 +41,12 @@ public class ApprovalPushTask extends BaseTask {
 
     private Log logger = LogFactory.getLog(this.getClass());
 
+    /**
+     * 绑定的审批appId
+     */
+    @Value("${botong.approval.appId}")
+    private String appId;
+
     @Autowired
     private IApprovalUserService approvalUserService;
     @Autowired
@@ -44,13 +54,13 @@ public class ApprovalPushTask extends BaseTask {
     @Autowired
     private ApprovalProcessMapper approvalProcessMapper;
     @Autowired
-    private ICopysService copySService;
-    @Autowired
     private CopysMapper copySMapper;
     @Autowired
-    private IPushLogService pushLogService;
-    @Autowired
     private AppCenterService appCenterService;
+    @Autowired
+    private IApprovalApiService approvalApiService;
+    @Autowired
+    private IModelService modelService;
 
     /**
      * 审批主键
@@ -58,14 +68,14 @@ public class ApprovalPushTask extends BaseTask {
     private String approvalId;
 
     /**
-     * 企业主键
+     * 公司id
      */
-    private String orgId;
+    private String companyId;
 
     /**
-     * 用户主键
+     * 成员id
      */
-    private String userId;
+    private String memberId;
 
     /**
      * 任务名称
@@ -75,18 +85,18 @@ public class ApprovalPushTask extends BaseTask {
     /**
      * 初始化任务参数
      *
-     * @param approvalId 部门编号
-     * @param orgId      部门编号
-     * @param userId     部门编号
+     * @param approvalId 审批id
+     * @param companyId  公司id
+     * @param memberId   成员id
      * @return
      */
-    public ApprovalPushTask init(String approvalId, String orgId, String userId) {
+    public ApprovalPushTask init(String approvalId, String companyId, String memberId) {
         //设置线程名称
         super.setTaskName(TASK_NAME);
         //设置任务所需参数
         this.approvalId = approvalId;
-        this.orgId = orgId;
-        this.userId = userId;
+        this.companyId = companyId;
+        this.memberId = memberId;
         return this;
     }
 
@@ -97,8 +107,8 @@ public class ApprovalPushTask extends BaseTask {
 
     public void run() {
         try {
-            logger.debug("开始审批推送任务,执行任务参数：approvalId = " + approvalId.toString() + "orgId = " + orgId + "userId = " + userId);
-            submitApproval(approvalId, orgId, userId);
+            logger.debug("开始审批推送任务,执行任务参数：approvalId = " + approvalId.toString() + "orgId = " + companyId + "memberId = " + memberId);
+            submitApproval(approvalId, companyId, memberId);
         } catch (Exception e) {
             logger.error("调用错误，错误原因：" + e.getMessage(), e);
         }
@@ -108,120 +118,92 @@ public class ApprovalPushTask extends BaseTask {
      * 要推送的审批任务--实现方法
      *
      * @param approvalId 审批主键
-     * @param orgId      企业主键
-     * @param userId     用户主键
+     * @param companyId  公司id
+     * @param memberId   成员id
      */
-    public void submitApproval(String approvalId, String orgId, String userId) {
+    public void submitApproval(String approvalId, String companyId, String memberId) {
+        logger.info("approval: " + approvalId + "  companyId: " + companyId + "  memberId: " + memberId);
         Approval approval = approvalService.selectById(approvalId);
-        ApprovalUser user = approvalUserService.selectById(userId);
-        if (orgId != null && userId != null) {
+        ApprovalUser approvalUser = approvalUserService.selectById(memberId);
+        // 推送审批消息发送人账号id
+        String passportId = approvalUser.getPassportId();
+        List<ApprovalUser> users = approvalUserService.selectList(Condition.create());
+        if (companyId != null && memberId != null) {
             String message = "您收到一条审批消息";
-            Map<String, Object> map = new HashMap<>(16);
-            map.put("dataType", "20");
-            map.put("id", approvalId);
-            map.put("orgId", orgId);
-            map.put("orgName", "");
-            map.put("message", message);
-            String systemMessage = JSONObject.toJSONString(map);
-            logger.info("oid=" + orgId + "    msg=" + systemMessage);
-
             List<ApprovalUserVO> approvalUserList = approvalProcessMapper.getApprovalUserList(approvalId);
-            Set<ApprovalUserVO> approvalProcessSet = new HashSet<>(approvalUserList);
-            if (approvalProcessSet != null && !approvalProcessSet.isEmpty()) {
-                String[] phones = new String[1];
+            List<ApprovalUserVO> approvalUserVOS = approvalUserList.stream().collect(Collectors.toSet()).stream().collect(Collectors.toList());
+            Collections.sort(approvalUserVOS, new Comparator<ApprovalUserVO>() {
+                @Override
+                public int compare(ApprovalUserVO o1, ApprovalUserVO o2) {
+                    if (o1.getSort() > o2.getSort()) {
+                        return 1;
+                    } else if (o1.getSort() < o2.getSort()) {
+                        return -1;
+                    } else {
+                        return 0;
+                    }
+                }
+            });
+            if (approvalUserVOS != null && !approvalUserVOS.isEmpty()) {
+                String[] passportIds = new String[1];
                 if (approval.getResult() == null) {
-                    for (ApprovalUserVO approvalUserVO : approvalProcessSet) {
-                        PushLog pushLog = new PushLog();
+                    for (ApprovalUserVO approvalUserVO : approvalUserVOS) {
                         if (approvalUserVO.getProcessState() == 0) {
-                            phones[0] = approvalUserVO.getMobile();
-                            pushLog.setId(IDUtils.uuid());
-                            pushLog.setDatatype(30);
-                            pushLog.setInfoId(approvalId);
-                            pushLog.setUserId(approvalUserVO.getUserId());
-                            pushLog.setOrgId(orgId);
-                            pushLog.setCopyNum(2);
-                            pushLog.setCreateTime(DateUtil.getCurrentTime().getTime());
-                            pushLog.setMessage("您收到一条审批消息");
-                            boolean insert = pushLogService.insert(pushLog);
-                            if (!insert) {
-                                throw new InsertMessageFailureException("保存推送审批记录失败");
+                            List<ApprovalUser> collect = users.stream().filter(approvalUser1 -> approvalUser1.getId().equals(approvalUserVO.getUserId())).collect(Collectors.toList());
+                            if(CollectionUtils.isNotEmpty(collect)){
+                                passportIds[0] = collect.get(0).getPassportId();
                             }
                             // 审批推送入参
-                            PushParam pushParam = setPushParam(systemMessage, phones,user, message);
+                            PushParam pushParam = setPushParam(passportId, passportIds, approval);
                             // 推送审批
                             appCenterService.push(pushParam);
-
                             break;
                         }
                     }
                 } else {
-
-                    PushLog pushLog = new PushLog();
-                    phones[0] = user.getMobile();
-                    pushLog.setDatatype(30);
-                    pushLog.setCopyNum(0);
-                    pushLog.setInfoId(String.valueOf(approval.getId()));
-                    pushLog.setUserId(approval.getUserId());
-                    pushLog.setOrgId(orgId);
-                    pushLog.setCreateTime(DateUtil.getCurrentTime().getTime());
-                    pushLog.setMessage("您收到一条审批消息");
+                    List<ApprovalUser> collect = users.stream().filter(approvalUser1 -> approvalUser1.getId().equals(approval.getUserId())).collect(Collectors.toList());
+                    if(CollectionUtils.isNotEmpty(collect)){
+                        passportIds[0] = collect.get(0).getPassportId();
+                    }
                     // 审批推送入参
-                    // 审批推送入参
-                    PushParam pushParam = setPushParam(systemMessage, phones,user, message);
+                    PushParam pushParam = setPushParam(passportId, passportIds, approval);
                     // 推送审批
                     appCenterService.push(pushParam);
-                    boolean insert = pushLogService.insert(pushLog);
-                    if (!insert) {
-                        throw new InsertMessageFailureException("保存推送审批记录失败");
-                    }
                     List<CopyUserVO> copyUserList = copySMapper.getCopyUserList(approvalId);
                     Integer flag = 0;
                     if (approval.getResult() == 1) {
                         flag++;
-                        System.out.println("========" + "第" + flag + "次进来");
+                        logger.info("========" + " 第" + flag + "次进来");
                         int n = 1;
                         int i = 0;
-                        List<String> userPhones = new ArrayList<>();
-                        List<String> phoneList = new ArrayList<>();
+                        List<String> passIds = new ArrayList<>();
+                        List<String> passIdList = new ArrayList<>();
                         for (CopyUserVO copyVO : copyUserList) {
-                            PushLog pushLog1 = new PushLog();
                             // 判断用户是否在平台登陆过
-                            if (copyVO.getIsActivated() == 1) {
-                                userPhones.add(copyVO.getMobile());
-                                pushLog1.setDatatype(30);
-                                pushLog1.setInfoId(approvalId);
-                                pushLog1.setUserId(copyVO.getUserId());
-                                pushLog1.setOrgId(orgId);
-                                pushLog1.setCopyNum(1);
-                                pushLog1.setCreateTime(DateUtil.getCurrentTime().getTime());
-                                pushLog1.setMessage("您收到一条审批消息");
-                                logger.debug("抄送人ID================" + copyVO.getUserId());
-                                logger.debug("审批ID================" + approvalId);
-                                pushLogService.insert(pushLog1);
-                            }
+                            List<String> collect1 = users.stream().filter(approvalUser1 -> approvalUser1.getId().equals(copyVO.getUserId())).map(ApprovalUser::getPassportId).collect(Collectors.toList());
+                            passIds.addAll(collect1);
                             if (n == 100) {
-                                for (int j = 0; j < userPhones.size(); j++) {
-                                    phones[j] = userPhones.get(j);
+                                for (int j = 0; j < passIds.size(); j++) {
+                                    passportIds[j] = passIds.get(j);
                                 }
-                                userPhones.removeAll(userPhones);
-                                String[] photos = phoneList.toArray(new String[phoneList.size()]);
+                                passIds.removeAll(passIds);
+                                String[] pidArray = passIdList.toArray(new String[passIdList.size()]);
                                 // 审批推送入参
-                                // 审批推送入参
-                                PushParam pushParam2 = setPushParam(systemMessage, phones,user, message);
+                                PushParam pushParam2 = setPushParam(passportId, pidArray, approval);
                                 // 推送审批
                                 appCenterService.push(pushParam2);
                                 n = 1;
                             } else if (i == copyUserList.size() - 1 && n < 100) {
-                                for (int j = 0; j < userPhones.size(); j++) {
-                                    phoneList.add(userPhones.get(j));
+                                for (int j = 0; j < passIds.size(); j++) {
+                                    passIdList.add(passIds.get(j));
                                 }
-                                userPhones.removeAll(userPhones);
-                                String[] photos = phoneList.toArray(new String[phoneList.size()]);
+                                passIds.removeAll(passIds);
+                                String[] pidArray = passIdList.toArray(new String[passIdList.size()]);
                                 // 审批推送入参
                                 PushParam pushParam2 = new PushParam();
-                                pushParam2.setMsg(systemMessage);
-                                pushParam2.setAlias(photos);
-                                pushParam2.setRegistrationId(user.getMobile());
+                                pushParam2.setMsg(message);
+                                pushParam2.setAlias(pidArray);
+                                pushParam2.setRegistrationId(passportId);
                                 pushParam2.setNotificationTitle(message);
                                 // 推送审批
                                 appCenterService.push(pushParam2);
@@ -235,29 +217,78 @@ public class ApprovalPushTask extends BaseTask {
         }
     }
 
-    private PushParam setPushParam(String systemMessage,String[] phones,ApprovalUser user,String message) {
+    private PushParam setPushParam(String passportId, String[] passportIds, Approval approval) {
+        ClientApprovalDetailVO approvalDetail = approvalApiService.getApprovalDetail(companyId, memberId, approval.getId());
+        List<ApproveAttrVO> approveAttrVO = approvalDetail.getApproveAttrVO();
+        ModelL modelL = modelService.selectById(approval.getModelId());
+        String message = "您收到一条审批消息";
+        logger.info("passportId: " + passportId + "  passportIds: " + passportIds[0] + "  message: " + message);
         PushParam pushParam = new PushParam();
-        pushParam.setMsg(systemMessage);
-        pushParam.setAlias(phones);
-        pushParam.setRegistrationId(user.getMobile());
+        pushParam.setAppId(appId);
+        pushParam.setMsg(message);
+        pushParam.setAlias(passportIds);
         pushParam.setNotificationTitle(message);
-        pushParam.setCompanyId(orgId);
-        pushParam.setRegistrationId(user.getId());
-        pushParam.setTitle("我是自定义标题");
-        pushParam.setAppId("978518782567088130");
+        pushParam.setCompanyId(companyId);
+        pushParam.setRegistrationId(passportId);
+        pushParam.setTitle(message);
         Map<String, String> maps = new HashMap<>(5);
         maps.put("appName", "审批");
-        maps.put("subModuleName", "审批提醒");
-        maps.put("logo", "http://www.shenpi.com/shenpi.jpg");
-        maps.put("url", "http://www.shenpi.com");
+        maps.put("subModuleName", modelL.getModelName());
+        maps.put("url", "http://192.168.10.230:1300/#/examineHandle?approvalId=" + approval.getId());
         // 审批提醒
         JSONArray array = new JSONArray();
-        JSONObject json = new JSONObject();
-        json.put("subTitle", "您收到一条审批提醒");
-        json.put("type", "5");
-        array.add(json);
-        maps.put ("content", array.toJSONString());
+        JSONObject json1 = new JSONObject();
+        json1.put("subTitle", approval.getTitle() + "需要您审批");
+        json1.put("type", "5");
+        array.add(json1);
+        if (CollectionUtils.isNotEmpty(approveAttrVO)) {
+            for (ApproveAttrVO vo : approveAttrVO) {
+                JSONObject json2 = new JSONObject();
+                if (vo.getType() == ApproConstants.RADIO_TYPE_3 || vo.getType() == ApproConstants.TIME_INTERVAL_TYPE_5 || vo.getType() == ApproConstants.SINGLE_LINE_TYPE_6) {
+                    json2.put("title", vo.getLabel());
+                    if ("开始时间".equals(vo.getLabel())) {
+                        json2.put("content", DateUtil.StringToString(DateUtil.convert(Long.valueOf(vo.getValue())), DateStyle.YYYY_MM_DD_HH_MM));
+                    } else {
+                        json2.put("content", vo.getValue());
+                    }
+                    json2.put("type", "0");
+                    array.add(json2);
+                    if (StringUtils.isNotBlank(vo.getLabels())) {
+                        JSONObject json5 = new JSONObject();
+                        json5.put("title", vo.getLabels());
+                        json5.put("content", DateUtil.StringToString(DateUtil.convert(Long.valueOf(vo.getValues())), DateStyle.YYYY_MM_DD_HH_MM));
+                        json5.put("type", "0");
+                        array.add(json5);
+                    }
+                }
+
+            }
+        }
+        JSONObject json3 = new JSONObject();
+        json3.put("type", "3");
+        if (approval.getResult() != null) {
+            switch (approval.getResult()) {
+                case 1:
+                    json3.put("status", "已同意");
+                    json3.put("color", "#4FA97B");
+                    break;
+                case 2:
+                    json3.put("status", "已拒绝");
+                    json3.put("color", "#EA6262");
+                    break;
+            }
+        } else {
+            json3.put("status", "待审批");
+            json3.put("color", "#848484");
+        }
+        array.add(json3);
+        JSONObject json4 = new JSONObject();
+        json4.put("bottom", approvalDetail.getName() + "  " + DateUtil.StringToString(DateUtil.convert(approval.getCreateTime()), DateStyle.YYYY_MM_DD_HH_MM));
+        json4.put("type", "4");
+        array.add(json4);
+        maps.put("content", array.toJSONString());
         pushParam.setMap(maps);
+        logger.info("pushParam: " + pushParam.toString());
         return pushParam;
 
     }

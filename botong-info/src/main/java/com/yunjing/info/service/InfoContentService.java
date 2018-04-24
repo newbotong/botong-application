@@ -69,4 +69,14 @@ public interface InfoContentService extends IService<InfoContent> {
      * @throws BaseException
      */
     InfoContent selectWebDetail(String id) throws BaseException;
+
+    /**
+     * 查询用户权限
+     *
+     * @param userId 成员id
+     * @return
+     * @throws BaseException
+     * @throws IOException
+     */
+    Boolean selectAuthority(String userId) throws BaseException,IOException;
 }

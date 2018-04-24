@@ -14,14 +14,17 @@ import com.yunjing.approval.param.FilterParam;
 import com.yunjing.approval.processor.okhttp.AppCenterService;
 import com.yunjing.approval.processor.task.async.ApprovalPushTask;
 import com.yunjing.approval.service.*;
-import com.yunjing.approval.util.Colors;
+import com.yunjing.approval.util.ApproConstants;
+import com.yunjing.mommon.Enum.DateStyle;
 import com.yunjing.mommon.global.exception.InsertMessageFailureException;
 import com.yunjing.mommon.global.exception.UpdateMessageFailureException;
+import com.yunjing.mommon.utils.DateUtil;
 import com.yunjing.mommon.utils.IDUtils;
 import org.apache.commons.lang.StringUtils;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.*;
@@ -63,24 +66,23 @@ public class ApprovalApiServiceImpl implements IApprovalApiService {
 
     @Autowired
     private RedisApproval redisApproval;
+    private final Log logger = LogFactory.getLog(ApprovalApiServiceImpl.class);
 
     @Override
-    @Transactional(propagation = Propagation.REQUIRED, rollbackFor = Exception.class)
-    public List<ClientModelVO> getList(String orgId) {
-        List<ModelL> modelLList = modelMapper.selectModelListByOrgId(orgId);
-        Set<ClientModelVO> set = new HashSet<>();
+    public List<ClientModelVO> getList(String companyId) {
+        logger.info("companyId: " + companyId);
+        List<ModelL> modelLList = modelMapper.selectModelListByOrgId(companyId);
+        List<ClientModelVO> list = new ArrayList<>();
         for (ModelL model : modelLList) {
             ClientModelVO modelVO1 = new ClientModelVO(model);
-            set.add(modelVO1);
+            list.add(modelVO1);
         }
-        List<ClientModelVO> list = new ArrayList<>(set);
         return list;
     }
 
     @Override
-    @Transactional(propagation = Propagation.REQUIRED, rollbackFor = Exception.class)
-    public Page<ClientApprovalVO> getWaited(Page page, String orgId, String userId, FilterParam filterParam) {
-
+    public Page<ClientApprovalVO> getWaited(Page page, String companyId, String memberId, FilterParam filterParam) {
+        logger.info("companyId: " + companyId + " memberId: " + memberId + " filterParam: " + filterParam.toString());
         int current = page.getCurrentPage();
         int size = page.getPageSize();
         int index = (current - 1) * size;
@@ -92,19 +94,36 @@ public class ApprovalApiServiceImpl implements IApprovalApiService {
         if (members != null) {
             userIds = members.stream().map(Member::getId).collect(Collectors.toList());
         }
-        userIds.add(userId);
+        userIds.add(memberId);
         Page<ClientApprovalVO> clientApprovalVOPage = new Page<>(current, size);
         List<ClientApprovalVO> clientApprovalVOS = new ArrayList<>();
-        List<ApprovalContentDTO> waitedMeApprovalList = approvalProcessMapper.getWaitedMeApprovalList(index, size, orgId, userIds, filterParam);
-        convertList(clientApprovalVOS, waitedMeApprovalList);
+        List<ApprovalContentDTO> waitedMeApprovalList = approvalProcessMapper.getWaitedMeApprovalList(index, size, companyId, userIds, filterParam);
+        List<ApprovalContentDTO> result = new ArrayList<>();
+        for (ApprovalContentDTO contentDTO : waitedMeApprovalList) {
+            List<ApprovalProcess> processList = approvalProcessService.selectList(Condition.create().where("approval_id={0}", contentDTO.getApprovalId()).and("user_id={0}", memberId));
+            for (ApprovalProcess process : processList) {
+                if (process.getSeq() == 1) {
+                    result.add(contentDTO);
+                } else {
+                    List<ApprovalProcess> processList1 = approvalProcessService.selectList(Condition.create().where("approval_id={0}", contentDTO.getApprovalId()));
+                    for (ApprovalProcess aProcess : processList1) {
+                        //判断上一个审批人的审批状态，如果是1（同意）或者是3（转让）显示当前审批人
+                        if (aProcess.getSeq() + 1 == process.getSeq() && aProcess.getProcessState() == 1 || aProcess.getProcessState() == 3) {
+                            result.add(contentDTO);
+                        }
+                    }
+                }
+            }
+        }
+        convertList(clientApprovalVOS, result);
         clientApprovalVOPage.build(clientApprovalVOS != null ? clientApprovalVOS : new ArrayList<>());
         clientApprovalVOPage.setTotalCount(clientApprovalVOS.size());
         return clientApprovalVOPage;
     }
 
     @Override
-    @Transactional(propagation = Propagation.REQUIRED, rollbackFor = Exception.class)
-    public Page<ClientApprovalVO> getCompleted(Page page, String orgId, String userId, FilterParam filterParam) {
+    public Page<ClientApprovalVO> getCompleted(Page page, String companyId, String memberId, FilterParam filterParam) {
+        logger.info("companyId: " + companyId + " memberId: " + memberId + " filterParam: " + filterParam.toString());
         int current = page.getCurrentPage();
         int size = page.getPageSize();
         int index = (current - 1) * size;
@@ -116,10 +135,10 @@ public class ApprovalApiServiceImpl implements IApprovalApiService {
         if (members != null) {
             userIds = members.stream().map(Member::getId).collect(Collectors.toList());
         }
-        userIds.add(userId);
+        userIds.add(memberId);
         Page<ClientApprovalVO> clientApprovalVOPage = new Page<>(current, size);
         List<ClientApprovalVO> clientApprovalVOS = new ArrayList<>();
-        List<ApprovalContentDTO> completedMeApprovalList = approvalProcessMapper.getCompletedApprovalList(index, size, orgId, userIds, filterParam);
+        List<ApprovalContentDTO> completedMeApprovalList = approvalProcessMapper.getCompletedApprovalList(index, size, companyId, userIds, filterParam);
         convertList(clientApprovalVOS, completedMeApprovalList);
         clientApprovalVOPage.build(clientApprovalVOS != null ? clientApprovalVOS : new ArrayList<>());
         clientApprovalVOPage.setTotalCount(clientApprovalVOS.size());
@@ -127,32 +146,41 @@ public class ApprovalApiServiceImpl implements IApprovalApiService {
     }
 
     @Override
-    public Page<ClientApprovalVO> getLaunched(Page page, String orgId, String userId, FilterParam filterParam) {
+    public Page<ClientApprovalVO> getLaunched(Page page, String companyId, String memberId, FilterParam filterParam) {
+        if (filterParam.getTime() != null) {
+            String date = DateUtil.convert(filterParam.getTime()).replace("00:00:00", "08:00:00");
+            filterParam.setTime(DateUtil.StringToDate(date, DateStyle.YYYY_MM_DD_HH_MM_SS).getTime());
+        }
+        logger.info("companyId: " + companyId + " memberId: " + memberId + " filterParam: " + filterParam.toString());
         int current = page.getCurrentPage();
         int size = page.getPageSize();
         int index = (current - 1) * size;
         Page<ClientApprovalVO> clientApprovalVOPage = new Page<>(current, size);
         List<ClientApprovalVO> clientApprovalVOS = new ArrayList<>();
-        List<ApprovalContentDTO> launchedMeApprovalList = approvalProcessMapper.getLaunchedApprovalList(index, size, orgId, userId, filterParam);
+        List<ApprovalContentDTO> launchedMeApprovalList = approvalProcessMapper.getLaunchedApprovalList(index, size, companyId, memberId, filterParam);
         List<ApprovalUser> userList = approvalUserService.selectList(Condition.create());
         String message = "";
-        int i = 1;
         ApprovalUser user = new ApprovalUser();
         for (ApprovalContentDTO contentVO : launchedMeApprovalList) {
-            List<ApprovalUser> users = userList.stream().filter(approvalUser -> approvalUser.getId().equals(contentVO.getUserId())).collect(Collectors.toList());
-            for (ApprovalUser approvalUser : users) {
-                user = approvalUser;
-            }
-            if (contentVO.getProcessState() == 0 && contentVO.getState() == 0) {
-                int critical = i++;
-                String name = StringUtils.isNotBlank(user.getName()) ? user.getName() : "";
-                if (name.length() > 2) {
-                    message = "等待" + name.substring(1, 3) + "审批";
-                } else {
-                    message = "等待" + name + "审批";
-                }
-                if (critical == 1) {
-                    contentVO.setMessage(message);
+            if (contentVO.getState() == 0) {
+                List<ApprovalProcess> processList = approvalProcessService.selectList(Condition.create().where("approval_id={0}", contentVO.getApprovalId()).orderBy("seq", true));
+                if (processList != null && CollectionUtils.isNotEmpty(processList)) {
+                    for (ApprovalProcess process : processList) {
+                        if (process.getProcessState() == 0) {
+                            List<ApprovalUser> users = userList.stream().filter(approvalUser -> approvalUser.getId().equals(process.getUserId())).collect(Collectors.toList());
+                            for (ApprovalUser approvalUser : users) {
+                                user = approvalUser;
+                            }
+                            String name = StringUtils.isNotBlank(user.getName()) ? user.getName() : "";
+                            if (name.length() > 2) {
+                                message = "等待" + name.substring(1, 3) + "审批";
+                            } else {
+                                message = "等待" + name + "审批";
+                            }
+                            contentVO.setMessage(message);
+                            break;
+                        }
+                    }
                 }
             } else if (contentVO.getState() == 1) {
                 message = "审批完成";
@@ -162,7 +190,7 @@ public class ApprovalApiServiceImpl implements IApprovalApiService {
                     message += " （拒绝）";
                 }
             } else if (contentVO.getState() == 2) {
-                message = "已撤回";
+                message = "已撤销";
             }
             contentVO.setMessage(message);
         }
@@ -173,13 +201,18 @@ public class ApprovalApiServiceImpl implements IApprovalApiService {
     }
 
     @Override
-    public Page<ClientApprovalVO> getCopied(Page page, String orgId, String userId, FilterParam filterParam) {
+    public Page<ClientApprovalVO> getCopied(Page page, String companyId, String memberId, FilterParam filterParam) {
+        logger.info("companyId: " + companyId + " memberId: " + memberId + " filterParam: " + filterParam.toString());
+        if (filterParam.getTime() != null) {
+            String date = DateUtil.convert(filterParam.getTime()).replace("00:00:00", "08:00:00");
+            filterParam.setTime(DateUtil.StringToDate(date, DateStyle.YYYY_MM_DD_HH_MM_SS).getTime());
+        }
         int current = page.getCurrentPage();
         int size = page.getPageSize();
         int index = (current - 1) * size;
         Page<ClientApprovalVO> clientApprovalVOPage = new Page<>(current, size);
         List<ClientApprovalVO> clientApprovalVOS = new ArrayList<>();
-        List<ApprovalContentDTO> copyApprovalList = copysMapper.getCopiedApprovalList(index, size, orgId, userId, filterParam);
+        List<ApprovalContentDTO> copyApprovalList = copysMapper.getCopiedApprovalList(index, size, companyId, memberId, filterParam);
         convertList(clientApprovalVOS, copyApprovalList);
         clientApprovalVOPage.build(clientApprovalVOS != null ? clientApprovalVOS : new ArrayList<>());
         clientApprovalVOPage.setTotalCount(clientApprovalVOS.size());
@@ -187,7 +220,8 @@ public class ApprovalApiServiceImpl implements IApprovalApiService {
     }
 
     @Override
-    public ClientApprovalDetailVO getApprovalDetail(String orgId, String userId, String approvalId) {
+    public ClientApprovalDetailVO getApprovalDetail(String companyId, String memberId, String approvalId) {
+        logger.info("companyId: " + companyId + " memberId: " + memberId + " approvalId: " + approvalId);
         ClientApprovalDetailVO clientApprovalDetailVO = new ClientApprovalDetailVO();
         // 获取审批详情
         List<ApproveAttrVO> detail = getDetail(approvalId);
@@ -199,6 +233,7 @@ public class ApprovalApiServiceImpl implements IApprovalApiService {
         if (approvalById != null) {
             // 审批主体信息
             clientApprovalDetailVO.setName(approvalById.getName());
+            clientApprovalDetailVO.setMemberId(approvalById.getUserId());
             ModelL modelL = modelService.selectOne(Condition.create().where("id={0}", approvalById.getModelId()));
             clientApprovalDetailVO.setModelName(modelL.getModelName() != null ? modelL.getModelName() : null);
             clientApprovalDetailVO.setDeptName(approvalById.getDeptName());
@@ -206,43 +241,97 @@ public class ApprovalApiServiceImpl implements IApprovalApiService {
             if (StringUtils.isNotBlank(approvalById.getAvatar())) {
                 clientApprovalDetailVO.setAvatar(approvalById.getAvatar());
             } else {
-                clientApprovalDetailVO.setColor(Colors.generateBeautifulColor(approvalById.getMobile(), approvalById.getName()));
-                clientApprovalDetailVO.setAvatarName(approvalById.getName().length() <= 2 ? approvalById.getName() : approvalById.getName().substring(1, 3));
+                clientApprovalDetailVO.setColor(ApproConstants.DEFAULT_COLOR);
             }
             clientApprovalDetailVO.setState(approvalById.getState());
             clientApprovalDetailVO.setResult(approvalById.getResult() != null ? approvalById.getResult() : null);
         }
         // 获取审批人信息
         List<ApprovalUserVO> approvalUserList = approvalProcessMapper.getApprovalUserList(approvalId);
+        // 审批发起人
+        ApprovalUserVO initiator = new ApprovalUserVO();
+        initiator.setName(null != approvalById.getName() ? approvalById.getName() : "");
+        initiator.setAvatar(approvalById.getAvatar() != null ? approvalById.getAvatar() : "");
+        initiator.setApprovalTime(approvalById.getCreateTime() != null ? approvalById.getCreateTime() : null);
+        initiator.setColor(approvalById.getColor() != null ? approvalById.getColor() : ApproConstants.DEFAULT_COLOR);
+        initiator.setMessage("发起申请");
+        initiator.setProcessState(10);
+        initiator.setSort(0);
+        approvalUserList.add(initiator);
         int index = 1;
         for (ApprovalUserVO approvalUserVO : approvalUserList) {
-            approvalUserVO.setColor(Colors.generateBeautifulColor(approvalUserVO.getMobile(), approvalUserVO.getName()));
+            approvalUserVO.setColor(approvalUserVO.getColor() != null ? approvalUserVO.getColor() : ApproConstants.DEFAULT_COLOR);
             if (StringUtils.isBlank(approvalUserVO.getAvatar())) {
-                approvalUserVO.setColor(Colors.generateBeautifulColor(approvalUserVO.getMobile(), approvalUserVO.getName()));
+                approvalUserVO.setColor(approvalUserVO.getColor() != null ? approvalUserVO.getColor() : ApproConstants.DEFAULT_COLOR);
                 approvalUserVO.setAvatarName(approvalUserVO.getName().length() <= 2 ? approvalUserVO.getName() : approvalUserVO.getName().substring(1, 3));
             }
-            if (approvalUserVO.getProcessState() == 0) {
-                if (approvalUserVO.getUserId().equals(userId)) {
+            if (approvalUserVO.getProcessState() != null && approvalUserVO.getProcessState() == 0) {
+                approvalUserVO.setApprovalTime(null);
+                int i = index++;
+                if (approvalUserVO.getUserId().equals(memberId)) {
                     //描述提醒用户信息
                     clientApprovalDetailVO.setProcessState(approvalUserVO.getProcessState());
                     clientApprovalDetailVO.setMessage("等待我审批");
+                    if(i == 1){
+                        approvalUserVO.setMessage("审批中");
+                    }else {
+                        approvalUserVO.setMessage("等待审批");
+                    }
                 } else {
-                    int flag = index++;
                     //描述提醒用户信息
-                    if (flag == 1) {
+                    if (i == 1) {
                         clientApprovalDetailVO.setMessage("等待" + approvalUserVO.getName() + "审批");
+                        approvalUserVO.setMessage("审批中");
+                    } else {
+                        approvalUserVO.setMessage("等待审批");
                     }
                 }
+            } else if (approvalUserVO.getProcessState() != null && approvalUserVO.getProcessState() == 1) {
+                approvalUserVO.setMessage("已同意");
+            } else if (approvalUserVO.getProcessState() != null && approvalUserVO.getProcessState() == 2) {
+                approvalUserVO.setMessage("已拒绝");
+            } else if (approvalUserVO.getProcessState() != null && approvalUserVO.getProcessState() == 3) {
+                approvalUserVO.setMessage("已转交");
+            } else if (approvalUserVO.getProcessState() != null && approvalUserVO.getProcessState() == 4) {
+                approvalUserVO.setMessage("已撤销");
             }
         }
-        clientApprovalDetailVO.setApprovalUserList(approvalUserList);
-
+        Collections.sort(approvalUserList, new Comparator<ApprovalUserVO>() {
+            @Override
+            public int compare(ApprovalUserVO o1, ApprovalUserVO o2) {
+                if (o1.getSort() > o2.getSort()) {
+                    return 1;
+                } else if (o1.getSort() < (o2.getSort())) {
+                    return -1;
+                } else {
+                    return 0;
+                }
+            }
+        });
+        // 当发起人做撤销操作后审批详情中审批人情况集合
+        Set<ApprovalUserVO> collect = approvalUserList.stream().filter(approvalUserVO -> approvalUserVO.getProcessState() == 4).collect(Collectors.toSet());
+        if (collect.size() > 0) {
+            boolean b = approvalUserList.removeIf(approvalUserVO -> approvalUserVO.getProcessState() == 4);
+            if (b) {
+                ApprovalUserVO initiator2 = new ApprovalUserVO();
+                initiator2.setName(null != approvalById.getName() ? approvalById.getName() : "");
+                initiator2.setAvatar(approvalById.getAvatar() != null ? approvalById.getAvatar() : "");
+                initiator2.setApprovalTime(approvalById.getFinishTime() != null ? approvalById.getFinishTime() : null);
+                initiator2.setColor(approvalById.getColor() != null ? approvalById.getColor() : ApproConstants.DEFAULT_COLOR);
+                initiator2.setMessage("已撤销");
+                initiator2.setProcessState(4);
+                initiator2.setSort(1);
+                approvalUserList.add(initiator2);
+                clientApprovalDetailVO.setApprovalUserList(approvalUserList);
+            }
+        } else {
+            clientApprovalDetailVO.setApprovalUserList(approvalUserList);
+        }
         // 获取抄送人信息
         List<CopyUserVO> copyUserList = copysMapper.getCopyUserList(approvalId);
         copyUserList.forEach(copyUserVO -> {
             if (StringUtils.isBlank(copyUserVO.getAvatar())) {
-                copyUserVO.setColor(Colors.generateBeautifulColor(copyUserVO.getMobile(), copyUserVO.getName()));
-                copyUserVO.setAvatarName(copyUserVO.getName().length() <= 2 ? copyUserVO.getName() : copyUserVO.getName().substring(1, 3));
+                copyUserVO.setColor(copyUserVO.getColor() != null ? copyUserVO.getColor() : ApproConstants.DEFAULT_COLOR);
             }
         });
         // 注入抄送人信息
@@ -251,17 +340,19 @@ public class ApprovalApiServiceImpl implements IApprovalApiService {
     }
 
     @Override
-    public boolean solveApproval(String orgId, String userId, String approvalId, Integer state) {
+    @Transactional(rollbackFor = Exception.class)
+    public boolean solveApproval(String companyId, String memberId, String approvalId, Integer state) {
+        logger.info("companyId: " + companyId + " memberId: " + memberId + " approvalId: " + approvalId + "state: " + state);
         boolean flag = false;
         List<ApprovalProcess> processList = approvalProcessService.selectList(Condition.create().where("approval_id={0}", approvalId));
         if (processList != null && !processList.isEmpty()) {
             for (ApprovalProcess process : processList) {
                 // 当审批流程中的审批未处理时（0：未处理）
                 if (process.getProcessState() == 0) {
-                    if (process.getUserId().equals(userId)) {
+                    if (process.getUserId().equals(memberId)) {
                         process.setProcessState(state);
                         process.setProcessTime(System.currentTimeMillis());
-                        boolean update = approvalProcessService.update(process, Condition.create().where("approval_id={0}", approvalId));
+                        boolean update = approvalProcessService.update(process, Condition.create().where("approval_id={0}", approvalId).and("user_id={0}",memberId));
                         if (!update) {
                             throw new UpdateMessageFailureException("同意审批--更新审批流程信息失败");
                         }
@@ -331,13 +422,15 @@ public class ApprovalApiServiceImpl implements IApprovalApiService {
         }
         //异步推送给下一个审批人
         if (flag) {
-            approvalPushTask.init(approvalId, orgId, userId).run();
+            approvalPushTask.init(approvalId, companyId, memberId).run();
         }
         return flag;
     }
 
     @Override
-    public boolean revokeApproval(String orgId, String userId, String approvalId) {
+    @Transactional(rollbackFor = Exception.class)
+    public boolean revokeApproval(String companyId, String memberId, String approvalId) {
+        logger.info("companyId: " + companyId + " memberId: " + memberId + " approvalId: " + approvalId);
         boolean flag = false;
         List<ApprovalProcess> processList = approvalProcessService.selectList(Condition.create().where("approval_id={0}", approvalId));
         processList.forEach(approvalProcess -> {
@@ -352,6 +445,7 @@ public class ApprovalApiServiceImpl implements IApprovalApiService {
         if (approval != null) {
             approval.setState(2);
             approval.setResult(4);
+            approval.setFinishTime(System.currentTimeMillis());
             flag = approvalService.updateById(approval);
             if (!flag) {
                 throw new UpdateMessageFailureException("审批撤销操作--修改审批信息失败");
@@ -361,15 +455,17 @@ public class ApprovalApiServiceImpl implements IApprovalApiService {
     }
 
     @Override
-    public boolean transferApproval(String orgId, String userId, String transferredUserId, String approvalId) {
-
-        List<ApprovalProcess> processList = approvalProcessService.selectList(Condition.create().where("approval_id={0}", approvalId));
+    @Transactional(rollbackFor = Exception.class)
+    public boolean transferApproval(String companyId, String memberId, String transferredUserId, String approvalId) {
+        logger.info("companyId: " + companyId + " memberId: " + memberId + " transferredUserId: " + transferredUserId + "approvalId: " + approvalId);
+        List<ApprovalProcess> processList = approvalProcessService.selectList(Condition.create().where("approval_id={0}", approvalId).orderBy("seq",true));
         int num = 0;
-        List<ApprovalProcess> newProcessList = new ArrayList<>();
+        List<ApprovalProcess> list = new ArrayList<>();
         for (ApprovalProcess approvalProcess : processList) {
             if (approvalProcess.getProcessState() == 0 && num == 0) {
                 approvalProcess.setProcessState(3);
                 approvalProcess.setProcessTime(System.currentTimeMillis());
+                list.add(approvalProcess);
                 ApprovalProcess newProcess = new ApprovalProcess();
                 newProcess.setSeq(approvalProcess.getSeq() + 1);
                 newProcess.setId(IDUtils.uuid());
@@ -377,31 +473,34 @@ public class ApprovalApiServiceImpl implements IApprovalApiService {
                 newProcess.setProcessState(0);
                 newProcess.setApprovalId(approvalId);
                 newProcess.setProcessTime(System.currentTimeMillis());
-                newProcessList.add(newProcess);
+                boolean insert = approvalProcessService.insert(newProcess);
+                if (!insert) {
+                    throw new InsertMessageFailureException("转让审批操作--新增审批流程信息失败");
+                }
                 num++;
                 continue;
             }
             if (num == 1) {
                 approvalProcess.setSeq(approvalProcess.getSeq() + 1);
+                list.add(approvalProcess);
+            }else {
+                list.add(approvalProcess);
             }
         }
-        boolean insertBatch = approvalProcessService.insertBatch(newProcessList);
-        if (!insertBatch) {
-            throw new InsertMessageFailureException("转让审批操作--新增审批流程信息失败");
-        }
-        boolean batchById = approvalProcessService.updateBatchById(processList);
+        boolean batchById = approvalProcessService.updateBatchById(list);
         if (!batchById) {
             throw new UpdateMessageFailureException("转让审批操作--修改审批流程信息失败");
         }
         //转让成功推送下一个
         if (batchById) {
-            approvalPushTask.init(approvalId, orgId, userId).run();
+            approvalPushTask.init(approvalId, companyId, memberId).run();
         }
         return batchById;
     }
 
     @Override
     public boolean updateCopyReadState(String[] approvalId) {
+        logger.info("approvalId: " + approvalId.toString());
         boolean isUpdated = false;
 
         List<Copys> copysList = copySService.selectList(Condition.create().in("approval_id", approvalId));
@@ -424,7 +523,7 @@ public class ApprovalApiServiceImpl implements IApprovalApiService {
                 contentDTO.setUserNick(user.getName());
                 contentDTO.setUserAvatar(user.getAvatar());
                 if (StringUtils.isBlank(contentDTO.getUserAvatar())) {
-                    contentDTO.setColor(Colors.generateBeautifulColor(StringUtils.isNotBlank(user.getMobile()) ? user.getMobile() : "", StringUtils.isNotBlank(user.getName()) ? user.getName() : ""));
+                    contentDTO.setColor(user.getColor() != null ? user.getColor() : ApproConstants.DEFAULT_COLOR);
                 }
             }
             ClientApprovalVO clientApprovalVO = new ClientApprovalVO(contentDTO);

@@ -11,6 +11,9 @@ spring:
   sleuth:
     sampler:
       percentage: 1
+  zipkin:
+    service:
+      name: botong-zipkin
   rabbitmq:
       host: ${rabbitmq.server}
       port: ${rabbitmq.port}
@@ -107,4 +110,4 @@ logging:
   file: ${user.dir}/logs/${spring.application.name}.log
 
 #H5分享地址
-H5Address: ${H5Address-notice}
+h5Address: ${H5Address-notice}

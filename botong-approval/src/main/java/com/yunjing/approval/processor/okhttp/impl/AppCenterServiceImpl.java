@@ -11,6 +11,7 @@ import com.yunjing.approval.processor.okhttp.ApiService;
 import com.yunjing.approval.processor.okhttp.AppCenterService;
 import com.yunjing.approval.util.ApproConstants;
 import com.yunjing.mommon.constant.StatusCode;
+import com.yunjing.mommon.global.exception.BaseRuntimeException;
 import com.yunjing.mommon.wrapper.PageWrapper;
 import com.yunjing.mommon.wrapper.ResponseEntityWrapper;
 import lombok.extern.slf4j.Slf4j;
@@ -40,8 +41,8 @@ public class AppCenterServiceImpl implements AppCenterService {
     /**
      * 这里需要在启动参数时指定，无法放在配置中心加载
      */
-    @Value("app-center-url")
-    private String appCenterUrl = ApiService.BASE_URL;
+    @Value("${okhttp.botong.zuul}")
+    private String appCenterUrl;
 
     /**
      * api 服务
@@ -69,6 +70,18 @@ public class AppCenterServiceImpl implements AppCenterService {
      */
     private TaskCallback taskCallback;
 
+    private void init() {
+        log.info("appCenterUrl:{}", appCenterUrl);
+        // 构建 Retrofit 对象
+        Retrofit retrofit = new Retrofit.Builder()
+                .baseUrl(appCenterUrl)
+                // 添加json转换器，这里使用的是gson，也可以使用fastjson的转换工厂【FastJsonConverterFactory.create()】
+                .addConverterFactory(GsonConverterFactory.create())
+                .build();
+
+        // 构建请求对象
+        apiService = retrofit.create(ApiService.class);
+    }
     /**
      * 设置管理员验证回调
      *
@@ -86,27 +99,20 @@ public class AppCenterServiceImpl implements AppCenterService {
     public void setOrgMemberCallback(OrgMemberCallback orgMemberCallback) {
         this.orgMemberCallback = orgMemberCallback;
     }
-
-
     public void setTaskCallback(TaskCallback taskCallback) {
         this.taskCallback = taskCallback;
     }
 
-    public AppCenterServiceImpl() {
-
-        // 构建 Retrofit 对象
-        Retrofit retrofit = new Retrofit.Builder()
-                .baseUrl(appCenterUrl)
-                // 添加json转换器，这里使用的是gson，也可以使用fastjson的转换工厂【FastJsonConverterFactory.create()】
-                .addConverterFactory(GsonConverterFactory.create())
-                .build();
-
-        // 构建请求对象
-        apiService = retrofit.create(ApiService.class);
-    }
-
     @Override
     public void push(PushParam param) {
+        if (apiService == null) {
+            init();
+        }
+
+        log.info("应用中心url:{}", appCenterUrl);
+
+        log.info("推送参数：{}", JSON.toJSONString(param));
+
         apiService.push(param).enqueue(new Callback<ResponseEntityWrapper>() {
 
             /**
@@ -118,17 +124,12 @@ public class AppCenterServiceImpl implements AppCenterService {
             public void onResponse(Call<ResponseEntityWrapper> call, Response<ResponseEntityWrapper> response) {
                 // 服务器响应数据
                 ResponseEntityWrapper body = response.body();
-                // 服务器响应code
-                int code = response.code();
 
-                if (response.isSuccessful()) {
-                    if (body != null) {
-                        log.info("调用推送结果，code:{},message:{}", body.getStatusCode(), body.getStatusMessage());
-                    } else {
-                        log.error("body is null");
-                    }
+                if(body.getStatusCode() != StatusCode.SUCCESS.getStatusCode()){
+                    log.info("调用推送结果，code:{},message:{}", body.getStatusCode(), body.getStatusMessage());
+                    throw new BaseRuntimeException(body.getStatusCode(), body.getStatusMessage());
                 } else {
-                    // 这里处理非响应 200 的情况
+                    log.info("调用推送结果，code:{},message:{}", body.getStatusCode(), body.getStatusMessage());
                 }
             }
 
@@ -146,6 +147,9 @@ public class AppCenterServiceImpl implements AppCenterService {
 
     @Override
     public void dang(DangParam param) {
+        if (apiService == null) {
+            init();
+        }
         apiService.dang(param).enqueue(new Callback<ResponseEntityWrapper>() {
             @Override
             public void onResponse(Call<ResponseEntityWrapper> call, Response<ResponseEntityWrapper> response) {
@@ -166,7 +170,9 @@ public class AppCenterServiceImpl implements AppCenterService {
 
     @Override
     public boolean isManager(String appId, String memberId, boolean isSync) {
-
+        if (apiService == null) {
+            init();
+        }
         Call<ResponseEntityWrapper<Boolean>> call = apiService.verifyManager(appId, memberId);
         if (isSync) {
             try {
@@ -209,6 +215,9 @@ public class AppCenterServiceImpl implements AppCenterService {
 
     @Override
     public List<OrgMemberVo> findAllOrgMember(String orgId, boolean isSync) {
+        if (apiService == null) {
+            init();
+        }
         Call<ResponseEntityWrapper<List<OrgMemberVo>>> call = apiService.findAllOrgMember(orgId);
         if (isSync) {
             try {
@@ -277,6 +286,9 @@ public class AppCenterServiceImpl implements AppCenterService {
      */
     @Override
     public List<Member> findSubLists(String[] deptIds, String[] memberIds) {
+        if (apiService == null) {
+            init();
+        }
         try {
             Response<ResponseEntityWrapper<List<Member>>> response = apiService.findSubLists(deptIds, memberIds, ApproConstants.BOTONG_ONE_NUM).execute();
             ResponseEntityWrapper<List<Member>> body = response.body();
@@ -306,6 +318,9 @@ public class AppCenterServiceImpl implements AppCenterService {
      */
     @Override
     public PageWrapper<Member> findMemberPage(String[] deptIds, String[] memberIds, int pageNo, int pageSize) {
+        if (apiService == null) {
+            init();
+        }
         try {
             Response<ResponseEntityWrapper<PageWrapper<Member>>> response = apiService.findMemberPage(deptIds, memberIds, pageNo, pageSize).execute();
             ResponseEntityWrapper<PageWrapper<Member>> body = response.body();
@@ -333,6 +348,9 @@ public class AppCenterServiceImpl implements AppCenterService {
      */
     @Override
     public List<Member> manageScope(String appId, String memberId) {
+        if (apiService == null) {
+            init();
+        }
         try {
             Response<ResponseEntityWrapper<List<Member>>> response = apiService.manageScope(appId, memberId).execute();
             ResponseEntityWrapper<List<Member>> body = response.body();

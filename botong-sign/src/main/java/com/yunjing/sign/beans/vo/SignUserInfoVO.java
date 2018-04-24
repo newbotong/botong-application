@@ -21,7 +21,7 @@ public class SignUserInfoVO {
     /**
      * 姓名
      */
-    @SerializedName(value = "memberName")
+    @SerializedName(value = "nick")
     private String name;
 
     /**
@@ -29,11 +29,17 @@ public class SignUserInfoVO {
      */
     private String profile;
 
+    @SerializedName(value = "passportId")
+    private String userId;
+
+    /**
+     * 颜色
+     */
+    private String color;
     /**
      * 部门
      */
     private String[] deptNames;
-
 
 
     /**
@@ -45,4 +51,15 @@ public class SignUserInfoVO {
      * 签到状态
      */
     private Integer signState;
+
+
+    @JSONField(name="id")
+    public void setMemberId(String memberId) {
+        this.memberId = memberId;
+    }
+
+    @JSONField(name="passportId")
+    public void setUserId(String userId) {
+        this.userId = userId;
+    }
 }

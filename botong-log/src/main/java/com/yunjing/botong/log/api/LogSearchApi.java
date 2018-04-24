@@ -6,6 +6,7 @@ import com.yunjing.botong.log.service.ILogSearchService;
 import com.yunjing.message.model.Message;
 import com.yunjing.mommon.base.BaseController;
 import com.yunjing.mommon.wrapper.ResponseEntityWrapper;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
@@ -53,6 +54,9 @@ public class LogSearchApi extends BaseController {
      */
     @PostMapping("/read")
     public ResponseEntityWrapper read(@RequestBody ReceviedParam receviedParam) {
+        if (StringUtils.isEmpty(receviedParam.getUserId())) {
+            return success();
+        }
         return success(iLogSearchService.read(receviedParam.getLogId(), receviedParam.getUserId()));
     }
 
@@ -63,6 +67,9 @@ public class LogSearchApi extends BaseController {
      */
     @PostMapping("/read-all")
     public ResponseEntityWrapper readAll(@RequestBody ReceviedParam receviedParam) {
+        if (StringUtils.isEmpty(receviedParam.getUserId())) {
+            return success();
+        }
         return success(iLogSearchService.read(receviedParam));
     }
 
@@ -74,5 +81,16 @@ public class LogSearchApi extends BaseController {
     @PostMapping("/delete")
     public ResponseEntityWrapper delete(@RequestBody ReceviedParam receviedParam) {
         return success(iLogSearchService.delete(receviedParam.getLogId(), receviedParam.getUserId()));
+    }
+
+
+    /**
+     * 获取日志详情
+     * @param receviedParam
+     * @return
+     */
+    @PostMapping("/get")
+    public ResponseEntityWrapper get(@RequestBody ReceviedParam receviedParam) {
+        return success(iLogSearchService.get(receviedParam));
     }
 }

@@ -12,6 +12,9 @@
         INNER JOIN org_model o ON o.model_id = m.model_id
         WHERE o.org_id = #{ orgId }
     </select>
+    <select id="getMinSort" resultType="java.lang.Integer">
+        select MIN(priority) AS max FROM model_item WHERE model_id = #{modelId} AND data_type = #{dataType}
+    </select>
     <delete id="deleteModelItemListByOrgId" parameterType="java.lang.String">
         DELETE FROM model_item WHERE  model_id IN (SELECT o.model_id FROM org_model o WHERE o.org_id= #{ orgId })
     </delete>

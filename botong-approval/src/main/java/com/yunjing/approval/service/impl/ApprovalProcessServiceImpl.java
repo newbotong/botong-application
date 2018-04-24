@@ -13,7 +13,6 @@ import org.springframework.transaction.annotation.Transactional;
  * @date 2018/1/15
  */
 @Service
-@Transactional(propagation = Propagation.REQUIRED, rollbackFor = Exception.class)
 public class ApprovalProcessServiceImpl extends BaseServiceImpl<ApprovalProcessMapper, ApprovalProcess> implements IApprovalProcessService {
 
 }

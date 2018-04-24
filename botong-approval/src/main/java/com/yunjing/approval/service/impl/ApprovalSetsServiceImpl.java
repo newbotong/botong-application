@@ -14,6 +14,7 @@ import com.yunjing.approval.service.IModelService;
 import com.yunjing.approval.service.IProcessService;
 import com.yunjing.approval.util.ApproConstants;
 import com.yunjing.mommon.global.exception.BaseException;
+import com.yunjing.mommon.global.exception.InsertMessageFailureException;
 import com.yunjing.mommon.utils.IDUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -27,7 +28,6 @@ import java.util.List;
  * @date 2017/11/30
  */
 @Service
-@Transactional(propagation = Propagation.REQUIRED, rollbackFor = Exception.class)
 public class ApprovalSetsServiceImpl extends ServiceImpl<ApprovalSetsMapper, ApprovalSets> implements IApprovalSetsService {
 
 
@@ -80,7 +80,7 @@ public class ApprovalSetsServiceImpl extends ServiceImpl<ApprovalSetsMapper, App
             approvalSets.setSetting(setting);
             boolean insertOrUpdate = this.insertOrUpdate(approvalSets);
             if (!insertOrUpdate) {
-                throw new BaseException("审批设置项保存失败");
+                throw new InsertMessageFailureException("审批设置项保存失败");
             }
 
         }

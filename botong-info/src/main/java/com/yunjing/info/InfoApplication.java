@@ -1,5 +1,6 @@
 package com.yunjing.info;
 
+import com.yunjing.mommon.annotation.EnableCommonLogger;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.cloud.netflix.eureka.EnableEurekaClient;
@@ -11,6 +12,7 @@ import org.springframework.cloud.netflix.feign.FeignClient;
  * @author tandk
  * @date 2018/3/22 17:27
  */
+@EnableCommonLogger
 @EnableEurekaClient
 @SpringBootApplication
 @FeignClient

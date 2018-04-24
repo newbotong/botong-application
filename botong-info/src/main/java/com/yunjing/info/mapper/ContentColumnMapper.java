@@ -6,10 +6,10 @@ import org.springframework.stereotype.Repository;
 
 /**
  * <p>
- * <p> 资讯目录Mapper
+ * <p>  V1.0 资讯目录
  * </p>
  *
- * @author tao.zeng.
+ * @author liushujie.
  * @since 2018/3/23.
  */
 @Repository

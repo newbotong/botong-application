@@ -10,6 +10,7 @@ import redis.clients.jedis.Pipeline;
 import redis.clients.jedis.Response;
 
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
@@ -22,6 +23,18 @@ import java.util.Map;
  * @since 2018/3/28.
  */
 public class Test {
+
+    @org.junit.Test
+    public void test4() {
+        List<Object> list = new ArrayList<>();
+        for (int i = 1; i < 32; i++) {
+            list.add(i);
+        }
+        String cycle = list.toString();
+        cycle = new StringBuffer(list.toString()).deleteCharAt(cycle.length() - 1).deleteCharAt(0).toString();
+
+        System.out.println(cycle);
+    }
 
     @org.junit.Test
     public void test3() {
@@ -48,7 +61,7 @@ public class Test {
     @org.junit.Test
     public void test1() {
         ManagerListParam param = new ManagerListParam();
-        param.setAppId("");
+        // param.setAppId("");
         param.setDate("");
         param.setMemberId("");
         param.setOrgId("");
@@ -70,7 +83,7 @@ public class Test {
         remindVo.setCycleType("ONCE");
         remindVo.setJobTime("2018-3-30 16:30");
         remindVo.setRemindMode(1);
-        remindVo.setAppId("botong-log");
+        // remindVo.setAppId("botong-log");
         // 提交周期（1每天 2 每周 3 每月 4 季度 5 年度）
         remindVo.setSubmitType(1);
 
@@ -78,4 +91,6 @@ public class Test {
 
         System.out.println(gson.toJson(remindVo));
     }
+
+
 }

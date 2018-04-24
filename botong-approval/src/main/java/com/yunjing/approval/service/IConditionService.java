@@ -38,11 +38,10 @@ public interface IConditionService extends IBaseService<SetsCondition> {
      * 删除审批条件
      *
      * @param modelId    模型编号
-     * @param conditions 审批条件编号
      * @return
      * @throws Exception
      */
-    boolean delete(String modelId, String conditions) throws Exception;
+    boolean delete(String modelId) throws Exception;
 
     /**
      * 获取审批条件

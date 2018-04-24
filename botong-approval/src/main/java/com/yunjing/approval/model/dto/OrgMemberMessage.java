@@ -30,6 +30,10 @@ public class OrgMemberMessage implements Serializable {
      */
     String memberId;
 
+    /**
+     * 账号id
+     */
+    String passportId;
 
     /**
      * 成员名称
@@ -84,7 +88,7 @@ public class OrgMemberMessage implements Serializable {
         /**
          * 删除
          */
-        DELETE;
+        DELETE
 
     }
 }

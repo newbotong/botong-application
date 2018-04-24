@@ -6,7 +6,7 @@ import com.common.mybatis.model.BaseModel;
 import lombok.Data;
 
 /**
- * @author auth
+ * @author 王开亮
  * @date 2018/4/2 11:51
  */
 @TableName("log_template_enum_items")

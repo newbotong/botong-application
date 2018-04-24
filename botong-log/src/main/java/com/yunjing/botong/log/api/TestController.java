@@ -5,6 +5,7 @@ import com.yunjing.botong.log.mapper.LogTemplateFieldMapper;
 import com.yunjing.botong.log.params.DangParam;
 import com.yunjing.botong.log.params.UserInfoModel;
 import com.yunjing.botong.log.processor.okhttp.AppCenterService;
+import com.yunjing.botong.log.vo.AppPushParam;
 import com.yunjing.botong.log.vo.LogTemplateFieldVo;
 import com.yunjing.mommon.base.PushParam;
 import lombok.extern.slf4j.Slf4j;
@@ -57,7 +58,7 @@ public class TestController {
     @RequestMapping("/push")
     public String push() {
         // 创建请求参数
-        PushParam param = new PushParam();
+        AppPushParam param = new AppPushParam();
         param.setTitle("Title");
         param.setNotificationTitle("NotificationTitle");
         param.setAlias(new String[]{"6386505037916409856"});
@@ -67,25 +68,13 @@ public class TestController {
 
     @RequestMapping("/dang")
     public String dang() {
-        DangParam param = new DangParam();
-        param.setIsAccessory(0);
-        param.setSendTelephone(18562818246L);
-        param.setUserId(6386505037916409856L);
-        List<UserInfoModel> infoModels = new ArrayList<>();
-        infoModels.add(new UserInfoModel(18562818246L, 6386505037916409856L));
-        param.setReceiveBody(infoModels);
-        param.setDangType(1);
-        param.setRemindType(1);
-        param.setSendType(1);
-        param.setSendContent("dang消息内容");
-        appCenterService.dang(param);
         return "success";
     }
 
 
     @RequestMapping("/is-manager")
     public String isManager() {
-        appCenterService.isManager("611564163546121654982", "6386505038969180166", true);
+        appCenterService.isManager("611564163546121654982", "6386505038969180166");
         return "success";
     }
 

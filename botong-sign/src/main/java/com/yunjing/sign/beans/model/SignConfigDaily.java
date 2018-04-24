@@ -77,4 +77,8 @@ public class SignConfigDaily extends BaseModel<SignConfigDaily>  {
 	 */
 	private String adress;
 
+	/**
+	 * 原点的打卡距离
+	 */
+	private Integer range;
 }

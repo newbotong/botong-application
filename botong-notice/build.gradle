@@ -21,9 +21,6 @@ repositories {
 }
 
 dependencies {
-    compile('com.yunjing.botong:commons:2.0.0-SNAPSHOT') {
-        changing = true //实时更新jar包
-    }
     compile('com.yunjing.botong:commons-mybatisplus:2.0.0-SNAPSHOT') {
         changing = true //实时更新jar包
     }
@@ -40,7 +37,7 @@ dependencies {
     compile group: 'com.squareup.okhttp3', name: 'okhttp', version: '3.10.0'
 
     //Reids jar
-    compile('com.yunjing.botong:commons-redis:2.0.0-SNAPSHOT'){
+    compile('com.yunjing.botong:commons-redis:2.0.3-SNAPSHOT'){
         changing = true
     }
 

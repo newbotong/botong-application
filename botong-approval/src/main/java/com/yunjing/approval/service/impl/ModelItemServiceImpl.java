@@ -1,6 +1,7 @@
 package com.yunjing.approval.service.impl;
 
 import com.alibaba.fastjson.JSONObject;
+import com.alibaba.fastjson.TypeReference;
 import com.baomidou.mybatisplus.mapper.Condition;
 import com.baomidou.mybatisplus.mapper.EntityWrapper;
 import com.baomidou.mybatisplus.mapper.Wrapper;
@@ -8,19 +9,27 @@ import com.common.mybatis.service.impl.BaseServiceImpl;
 import com.yunjing.approval.dao.mapper.ConditionMapper;
 import com.yunjing.approval.dao.mapper.ModelItemMapper;
 import com.yunjing.approval.dao.mapper.ModelMapper;
-import com.yunjing.approval.model.entity.*;
+import com.yunjing.approval.model.dto.CompanyDeptDTO;
+import com.yunjing.approval.model.entity.ModelItem;
+import com.yunjing.approval.model.entity.ModelL;
+import com.yunjing.approval.model.entity.OrgModel;
+import com.yunjing.approval.model.entity.SetsCondition;
 import com.yunjing.approval.model.vo.*;
 import com.yunjing.approval.service.*;
-import com.yunjing.mommon.global.exception.BaseException;
+import com.yunjing.approval.util.ApproConstants;
+import com.yunjing.mommon.global.exception.InsertMessageFailureException;
+import com.yunjing.mommon.global.exception.MissingRequireFieldException;
+import com.yunjing.mommon.global.exception.ParameterErrorException;
+import com.yunjing.mommon.global.exception.UpdateMessageFailureException;
 import com.yunjing.mommon.utils.IDUtils;
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.lang.ArrayUtils;
 import org.apache.commons.lang.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Propagation;
-import org.springframework.transaction.annotation.Transactional;
 
+import java.lang.reflect.Type;
 import java.sql.Timestamp;
 import java.util.ArrayList;
 import java.util.HashSet;
@@ -62,7 +71,13 @@ public class ModelItemServiceImpl extends BaseServiceImpl<ModelItemMapper, Model
     @Autowired
     private ModelItemMapper modelItemMapper;
     @Autowired
-    private IModelCategoryService modelCategoryService;
+    private IApprovalUserService approvalUserService;
+
+    @Autowired
+    StringRedisTemplate redisTemplate;
+
+    private Type companyDeptType = new TypeReference<List<CompanyDeptDTO>>() {
+    }.getType();
 
     /**
      * 1-多行输入框 2-数字输入框 3-单选框 4-日期 5-日期区间 6-单行输入框 7-明细 8-说明文字 9-金额 10- 图片 11-附件
@@ -70,8 +85,8 @@ public class ModelItemServiceImpl extends BaseServiceImpl<ModelItemMapper, Model
     private final int[] types = {1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11};
 
     @Override
-    @Transactional(propagation = Propagation.REQUIRED, rollbackFor = Exception.class)
-    public ClientModelItemVO getModelItem(String modelId) throws Exception {
+    public ClientModelItemVO getModelItem(String modelId, String memberId) throws Exception {
+        logger.info("modelId: " + modelId + " memberId: " + memberId);
         ModelL modelL = modelService.selectById(modelId);
         List<ModelItem> itemList = this.selectList(Condition.create().where("model_id={0}", modelId).and("item_version={0}", modelL.getModelVersion()).orderBy("priority"));
         ModelVO modelVO = new ModelVO();
@@ -104,10 +119,6 @@ public class ModelItemServiceImpl extends BaseServiceImpl<ModelItemMapper, Model
         modelVO.setItems(modelItemVOS);
         ClientModelItemVO clientModelItemVO = new ClientModelItemVO(modelVO);
 
-        // 获取审批流程设置类型，set=0:不分条件设置审批人 set=1:分条件设置审批人
-        ApprovalSetVO approvalSet = approvalSetsService.getApprovalSet(modelId);
-        clientModelItemVO.setSet(approvalSet.getSetting());
-
         // 获取预设人员筛选字段
         Set<String> keys = new HashSet<>();
         if (StringUtils.isNotBlank(modelId)) {
@@ -129,8 +140,19 @@ public class ModelItemServiceImpl extends BaseServiceImpl<ModelItemMapper, Model
 
         // 获取默认抄送人
         List<UserVO> userVOList = copyService.get(modelId);
-        clientModelItemVO.setCopyerVOS(new ArrayList<>());
+        clientModelItemVO.setCopyerVOS(userVOList);
 
+        // 获取部门信息
+        List<DeptVO> deptVOList = new ArrayList<>();
+        DeptVO deptVO = new DeptVO();
+        deptVO.setDeptId("6384295807830462465");
+        deptVO.setDeptName("行政部");
+        DeptVO deptVO1 = new DeptVO();
+        deptVO1.setDeptId("6384295807830462466");
+        deptVO1.setDeptName("行政部2");
+        deptVOList.add(deptVO);
+        deptVOList.add(deptVO1);
+        clientModelItemVO.setDeptList(deptVOList);
         return clientModelItemVO;
 
     }
@@ -160,7 +182,7 @@ public class ModelItemServiceImpl extends BaseServiceImpl<ModelItemMapper, Model
 
         ModelL modelL = modelService.selectById(modelId);
         if (modelL == null) {
-            throw new BaseException("模型信息不存在");
+            throw new ParameterErrorException("模型信息不存在");
         }
 
         Wrapper<ModelItem> wrapper = new EntityWrapper<>();
@@ -168,25 +190,17 @@ public class ModelItemServiceImpl extends BaseServiceImpl<ModelItemMapper, Model
         List<ModelItem> itemList = this.selectList(wrapper);
 
         if (CollectionUtils.isEmpty(itemList)) {
-            throw new BaseException("字段信息不存在");
+            throw new ParameterErrorException("字段信息不存在");
         }
 
         return this.getModelVO(modelL, itemList);
     }
 
     @Override
-    @Transactional(propagation = Propagation.REQUIRED, rollbackFor = Exception.class)
-    public ModelVO saveModelItem(String companyId, String memberId, String json) throws Exception {
-        List<ModelCategory> categories = modelCategoryService.selectList(Condition.create().where("org_id={0}", companyId));
-        String other = "其他";
-        String categoryId = "";
-        for (ModelCategory category : categories) {
-            if(other.equals(category.getCategoryName())){
-                categoryId = category.getId();
-            }
-        }
+    public ModelVO saveModelItem(String companyId, String memberId, String categoryId, String json) throws Exception {
+        logger.info("companyId: " + companyId + " memberId: " + memberId + " categoryId: " + categoryId + " json: " + json);
         if (StringUtils.isBlank(json)) {
-            throw new BaseException("模型数据不存在");
+            throw new ParameterErrorException("模型数据不存在");
         }
         System.out.println(json);
 
@@ -194,16 +208,16 @@ public class ModelItemServiceImpl extends BaseServiceImpl<ModelItemMapper, Model
         try {
             vo = JSONObject.parseObject(json, ModelVO.class);
         } catch (Exception ex) {
-            throw new BaseException("模型数据格式不正确");
+            throw new ParameterErrorException("模型数据格式不正确");
         }
 
         if (StringUtils.isBlank(vo.getModelName())) {
-            throw new BaseException("审批名称不存在");
+            throw new ParameterErrorException("审批名称不存在");
         }
 
         List<ModelItemVO> itemVOS = vo.getItems();
         if (CollectionUtils.isEmpty(itemVOS)) {
-            throw new BaseException("字段数据不存在");
+            throw new ParameterErrorException("字段数据不存在");
         }
 
         String modelId = vo.getModelId();
@@ -214,7 +228,7 @@ public class ModelItemServiceImpl extends BaseServiceImpl<ModelItemMapper, Model
         if (StringUtils.isNotBlank(vo.getModelId())) {
             entity = modelService.selectById(modelId);
             if (entity == null) {
-                throw new BaseException("模型信息不存在");
+                throw new ParameterErrorException("模型信息不存在");
             }
             version = entity.getModelVersion() + 1;
         } else {
@@ -245,14 +259,14 @@ public class ModelItemServiceImpl extends BaseServiceImpl<ModelItemMapper, Model
 
         List<ModelItem> entityList = this.getModelItemList(itemVOS, modelId, version, false, null);
         if (CollectionUtils.isEmpty(entityList)) {
-            throw new BaseException("字段数据解析异常");
+            throw new MissingRequireFieldException("字段数据解析异常");
         }
 
         boolean result = modelService.insertOrUpdate(entity);
         if (result) {
             result = this.insertBatch(entityList);
             if (!result) {
-                throw new BaseException("字段插入失败");
+                throw new InsertMessageFailureException("字段插入失败");
             }
 
             if (isNew) {
@@ -265,14 +279,14 @@ public class ModelItemServiceImpl extends BaseServiceImpl<ModelItemMapper, Model
                 orgModel.setCreateTime(now.getTime());
                 result = orgModelService.insert(orgModel);
                 if (!result) {
-                    throw new BaseException("模型关系插入失败");
+                    throw new InsertMessageFailureException("模型关系插入失败");
                 }
             } else {
                 approvalSetsService.deleteById(modelId);
                 conditionMapper.disableByModelId(modelId);
             }
         } else {
-            throw new BaseException("模型插入或更新失败");
+            throw new UpdateMessageFailureException("模型插入或更新失败");
         }
 
         return this.getModelVO(entity, entityList);
@@ -290,7 +304,7 @@ public class ModelItemServiceImpl extends BaseServiceImpl<ModelItemMapper, Model
      * @param version 模型版本号
      * @param flag    是否为子字段
      * @param parent  父字段视图
-     * @return 字段结婚
+     * @return
      * @throws Exception 异常
      */
     private List<ModelItem> getModelItemList(List<ModelItemVO> itemVOS, String modelId, int version, boolean flag, ModelItem parent) throws Exception {
@@ -299,7 +313,7 @@ public class ModelItemServiceImpl extends BaseServiceImpl<ModelItemMapper, Model
         for (ModelItemVO itemVO : itemVOS) {
             int type = itemVO.getType();
             if (!ArrayUtils.contains(types, type)) {
-                throw new BaseException("模型数据格式不正确 - 字段类型不正确");
+                throw new MissingRequireFieldException("模型数据格式不正确 - 字段类型不正确");
             }
 
             ModelItem item = new ModelItem();
@@ -324,7 +338,7 @@ public class ModelItemServiceImpl extends BaseServiceImpl<ModelItemMapper, Model
                 label = "说明";
             } else {
                 if (StringUtils.isBlank(label)) {
-                    throw new BaseException("模型数据格式不正确 - 标题为空");
+                    throw new MissingRequireFieldException("模型数据格式不正确 - 标题为空");
                 }
             }
             item.setItemLabel(label);
@@ -337,7 +351,7 @@ public class ModelItemServiceImpl extends BaseServiceImpl<ModelItemMapper, Model
 
             if (type == 3 || type == 5) {
                 if (StringUtils.isBlank(option)) {
-                    throw new BaseException("模型数据格式不正确 - 选项为空");
+                    throw new MissingRequireFieldException("模型数据格式不正确 - 选项为空");
                 }
                 item.setOptValue(option);
             }
@@ -359,12 +373,12 @@ public class ModelItemServiceImpl extends BaseServiceImpl<ModelItemMapper, Model
             if (type == 4 || type == 5) {
                 if (StringUtils.isNotBlank(dateFormat)) {
                     if (!"yyyy-MM-dd".equals(dateFormat) && !"yyyy-MM-dd HH:mm".equals(dateFormat)) {
-                        throw new BaseException("模型数据格式不正确 - 日期类型不正确");
+                        throw new MissingRequireFieldException("模型数据格式不正确 - 日期类型不正确");
                     } else {
                         item.setDateFormat(dateFormat);
                     }
                 } else {
-                    throw new BaseException("模型数据格式不正确 - 日期类型为空");
+                    throw new MissingRequireFieldException("模型数据格式不正确 - 日期类型为空");
                 }
             }
 
@@ -393,10 +407,12 @@ public class ModelItemServiceImpl extends BaseServiceImpl<ModelItemMapper, Model
             }
             item.setIsRequired(isRequired);
 
+            // 获取单选框中排序最小值
+            Integer minSort = modelItemMapper.getMinSort(modelId, ApproConstants.RADIO_TYPE_3);
             // 是否为判断条件
             if (!flag) {
                 if (type == 2 || type == 3) {
-                    Integer isJudge = itemVO.getIsJudge();
+                    Integer isJudge = itemVO.getJudge();
                     if (isJudge != null && isJudge == 1) {
                         isJudge = 1;
                     } else {
@@ -404,7 +420,11 @@ public class ModelItemServiceImpl extends BaseServiceImpl<ModelItemMapper, Model
                     }
                     item.setIsJudge(isJudge);
                 } else {
-                    item.setIsJudge(0);
+                    if (item.getPriority().equals(minSort)) {
+                        item.setIsJudge(1);
+                    } else {
+                        item.setIsJudge(0);
+                    }
                 }
             } else {
                 item.setIsJudge(0);
@@ -426,7 +446,7 @@ public class ModelItemServiceImpl extends BaseServiceImpl<ModelItemMapper, Model
                     entityList.addAll(childList);
                     childList.clear();
                 } else {
-                    throw new BaseException("字段子集数据解析异常");
+                    throw new MissingRequireFieldException("字段子集数据解析异常");
                 }
             }
             i++;

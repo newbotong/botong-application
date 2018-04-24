@@ -3,10 +3,15 @@ package com.yunjing.botong.log.api;
 import com.common.mongo.util.PageWrapper;
 import com.yunjing.botong.log.params.ManagerListParam;
 import com.yunjing.botong.log.service.LogReportService;
-import com.yunjing.botong.log.vo.Member;
+import com.yunjing.botong.log.vo.ManagerMemberInfoVo;
 import com.yunjing.mommon.base.BaseController;
+import com.yunjing.mommon.constant.StatusCode;
+import com.yunjing.mommon.global.exception.BaseRuntimeException;
+import com.yunjing.mommon.validate.BeanFieldValidator;
 import com.yunjing.mommon.wrapper.ResponseEntityWrapper;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.web.bind.annotation.*;
 
 /**
@@ -20,6 +25,9 @@ import org.springframework.web.bind.annotation.*;
 @RestController
 @RequestMapping("/log/report")
 public class LogReportApi extends BaseController {
+
+    @Value("${botong.log.appId}")
+    private String appId;
 
 
     @Autowired
@@ -38,13 +46,21 @@ public class LogReportApi extends BaseController {
     @GetMapping("/list")
     public ResponseEntityWrapper list(@RequestParam String memberId,
                                       @RequestParam String orgId,
-                                      @RequestParam String appId,
                                       @RequestParam Integer pageNo,
                                       @RequestParam Integer pageSize,
                                       @RequestParam(required = false, defaultValue = "1") Integer submitType,
                                       @RequestParam(required = false, defaultValue = "0") Long startDate,
                                       @RequestParam(required = false, defaultValue = "0") Long endDate) {
 
+        if (StringUtils.isEmpty(memberId)) {
+            throw new BaseRuntimeException(StatusCode.MISSING_REQUIRE_FIELD.getStatusCode(), "memberId 不能为空");
+        }
+        if (StringUtils.isEmpty(orgId)) {
+            throw new BaseRuntimeException(StatusCode.MISSING_REQUIRE_FIELD.getStatusCode(), "orgId 不能为空");
+        }
+        if (submitType == 0) {
+            submitType = 1;
+        }
         PageWrapper query = logReportService.query(memberId, orgId, appId, pageNo, pageSize, submitType, startDate, endDate);
         return success(query);
     }
@@ -58,7 +74,8 @@ public class LogReportApi extends BaseController {
      */
     @PostMapping("/manager-submit-list")
     public ResponseEntityWrapper submitList(@RequestBody ManagerListParam param) {
-        PageWrapper<Member> wrapper = logReportService.submitList(param.getMemberId(), param.getOrgId(), param.getAppId(), param.getSubmitType(), param.getDate(), param.getPageNo(), param.getPageSize());
+        BeanFieldValidator.getInstance().validate(param);
+        PageWrapper<ManagerMemberInfoVo> wrapper = logReportService.submitList(param.getMemberId(), param.getOrgId(), appId, param.getSubmitType(), param.getDate(), param.getPageNo(), param.getPageSize());
         return success(wrapper);
     }
 
@@ -70,7 +87,8 @@ public class LogReportApi extends BaseController {
      */
     @PostMapping("/manager-unsubmit-list")
     public ResponseEntityWrapper unSubmitList(@RequestBody ManagerListParam param) {
-        PageWrapper<Member> wrapper = logReportService.unSubmitList(param.getMemberId(), param.getOrgId(), param.getAppId(), param.getSubmitType(), param.getDate(), param.getPageNo(), param.getPageSize());
+        BeanFieldValidator.getInstance().validate(param);
+        PageWrapper<ManagerMemberInfoVo> wrapper = logReportService.unSubmitList(param.getMemberId(), param.getOrgId(), appId, param.getSubmitType(), param.getDate(), param.getPageNo(), param.getPageSize());
         return success(wrapper);
     }
 }
