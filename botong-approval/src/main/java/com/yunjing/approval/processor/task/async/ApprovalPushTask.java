@@ -164,7 +164,14 @@ public class ApprovalPushTask extends BaseTask {
                         }
                     }
                 } else {
-                    passportIds[0] = passportId;
+                    String[] m = new String[1];
+                    m[0] = approval.getId();
+                    List<Member> ms = appCenterService.findSubLists(null, m);
+                    String psId = "";
+                    for (Member member : ms) {
+                        psId = member.getPassportId();
+                    }
+                    passportIds[0] = psId;
                     // 审批推送入参
                     PushParam pushParam = setPushParam(passportId, passportIds, approval);
                     // 推送审批

@@ -10,10 +10,10 @@ import com.yunjing.approval.dao.mapper.ApprovalUserMapper;
 import com.yunjing.approval.model.dto.CompanyDeptDTO;
 import com.yunjing.approval.model.dto.MemberDTO;
 import com.yunjing.approval.model.dto.MemberListDTO;
-import com.yunjing.approval.model.dto.OrgMemberMessage;
 import com.yunjing.approval.model.entity.ApprovalUser;
 import com.yunjing.approval.service.IApprovalUserService;
 import com.yunjing.mommon.utils.BeanUtils;
+import org.apache.commons.collections.CollectionUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.stereotype.Service;
@@ -43,40 +43,27 @@ public class ApprovalUserServiceImpl extends BaseServiceImpl<ApprovalUserMapper,
 
     private Type userInfoType = new TypeReference<UserInfo>() {
     }.getType();
+
     @Override
-    public boolean addMember(List<OrgMemberMessage> orgMemberMessages) {
+    public boolean addMember(List<ApprovalUser> approvalUserList) {
         boolean isInserted = false;
         List<ApprovalUser> approvalUsers = new ArrayList<>();
         List<ApprovalUser> list = this.selectList(Condition.create());
         List<String> ids = list.stream().map(ApprovalUser::getId).collect(Collectors.toList());
-        orgMemberMessages.forEach(orgMemberMessage -> {
-            Set<String> idSet = ids.stream().filter(id -> id.equals(orgMemberMessage.getMemberId())).collect(Collectors.toSet());
+        approvalUserList.forEach(approvalUser -> {
+            Set<String> idSet = ids.stream().filter(id -> id.equals(approvalUser.getId())).collect(Collectors.toSet());
             if (idSet.size() == 0) {
-                ApprovalUser approvalUser = new ApprovalUser();
-                approvalUser.setId(orgMemberMessage.getMemberId());
-                approvalUser.setName(orgMemberMessage.getMemberName());
-                approvalUser.setPosition(orgMemberMessage.getPosition());
-                approvalUser.setMobile(orgMemberMessage.getMobile());
-                approvalUser.setAvatar(orgMemberMessage.getProfile());
-                approvalUser.setOrgId(orgMemberMessage.getCompanyId());
-                approvalUser.setPassportId(orgMemberMessage.getPassportId());
-                approvalUser.setColor(orgMemberMessage.getColor());
-                List<String> deptIds = orgMemberMessage.getDeptIds();
-                List<String> deptNames = orgMemberMessage.getDeptNames();
-                String dIds = "";
-                if (deptIds != null && !deptIds.isEmpty()) {
-                    for (String deptId : deptIds) {
-                        dIds = deptId + ",";
-                    }
-                }
-                approvalUser.setDeptId(dIds);
-                String dNames = "";
-                if (deptNames != null && !deptNames.isEmpty()) {
-                    for (String deptName : deptNames) {
-                        dNames = deptName + ",";
-                    }
-                }
-                approvalUser.setDeptName(dNames);
+                ApprovalUser newUser = new ApprovalUser();
+                newUser.setId(approvalUser.getId());
+                newUser.setName(approvalUser.getName());
+                newUser.setPosition(approvalUser.getPosition());
+                newUser.setMobile(approvalUser.getMobile());
+                newUser.setAvatar(approvalUser.getAvatar());
+                newUser.setOrgId(approvalUser.getOrgId());
+                newUser.setPassportId(approvalUser.getPassportId());
+                newUser.setColor(approvalUser.getColor());
+                approvalUser.setDeptId(approvalUser.getDeptId());
+                approvalUser.setDeptName(approvalUser.getDeptName());
                 approvalUsers.add(approvalUser);
             }
         });
@@ -88,22 +75,18 @@ public class ApprovalUserServiceImpl extends BaseServiceImpl<ApprovalUserMapper,
     }
 
     @Override
-    public boolean updateMember(List<OrgMemberMessage> orgMemberMessages) {
+    public boolean updateMember(List<ApprovalUser> approvalUserList) {
         boolean isUpdated = false;
-        List<String> ids = orgMemberMessages.stream().map(OrgMemberMessage::getMemberId).collect(Collectors.toList());
-        if (!ids.isEmpty()) {
-            List<ApprovalUser> list = this.selectList(Condition.create().in("id={0}", ids));
-            if (!list.isEmpty()) {
-                isUpdated = this.updateBatchById(list);
-            }
+        if (CollectionUtils.isNotEmpty(approvalUserList)) {
+            isUpdated = this.insertOrUpdateBatch(approvalUserList);
         }
         return isUpdated;
     }
 
     @Override
-    public boolean deleteMember(List<OrgMemberMessage> orgMemberMessages) {
+    public boolean deleteMember(List<ApprovalUser> approvalUserList) {
         boolean isDeleted = false;
-        List<String> ids = orgMemberMessages.stream().map(OrgMemberMessage::getMemberId).collect(Collectors.toList());
+        List<String> ids = approvalUserList.stream().map(ApprovalUser::getId).collect(Collectors.toList());
         if (!ids.isEmpty()) {
             isDeleted = this.deleteBatchIds(ids);
         }
@@ -111,41 +94,34 @@ public class ApprovalUserServiceImpl extends BaseServiceImpl<ApprovalUserMapper,
     }
 
     @Override
-    public boolean updateContract(String companyId ,String userId,Integer choiceContacts) {
+    public boolean updateContract(String companyId) {
         List<MemberListDTO> memberListDTOList = new ArrayList<>();
         List<CompanyDeptDTO> companyDeptDTOList = JSON.parseObject(redisTemplate.opsForList().range(ContactsCommon.ORG_COMPANY_DEPT_KEY + companyId, 0, -1).toString(), companyDeptType);
         for (CompanyDeptDTO companyDeptDTO : companyDeptDTOList) {
 //              获取根部门下的成员列表
             if (redisTemplate.hasKey(ContactsCommon.ORG_DEPT_MEMBER_KEY + companyDeptDTO.getId())) {
-                    List<String> memberIdList = redisTemplate.opsForList().range(ContactsCommon.ORG_DEPT_MEMBER_KEY + companyDeptDTO.getId(), 0, -1);
-                    for (String memberId : memberIdList) {
-                        MemberListDTO memberListDTO = getMemberListDTO(memberId);
-                        if (memberListDTO != null) {
-//                          校验是否为选择联系人列表(0:否 1：是)
-                            if (choiceContacts == Integer.parseInt(ContactsCommon.COMMON_1)) {
-                                if (!memberListDTO.getPassportId().equals(userId)) {
-                                    memberListDTOList.add(memberListDTO);
-                                }
-                            } else {
-                                memberListDTOList.add(memberListDTO);
-                            }
-                        }
+                List<String> memberIdList = redisTemplate.opsForList().range(ContactsCommon.ORG_DEPT_MEMBER_KEY + companyDeptDTO.getId(), 0, -1);
+                for (String memberId : memberIdList) {
+                    MemberListDTO memberListDTO = getMemberListDTO(memberId);
+                    if (memberListDTO != null) {
+                        memberListDTOList.add(memberListDTO);
                     }
                 }
+            }
         }
-        List<OrgMemberMessage> list = new ArrayList<>();
+        List<ApprovalUser> list = new ArrayList<>();
         for (MemberListDTO member : memberListDTOList) {
-            OrgMemberMessage orgMemeber = new OrgMemberMessage();
-            orgMemeber.setMemberId(member.getMemberId());
-            orgMemeber.setCompanyId(companyId);
+            ApprovalUser approvalUser = new ApprovalUser();
+            approvalUser.setId(member.getMemberId());
+            approvalUser.setOrgId(companyId);
 //            orgMemeber.setDeptIds(new ArrayList<>(member.g));
 //            orgMemeber.setDeptNames(member.getDeptNames());
-            orgMemeber.setMemberName(member.getName());
-            orgMemeber.setMobile(member.getMobile());
-            orgMemeber.setPosition(member.getPosition());
-            orgMemeber.setProfile(member.getProfile());
-            orgMemeber.setPassportId(member.getPassportId());
-            list.add(orgMemeber);
+            approvalUser.setName(member.getName());
+            approvalUser.setMobile(member.getMobile());
+            approvalUser.setPosition(member.getPosition());
+            approvalUser.setAvatar(member.getProfile());
+            approvalUser.setPassportId(member.getPassportId());
+            list.add(approvalUser);
         }
         boolean b = this.addMember(list);
         return b;
@@ -154,7 +130,7 @@ public class ApprovalUserServiceImpl extends BaseServiceImpl<ApprovalUserMapper,
     /**
      * 获取成员信息
      *
-     * @param memberId      成员id
+     * @param memberId 成员id
      * @return
      */
     private MemberListDTO getMemberListDTO(String memberId) {

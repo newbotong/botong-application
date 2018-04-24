@@ -243,8 +243,8 @@ public class NoticeServiceImpl extends ServiceImpl<NoticeMapper, NoticeEntity> i
                 dangParam.setAccessorySize("");
             }
             // okhttp调用发送dang消息
-            dangService.sendDang(dangParam);
-            Response<ResponseEntityWrapper> e = push.execute();
+            Call<ResponseEntityWrapper> dPush = dangService.sendDang(dangParam);
+            Response<ResponseEntityWrapper> e = dPush.execute();
             ResponseEntityWrapper r = e.body();
             if (null != r) {
                 if (r.getStatusCode() != StatusCode.SUCCESS.getStatusCode()) {
