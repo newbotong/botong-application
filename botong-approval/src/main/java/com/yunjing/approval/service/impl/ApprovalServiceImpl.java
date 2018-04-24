@@ -151,6 +151,10 @@ public class ApprovalServiceImpl extends BaseServiceImpl<ApprovalMapper, Approva
                     JSONObject contents = (JSONObject) content.next();
                     JSONArray array1 = contents.getJSONArray("items");
                     String field = contents.getString("field");
+                    if(StringUtils.isNotBlank(field)){
+                        field = "mingxi";
+                    }
+                    Integer num = contents.getInteger("num");
                     attr1.setAttrType(type);
                     attr1.setAttrName(field);
                     contentSet.add(attr1);
@@ -182,8 +186,7 @@ public class ApprovalServiceImpl extends BaseServiceImpl<ApprovalMapper, Approva
                             } else {
                                 entity.setAttrValue(EmojiFilterUtils.filterEmoji(detailValue));
                             }
-                            int detailNum = detail.getIntValue("num");
-                            entity.setAttrNum(detailNum);
+                            entity.setAttrNum(num);
                             attrs.add(entity);
                         }
                     }

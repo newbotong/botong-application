@@ -250,10 +250,12 @@ public class ApprovalApiServiceImpl implements IApprovalApiService {
         List<ApprovalUserVO> approvalUserList = approvalProcessMapper.getApprovalUserList(approvalId);
         // 审批发起人
         ApprovalUserVO initiator = new ApprovalUserVO();
-        initiator.setName(null != approvalById.getName() ? approvalById.getName() : "");
-        initiator.setAvatar(approvalById.getAvatar() != null ? approvalById.getAvatar() : "");
-        initiator.setApprovalTime(approvalById.getCreateTime() != null ? approvalById.getCreateTime() : null);
-        initiator.setColor(approvalById.getColor() != null ? approvalById.getColor() : ApproConstants.DEFAULT_COLOR);
+        if (approvalById != null) {
+            initiator.setName(approvalById.getName() != null ? approvalById.getName() : "");
+            initiator.setAvatar(approvalById.getAvatar() != null ? approvalById.getAvatar() : "");
+            initiator.setApprovalTime(approvalById.getCreateTime());
+            initiator.setColor(approvalById.getColor() != null ? approvalById.getColor() : ApproConstants.DEFAULT_COLOR);
+        }
         initiator.setMessage("发起申请");
         initiator.setProcessState(10);
         initiator.setSort(0);
@@ -272,9 +274,9 @@ public class ApprovalApiServiceImpl implements IApprovalApiService {
                     //描述提醒用户信息
                     clientApprovalDetailVO.setProcessState(approvalUserVO.getProcessState());
                     clientApprovalDetailVO.setMessage("等待我审批");
-                    if(i == 1){
+                    if (i == 1) {
                         approvalUserVO.setMessage("审批中");
-                    }else {
+                    } else {
                         approvalUserVO.setMessage("等待审批");
                     }
                 } else {
@@ -352,7 +354,7 @@ public class ApprovalApiServiceImpl implements IApprovalApiService {
                     if (process.getUserId().equals(memberId)) {
                         process.setProcessState(state);
                         process.setProcessTime(System.currentTimeMillis());
-                        boolean update = approvalProcessService.update(process, Condition.create().where("approval_id={0}", approvalId).and("user_id={0}",memberId));
+                        boolean update = approvalProcessService.update(process, Condition.create().where("approval_id={0}", approvalId).and("user_id={0}", memberId));
                         if (!update) {
                             throw new UpdateMessageFailureException("同意审批--更新审批流程信息失败");
                         }
@@ -458,7 +460,7 @@ public class ApprovalApiServiceImpl implements IApprovalApiService {
     @Transactional(rollbackFor = Exception.class)
     public boolean transferApproval(String companyId, String memberId, String transferredUserId, String approvalId) {
         logger.info("companyId: " + companyId + " memberId: " + memberId + " transferredUserId: " + transferredUserId + "approvalId: " + approvalId);
-        List<ApprovalProcess> processList = approvalProcessService.selectList(Condition.create().where("approval_id={0}", approvalId).orderBy("seq",true));
+        List<ApprovalProcess> processList = approvalProcessService.selectList(Condition.create().where("approval_id={0}", approvalId).orderBy("seq", true));
         int num = 0;
         List<ApprovalProcess> list = new ArrayList<>();
         for (ApprovalProcess approvalProcess : processList) {
@@ -483,7 +485,7 @@ public class ApprovalApiServiceImpl implements IApprovalApiService {
             if (num == 1) {
                 approvalProcess.setSeq(approvalProcess.getSeq() + 1);
                 list.add(approvalProcess);
-            }else {
+            } else {
                 list.add(approvalProcess);
             }
         }
@@ -547,26 +549,16 @@ public class ApprovalApiServiceImpl implements IApprovalApiService {
                 ApproveAttrVO attrVo = new ApproveAttrVO(attr);
                 Map<Integer, List<ApproveAttrVO>> map = new HashMap<>(1);
                 for (ApproveAttributeVO childAttr : attrList) {
-                    if (childAttr.getAttrParent() == null) {
-                        continue;
-                    }
-
-                    if (attr.getId().equals(childAttr.getAttrParent())) {
+                    if (childAttr.getAttrParent() != null && childAttr.getAttrNum() != null && attr.getId().equals(childAttr.getAttrParent())) {
                         Integer num = childAttr.getAttrNum();
-                        if (num == null) {
-                            continue;
-                        }
                         List<ApproveAttrVO> childAttrs = map.get(num);
-
                         if (CollectionUtils.isEmpty(childAttrs)) {
                             childAttrs = new ArrayList<>();
                         }
                         childAttrs.add(new ApproveAttrVO(childAttr));
-
                         map.put(num, childAttrs);
                     }
                 }
-
                 if (MapUtils.isNotEmpty(map)) {
                     List<ApproveRowVO> details = new ArrayList<>(map.size());
                     for (Map.Entry<Integer, List<ApproveAttrVO>> entry : map.entrySet()) {
