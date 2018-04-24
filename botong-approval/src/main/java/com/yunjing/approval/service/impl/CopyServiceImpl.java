@@ -10,14 +10,12 @@ import com.yunjing.approval.model.vo.UserVO;
 import com.yunjing.approval.service.IApprovalUserService;
 import com.yunjing.approval.service.ICopyService;
 import com.yunjing.approval.util.ApproConstants;
-import com.yunjing.mommon.global.exception.BaseException;
+import com.yunjing.mommon.global.exception.ParameterErrorException;
 import com.yunjing.mommon.utils.IDUtils;
 import org.apache.commons.lang.ArrayUtils;
 import org.apache.commons.lang.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Propagation;
-import org.springframework.transaction.annotation.Transactional;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -158,7 +156,7 @@ public class CopyServiceImpl extends BaseServiceImpl<CopyMapper, Copy> implement
     public boolean save(String modelId, String userIds) throws Exception {
 
         if (null == modelId) {
-            throw new BaseException("模型主键不存在");
+            throw new ParameterErrorException("模型主键不存在");
         }
 
         if (StringUtils.isBlank(userIds)) {
@@ -169,7 +167,7 @@ public class CopyServiceImpl extends BaseServiceImpl<CopyMapper, Copy> implement
         String[] ids = StringUtils.split(userIds, ",");
 
         if (ArrayUtils.isEmpty(ids)) {
-            throw new BaseException("用户主键集合不存在");
+            throw new ParameterErrorException("用户主键集合不存在");
         }
 
         List<Copy> list = new ArrayList<>(ids.length);
@@ -195,7 +193,7 @@ public class CopyServiceImpl extends BaseServiceImpl<CopyMapper, Copy> implement
         }
 
         if (list.isEmpty()) {
-            throw new BaseException("用户主键集合不存在");
+            throw new ParameterErrorException("用户主键集合不存在");
         }
 
         this.delete(new EntityWrapper<Copy>().eq("model_id", modelId));

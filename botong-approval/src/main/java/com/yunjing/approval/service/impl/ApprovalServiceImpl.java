@@ -21,9 +21,10 @@ import com.yunjing.approval.service.*;
 import com.yunjing.approval.util.ApproConstants;
 import com.yunjing.approval.util.EmojiFilterUtils;
 import com.yunjing.mommon.Enum.DateStyle;
-import com.yunjing.mommon.global.exception.BaseException;
 import com.yunjing.mommon.global.exception.DeleteMessageFailureException;
 import com.yunjing.mommon.global.exception.InsertMessageFailureException;
+import com.yunjing.mommon.global.exception.MessageNotExitException;
+import com.yunjing.mommon.global.exception.ParameterErrorException;
 import com.yunjing.mommon.utils.BeanUtils;
 import com.yunjing.mommon.utils.DateUtil;
 import com.yunjing.mommon.utils.IDUtils;
@@ -150,8 +151,13 @@ public class ApprovalServiceImpl extends BaseServiceImpl<ApprovalMapper, Approva
                     JSONObject contents = (JSONObject) content.next();
                     JSONArray array1 = contents.getJSONArray("items");
                     String field = contents.getString("field");
+                    Integer num = contents.getInteger("num");
                     attr1.setAttrType(type);
-                    attr1.setAttrName(field);
+                    if (StringUtils.isNotBlank(field)){
+                        attr1.setAttrName(field);
+                    }else {
+                        attr1.setAttrName("mingxi");
+                    }
                     contentSet.add(attr1);
                     Iterator<Object> modelItems = array1.iterator();
                     Set<ApprovalAttr> attrs = new HashSet<>();
@@ -181,8 +187,7 @@ public class ApprovalServiceImpl extends BaseServiceImpl<ApprovalMapper, Approva
                             } else {
                                 entity.setAttrValue(EmojiFilterUtils.filterEmoji(detailValue));
                             }
-                            int detailNum = detail.getIntValue("num");
-                            entity.setAttrNum(detailNum);
+                            entity.setAttrNum(num);
                             attrs.add(entity);
                         }
                     }
@@ -242,20 +247,20 @@ public class ApprovalServiceImpl extends BaseServiceImpl<ApprovalMapper, Approva
         List<ApprovalProcess> approvalProcessList = approvalProcessService.selectList(new EntityWrapper<ApprovalProcess>().in("approval_id", approvaIds).and("is_delete=0"));
 
         if (CollectionUtils.isEmpty(approvalProcessList)) {
-            throw new BaseException("审批流程信息不存在");
+            throw new MessageNotExitException("审批流程信息不存在");
         }
 
         Set<String> userIdSet = approvalProcessList.stream().map(ApprovalProcess::getUserId).collect(Collectors.toSet());
 
         if (CollectionUtils.isEmpty(userIdSet)) {
-            throw new BaseException("审批人信息不存在");
+            throw new MessageNotExitException("审批人信息不存在");
         }
 
         List<String> userIds = new ArrayList<>(userIdSet.size());
         userIds.addAll(userIdSet);
         List<ApprovalUser> users = approvalUserService.selectList(Condition.create().in("id", userIds));
         if (CollectionUtils.isEmpty(users)) {
-            throw new BaseException("获取审批人信息不存在");
+            throw new MessageNotExitException("获取审批人信息不存在");
         }
 
         // key = id, value = nick
@@ -445,19 +450,19 @@ public class ApprovalServiceImpl extends BaseServiceImpl<ApprovalMapper, Approva
         List<ApprovalProcess> approvalProcessList = approvalProcessService.selectList(new EntityWrapper<ApprovalProcess>().in("approval_id", approvalIds));
         if (CollectionUtils.isEmpty(approvalProcessList)) {
             logger.error("审批流程信息不存在");
-            throw new BaseException("审批流程信息不存在");
+            throw new MessageNotExitException("审批流程信息不存在");
         }
         Set<String> userIdSet = approvalProcessList.stream().map(ApprovalProcess::getUserId).collect(Collectors.toSet());
         if (CollectionUtils.isEmpty(userIdSet)) {
             logger.error("审批人信息不存在");
-            throw new BaseException("审批人信息不存在");
+            throw new MessageNotExitException("审批人信息不存在");
         }
         List<String> userIds = new ArrayList<>(userIdSet.size());
         userIds.addAll(userIdSet);
         List<ApprovalUser> users = approvalUserService.selectList(Condition.create().in("id", userIds));
         if (CollectionUtils.isEmpty(users)) {
             logger.error("获取审批人信息不存在");
-//            throw new BaseException("获取审批人信息不存在");
+            throw new MessageNotExitException("获取审批人信息不存在");
         }
         // 封装审批人主键与昵称 （key = id, value = nick）
         Map<String, String> userMap = users.stream().collect(Collectors.toMap(ApprovalUser::getId, ApprovalUser::getName));
@@ -743,13 +748,13 @@ public class ApprovalServiceImpl extends BaseServiceImpl<ApprovalMapper, Approva
      * @param exportData 导出数据
      * @return
      */
-    private boolean saveExportLog(String orgId, String userId, String modelId, String fileName, List<ApprovalExcelVO> exportData) throws BaseException {
+    private boolean saveExportLog(String orgId, String userId, String modelId, String fileName, List<ApprovalExcelVO> exportData) throws Exception {
 
         if (null == orgId) {
-            throw new BaseException("该企业不存在");
+            throw new ParameterErrorException("该企业不存在");
         }
         if (null == userId) {
-            throw new BaseException("该用户不存在");
+            throw new ParameterErrorException("该用户不存在");
         }
         String modelIds;
         Set<String> set = new HashSet<>();
@@ -778,15 +783,15 @@ public class ApprovalServiceImpl extends BaseServiceImpl<ApprovalMapper, Approva
         boolean insert = exportLogService.insert(exportLog);
 
         if (!insert) {
-            throw new BaseException("保存导出记录失败");
+            throw new InsertMessageFailureException("保存导出记录失败");
         }
         return true;
     }
 
-    private Wrapper<Approval> getWrapper(DataParam dataParam) throws BaseException {
+    private Wrapper<Approval> getWrapper(DataParam dataParam) throws Exception {
         Wrapper<Approval> wrapper = new EntityWrapper<>();
         if (StringUtils.isBlank(dataParam.getCompanyId())) {
-            throw new BaseException("主键不存在");
+            throw new ParameterErrorException("主键不存在");
         }
         wrapper.eq("org_id", dataParam.getCompanyId());
         if (StringUtils.isNotBlank(dataParam.getModelId())) {
@@ -818,11 +823,11 @@ public class ApprovalServiceImpl extends BaseServiceImpl<ApprovalMapper, Approva
         return wrapper;
     }
 
-    private List<Approval> getList(DataParam dataParam) throws BaseException {
+    private List<Approval> getList(DataParam dataParam) throws Exception {
         return this.selectList(getWrapper(dataParam).orderBy("model_id", true));
     }
 
-    private PageWrapper<Approval> getPage(DataParam dataParam) throws BaseException {
+    private PageWrapper<Approval> getPage(DataParam dataParam) throws Exception {
         com.baomidou.mybatisplus.plugins.Page page = new com.baomidou.mybatisplus.plugins.Page(dataParam.getCurrentPage(), dataParam.getPageSize());
         com.baomidou.mybatisplus.plugins.Page page1 = this.selectPage(page, getWrapper(dataParam));
         PageWrapper<Approval> pageWrapper = BeanUtils.mapPage(page1, Approval.class);
@@ -836,7 +841,7 @@ public class ApprovalServiceImpl extends BaseServiceImpl<ApprovalMapper, Approva
      * @param approval    审批对象
      * @return
      */
-    private boolean saveApprovalUser(String sendUserIds, Approval approval) throws BaseException {
+    private boolean saveApprovalUser(String sendUserIds, Approval approval) throws Exception {
         boolean flag = false;
         if (sendUserIds != null) {
             // 去除可能的重复数据
@@ -885,7 +890,7 @@ public class ApprovalServiceImpl extends BaseServiceImpl<ApprovalMapper, Approva
      * @param approval    审批对象
      * @return
      */
-    private boolean saveCopyUser(String sendCopyIds, Approval approval) throws BaseException {
+    private boolean saveCopyUser(String sendCopyIds, Approval approval) throws Exception {
         boolean flag = false;
         if (StringUtils.isNotBlank(sendCopyIds)) {
             // 去除可能的重复数据

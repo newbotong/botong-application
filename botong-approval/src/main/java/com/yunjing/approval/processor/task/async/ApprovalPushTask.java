@@ -2,9 +2,11 @@ package com.yunjing.approval.processor.task.async;
 
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
+import com.baomidou.mybatisplus.mapper.Condition;
 import com.yunjing.approval.dao.mapper.ApprovalProcessMapper;
 import com.yunjing.approval.dao.mapper.CopysMapper;
 import com.yunjing.approval.model.entity.Approval;
+import com.yunjing.approval.model.entity.ApprovalUser;
 import com.yunjing.approval.model.entity.ModelL;
 import com.yunjing.approval.model.vo.*;
 import com.yunjing.approval.param.PushParam;
@@ -122,13 +124,10 @@ public class ApprovalPushTask extends BaseTask {
     public void submitApproval(String approvalId, String companyId, String memberId) {
         logger.info("approval: " + approvalId + "  companyId: " + companyId + "  memberId: " + memberId);
         Approval approval = approvalService.selectById(approvalId);
-        String[] members = new String[1];
-        members[0] = memberId;
-        List<Member> memberList = appCenterService.findSubLists(null, members);
-        String passportId = "";
-        for (Member member : memberList) {
-            passportId = member.getPassportId();
-        }
+        ApprovalUser approvalUser = approvalUserService.selectById(memberId);
+        // 推送审批消息发送人账号id
+        String passportId = approvalUser.getPassportId();
+        List<ApprovalUser> users = approvalUserService.selectList(Condition.create());
         if (companyId != null && memberId != null) {
             String message = "您收到一条审批消息";
             List<ApprovalUserVO> approvalUserList = approvalProcessMapper.getApprovalUserList(approvalId);
@@ -147,14 +146,12 @@ public class ApprovalPushTask extends BaseTask {
             });
             if (approvalUserVOS != null && !approvalUserVOS.isEmpty()) {
                 String[] passportIds = new String[1];
-                String[] mid = new String[1];
                 if (approval.getResult() == null) {
                     for (ApprovalUserVO approvalUserVO : approvalUserVOS) {
                         if (approvalUserVO.getProcessState() == 0) {
-                            mid[0] = approvalUserVO.getUserId();
-                            List<Member> mlist = appCenterService.findSubLists(null, mid);
-                            for (Member member : mlist) {
-                                passportIds[0] = member.getPassportId();
+                            List<ApprovalUser> collect = users.stream().filter(approvalUser1 -> approvalUser1.getId().equals(approvalUserVO.getUserId())).collect(Collectors.toList());
+                            if(CollectionUtils.isNotEmpty(collect)){
+                                passportIds[0] = collect.get(0).getPassportId();
                             }
                             // 审批推送入参
                             PushParam pushParam = setPushParam(passportId, passportIds, approval);
@@ -164,7 +161,10 @@ public class ApprovalPushTask extends BaseTask {
                         }
                     }
                 } else {
-                    passportIds[0] = passportId;
+                    List<ApprovalUser> collect = users.stream().filter(approvalUser1 -> approvalUser1.getId().equals(approval.getUserId())).collect(Collectors.toList());
+                    if(CollectionUtils.isNotEmpty(collect)){
+                        passportIds[0] = collect.get(0).getPassportId();
+                    }
                     // 审批推送入参
                     PushParam pushParam = setPushParam(passportId, passportIds, approval);
                     // 推送审批
@@ -178,13 +178,10 @@ public class ApprovalPushTask extends BaseTask {
                         int i = 0;
                         List<String> passIds = new ArrayList<>();
                         List<String> passIdList = new ArrayList<>();
-                        String[] cid = new String[1];
                         for (CopyUserVO copyVO : copyUserList) {
                             // 判断用户是否在平台登陆过
-                            cid[0] = copyVO.getUserId();
-                            List<Member> mids = appCenterService.findSubLists(null, cid);
-                            List<String> pids = mids.stream().map(Member::getPassportId).collect(Collectors.toList());
-                            passIds.addAll(pids);
+                            List<String> collect1 = users.stream().filter(approvalUser1 -> approvalUser1.getId().equals(copyVO.getUserId())).map(ApprovalUser::getPassportId).collect(Collectors.toList());
+                            passIds.addAll(collect1);
                             if (n == 100) {
                                 for (int j = 0; j < passIds.size(); j++) {
                                     passportIds[j] = passIds.get(j);

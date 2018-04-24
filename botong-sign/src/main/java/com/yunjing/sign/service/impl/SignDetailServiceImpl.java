@@ -2,6 +2,7 @@ package com.yunjing.sign.service.impl;
 
 import com.alibaba.fastjson.JSONObject;
 import com.baomidou.mybatisplus.mapper.EntityWrapper;
+import com.baomidou.mybatisplus.plugins.Page;
 import com.baomidou.mybatisplus.service.impl.ServiceImpl;
 import com.common.redis.share.UserInfo;
 import com.yunjing.mommon.Enum.DateStyle;
@@ -220,11 +221,29 @@ public class SignDetailServiceImpl extends ServiceImpl<SignDetailMapper, SignDet
      */
     @Override
     public PageWrapper<UserMonthListVO> staticsMonthInfo(UserAndDeptParam userAndDeptParam, SignBaseMapper mapper) {
-        String[] deptIds = StringUtils.split(userAndDeptParam.getDeptIds(),",");
-        String[] userIdCs = StringUtils.split(userAndDeptParam.getUserIds(),",");
-        //okhttp 分页查询人员列表
-        PageWrapper<SignUserInfoVO> page  = userRemoteApiService.findMemberPage(deptIds, userIdCs, userAndDeptParam.getPageNo(), userAndDeptParam.getPageSize());
-        //判断是否为空
+        PageWrapper<SignUserInfoVO> page = new PageWrapper<>();
+        if (StringUtils.isEmpty(userAndDeptParam.getDeptIds()) && StringUtils.isEmpty(userAndDeptParam.getUserIds())) {
+            List<SignUserInfoVO> memberList = userRemoteApiService.manageScope(userAndDeptParam.getAppId(), userAndDeptParam.getMemberId());
+            if (memberList == null) {
+                return null;
+            }
+            Page<SignUserInfoVO> pageM = new Page<>(userAndDeptParam.getPageNo(), userAndDeptParam.getPageSize());
+            pageM.setTotal(memberList!= null ? memberList.size() : SignConstant.BOTONG_ZERO_VALUE);
+            int endIndex = pageM.getOffset() + pageM.getSize();
+            if (endIndex > memberList.size()) {
+                endIndex = memberList.size() - 1;
+            }
+            List<SignUserInfoVO> memList = memberList.subList(pageM.getOffset(), endIndex);
+            pageM.setRecords(memList);
+            page = BeanUtils.mapPage(pageM, SignUserInfoVO.class);
+        } else {
+            String[] deptIds = StringUtils.split(userAndDeptParam.getDeptIds(),",");
+            String[] userIdCs = StringUtils.split(userAndDeptParam.getUserIds(),",");
+            //okhttp 分页查询人员列表
+            page  = userRemoteApiService.findMemberPage(deptIds, userIdCs, userAndDeptParam.getPageNo(), userAndDeptParam.getPageSize());
+            //判断是否为空
+        }
+
         List<SignUserInfoVO> userList;
         if (page != null) {
             userList = page.getRecords();
@@ -258,6 +277,7 @@ public class SignDetailServiceImpl extends ServiceImpl<SignDetailMapper, SignDet
                 Date dDate = DateUtil.addDay(startD, j);
                 vo.setSignWeek(DateUtil.getWeek(dDate).getNumber());
                 vo.setSignTime(dDate.getTime());
+                vo.setSignCount(SignConstant.BOTONG_ZERO_VALUE);
                 vo.setUserId(obj.getMemberId());
                 monthList.put(DateUtil.getDate(dDate), vo);
             }
@@ -321,6 +341,9 @@ public class SignDetailServiceImpl extends ServiceImpl<SignDetailMapper, SignDet
         return memList;
     }
 
+
+
+
     /**
      * 获取导出的签到信息列表
      * @param userAndDeptParam  人员和部门对象
@@ -329,10 +352,16 @@ public class SignDetailServiceImpl extends ServiceImpl<SignDetailMapper, SignDet
      */
     @Override
     public List<SignExcelVO> getSignInList(UserAndDeptParam userAndDeptParam, SignBaseMapper mapper){
-        String[] deptIds = StringUtils.split(userAndDeptParam.getDeptIds(),",");
-        String[] userIdCs = StringUtils.split(userAndDeptParam.getUserIds(),",");
-        //okhttp 查询成员列表
-        List<SignUserInfoVO> userList = userRemoteApiService.findSubLists(deptIds, userIdCs);
+        List<SignUserInfoVO> userList = new ArrayList<>();
+        if (StringUtils.isEmpty(userAndDeptParam.getDeptIds()) && StringUtils.isEmpty(userAndDeptParam.getUserIds())) {
+            userList = userRemoteApiService.manageScope(userAndDeptParam.getAppId(), userAndDeptParam.getMemberId());
+        } else {
+            String[] deptIds = StringUtils.split(userAndDeptParam.getDeptIds(),",");
+            String[] userIdCs = StringUtils.split(userAndDeptParam.getUserIds(),",");
+            //okhttp 查询成员列表
+            userList = userRemoteApiService.findSubLists(deptIds, userIdCs);
+        }
+
         if(userList == null || userList.size() == 0) {
             return null;
         }
@@ -402,7 +431,7 @@ public class SignDetailServiceImpl extends ServiceImpl<SignDetailMapper, SignDet
     @Override
     public BaseExModel createTempExcel(UserAndDeptParam userAndDeptParam) {
         Date startD = DateUtil.StringToDate(userAndDeptParam.getSignDate() + "-01", DateStyle.YYYY_MM_DD);
-        Date endDate = DateUtil.getLastDayOfMonth(startD);
+        Date endDate = DateUtil.addDay(DateUtil.getLastDayOfMonth(startD), 1);
         List<SignExcelVO> exportData = getSignInList(userAndDeptParam, signDetailMapper);
         if (exportData == null) {
             exportData = new ArrayList<>();

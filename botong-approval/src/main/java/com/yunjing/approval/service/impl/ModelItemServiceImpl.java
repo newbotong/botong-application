@@ -10,11 +10,17 @@ import com.yunjing.approval.dao.mapper.ConditionMapper;
 import com.yunjing.approval.dao.mapper.ModelItemMapper;
 import com.yunjing.approval.dao.mapper.ModelMapper;
 import com.yunjing.approval.model.dto.CompanyDeptDTO;
-import com.yunjing.approval.model.entity.*;
+import com.yunjing.approval.model.entity.ModelItem;
+import com.yunjing.approval.model.entity.ModelL;
+import com.yunjing.approval.model.entity.OrgModel;
+import com.yunjing.approval.model.entity.SetsCondition;
 import com.yunjing.approval.model.vo.*;
 import com.yunjing.approval.service.*;
 import com.yunjing.approval.util.ApproConstants;
-import com.yunjing.mommon.global.exception.BaseException;
+import com.yunjing.mommon.global.exception.InsertMessageFailureException;
+import com.yunjing.mommon.global.exception.MissingRequireFieldException;
+import com.yunjing.mommon.global.exception.ParameterErrorException;
+import com.yunjing.mommon.global.exception.UpdateMessageFailureException;
 import com.yunjing.mommon.utils.IDUtils;
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.lang.ArrayUtils;
@@ -22,8 +28,6 @@ import org.apache.commons.lang.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Propagation;
-import org.springframework.transaction.annotation.Transactional;
 
 import java.lang.reflect.Type;
 import java.sql.Timestamp;
@@ -74,7 +78,7 @@ public class ModelItemServiceImpl extends BaseServiceImpl<ModelItemMapper, Model
 
     private Type companyDeptType = new TypeReference<List<CompanyDeptDTO>>() {
     }.getType();
-    
+
     /**
      * 1-多行输入框 2-数字输入框 3-单选框 4-日期 5-日期区间 6-单行输入框 7-明细 8-说明文字 9-金额 10- 图片 11-附件
      */
@@ -178,7 +182,7 @@ public class ModelItemServiceImpl extends BaseServiceImpl<ModelItemMapper, Model
 
         ModelL modelL = modelService.selectById(modelId);
         if (modelL == null) {
-            throw new BaseException("模型信息不存在");
+            throw new ParameterErrorException("模型信息不存在");
         }
 
         Wrapper<ModelItem> wrapper = new EntityWrapper<>();
@@ -186,7 +190,7 @@ public class ModelItemServiceImpl extends BaseServiceImpl<ModelItemMapper, Model
         List<ModelItem> itemList = this.selectList(wrapper);
 
         if (CollectionUtils.isEmpty(itemList)) {
-            throw new BaseException("字段信息不存在");
+            throw new ParameterErrorException("字段信息不存在");
         }
 
         return this.getModelVO(modelL, itemList);
@@ -194,9 +198,9 @@ public class ModelItemServiceImpl extends BaseServiceImpl<ModelItemMapper, Model
 
     @Override
     public ModelVO saveModelItem(String companyId, String memberId, String categoryId, String json) throws Exception {
-        logger.info("companyId: " + companyId + " memberId: " + memberId + " categoryId: " + categoryId + " json: " +json);
+        logger.info("companyId: " + companyId + " memberId: " + memberId + " categoryId: " + categoryId + " json: " + json);
         if (StringUtils.isBlank(json)) {
-            throw new BaseException("模型数据不存在");
+            throw new ParameterErrorException("模型数据不存在");
         }
         System.out.println(json);
 
@@ -204,16 +208,16 @@ public class ModelItemServiceImpl extends BaseServiceImpl<ModelItemMapper, Model
         try {
             vo = JSONObject.parseObject(json, ModelVO.class);
         } catch (Exception ex) {
-            throw new BaseException("模型数据格式不正确");
+            throw new ParameterErrorException("模型数据格式不正确");
         }
 
         if (StringUtils.isBlank(vo.getModelName())) {
-            throw new BaseException("审批名称不存在");
+            throw new ParameterErrorException("审批名称不存在");
         }
 
         List<ModelItemVO> itemVOS = vo.getItems();
         if (CollectionUtils.isEmpty(itemVOS)) {
-            throw new BaseException("字段数据不存在");
+            throw new ParameterErrorException("字段数据不存在");
         }
 
         String modelId = vo.getModelId();
@@ -224,7 +228,7 @@ public class ModelItemServiceImpl extends BaseServiceImpl<ModelItemMapper, Model
         if (StringUtils.isNotBlank(vo.getModelId())) {
             entity = modelService.selectById(modelId);
             if (entity == null) {
-                throw new BaseException("模型信息不存在");
+                throw new ParameterErrorException("模型信息不存在");
             }
             version = entity.getModelVersion() + 1;
         } else {
@@ -255,14 +259,14 @@ public class ModelItemServiceImpl extends BaseServiceImpl<ModelItemMapper, Model
 
         List<ModelItem> entityList = this.getModelItemList(itemVOS, modelId, version, false, null);
         if (CollectionUtils.isEmpty(entityList)) {
-            throw new BaseException("字段数据解析异常");
+            throw new MissingRequireFieldException("字段数据解析异常");
         }
 
         boolean result = modelService.insertOrUpdate(entity);
         if (result) {
             result = this.insertBatch(entityList);
             if (!result) {
-                throw new BaseException("字段插入失败");
+                throw new InsertMessageFailureException("字段插入失败");
             }
 
             if (isNew) {
@@ -275,14 +279,14 @@ public class ModelItemServiceImpl extends BaseServiceImpl<ModelItemMapper, Model
                 orgModel.setCreateTime(now.getTime());
                 result = orgModelService.insert(orgModel);
                 if (!result) {
-                    throw new BaseException("模型关系插入失败");
+                    throw new InsertMessageFailureException("模型关系插入失败");
                 }
             } else {
                 approvalSetsService.deleteById(modelId);
                 conditionMapper.disableByModelId(modelId);
             }
         } else {
-            throw new BaseException("模型插入或更新失败");
+            throw new UpdateMessageFailureException("模型插入或更新失败");
         }
 
         return this.getModelVO(entity, entityList);
@@ -309,7 +313,7 @@ public class ModelItemServiceImpl extends BaseServiceImpl<ModelItemMapper, Model
         for (ModelItemVO itemVO : itemVOS) {
             int type = itemVO.getType();
             if (!ArrayUtils.contains(types, type)) {
-                throw new BaseException("模型数据格式不正确 - 字段类型不正确");
+                throw new MissingRequireFieldException("模型数据格式不正确 - 字段类型不正确");
             }
 
             ModelItem item = new ModelItem();
@@ -334,7 +338,7 @@ public class ModelItemServiceImpl extends BaseServiceImpl<ModelItemMapper, Model
                 label = "说明";
             } else {
                 if (StringUtils.isBlank(label)) {
-                    throw new BaseException("模型数据格式不正确 - 标题为空");
+                    throw new MissingRequireFieldException("模型数据格式不正确 - 标题为空");
                 }
             }
             item.setItemLabel(label);
@@ -347,7 +351,7 @@ public class ModelItemServiceImpl extends BaseServiceImpl<ModelItemMapper, Model
 
             if (type == 3 || type == 5) {
                 if (StringUtils.isBlank(option)) {
-                    throw new BaseException("模型数据格式不正确 - 选项为空");
+                    throw new MissingRequireFieldException("模型数据格式不正确 - 选项为空");
                 }
                 item.setOptValue(option);
             }
@@ -369,12 +373,12 @@ public class ModelItemServiceImpl extends BaseServiceImpl<ModelItemMapper, Model
             if (type == 4 || type == 5) {
                 if (StringUtils.isNotBlank(dateFormat)) {
                     if (!"yyyy-MM-dd".equals(dateFormat) && !"yyyy-MM-dd HH:mm".equals(dateFormat)) {
-                        throw new BaseException("模型数据格式不正确 - 日期类型不正确");
+                        throw new MissingRequireFieldException("模型数据格式不正确 - 日期类型不正确");
                     } else {
                         item.setDateFormat(dateFormat);
                     }
                 } else {
-                    throw new BaseException("模型数据格式不正确 - 日期类型为空");
+                    throw new MissingRequireFieldException("模型数据格式不正确 - 日期类型为空");
                 }
             }
 
@@ -442,7 +446,7 @@ public class ModelItemServiceImpl extends BaseServiceImpl<ModelItemMapper, Model
                     entityList.addAll(childList);
                     childList.clear();
                 } else {
-                    throw new BaseException("字段子集数据解析异常");
+                    throw new MissingRequireFieldException("字段子集数据解析异常");
                 }
             }
             i++;

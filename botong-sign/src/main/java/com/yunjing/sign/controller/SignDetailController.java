@@ -13,6 +13,7 @@ import com.yunjing.sign.excel.BaseExModel;
 import com.yunjing.sign.service.ISignDetailService;
 import org.apache.poi.ss.usermodel.Workbook;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.web.bind.annotation.*;
 
 import javax.servlet.http.HttpServletResponse;
@@ -37,6 +38,9 @@ public class SignDetailController extends BaseController {
     @Autowired
     private SignDetailMapper signDetailMapper;
 
+    @Value("${botong.log.appId}")
+    private String appId;
+
     /**
      * 签到统计
      * @param userAndDeptParam      多部门id和多memberid
@@ -46,6 +50,7 @@ public class SignDetailController extends BaseController {
     public ResponseEntityWrapper statistics(@RequestBody UserAndDeptParam userAndDeptParam){
         // 基础校验
         BeanFieldValidator.getInstance().validate(userAndDeptParam);
+        userAndDeptParam.setAppId(appId);
         PageWrapper<UserMonthListVO> page = iSignDetailService.staticsMonthInfo(userAndDeptParam, signDetailMapper);
         return success(page);
     }
@@ -61,11 +66,13 @@ public class SignDetailController extends BaseController {
      * @throws Exception        异常
      */
     @GetMapping("/export")
-    public ResponseEntityWrapper export(HttpServletResponse response, String userIds, String deptIds, String signDate) throws Exception {
+    public ResponseEntityWrapper export(HttpServletResponse response, String userIds, String deptIds, String signDate, String memberId) throws Exception {
         UserAndDeptParam userAndDeptParam = new UserAndDeptParam();
         userAndDeptParam.setDeptIds(deptIds);
         userAndDeptParam.setUserIds(userIds);
         userAndDeptParam.setSignDate(signDate);
+        userAndDeptParam.setMemberId(memberId);
+        userAndDeptParam.setAppId(appId);
         boolean exportFlag = false;
         BaseExModel excel = iSignDetailService.createTempExcel(userAndDeptParam);
         String fileName = excel.getFileName();

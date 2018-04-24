@@ -4,24 +4,16 @@ package com.yunjing.approval.service.impl;
 import com.baomidou.mybatisplus.mapper.Condition;
 import com.common.mybatis.service.impl.BaseServiceImpl;
 import com.yunjing.approval.dao.mapper.OrgModelMapper;
-import com.yunjing.approval.model.entity.Approval;
-import com.yunjing.approval.model.entity.ModelItem;
-import com.yunjing.approval.model.entity.ModelL;
-import com.yunjing.approval.model.entity.OrgModel;
-import com.yunjing.approval.service.IApprovalService;
-import com.yunjing.approval.service.IModelItemService;
-import com.yunjing.approval.service.IModelService;
-import com.yunjing.approval.service.IOrgModelService;
+import com.yunjing.approval.model.entity.*;
+import com.yunjing.approval.service.*;
 import com.yunjing.approval.util.ApproConstants;
-import com.yunjing.mommon.global.exception.BaseException;
+import com.yunjing.mommon.global.exception.InsertMessageFailureException;
 import com.yunjing.mommon.utils.IDUtils;
 import org.apache.commons.lang.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Propagation;
-import org.springframework.transaction.annotation.Transactional;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -43,6 +35,8 @@ public class OrgModelServiceImpl extends BaseServiceImpl<OrgModelMapper, OrgMode
 
     @Autowired
     private IApprovalService approvalService;
+    @Autowired
+    private IModelCategoryService categoryService;
 
     private static final Log logger = LogFactory.getLog(OrgModelServiceImpl.class);
 
@@ -51,6 +45,23 @@ public class OrgModelServiceImpl extends BaseServiceImpl<OrgModelMapper, OrgMode
         boolean flag;
         // 查询系统的审批模板
         List<ModelL> defaultModelList = modelLService.selectList(Condition.create().where("is_def={0}", ApproConstants.IS_SYSTEM_MODEL_1));
+        // 查询系统分组
+        List<ModelCategory> categoryList = categoryService.selectList(Condition.create().where("is_default={0}", 1));
+        List<ModelCategory> newCategoryList = new ArrayList<>();
+        for (ModelCategory category : categoryList) {
+            ModelCategory newCategory = new ModelCategory();
+            newCategory.setId(IDUtils.uuid());
+            newCategory.setOrgId(orgId);
+            newCategory.setSort(category.getSort());
+            newCategory.setCategoryName(category.getCategoryName());
+            newCategory.setIsDefault(0);
+            newCategoryList.add(newCategory);
+        }
+        boolean insertBatch = categoryService.insertBatch(newCategoryList);
+        if (!insertBatch){
+            throw new InsertMessageFailureException("批量初始化分组失败");
+        }
+
         //查询该企业下是否已经有审批模板
         List<ModelL> modelListByOrgId = modelLService.findModel(orgId);
         if (modelListByOrgId != null && modelListByOrgId.size() > 0) {
@@ -58,7 +69,7 @@ public class OrgModelServiceImpl extends BaseServiceImpl<OrgModelMapper, OrgMode
         } else {
             // 初始化该企业审批模板
             try {
-                flag = this.createOrgModel(orgId, defaultModelList);
+                flag = this.createOrgModel(orgId, defaultModelList,newCategoryList);
             } catch (Exception e) {
                 flag = true;
                 logger.error("初始化该企业审批模板失败", e);
@@ -101,7 +112,7 @@ public class OrgModelServiceImpl extends BaseServiceImpl<OrgModelMapper, OrgMode
      * @return List<String> 返回模板ID集合（modelIds）
      * @throws Exception
      */
-    private boolean createOrgModel(String orgId, List<ModelL> defaultModelList) {
+    private boolean createOrgModel(String orgId, List<ModelL> defaultModelList,List<ModelCategory> newCategoryList) {
         boolean isInsert = false;
         List<ModelL> newModelList = new ArrayList<>();
         List<OrgModel> newOrgModelList = new ArrayList<>();
@@ -140,18 +151,19 @@ public class OrgModelServiceImpl extends BaseServiceImpl<OrgModelMapper, OrgMode
             isInsert = this.insertBatch(newOrgModelList);
             if (!isInsert) {
                 try {
-                    throw new BaseException("企业的审批模板(org_model)批量插入失败");
-                } catch (BaseException e) {
+                    throw new InsertMessageFailureException("企业的审批模板(org_model)批量插入失败");
+                } catch (InsertMessageFailureException e) {
                     logger.error("企业的审批模板(org_model)批量插入失败", e);
                 }
             }
         } else {
             try {
-                throw new BaseException("企业的审批模板(model)批量插入失败");
-            } catch (BaseException e) {
+                throw new InsertMessageFailureException("企业的审批模板(model)批量插入失败");
+            } catch (InsertMessageFailureException e) {
                 logger.error("企业的审批模板(model)批量插入失败", e);
             }
         }
+
         return isInsert;
     }
 
@@ -236,8 +248,8 @@ public class OrgModelServiceImpl extends BaseServiceImpl<OrgModelMapper, OrgMode
         }
         if (!flag) {
             try {
-                throw new BaseException("该企业的模板子项初始化失败");
-            } catch (BaseException e) {
+                throw new InsertMessageFailureException("该企业的模板子项初始化失败");
+            } catch (InsertMessageFailureException e) {
                 logger.error("该企业的模板子项初始化失败", e);
             }
         }

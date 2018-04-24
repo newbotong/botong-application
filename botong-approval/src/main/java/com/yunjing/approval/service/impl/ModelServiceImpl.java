@@ -9,20 +9,18 @@ import com.yunjing.approval.dao.mapper.ModelMapper;
 import com.yunjing.approval.model.entity.ModelCategory;
 import com.yunjing.approval.model.entity.ModelItem;
 import com.yunjing.approval.model.entity.ModelL;
-import com.yunjing.approval.model.vo.ModelItemVO;
 import com.yunjing.approval.model.vo.ModelListVO;
 import com.yunjing.approval.model.vo.ModelVO;
 import com.yunjing.approval.service.ICopyService;
 import com.yunjing.approval.service.IModelCategoryService;
 import com.yunjing.approval.service.IModelService;
 import com.yunjing.approval.util.ApproConstants;
-import com.yunjing.mommon.global.exception.BaseException;
 import com.yunjing.mommon.global.exception.MessageNotExitException;
+import com.yunjing.mommon.global.exception.MissingRequireFieldException;
+import com.yunjing.mommon.global.exception.ParameterErrorException;
 import com.yunjing.mommon.global.exception.UpdateMessageFailureException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Propagation;
-import org.springframework.transaction.annotation.Transactional;
 
 import java.util.*;
 import java.util.stream.Collectors;
@@ -53,15 +51,15 @@ public class ModelServiceImpl extends BaseServiceImpl<ModelMapper, ModelL> imple
         for (ModelVO modelVO : modelVOList) {
             // 过滤属于某个审批模板的所有详情项
             List<ModelItem> items = modelItems.stream().filter(modelItem -> modelItem.getModelId().equals(modelVO.getModelId())).collect(Collectors.toList());
-             // 过滤出类型是单选框的modelItem
+            // 过滤出类型是单选框的modelItem
             Set<ModelItem> itemSet = items.stream().filter(modelItem -> modelItem.getDataType().equals(ApproConstants.RADIO_TYPE_3)).collect(Collectors.toSet());
             modelVO.setItemVOSet(itemSet);
             // 过滤出所有需要必填的单选框
             Set<ModelItem> set = itemSet.stream().filter(modelItem -> modelItem.getIsRequired().equals(1)).collect(Collectors.toSet());
-            if(!set.isEmpty()){
+            if (!set.isEmpty()) {
                 // 有必填的单选框则标识true
                 modelVO.setHaveRequired(true);
-            }else {
+            } else {
                 // 没有必填的单选框标识为false
                 modelVO.setHaveRequired(false);
             }
@@ -83,7 +81,7 @@ public class ModelServiceImpl extends BaseServiceImpl<ModelMapper, ModelL> imple
                         public int compare(ModelVO o1, ModelVO o2) {
                             if (o1.getSort() > o2.getSort()) {
                                 return 1;
-                            } else if (o1.getSort()<(o2.getSort())) {
+                            } else if (o1.getSort() < (o2.getSort())) {
                                 return -1;
                             } else {
                                 return 0;
@@ -127,7 +125,7 @@ public class ModelServiceImpl extends BaseServiceImpl<ModelMapper, ModelL> imple
                 modelSortMap.put(sortJSON.getString("modelId"), sortJSON.getInteger("sort"));
             }
         } catch (Exception e) {
-            throw new BaseException("解析分组排序数据错误");
+            throw new MissingRequireFieldException("解析分组排序数据错误");
         }
 
         // 查询当前企业的所有分组
@@ -177,12 +175,12 @@ public class ModelServiceImpl extends BaseServiceImpl<ModelMapper, ModelL> imple
     public boolean updateIsDisabled(String modelId, Integer isDisabled) throws Exception {
         ModelL modelL = this.selectById(modelId);
         if (modelL == null) {
-            throw new BaseException("该模型不存在");
+            throw new ParameterErrorException("该模型不存在");
         }
         modelL.setIsDisabled(isDisabled);
         boolean isUpdated = this.updateById(modelL);
         if (!isUpdated) {
-            throw new BaseException("设置模型是否禁用失败");
+            throw new UpdateMessageFailureException("设置模型是否禁用失败");
         }
         return isUpdated;
     }

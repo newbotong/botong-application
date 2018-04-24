@@ -35,6 +35,12 @@ public class ModelCategory extends BaseModel<ModelCategory> {
     private Integer sort;
 
     /**
+     * 顺序
+     */
+    @TableField("is_default")
+    private Integer isDefault;
+
+    /**
      * 创建时间
      */
     @TableField("create_time")
