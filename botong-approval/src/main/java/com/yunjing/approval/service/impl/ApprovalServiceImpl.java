@@ -151,12 +151,13 @@ public class ApprovalServiceImpl extends BaseServiceImpl<ApprovalMapper, Approva
                     JSONObject contents = (JSONObject) content.next();
                     JSONArray array1 = contents.getJSONArray("items");
                     String field = contents.getString("field");
-                    if(StringUtils.isNotBlank(field)){
-                        field = "mingxi";
-                    }
                     Integer num = contents.getInteger("num");
                     attr1.setAttrType(type);
-                    attr1.setAttrName(field);
+                    if (StringUtils.isNotBlank(field)){
+                        attr1.setAttrName(field);
+                    }else {
+                        attr1.setAttrName("mingxi");
+                    }
                     contentSet.add(attr1);
                     Iterator<Object> modelItems = array1.iterator();
                     Set<ApprovalAttr> attrs = new HashSet<>();
