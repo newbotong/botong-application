@@ -5,6 +5,7 @@ import com.alibaba.fastjson.JSONObject;
 import com.baomidou.mybatisplus.mapper.EntityWrapper;
 import com.baomidou.mybatisplus.plugins.Page;
 import com.baomidou.mybatisplus.service.impl.ServiceImpl;
+import com.yunjing.info.common.EncryptionUtil;
 import com.yunjing.info.common.InfoConstant;
 import com.yunjing.info.dto.InfoContentDetailDto;
 import com.yunjing.info.dto.InfoDto;
@@ -24,7 +25,6 @@ import com.yunjing.mommon.global.exception.BaseException;
 import com.yunjing.mommon.global.exception.BaseRuntimeException;
 import com.yunjing.mommon.utils.IDUtils;
 import com.yunjing.mommon.wrapper.ResponseEntityWrapper;
-import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.lang.StringUtils;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -36,11 +36,10 @@ import retrofit2.Call;
 import retrofit2.Response;
 
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-
-import static com.netflix.config.DeploymentContext.ContextKey.appId;
 
 /**
  * 资讯内容Service实现类
@@ -78,6 +77,7 @@ public class InfoContentServiceImpl extends ServiceImpl<InfoContentMapper, InfoC
      */
     @Override
     public InfoContentDetailDto selectDetail(String id, String userId) throws BaseException, IOException {
+        String verificationCode = null;
         this.updateNumber(id);
         InfoContent infoContent = new InfoContent().selectOne(new EntityWrapper<InfoContent>().eq("is_delete", InfoConstant.LOGIC_DELETE_NORMAL).eq("id", id));
         if (null == infoContent) {
@@ -95,12 +95,19 @@ public class InfoContentServiceImpl extends ServiceImpl<InfoContentMapper, InfoC
                 memberList = body1.getData();
                 String[] passportIds = memberList.stream().map(Member::getPassportId).toArray(String[]::new);
                 Call<ResponseEntityWrapper> call = collectService.collectState(passportIds[0], id);
+                List<String> list = new ArrayList<>();
+                list.add(id);
+                list.add(passportIds[0]);
+                verificationCode = EncryptionUtil.md5(list.toString());
+                Object o = redisTemplate.opsForHash().get(InfoConstant.BOTONG_FAVOURITE_FAVID, verificationCode);
+
                 Response<ResponseEntityWrapper> execute = call.execute();
                 ResponseEntityWrapper body = execute.body();
                 Boolean result;
                 if (null != body.getData()) {
                     result = (Boolean) body.getData();
                     infoContentDetailDto.setFavouriteState(result);
+                    infoContentDetailDto.setFavId(String.valueOf(o));
                 }
             }
         } else {
@@ -143,7 +150,7 @@ public class InfoContentServiceImpl extends ServiceImpl<InfoContentMapper, InfoC
         infoContent.setSort(i + 1);
         Boolean result = infoContent.insert();
         if (!result) {
-            throw new BaseRuntimeException(StatusCode.RESOURCE_UPDATE_FAILED.getStatusCode(),"新增失败");
+            throw new BaseRuntimeException(StatusCode.RESOURCE_UPDATE_FAILED.getStatusCode(), "新增失败");
         }
         ParentInfoDetailDto parentInfoDetailDto = new ParentInfoDetailDto();
         InfoCatalog infoCatalog = new InfoCatalog().selectOne(new EntityWrapper<InfoCatalog>().eq("is_delete", InfoConstant.LOGIC_DELETE_NORMAL).eq("id", infoCategoryParam.getOneCatalogId()));
@@ -194,16 +201,16 @@ public class InfoContentServiceImpl extends ServiceImpl<InfoContentMapper, InfoC
     @Transactional(rollbackFor = Exception.class)
     public void infoEdit(InfoCategoryEditParam infoCategoryParam) throws BaseException {
         if (null == infoCategoryParam.getId()) {
-            throw new BaseRuntimeException(StatusCode.MISSING_REQUIRE_FIELD.getStatusCode(),"资讯id不能为空");
+            throw new BaseRuntimeException(StatusCode.MISSING_REQUIRE_FIELD.getStatusCode(), "资讯id不能为空");
         }
         InfoContent infoContent = new InfoContent().selectOne(new EntityWrapper<InfoContent>().eq("is_delete", InfoConstant.LOGIC_DELETE_NORMAL).eq("id", infoCategoryParam.getId()));
         if (null == infoContent) {
-            throw new BaseRuntimeException(StatusCode.RESOURCE_NOT_MESSAGE_EXIT.getStatusCode(),"该资讯已被删除");
+            throw new BaseRuntimeException(StatusCode.RESOURCE_NOT_MESSAGE_EXIT.getStatusCode(), "该资讯已被删除");
         }
         BeanUtils.copyProperties(infoCategoryParam, infoContent);
         boolean result = infoContent.updateById();
         if (!result) {
-            throw new BaseRuntimeException(StatusCode.RESOURCE_UPDATE_FAILED.getStatusCode(),"修改失败");
+            throw new BaseRuntimeException(StatusCode.RESOURCE_UPDATE_FAILED.getStatusCode(), "修改失败");
         }
         ParentInfoDetailDto infoDTO = new ParentInfoDetailDto();
         Object object = redisTemplate.opsForHash().get(InfoConstant.REDIS_HOME + ":" + infoCategoryParam.getOrgId(), infoCategoryParam.getOneCatalogId());
@@ -237,7 +244,7 @@ public class InfoContentServiceImpl extends ServiceImpl<InfoContentMapper, InfoC
     public InfoContent selectWebDetail(String id) throws BaseException {
         InfoContent infoContent = new InfoContent().selectOne(new EntityWrapper<InfoContent>().eq("is_delete", InfoConstant.LOGIC_DELETE_NORMAL).eq("id", id));
         if (null == infoContent) {
-            throw new BaseRuntimeException(StatusCode.RESOURCE_NOT_MESSAGE_EXIT.getStatusCode(),"该资讯已被删除");
+            throw new BaseRuntimeException(StatusCode.RESOURCE_NOT_MESSAGE_EXIT.getStatusCode(), "该资讯已被删除");
         }
         return infoContent;
     }
