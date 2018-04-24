@@ -229,7 +229,11 @@ public class SignDetailServiceImpl extends ServiceImpl<SignDetailMapper, SignDet
             }
             Page<SignUserInfoVO> pageM = new Page<>(userAndDeptParam.getPageNo(), userAndDeptParam.getPageSize());
             pageM.setTotal(memberList!= null ? memberList.size() : SignConstant.BOTONG_ZERO_VALUE);
-            List<SignUserInfoVO> memList = memberList.subList(pageM.getOffset(), pageM.getOffset() + pageM.getSize());
+            int endIndex = pageM.getOffset() + pageM.getSize();
+            if (endIndex > memberList.size()) {
+                endIndex = memberList.size() - 1;
+            }
+            List<SignUserInfoVO> memList = memberList.subList(pageM.getOffset(), endIndex);
             pageM.setRecords(memList);
             page = BeanUtils.mapPage(pageM, SignUserInfoVO.class);
         } else {
