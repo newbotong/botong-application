@@ -70,6 +70,8 @@ public interface InfoConstant {
      */
     String BOTONG_INFO_FIX = ":";
 
+    String BOTONG_FAVOURITE_FAVID = "botong:favourite:favid";
+
     @Getter
     enum StateCode {
 

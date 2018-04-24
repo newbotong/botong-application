@@ -36,8 +36,14 @@ public class InfoContentDetailDto implements Serializable {
      * 创建日期
      */
     private Long createTime;
+
+    /**
+     * 收藏id
+     */
+    private String favId;
     /**
      * 是否收藏   true为已收藏    false为未收藏
      */
     private Boolean favouriteState;
+    
 }
