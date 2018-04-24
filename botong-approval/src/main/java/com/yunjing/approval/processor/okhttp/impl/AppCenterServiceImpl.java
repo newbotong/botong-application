@@ -11,6 +11,7 @@ import com.yunjing.approval.processor.okhttp.ApiService;
 import com.yunjing.approval.processor.okhttp.AppCenterService;
 import com.yunjing.approval.util.ApproConstants;
 import com.yunjing.mommon.constant.StatusCode;
+import com.yunjing.mommon.global.exception.BaseRuntimeException;
 import com.yunjing.mommon.wrapper.PageWrapper;
 import com.yunjing.mommon.wrapper.ResponseEntityWrapper;
 import lombok.extern.slf4j.Slf4j;
@@ -123,10 +124,12 @@ public class AppCenterServiceImpl implements AppCenterService {
             public void onResponse(Call<ResponseEntityWrapper> call, Response<ResponseEntityWrapper> response) {
                 // 服务器响应数据
                 ResponseEntityWrapper body = response.body();
-                if (body != null) {
+
+                if(body.getStatusCode() != StatusCode.SUCCESS.getStatusCode()){
                     log.info("调用推送结果，code:{},message:{}", body.getStatusCode(), body.getStatusMessage());
+                    throw new BaseRuntimeException(body.getStatusCode(), body.getStatusMessage());
                 } else {
-                    log.error("body is null");
+                    log.info("调用推送结果，code:{},message:{}", body.getStatusCode(), body.getStatusMessage());
                 }
             }
 
