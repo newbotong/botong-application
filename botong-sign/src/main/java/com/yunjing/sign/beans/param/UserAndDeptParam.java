@@ -30,6 +30,11 @@ public class UserAndDeptParam {
     private String orgId;
 
     /**
+     * appId
+     */
+    private String appId;
+
+    /**
      * 部门id 逗号间隔
      */
     private String deptIds;

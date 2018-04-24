@@ -2,6 +2,7 @@ package com.yunjing.sign.service.impl;
 
 import com.alibaba.fastjson.JSONObject;
 import com.baomidou.mybatisplus.mapper.EntityWrapper;
+import com.baomidou.mybatisplus.plugins.Page;
 import com.baomidou.mybatisplus.service.impl.ServiceImpl;
 import com.common.redis.share.UserInfo;
 import com.yunjing.mommon.Enum.DateStyle;
@@ -220,11 +221,24 @@ public class SignDetailServiceImpl extends ServiceImpl<SignDetailMapper, SignDet
      */
     @Override
     public PageWrapper<UserMonthListVO> staticsMonthInfo(UserAndDeptParam userAndDeptParam, SignBaseMapper mapper) {
-        String[] deptIds = StringUtils.split(userAndDeptParam.getDeptIds(),",");
-        String[] userIdCs = StringUtils.split(userAndDeptParam.getUserIds(),",");
-        //okhttp 分页查询人员列表
-        PageWrapper<SignUserInfoVO> page  = userRemoteApiService.findMemberPage(deptIds, userIdCs, userAndDeptParam.getPageNo(), userAndDeptParam.getPageSize());
-        //判断是否为空
+        PageWrapper<SignUserInfoVO> page = new PageWrapper<>();
+        if (StringUtils.isEmpty(userAndDeptParam.getDeptIds()) && StringUtils.isEmpty(userAndDeptParam.getUserIds())) {
+            List<SignUserInfoVO> memberList = userRemoteApiService.manageScope(userAndDeptParam.getOrgId(), userAndDeptParam.getMemberId());
+            if (memberList == null) {
+                return null;
+            }
+            Page<SignUserInfoVO> pageM = new Page<>(userAndDeptParam.getPageNo(), userAndDeptParam.getPageSize());
+            page.setTotal(memberList!= null ? memberList.size() : SignConstant.BOTONG_ZERO_VALUE);
+            memberList.subList(pageM.getOffset(), pageM.getOffset() + pageM.getSize());
+            page = BeanUtils.mapPage(pageM, SignUserInfoVO.class);
+        } else {
+            String[] deptIds = StringUtils.split(userAndDeptParam.getDeptIds(),",");
+            String[] userIdCs = StringUtils.split(userAndDeptParam.getUserIds(),",");
+            //okhttp 分页查询人员列表
+            page  = userRemoteApiService.findMemberPage(deptIds, userIdCs, userAndDeptParam.getPageNo(), userAndDeptParam.getPageSize());
+            //判断是否为空
+        }
+
         List<SignUserInfoVO> userList;
         if (page != null) {
             userList = page.getRecords();
@@ -321,6 +335,9 @@ public class SignDetailServiceImpl extends ServiceImpl<SignDetailMapper, SignDet
         return memList;
     }
 
+
+
+
     /**
      * 获取导出的签到信息列表
      * @param userAndDeptParam  人员和部门对象
@@ -329,10 +346,16 @@ public class SignDetailServiceImpl extends ServiceImpl<SignDetailMapper, SignDet
      */
     @Override
     public List<SignExcelVO> getSignInList(UserAndDeptParam userAndDeptParam, SignBaseMapper mapper){
-        String[] deptIds = StringUtils.split(userAndDeptParam.getDeptIds(),",");
-        String[] userIdCs = StringUtils.split(userAndDeptParam.getUserIds(),",");
-        //okhttp 查询成员列表
-        List<SignUserInfoVO> userList = userRemoteApiService.findSubLists(deptIds, userIdCs);
+        List<SignUserInfoVO> userList = new ArrayList<>();
+        if (StringUtils.isEmpty(userAndDeptParam.getDeptIds()) && StringUtils.isEmpty(userAndDeptParam.getUserIds())) {
+            userList = userRemoteApiService.manageScope(userAndDeptParam.getOrgId(), userAndDeptParam.getMemberId());
+        } else {
+            String[] deptIds = StringUtils.split(userAndDeptParam.getDeptIds(),",");
+            String[] userIdCs = StringUtils.split(userAndDeptParam.getUserIds(),",");
+            //okhttp 查询成员列表
+            userList = userRemoteApiService.findSubLists(deptIds, userIdCs);
+        }
+
         if(userList == null || userList.size() == 0) {
             return null;
         }
