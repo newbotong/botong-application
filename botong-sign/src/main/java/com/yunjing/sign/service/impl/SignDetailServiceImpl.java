@@ -404,6 +404,9 @@ public class SignDetailServiceImpl extends ServiceImpl<SignDetailMapper, SignDet
         Date startD = DateUtil.StringToDate(userAndDeptParam.getSignDate() + "-01", DateStyle.YYYY_MM_DD);
         Date endDate = DateUtil.getLastDayOfMonth(startD);
         List<SignExcelVO> exportData = getSignInList(userAndDeptParam, signDetailMapper);
+        if (exportData == null) {
+            exportData = new ArrayList<>();
+        }
         SignExModel signExModel = new SignExModel();
 
         List<ExcelModel> excelModelList = new ArrayList<>();
