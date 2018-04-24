@@ -121,6 +121,9 @@ public class AppCenterServiceImpl implements AppCenterService {
                 ResponseEntityWrapper body = response.body();
                 if (body != null) {
                     log.info("调用推送结果，code:{},message:{}", body.getStatusCode(), body.getStatusMessage());
+                    if (body.getStatusCode() != StatusCode.SUCCESS.getStatusCode()) {
+                        log.info("调用推送结果异常，code:{},message:{}", body.getStatusCode(), body.getStatusMessage());
+                    }
                 } else {
                     log.error("body is null");
                 }

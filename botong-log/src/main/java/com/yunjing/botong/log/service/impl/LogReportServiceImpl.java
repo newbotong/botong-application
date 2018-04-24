@@ -161,7 +161,9 @@ public class LogReportServiceImpl implements LogReportService {
         // 管理的成员id集合
         Set<String> memberIdList = new HashSet<>();
         for (Member member : list) {
-            memberIdList.add(member.getId());
+            if (member.getId() != null) {
+                memberIdList.add(member.getId());
+            }
         }
 
         // 已提交成员集合
@@ -178,7 +180,9 @@ public class LogReportServiceImpl implements LogReportService {
         // 去除已提交列表，其余为未提交列表
         memberIdList.removeAll(collection);
 
-        members = redisOperator.getMemberList(memberIdList);
+        if (CollectionUtils.isNotEmpty(memberIdList)) {
+            members = redisOperator.getMemberList(memberIdList);
+        }
 
         return buildWrapper(members, pageNo, pageSize);
     }
@@ -193,16 +197,17 @@ public class LogReportServiceImpl implements LogReportService {
      * @return
      */
     private PageWrapper<ManagerMemberInfoVo> buildWrapper(List<Member> members, int pageNo, int pageSize) {
-        List<ManagerMemberInfoVo> infoVos = com.yunjing.mommon.utils.BeanUtils.mapList(members, ManagerMemberInfoVo.class);
-
         PageWrapper<ManagerMemberInfoVo> wrapper = new PageWrapper<>();
         wrapper.setSize(pageSize);
         wrapper.setCurrent(pageNo);
-        if (CollectionUtils.isNotEmpty(infoVos)) {
-            ListPage<ManagerMemberInfoVo> page = new ListPage<>(infoVos, pageSize);
-            wrapper.setRecords(page.getPagedList(pageNo));
-            wrapper.setPages(page.getPageCount());
-            wrapper.setTotal(infoVos.size());
+        if (CollectionUtils.isNotEmpty(members)) {
+            List<ManagerMemberInfoVo> infoVos = com.yunjing.mommon.utils.BeanUtils.mapList(members, ManagerMemberInfoVo.class);
+            if (CollectionUtils.isNotEmpty(infoVos)) {
+                ListPage<ManagerMemberInfoVo> page = new ListPage<>(infoVos, pageSize);
+                wrapper.setRecords(page.getPagedList(pageNo));
+                wrapper.setPages(page.getPageCount());
+                wrapper.setTotal(infoVos.size());
+            }
         }
         return wrapper;
     }
