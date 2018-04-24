@@ -8,7 +8,7 @@ import lombok.Data;
 import java.util.List;
 
 /**
- * @author auth
+ * @author 王开亮
  * @date 2018/4/2 11:46
  */
 @TableName("log_template_enums")

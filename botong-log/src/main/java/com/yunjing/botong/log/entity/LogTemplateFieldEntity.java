@@ -7,7 +7,7 @@ import com.yunjing.botong.log.params.LogTemplateParam;
 import lombok.Data;
 
 /**
- * @author auth
+ * @author 王开亮
  * @date 2018/4/2 11:41
  */
 @Data
