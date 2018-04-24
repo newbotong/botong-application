@@ -13,7 +13,7 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.web.bind.annotation.*;
 
 /**
- * @author auth
+ * @author 王开亮
  * @date 2018/3/30 15:34
  */
 @RestController

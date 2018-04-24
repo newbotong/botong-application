@@ -5,7 +5,8 @@ import com.yunjing.botong.log.params.ManagerListParam;
 import com.yunjing.botong.log.service.LogReportService;
 import com.yunjing.botong.log.vo.ManagerMemberInfoVo;
 import com.yunjing.mommon.base.BaseController;
-import com.yunjing.mommon.global.exception.ParameterErrorException;
+import com.yunjing.mommon.constant.StatusCode;
+import com.yunjing.mommon.global.exception.BaseRuntimeException;
 import com.yunjing.mommon.validate.BeanFieldValidator;
 import com.yunjing.mommon.wrapper.ResponseEntityWrapper;
 import org.apache.commons.lang3.StringUtils;
@@ -52,10 +53,10 @@ public class LogReportApi extends BaseController {
                                       @RequestParam(required = false, defaultValue = "0") Long endDate) {
 
         if (StringUtils.isEmpty(memberId)) {
-            throw new ParameterErrorException("memberId 不能为空");
+            throw new BaseRuntimeException(StatusCode.MISSING_REQUIRE_FIELD.getStatusCode(), "memberId 不能为空");
         }
         if (StringUtils.isEmpty(orgId)) {
-            throw new ParameterErrorException("orgId 不能为空");
+            throw new BaseRuntimeException(StatusCode.MISSING_REQUIRE_FIELD.getStatusCode(), "orgId 不能为空");
         }
         if (submitType == 0) {
             submitType = 1;

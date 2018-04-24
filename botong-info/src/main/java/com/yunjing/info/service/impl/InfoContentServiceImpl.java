@@ -19,7 +19,9 @@ import com.yunjing.info.processor.okhttp.AuthorityService;
 import com.yunjing.info.processor.okhttp.CollectService;
 import com.yunjing.info.processor.okhttp.OrgStructureService;
 import com.yunjing.info.service.InfoContentService;
+import com.yunjing.mommon.constant.StatusCode;
 import com.yunjing.mommon.global.exception.BaseException;
+import com.yunjing.mommon.global.exception.BaseRuntimeException;
 import com.yunjing.mommon.utils.IDUtils;
 import com.yunjing.mommon.wrapper.ResponseEntityWrapper;
 import org.apache.commons.collections.CollectionUtils;
@@ -79,7 +81,7 @@ public class InfoContentServiceImpl extends ServiceImpl<InfoContentMapper, InfoC
         this.updateNumber(id);
         InfoContent infoContent = new InfoContent().selectOne(new EntityWrapper<InfoContent>().eq("is_delete", InfoConstant.LOGIC_DELETE_NORMAL).eq("id", id));
         if (null == infoContent) {
-            throw new BaseException("该资讯已被删除");
+            throw new BaseRuntimeException(StatusCode.RESOURCE_NOT_MESSAGE_EXIT.getStatusCode(), "该资讯已被删除");
         }
         InfoContentDetailDto infoContentDetailDto = new InfoContentDetailDto();
         BeanUtils.copyProperties(infoContent, infoContentDetailDto);
@@ -88,16 +90,18 @@ public class InfoContentServiceImpl extends ServiceImpl<InfoContentMapper, InfoC
         Response<ResponseEntityWrapper<List<Member>>> execute1 = call1.execute();
         ResponseEntityWrapper<List<Member>> body1 = execute1.body();
         List<Member> memberList;
-        if (null != body1.getData()) {
-            memberList = body1.getData();
-            String[] passportIds = memberList.stream().map(Member::getPassportId).toArray(String[]::new);
-            Call<ResponseEntityWrapper> call = collectService.collectState(passportIds[0], id);
-            Response<ResponseEntityWrapper> execute = call.execute();
-            ResponseEntityWrapper body = execute.body();
-            Boolean result;
-            if (null != body.getData()) {
-                result = (Boolean) body.getData();
-                infoContentDetailDto.setFavouriteState(result);
+        if (null != body1) {
+            if (null != body1.getData()) {
+                memberList = body1.getData();
+                String[] passportIds = memberList.stream().map(Member::getPassportId).toArray(String[]::new);
+                Call<ResponseEntityWrapper> call = collectService.collectState(passportIds[0], id);
+                Response<ResponseEntityWrapper> execute = call.execute();
+                ResponseEntityWrapper body = execute.body();
+                Boolean result;
+                if (null != body.getData()) {
+                    result = (Boolean) body.getData();
+                    infoContentDetailDto.setFavouriteState(result);
+                }
             }
         } else {
             infoContentDetailDto.setFavouriteState(false);
@@ -139,7 +143,7 @@ public class InfoContentServiceImpl extends ServiceImpl<InfoContentMapper, InfoC
         infoContent.setSort(i + 1);
         Boolean result = infoContent.insert();
         if (!result) {
-            throw new BaseException("新增失败");
+            throw new BaseRuntimeException(StatusCode.RESOURCE_UPDATE_FAILED.getStatusCode(),"新增失败");
         }
         ParentInfoDetailDto parentInfoDetailDto = new ParentInfoDetailDto();
         InfoCatalog infoCatalog = new InfoCatalog().selectOne(new EntityWrapper<InfoCatalog>().eq("is_delete", InfoConstant.LOGIC_DELETE_NORMAL).eq("id", infoCategoryParam.getOneCatalogId()));
@@ -190,16 +194,16 @@ public class InfoContentServiceImpl extends ServiceImpl<InfoContentMapper, InfoC
     @Transactional(rollbackFor = Exception.class)
     public void infoEdit(InfoCategoryEditParam infoCategoryParam) throws BaseException {
         if (null == infoCategoryParam.getId()) {
-            throw new BaseException("资讯id不能为空");
+            throw new BaseRuntimeException(StatusCode.MISSING_REQUIRE_FIELD.getStatusCode(),"资讯id不能为空");
         }
         InfoContent infoContent = new InfoContent().selectOne(new EntityWrapper<InfoContent>().eq("is_delete", InfoConstant.LOGIC_DELETE_NORMAL).eq("id", infoCategoryParam.getId()));
         if (null == infoContent) {
-            throw new BaseException("该资讯已经被删除");
+            throw new BaseRuntimeException(StatusCode.RESOURCE_NOT_MESSAGE_EXIT.getStatusCode(),"该资讯已被删除");
         }
         BeanUtils.copyProperties(infoCategoryParam, infoContent);
         boolean result = infoContent.updateById();
         if (!result) {
-            throw new BaseException("修改失败");
+            throw new BaseRuntimeException(StatusCode.RESOURCE_UPDATE_FAILED.getStatusCode(),"修改失败");
         }
         ParentInfoDetailDto infoDTO = new ParentInfoDetailDto();
         Object object = redisTemplate.opsForHash().get(InfoConstant.REDIS_HOME + ":" + infoCategoryParam.getOrgId(), infoCategoryParam.getOneCatalogId());
@@ -233,7 +237,7 @@ public class InfoContentServiceImpl extends ServiceImpl<InfoContentMapper, InfoC
     public InfoContent selectWebDetail(String id) throws BaseException {
         InfoContent infoContent = new InfoContent().selectOne(new EntityWrapper<InfoContent>().eq("is_delete", InfoConstant.LOGIC_DELETE_NORMAL).eq("id", id));
         if (null == infoContent) {
-            throw new BaseException("该资讯已被删除");
+            throw new BaseRuntimeException(StatusCode.RESOURCE_NOT_MESSAGE_EXIT.getStatusCode(),"该资讯已被删除");
         }
         return infoContent;
     }
@@ -254,8 +258,10 @@ public class InfoContentServiceImpl extends ServiceImpl<InfoContentMapper, InfoC
         ResponseEntityWrapper body = execute.body();
         //判断是否为管理员
         boolean results = false;
-        if (null != body.getData()) {
-            results = (boolean) body.getData();
+        if (null != body) {
+            if (null != body.getData()) {
+                results = (boolean) body.getData();
+            }
         }
         return results;
     }

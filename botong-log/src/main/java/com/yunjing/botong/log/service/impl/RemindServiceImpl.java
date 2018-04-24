@@ -15,7 +15,8 @@ import com.yunjing.botong.log.processor.mq.configuration.RemindMessageConfigurat
 import com.yunjing.botong.log.processor.okhttp.AppCenterService;
 import com.yunjing.botong.log.service.IRemindService;
 import com.yunjing.botong.log.vo.RemindVo;
-import com.yunjing.mommon.global.exception.ParameterErrorException;
+import com.yunjing.mommon.constant.StatusCode;
+import com.yunjing.mommon.global.exception.BaseRuntimeException;
 import com.yunjing.mommon.utils.BeanUtils;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -202,7 +203,7 @@ public class RemindServiceImpl extends BaseServiceImpl<RemindMapper, RemindEntit
                 }
             }
         } else {
-            throw new ParameterErrorException("设置任务失败！");
+            throw new BaseRuntimeException(StatusCode.SEND_REQUEST_ERROR.getStatusCode(), "设置任务失败！");
         }
     }
 }

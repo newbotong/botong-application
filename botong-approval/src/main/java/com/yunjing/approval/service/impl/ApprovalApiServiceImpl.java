@@ -233,6 +233,7 @@ public class ApprovalApiServiceImpl implements IApprovalApiService {
         if (approvalById != null) {
             // 审批主体信息
             clientApprovalDetailVO.setName(approvalById.getName());
+            clientApprovalDetailVO.setMemberId(approvalById.getUserId());
             ModelL modelL = modelService.selectOne(Condition.create().where("id={0}", approvalById.getModelId()));
             clientApprovalDetailVO.setModelName(modelL.getModelName() != null ? modelL.getModelName() : null);
             clientApprovalDetailVO.setDeptName(approvalById.getDeptName());
@@ -457,13 +458,14 @@ public class ApprovalApiServiceImpl implements IApprovalApiService {
     @Transactional(rollbackFor = Exception.class)
     public boolean transferApproval(String companyId, String memberId, String transferredUserId, String approvalId) {
         logger.info("companyId: " + companyId + " memberId: " + memberId + " transferredUserId: " + transferredUserId + "approvalId: " + approvalId);
-        List<ApprovalProcess> processList = approvalProcessService.selectList(Condition.create().where("approval_id={0}", approvalId));
+        List<ApprovalProcess> processList = approvalProcessService.selectList(Condition.create().where("approval_id={0}", approvalId).orderBy("seq",true));
         int num = 0;
-        List<ApprovalProcess> newProcessList = new ArrayList<>();
+        List<ApprovalProcess> list = new ArrayList<>();
         for (ApprovalProcess approvalProcess : processList) {
             if (approvalProcess.getProcessState() == 0 && num == 0) {
                 approvalProcess.setProcessState(3);
                 approvalProcess.setProcessTime(System.currentTimeMillis());
+                list.add(approvalProcess);
                 ApprovalProcess newProcess = new ApprovalProcess();
                 newProcess.setSeq(approvalProcess.getSeq() + 1);
                 newProcess.setId(IDUtils.uuid());
@@ -471,19 +473,21 @@ public class ApprovalApiServiceImpl implements IApprovalApiService {
                 newProcess.setProcessState(0);
                 newProcess.setApprovalId(approvalId);
                 newProcess.setProcessTime(System.currentTimeMillis());
-                newProcessList.add(newProcess);
+                boolean insert = approvalProcessService.insert(newProcess);
+                if (!insert) {
+                    throw new InsertMessageFailureException("转让审批操作--新增审批流程信息失败");
+                }
                 num++;
                 continue;
             }
             if (num == 1) {
                 approvalProcess.setSeq(approvalProcess.getSeq() + 1);
+                list.add(approvalProcess);
+            }else {
+                list.add(approvalProcess);
             }
         }
-        boolean insertBatch = approvalProcessService.insertBatch(newProcessList);
-        if (!insertBatch) {
-            throw new InsertMessageFailureException("转让审批操作--新增审批流程信息失败");
-        }
-        boolean batchById = approvalProcessService.updateBatchById(processList);
+        boolean batchById = approvalProcessService.updateBatchById(list);
         if (!batchById) {
             throw new UpdateMessageFailureException("转让审批操作--修改审批流程信息失败");
         }
