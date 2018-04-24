@@ -73,7 +73,7 @@ public class OrgMemberMessageConsumer extends AbstractMessageConsumerWithQueueDe
 
     private ApprovalUser covertObj(OrgMemberMessage memberMessage) {
         ApprovalUser approvalUser = new ApprovalUser();
-//        approvalUser.setPassportId(memberMessage.getPassportId());
+        approvalUser.setPassportId(memberMessage.getPassportId());
         approvalUser.setColor(memberMessage.getColor());
         approvalUser.setOrgId(memberMessage.getCompanyId());
         approvalUser.setAvatar(memberMessage.getProfile());
