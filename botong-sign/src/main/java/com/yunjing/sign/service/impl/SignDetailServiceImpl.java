@@ -273,6 +273,7 @@ public class SignDetailServiceImpl extends ServiceImpl<SignDetailMapper, SignDet
                 Date dDate = DateUtil.addDay(startD, j);
                 vo.setSignWeek(DateUtil.getWeek(dDate).getNumber());
                 vo.setSignTime(dDate.getTime());
+                vo.setSignCount(SignConstant.BOTONG_ZERO_VALUE);
                 vo.setUserId(obj.getMemberId());
                 monthList.put(DateUtil.getDate(dDate), vo);
             }
