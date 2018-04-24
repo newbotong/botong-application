@@ -223,13 +223,14 @@ public class SignDetailServiceImpl extends ServiceImpl<SignDetailMapper, SignDet
     public PageWrapper<UserMonthListVO> staticsMonthInfo(UserAndDeptParam userAndDeptParam, SignBaseMapper mapper) {
         PageWrapper<SignUserInfoVO> page = new PageWrapper<>();
         if (StringUtils.isEmpty(userAndDeptParam.getDeptIds()) && StringUtils.isEmpty(userAndDeptParam.getUserIds())) {
-            List<SignUserInfoVO> memberList = userRemoteApiService.manageScope(userAndDeptParam.getOrgId(), userAndDeptParam.getMemberId());
+            List<SignUserInfoVO> memberList = userRemoteApiService.manageScope(userAndDeptParam.getAppId(), userAndDeptParam.getMemberId());
             if (memberList == null) {
                 return null;
             }
             Page<SignUserInfoVO> pageM = new Page<>(userAndDeptParam.getPageNo(), userAndDeptParam.getPageSize());
-            page.setTotal(memberList!= null ? memberList.size() : SignConstant.BOTONG_ZERO_VALUE);
-            memberList.subList(pageM.getOffset(), pageM.getOffset() + pageM.getSize());
+            pageM.setTotal(memberList!= null ? memberList.size() : SignConstant.BOTONG_ZERO_VALUE);
+            List<SignUserInfoVO> memList = memberList.subList(pageM.getOffset(), pageM.getOffset() + pageM.getSize());
+            pageM.setRecords(memList);
             page = BeanUtils.mapPage(pageM, SignUserInfoVO.class);
         } else {
             String[] deptIds = StringUtils.split(userAndDeptParam.getDeptIds(),",");
@@ -348,7 +349,7 @@ public class SignDetailServiceImpl extends ServiceImpl<SignDetailMapper, SignDet
     public List<SignExcelVO> getSignInList(UserAndDeptParam userAndDeptParam, SignBaseMapper mapper){
         List<SignUserInfoVO> userList = new ArrayList<>();
         if (StringUtils.isEmpty(userAndDeptParam.getDeptIds()) && StringUtils.isEmpty(userAndDeptParam.getUserIds())) {
-            userList = userRemoteApiService.manageScope(userAndDeptParam.getOrgId(), userAndDeptParam.getMemberId());
+            userList = userRemoteApiService.manageScope(userAndDeptParam.getAppId(), userAndDeptParam.getMemberId());
         } else {
             String[] deptIds = StringUtils.split(userAndDeptParam.getDeptIds(),",");
             String[] userIdCs = StringUtils.split(userAndDeptParam.getUserIds(),",");
@@ -425,7 +426,7 @@ public class SignDetailServiceImpl extends ServiceImpl<SignDetailMapper, SignDet
     @Override
     public BaseExModel createTempExcel(UserAndDeptParam userAndDeptParam) {
         Date startD = DateUtil.StringToDate(userAndDeptParam.getSignDate() + "-01", DateStyle.YYYY_MM_DD);
-        Date endDate = DateUtil.getLastDayOfMonth(startD);
+        Date endDate = DateUtil.addDay(DateUtil.getLastDayOfMonth(startD), 1);
         List<SignExcelVO> exportData = getSignInList(userAndDeptParam, signDetailMapper);
         if (exportData == null) {
             exportData = new ArrayList<>();

@@ -160,7 +160,7 @@ public class SignDetailDailyServiceImpl extends ServiceImpl<SignDetailDailyMappe
     @Override
     public BaseExModel createTempExcel(UserAndDeptParam userAndDeptParam) {
         Date startD = DateUtil.StringToDate(userAndDeptParam.getSignDate() + "-01", DateStyle.YYYY_MM_DD);
-        Date endDate = DateUtil.getLastDayOfMonth(startD);
+        Date endDate = DateUtil.addDay(DateUtil.getLastDayOfMonth(startD), 1);
         List<SignExcelVO> exportData = iSignDetailService.getSignInList(userAndDeptParam, signDetailDailyMapper);
         if (exportData == null) {
             exportData = new ArrayList<>();
