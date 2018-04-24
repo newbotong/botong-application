@@ -1,6 +1,7 @@
 package com.yunjing.approval.processor.mq.consumer;
 
 import com.yunjing.approval.model.dto.OrgMemberMessage;
+import com.yunjing.approval.model.entity.ApprovalUser;
 import com.yunjing.approval.processor.mq.configuration.OrgAppMessageConfiguration;
 import com.yunjing.approval.service.IApprovalUserService;
 import com.yunjing.approval.service.IOrgModelService;
@@ -32,9 +33,6 @@ public class OrgAppMessageConsumer extends AbstractMessageConsumerWithQueueDecla
     @Autowired
     private IOrgModelService orgModelService;
 
-    @Autowired
-    private IApprovalUserService approvalUserService;
-
     public OrgAppMessageConsumer(OrgAppMessageConfiguration configuration) {
         super(configuration);
     }
@@ -50,32 +48,6 @@ public class OrgAppMessageConsumer extends AbstractMessageConsumerWithQueueDecla
             } else if (StringUtils.isNotBlank(companyId) && appMessage.getMessageType().equals(OrgAppMessage.MessageType.DISBAND)) {
                 orgModelService.deleteApprovalModel(companyId);
             }
-        }else if(messageObj instanceof List){
-
-            List list = (List) messageObj;
-            List<OrgMemberMessage> insertList = new ArrayList<>();
-            List<OrgMemberMessage> updateList = new ArrayList<>();
-            List<OrgMemberMessage> deleteList = new ArrayList<>();
-            list.forEach(obj -> {
-                OrgMemberMessage memberMessage = (OrgMemberMessage) obj;
-                if(memberMessage != null && memberMessage.getMessageType().equals(OrgMemberMessage.MessageType.INSERT)){
-                    insertList.add(memberMessage);
-                }else if (memberMessage != null && memberMessage.getMessageType().equals(OrgMemberMessage.MessageType.MODIFY)){
-                    updateList.add(memberMessage);
-                }else if(memberMessage != null && memberMessage.getMessageType().equals(OrgMemberMessage.MessageType.DELETE)){
-                    deleteList.add(memberMessage);
-                }
-            });
-            if(!insertList.isEmpty()){
-                approvalUserService.addMember(insertList);
-            }
-            if(!insertList.isEmpty()){
-                approvalUserService.updateMember(updateList);
-            }
-            if(!insertList.isEmpty()){
-                approvalUserService.deleteMember(deleteList);
-            }
         }
-
     }
 }

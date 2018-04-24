@@ -1,23 +1,17 @@
 package com.yunjing.approval.api;
 
 import com.common.mybatis.page.Page;
-import com.yunjing.approval.model.dto.OrgMemberMessage;
 import com.yunjing.approval.model.vo.ClientModelVO;
-import com.yunjing.approval.model.vo.Member;
-import com.yunjing.approval.model.vo.MemberInfo;
-import com.yunjing.approval.model.vo.OrgMemberVo;
 import com.yunjing.approval.param.FilterParam;
-import com.yunjing.approval.processor.okhttp.AppCenterService;
-import com.yunjing.approval.service.*;
+import com.yunjing.approval.service.IApprovalApiService;
+import com.yunjing.approval.service.IModelItemService;
+import com.yunjing.approval.service.IProcessService;
 import com.yunjing.mommon.base.BaseController;
 import com.yunjing.mommon.wrapper.ResponseEntityWrapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
-import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
-import java.util.stream.Collectors;
 
 
 /**
@@ -53,14 +47,14 @@ public class ClientApprovalController extends BaseController {
     /**
      * 获取审批模型详情
      *
-     * @param modelId 模型主键
+     * @param modelId  模型主键
      * @param memberId
      * @return
      * @throws Exception
      */
     @GetMapping("/model-item-detail")
-    public ResponseEntityWrapper getItem(@RequestParam("modelId") String modelId,@RequestParam("memberId") String memberId) throws Exception {
-        return success(modelItemService.getModelItem(modelId,memberId));
+    public ResponseEntityWrapper getItem(@RequestParam("modelId") String modelId, @RequestParam("memberId") String memberId) throws Exception {
+        return success(modelItemService.getModelItem(modelId, memberId));
     }
 
 
@@ -161,9 +155,9 @@ public class ClientApprovalController extends BaseController {
      */
     @PostMapping("/get-approver")
     public ResponseEntityWrapper getApprovalMember(@RequestParam("companyId") String companyId, @RequestParam("memberId") String memberId,
-                                                   @RequestParam("modelId") String modelId,@RequestParam(value = "deptId",required = false) String deptId,
-                                                   @RequestParam(value = "conditionId",required = false) String conditionId,
-                                                   @RequestParam(value = "judge",required = false) String judge) throws Exception {
+                                                   @RequestParam("modelId") String modelId, @RequestParam(value = "deptId", required = false) String deptId,
+                                                   @RequestParam(value = "conditionId", required = false) String conditionId,
+                                                   @RequestParam(value = "judge", required = false) String judge) throws Exception {
         return success(processService.getApprover(companyId, memberId, modelId, deptId, conditionId, judge));
     }
 }

@@ -18,9 +18,9 @@ import com.yunjing.approval.service.IConditionService;
 import com.yunjing.approval.service.IModelItemService;
 import com.yunjing.approval.service.IModelService;
 import com.yunjing.approval.service.IProcessService;
-import com.yunjing.mommon.global.exception.BaseException;
 import com.yunjing.mommon.global.exception.DeleteMessageFailureException;
 import com.yunjing.mommon.global.exception.InsertMessageFailureException;
+import com.yunjing.mommon.global.exception.MessageNotExitException;
 import com.yunjing.mommon.utils.IDUtils;
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.lang.StringUtils;
@@ -33,7 +33,7 @@ import java.util.*;
 import java.util.stream.Collectors;
 
 /**
- * @author roc
+ * @author 刘小鹏
  * @date 2017/12/21
  */
 @Service
@@ -125,7 +125,7 @@ public class ConditionServiceImpl extends BaseServiceImpl<ConditionMapper, SetsC
 
         Integer version = model.getModelVersion();
         if (version == null || version < 1) {
-            throw new BaseException("模型版本异常");
+            throw new MessageNotExitException("模型版本异常");
         }
         Wrapper<ModelItem> wrapper = new EntityWrapper<>();
         wrapper.eq("model_id", modelId).eq("data_type", 3).eq("item_version", version);

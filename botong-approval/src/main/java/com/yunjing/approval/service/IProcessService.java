@@ -77,5 +77,5 @@ public interface IProcessService extends IBaseService<SetsProcess> {
      * @return
      * @throws BaseException
      */
-    boolean saveDefaultApprover(String modelId, String approverIds, String copyIds) throws BaseException;
+    boolean saveDefaultApprover(String modelId, String approverIds, String copyIds);
 }

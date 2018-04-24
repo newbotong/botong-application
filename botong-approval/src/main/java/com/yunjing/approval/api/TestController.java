@@ -63,8 +63,8 @@ public class TestController extends BaseController {
     private IApprovalUserService approvalUserService;
 
     @GetMapping("/test")
-    public ResponseEntityWrapper test(@RequestParam("companyId") String companyId, @RequestParam("userId") String userId, Integer choiceContacts) {
+    public ResponseEntityWrapper test(@RequestParam("companyId") String companyId) {
 
-        return success(approvalUserService.updateContract(companyId, userId, choiceContacts));
+        return success(approvalUserService.updateContract(companyId));
     }
 }
