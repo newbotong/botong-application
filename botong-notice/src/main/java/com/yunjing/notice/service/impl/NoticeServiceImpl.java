@@ -5,7 +5,10 @@ import com.alibaba.fastjson.JSONObject;
 import com.baomidou.mybatisplus.mapper.EntityWrapper;
 import com.baomidou.mybatisplus.plugins.Page;
 import com.baomidou.mybatisplus.service.impl.ServiceImpl;
+import com.esotericsoftware.minlog.Log;
+import com.yunjing.mommon.constant.StatusCode;
 import com.yunjing.mommon.global.exception.BaseException;
+import com.yunjing.mommon.global.exception.BaseRuntimeException;
 import com.yunjing.mommon.utils.DateUtil;
 import com.yunjing.mommon.utils.IDUtils;
 import com.yunjing.mommon.wrapper.ResponseEntityWrapper;
@@ -23,6 +26,7 @@ import com.yunjing.notice.processor.okhttp.InformService;
 import com.yunjing.notice.processor.okhttp.OrgStructureService;
 import com.yunjing.notice.service.NoticeService;
 import com.yunjing.notice.service.NoticeUserService;
+import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.BeanUtils;
@@ -43,6 +47,7 @@ import java.util.*;
  * @since 2018/03/20/.
  */
 @Service
+@Slf4j
 public class NoticeServiceImpl extends ServiceImpl<NoticeMapper, NoticeEntity> implements NoticeService {
 
     @Autowired
@@ -93,7 +98,9 @@ public class NoticeServiceImpl extends ServiceImpl<NoticeMapper, NoticeEntity> i
             throw new BaseException("成员不能为空");
         }
         //okhttp
+
         Call<ResponseEntityWrapper<List<Member>>> call = orgStructureService.findSubLists(noticeBody.getDepartmentIds(), noticeBody.getMemberIds(), 0);
+        Log.info(call.toString());
         Response<ResponseEntityWrapper<List<Member>>> execute = call.execute();
         ResponseEntityWrapper<List<Member>> body = execute.body();
         List<Member> memberList;
@@ -177,7 +184,15 @@ public class NoticeServiceImpl extends ServiceImpl<NoticeMapper, NoticeEntity> i
         pushParam.setCompanyId(noticeBody.getOrgId());
         pushParam.setAppId(appId);
         // okhttp调用工作通知
-        informService.pushAllTargetByUser(pushParam);
+
+        Call<ResponseEntityWrapper> push = informService.pushAllTargetByUser(pushParam);
+        Response<ResponseEntityWrapper> ex = push.execute();
+        ResponseEntityWrapper response = ex.body();
+        if (null != response) {
+            if (response.getStatusCode() != StatusCode.SUCCESS.getStatusCode()) {
+                throw new BaseRuntimeException(response.getStatusCode(), response.getStatusMessage());
+            }
+        }
         //Dang
         if (noticeBody.getDangState() == 0) {
             //批量查询用户信息
@@ -229,6 +244,13 @@ public class NoticeServiceImpl extends ServiceImpl<NoticeMapper, NoticeEntity> i
             }
             // okhttp调用发送dang消息
             dangService.sendDang(dangParam);
+            Response<ResponseEntityWrapper> e = push.execute();
+            ResponseEntityWrapper r = e.body();
+            if (null != r) {
+                if (r.getStatusCode() != StatusCode.SUCCESS.getStatusCode()) {
+                    throw new BaseRuntimeException(r.getStatusCode(), r.getStatusMessage());
+                }
+            }
         }
     }
 
