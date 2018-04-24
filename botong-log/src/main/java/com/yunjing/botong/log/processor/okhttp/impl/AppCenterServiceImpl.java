@@ -9,6 +9,7 @@ import com.yunjing.botong.log.processor.okhttp.AppCenterService;
 import com.yunjing.botong.log.vo.AppPushParam;
 import com.yunjing.botong.log.vo.Member;
 import com.yunjing.mommon.constant.StatusCode;
+import com.yunjing.mommon.global.exception.BaseRuntimeException;
 import com.yunjing.mommon.wrapper.ResponseEntityWrapper;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
@@ -251,6 +252,8 @@ public class AppCenterServiceImpl implements AppCenterService {
                 log.info("设置任务调度结果:code:{},message:{},data:{}", body.getStatusCode(), body.getStatusMessage(), body.getData());
                 if (response.isSuccessful() && body.getStatusCode() == StatusCode.SUCCESS.getStatusCode()) {
                     return body.getData();
+                } else {
+                    throw new BaseRuntimeException(body.getStatusCode(), body.getStatusMessage());
                 }
             } else {
                 log.error("body is null");
