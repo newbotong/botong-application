@@ -1,0 +1,45 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.yunjing.approval.dao.mapper.ApprovalAttrMapper">
+
+    <select id="selectAttrByOrgId" resultType="com.yunjing.approval.model.entity.ApprovalAttr">
+        select attr.id as attrId,attr.attr_name as attrName,attr.attr_parent as attrParent,attr.attr_value as attrValue,
+        attr.attr_num as attrNum,attr.attr_type as attrType,attr.approval_id as approvalId
+        from approval_attr attr
+        join approval app on app.id = attr.approval_id
+        where app.org_id = #{ orgId }
+    </select>
+    <resultMap id="AttrMap" type="com.yunjing.approval.model.vo.ApproveAttributeVO">
+        <result column="id" property ="id"/>
+        <result column="approval_id" property="approvalId"/>
+        <result column="attr_parent" property="attrParent"/>
+        <result column="attr_name" property="attrName"/>
+        <result column="attr_value" property="attrValue"/>
+        <result column="attr_num" property="attrNum"/>
+        <result column="attr_type" property="attrType"/>
+        <result column="item_label" property="attrLabel"/>
+        <result column="item_labels" property="attrLabels"/>
+        <result column="unit" property="attrUnit"/>
+        <result column="opt_value" property="optValue"/>
+        <result column="org_id" property="orgId"/>
+        <result column="date_format" property="dateFormat"/>
+    </resultMap>
+    <select id="selectAttrList" resultMap="AttrMap">
+        SELECT t1.id, t1.approval_id, t1.attr_parent, t1.attr_name, t1.attr_value, t1.attr_num, t1.attr_type,
+        	t3.item_label,t3.item_labels, t3.unit, t3.opt_value, t2.org_id,t3.date_format
+        FROM approval_attr t1
+        LEFT JOIN approval t2 ON t1.approval_id = t2.id
+        LEFT JOIN model_item t3 ON t2.model_id = t3.model_id
+        WHERE t1.attr_name = t3.field AND t2.model_version = t3.item_version AND t1.approval_id = #{approvalId}
+        ORDER BY t3.priority ASC 
+    </select>
+    <select id="selectAttrListByOrgId" resultMap="AttrMap">
+        SELECT t1.id, t1.approval_id, t1.attr_parent, t1.attr_name, t1.attr_value, t1.attr_num, t1.attr_type,
+        	t3.item_label,t3.item_labels,  t3.unit, t3.opt_value, t2.org_id
+        FROM approval_attr t1
+        LEFT JOIN approval t2 ON t1.approval_id = t2.id
+        LEFT JOIN model_item t3 ON t2.model_id = t3.model_id
+        WHERE t1.attr_name = t3.field AND t2.model_version = t3.item_version AND t2.org_id = #{orgId}
+        ORDER BY t3.priority ASC
+    </select>
+</mapper>

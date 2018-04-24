@@ -1,0 +1,42 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.yunjing.approval.dao.mapper.CopysMapper">
+
+    <resultMap id="ApprovalMap" type="com.yunjing.approval.model.dto.ApprovalContentDTO">
+        <result column="approval_id" property="approvalId"/>
+        <result column="model_id" property="modelId"/>
+        <result column="model_name" property="modelName"/>
+        <result column="state" property="state"/>
+        <result column="create_time" property="createTime"/>
+        <result column="user_id" property="userId"/>
+        <result column="is_read" property="isRead"/>
+    </resultMap>
+    <select id="getCopiedApprovalList" resultMap="ApprovalMap">
+        SELECT a.title, a.state,a.result, a.model_id, a.create_time,m.model_name,co.create_time,a.user_id,co.approval_id,co.is_read
+        FROM approval_copys co,approval a,model m
+        <where>
+            co.copys_type = 1 AND co.approval_id = a.id AND m.id= a.model_id AND co.user_id = #{userId} AND a.org_id = #{orgId}
+            <if test="filterParam.state != null">
+                and a.state = #{filterParam.state}
+            </if>
+            <if test="filterParam.time != null">
+                and from_unixtime(a.create_time/1000, '%Y%m%d') = from_unixtime(#{filterParam.time}/1000,'%Y%m%d')
+            </if>
+            <if test="filterParam.searchKey != null and filterParam.searchKey != ''">
+                and concat(a.id,a.title) like CONCAT('%',#{filterParam.searchKey},'%')
+            </if>
+        </where>
+        ORDER BY co.create_time DESC
+        limit #{index},#{size}
+    </select>
+
+    <resultMap id="CopyUserMap" type="com.yunjing.approval.model.vo.CopyUserVO">
+        <result column="user_id" property="userId"/>
+    </resultMap>
+    <select id="getCopyUserList" resultMap="CopyUserMap">
+        SELECT au.name, co.user_id,au.avatar,au.mobile,au.color
+        FROM approval_copys co JOIN approval_user au ON co.user_id = au.id
+        WHERE co.approval_id=#{approvalId}
+
+    </select>
+</mapper>

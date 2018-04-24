@@ -1,0 +1,98 @@
+### 设置服务端口和Tomcat编码格式
+server:
+  port: 26130
+  tomcat:
+    uri-encoding: UTF-8
+
+### 注册中心eureka
+eureka:
+  client:
+    register-with-eureka: true
+    fetch-registry: true
+    serviceUrl:
+      defaultZone: http://${eureka.server}:${eureka.port}/eureka/
+  instance:
+    lease-renewal-interval-in-seconds: 1
+    lease-expiration-duration-in-seconds: 1
+    preferIpAddress: true
+
+### 设置服务名称
+spring:
+  application:
+    name: botong-info
+  sleuth:
+    sampler:
+      percentage: 1
+  zipkin:
+    service:
+      name: botong-zipkin
+  rabbitmq:
+      host: ${rabbitmq.server}
+      port: ${rabbitmq.port}
+      username: ${rabbitmq.username}
+      password: ${rabbitmq.password}
+  datasource:
+    url: ${spring.datasource.mysql.url}
+    username: ${spring.datasource.mysql.username}
+    password: ${spring.datasource.mysql.password}
+    driver-class-name: com.mysql.jdbc.Driver
+    initialize: true
+    continue-on-error: true
+  ##Redis配置
+  # Redis数据库索引（默认为0）
+  redis:
+      database: ${redis.dbindex}
+    # Redis服务器地址
+      host: ${redis.host}
+    # Redis服务器连接端口
+      port: ${redis.port}
+    # Redis服务器连接密码（默认为空）
+      password: ${redis.password}
+      # 连接超时时间（毫秒）
+      timeout: 0
+    # 连接池最大连接数（使用负值表示没有限制）
+      pool:
+        max-active: 8
+    # 连接池最大阻塞等待时间（使用负值表示没有限制）
+        max-wait: -1
+    # 连接池中的最大空闲连接
+        max-idle: 8
+    # 连接池中的最小空闲连接
+        min-idle: 0
+
+  ##Redis配置-日志
+  redis-info:
+    database: ${redis-info.dbindex}
+    host: ${redis-info.host}
+    port: ${redis-info.port}
+    password: ${redis-info.password}
+    timeout: 0
+    pool:
+      max-active: 8
+      max-wait: -1
+      max-idle: 8
+      min-idle: 0
+
+##配置mybatis-plus
+mybatis-plus:
+  mapper-locations: classpath:mapper/*Mapper.xml
+  typeAliasesPackage: com.yunjing.info.model
+  global-config:
+    meta-object-handler: com.common.mybatis.config.FiledAnnotationMetaObjectHandler
+    logic-delete-value: 1
+    logic-not-delete-value: 0
+    sql-injector: com.baomidou.mybatisplus.mapper.LogicSqlInjector
+
+# 写入文件日志
+logging:
+  file: ${user.dir}/logs/${spring.application.name}.log
+
+#绑定的资讯的APPID
+info:
+     appId: 432a6733ee2f4bfea6429a1569f4ed54
+#     appId: 670f3d5d33ea11e885970242ac110006
+
+#okHttp调用
+okhttp:
+  botong:
+    zuul: ${okhttp.botong.zuul}

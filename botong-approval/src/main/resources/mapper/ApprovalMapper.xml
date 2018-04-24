@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.yunjing.approval.dao.mapper.ApprovalMapper">
+
+	<resultMap id="ApprovalDetailMap" type="com.yunjing.approval.model.dto.ApprovalDetailDTO">
+		<result column="model_id" property="modelId"/>
+		<result column="id" property="modelItemId"/>
+		<result column="item_label" property="itemLabel"/>
+		<result column="data_type" property="dataType"/>
+		<result column="is_child" property="isChild"/>
+		<result column="attr_value" property="attrValue"/>
+		<result column="opt_value" property="optValue"/>
+		<result column="create_time" property="createTime"/>
+		<result column="finish_time" property="finishTime"/>
+		<result column="user_id" property="userId"/>
+		<result column="dept_name" property="deptName"/>
+		<result column="name" property="name"/>
+		<result column="avatar" property="avatar"/>
+	</resultMap>
+	<select id="getApprovalById" resultMap="ApprovalDetailMap">
+		SELECT a.state,a.result,a.create_time,a.finish_time,m.model_id,a.user_id,u.name,u.avatar,u.mobile,u.dept_name,u.position,u.color
+		FROM approval a
+		LEFT JOIN model_item m ON a.model_id = m.model_id
+		LEFT JOIN approval_user u ON u.id = a.user_id
+		WHERE a.id = #{approvalId}
+		GROUP BY u.id
+	</select>
+</mapper>

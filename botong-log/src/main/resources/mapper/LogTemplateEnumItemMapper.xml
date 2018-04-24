@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.yunjing.botong.log.mapper.LogTemplateEnumItemMapper">
+
+    <insert id="batchInsertLogTemplateEnumItems">
+        INSERT INTO `log_template_enum_items` (`id`, `item_key`, `item_value`, `enum_id`, `sort`, `deleted`, `create_time`, `update_time`) VALUES
+        <foreach collection="enumItems" item="item" separator=",">
+            (#{item.id}, #{item.itemKey}, #{item.itemValue}, #{item.enumId}, #{item.sort}, #{item.deleted}, #{item.createTime}, #{item.updateTime})
+        </foreach>
+    </insert>
+
+</mapper>

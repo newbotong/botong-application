@@ -1,0 +1,67 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.yunjing.info.mapper.InfoContentMapper">
+    <resultMap id="pageSearch" type="com.yunjing.info.dto.InfoDto">
+        <id column="id" property="id"></id>
+        <result column="create_time" property="createTime"></result>
+        <result column="title" property="title"></result>
+        <result column="picture_url" property="pictureUrl"></result>
+    </resultMap>
+
+
+    <resultMap id="infoContentMap" type="com.yunjing.info.dto.InfoContentDto">
+    </resultMap>
+
+    <sql id="baseColumn">
+        r.id id,
+        r.catalog_id catalogId,
+        c.name catalogName,
+        r.org_id orgId,
+        r.title title,
+        r.sort sort,
+        r.read_number readNumber,
+        r.whether_show whetherShow,
+        r.create_time createTime,
+        r.update_time updateTime
+    </sql>
+
+    <!--模糊查询-->
+    <select id="searchPage" resultMap="pageSearch" parameterType="java.util.Map">
+        SELECT id,create_time,title,picture_url
+        FROM info_content
+        WHERE is_delete = 0 AND
+        org_id = #{orgId} AND
+        whether_show = 1
+        <if test="title!= null and title != ''">
+            AND title LIKE CONCAT(CONCAT('%',#{title}),'%')
+        </if>
+        ORDER BY sort DESC
+    </select>
+
+    <!--web 端 根据分类或者 title模糊查询-->
+    <select id="selectParentPage" resultMap="infoContentMap">
+        SELECT
+        <include refid="baseColumn"/>
+        FROM info_content r,info_catalog c
+        WHERE r.catalog_id=c.id
+        AND r.org_id = #{orgId}
+        AND r.is_delete=0
+        <if test="parentId!= null and parentId != ''">
+            AND c.parent_id = #{parentId}
+        </if>
+        <if test="catalogId!= null and catalogId != ''">
+            AND r.catalog_id = #{catalogId}
+        </if>
+        <if test="title!= null and title != ''">
+            AND r.title LIKE CONCAT(CONCAT('%',#{title}),'%')
+        </if>
+        ORDER BY
+        r.sort
+        <if test="pageNo!= null and pageSize != null">
+            LIMIT #{pageNo},#{pageSize}
+        </if>
+    </select>
+
+
+</mapper>
