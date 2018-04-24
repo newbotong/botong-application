@@ -96,18 +96,20 @@ public class InfoContentServiceImpl extends ServiceImpl<InfoContentMapper, InfoC
                 String[] passportIds = memberList.stream().map(Member::getPassportId).toArray(String[]::new);
                 Call<ResponseEntityWrapper> call = collectService.collectState(passportIds[0], id);
                 List<String> list = new ArrayList<>();
-                list.add(id);
                 list.add(passportIds[0]);
+                list.add(id);
                 verificationCode = EncryptionUtil.md5(list.toString());
                 Object o = redisTemplate.opsForHash().get(InfoConstant.BOTONG_FAVOURITE_FAVID, verificationCode);
 
                 Response<ResponseEntityWrapper> execute = call.execute();
                 ResponseEntityWrapper body = execute.body();
                 Boolean result;
-                if (null != body.getData()) {
-                    result = (Boolean) body.getData();
-                    infoContentDetailDto.setFavouriteState(result);
-                    infoContentDetailDto.setFavId(String.valueOf(o));
+                if (null != body) {
+                    if (null != body.getData()) {
+                        result = (Boolean) body.getData();
+                        infoContentDetailDto.setFavouriteState(result);
+                        infoContentDetailDto.setFavId(String.valueOf(o));
+                    }
                 }
             }
         } else {
