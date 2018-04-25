@@ -23,15 +23,6 @@ public interface IApprovalUserService extends IBaseService<ApprovalUser> {
     boolean addMember(List<ApprovalUser> approvalUserList);
 
     /**
-     * 更新成员信息
-     *
-     * @param approvalUserList 企业成员信息集合
-     * @return
-     * @throws BaseException
-     */
-    boolean updateMember(List<ApprovalUser> approvalUserList);
-
-    /**
      * 删除成员信息
      *
      * @param approvalUserList 企业成员信息集合
