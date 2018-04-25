@@ -67,7 +67,7 @@ public class UserRemoteApiServiceImpl implements UserRemoteApiService {
                     return body.getData();
                 }
             } else {
-                log.error("body is null");
+                log.error("根据部门id和用户id查询成员信息body is null");
             }
             return null;
         } catch (IOException e) {
@@ -99,7 +99,7 @@ public class UserRemoteApiServiceImpl implements UserRemoteApiService {
                     return body.getData();
                 }
             } else {
-                log.error("body is null");
+                log.error("分页查询用户body is null");
             }
             return null;
         } catch (IOException e) {
@@ -129,7 +129,7 @@ public class UserRemoteApiServiceImpl implements UserRemoteApiService {
                     return body.getData();
                 }
             } else {
-                log.error("body is null");
+                log.error("获取管理范围 body is null");
             }
             return null;
         } catch (IOException e) {
@@ -161,7 +161,7 @@ public class UserRemoteApiServiceImpl implements UserRemoteApiService {
                     return body.getData();
                 }
             } else {
-                log.error("body is null");
+                log.error("获取是否是管理员结果body is null");
             }
             return false;
         } catch (IOException e) {
@@ -191,7 +191,7 @@ public class UserRemoteApiServiceImpl implements UserRemoteApiService {
                     return body.getData();
                 }
             } else {
-                log.error("body is null");
+                log.error("获取指定企业所有成员信息body is null");
             }
             return null;
         } catch (IOException e) {
