@@ -44,16 +44,12 @@ public class OrgMemberMessageConsumer extends AbstractMessageConsumerWithQueueDe
         if (messageObj instanceof List) {
             List list = (List) messageObj;
             List<ApprovalUser> insertList = new ArrayList<>();
-            List<ApprovalUser> updateList = new ArrayList<>();
             List<ApprovalUser> deleteList = new ArrayList<>();
             for (Object obj : list) {
                 OrgMemberMessage memberMessage = (OrgMemberMessage) obj;
                 if (memberMessage != null && memberMessage.getMessageType().equals(OrgMemberMessage.MessageType.INSERT)) {
                     ApprovalUser approvalUser = covertObj(memberMessage);
                     insertList.add(approvalUser);
-                } else if (memberMessage != null && memberMessage.getMessageType().equals(OrgMemberMessage.MessageType.MODIFY)) {
-                    ApprovalUser approvalUser = covertObj(memberMessage);
-                    updateList.add(approvalUser);
                 } else if (memberMessage != null && memberMessage.getMessageType().equals(OrgMemberMessage.MessageType.DELETE)) {
                     ApprovalUser approvalUser = covertObj(memberMessage);
                     deleteList.add(approvalUser);
@@ -61,9 +57,6 @@ public class OrgMemberMessageConsumer extends AbstractMessageConsumerWithQueueDe
             }
             if (!insertList.isEmpty()) {
                 approvalUserService.addMember(insertList);
-            }
-            if (!updateList.isEmpty()) {
-                approvalUserService.updateMember(updateList);
             }
             if (!deleteList.isEmpty()) {
                 approvalUserService.deleteMember(deleteList);
@@ -73,7 +66,7 @@ public class OrgMemberMessageConsumer extends AbstractMessageConsumerWithQueueDe
 
     private ApprovalUser covertObj(OrgMemberMessage memberMessage) {
         ApprovalUser approvalUser = new ApprovalUser();
-//        approvalUser.setPassportId(memberMessage.getPassportId());
+        approvalUser.setPassportId(memberMessage.getPassportId());
         approvalUser.setColor(memberMessage.getColor());
         approvalUser.setOrgId(memberMessage.getCompanyId());
         approvalUser.setAvatar(memberMessage.getProfile());
