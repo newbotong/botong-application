@@ -1,5 +1,6 @@
 package com.yunjing.notice.service.impl;
 
+import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 import com.baomidou.mybatisplus.mapper.EntityWrapper;
@@ -187,12 +188,14 @@ public class NoticeServiceImpl extends ServiceImpl<NoticeMapper, NoticeEntity> i
         pushParam.setAppId(appId);
         // okhttp调用工作通知
 
+        System.out.println(JSON.toJSONString(pushParam ) + "=======================");
+
         Call<ResponseEntityWrapper> push = informService.pushAllTargetByUser(pushParam);
-        Response<ResponseEntityWrapper> ex = push.execute();
-        ResponseEntityWrapper response = ex.body();
-        if (null != response) {
-            if (response.getStatusCode() != StatusCode.SUCCESS.getStatusCode()) {
-                throw new BaseRuntimeException(response.getStatusCode(), response.getStatusMessage());
+        Response<ResponseEntityWrapper> response = push.execute();
+        ResponseEntityWrapper responseBody = response.body();
+        if (null != responseBody) {
+            if (responseBody.getStatusCode() != StatusCode.SUCCESS.getStatusCode()) {
+                throw new BaseRuntimeException(responseBody.getStatusCode(), responseBody.getStatusMessage());
             }
         }
         //Dang
