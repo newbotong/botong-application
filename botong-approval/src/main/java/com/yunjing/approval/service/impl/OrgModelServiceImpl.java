@@ -9,6 +9,7 @@ import com.yunjing.approval.service.*;
 import com.yunjing.approval.util.ApproConstants;
 import com.yunjing.mommon.global.exception.InsertMessageFailureException;
 import com.yunjing.mommon.utils.IDUtils;
+import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.lang.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -17,6 +18,9 @@ import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
+import java.util.Set;
+import java.util.stream.Collectors;
 
 /**
  * 企业模型实现类
@@ -46,22 +50,7 @@ public class OrgModelServiceImpl extends BaseServiceImpl<OrgModelMapper, OrgMode
         // 查询系统的审批模板
         List<ModelL> defaultModelList = modelLService.selectList(Condition.create().where("is_def={0}", ApproConstants.IS_SYSTEM_MODEL_1));
         // 查询系统分组
-        List<ModelCategory> categoryList = categoryService.selectList(Condition.create().where("is_default={0}", 1));
-        List<ModelCategory> newCategoryList = new ArrayList<>();
-        for (ModelCategory category : categoryList) {
-            ModelCategory newCategory = new ModelCategory();
-            newCategory.setId(IDUtils.uuid());
-            newCategory.setOrgId(orgId);
-            newCategory.setSort(category.getSort());
-            newCategory.setCategoryName(category.getCategoryName());
-            newCategory.setIsDefault(0);
-            newCategoryList.add(newCategory);
-        }
-        boolean insertBatch = categoryService.insertBatch(newCategoryList);
-        if (!insertBatch){
-            throw new InsertMessageFailureException("批量初始化分组失败");
-        }
-
+        List<ModelCategory> defaultCategoryList = categoryService.selectList(Condition.create().where("is_default={0}", 1));
         //查询该企业下是否已经有审批模板
         List<ModelL> modelListByOrgId = modelLService.findModel(orgId);
         if (modelListByOrgId != null && modelListByOrgId.size() > 0) {
@@ -69,7 +58,7 @@ public class OrgModelServiceImpl extends BaseServiceImpl<OrgModelMapper, OrgMode
         } else {
             // 初始化该企业审批模板
             try {
-                flag = this.createOrgModel(orgId, defaultModelList,newCategoryList);
+                flag = this.createOrgModel(orgId, defaultModelList, defaultCategoryList);
             } catch (Exception e) {
                 flag = true;
                 logger.error("初始化该企业审批模板失败", e);
@@ -112,12 +101,27 @@ public class OrgModelServiceImpl extends BaseServiceImpl<OrgModelMapper, OrgMode
      * @return List<String> 返回模板ID集合（modelIds）
      * @throws Exception
      */
-    private boolean createOrgModel(String orgId, List<ModelL> defaultModelList,List<ModelCategory> newCategoryList) {
+    private boolean createOrgModel(String orgId, List<ModelL> defaultModelList, List<ModelCategory> defaultCategoryList) {
         boolean isInsert = false;
         List<ModelL> newModelList = new ArrayList<>();
         List<OrgModel> newOrgModelList = new ArrayList<>();
+        List<ModelCategory> newCategoryList = new ArrayList<>();
+        for (ModelCategory category : defaultCategoryList) {
+            ModelCategory newCategory = new ModelCategory();
+            newCategory.setId(IDUtils.uuid());
+            newCategory.setOrgId(orgId);
+            newCategory.setSort(category.getSort());
+            newCategory.setCategoryName(category.getCategoryName());
+            newCategory.setIsDefault(0);
+            newCategory.setCreateTime(category.getCreateTime());
+            newCategory.setUpdateTime(category.getUpdateTime());
+            newCategoryList.add(newCategory);
+        }
+        boolean insertBatch = categoryService.insertBatch(newCategoryList);
+        if (!insertBatch) {
+            logger.error("批量插入分组失败");
+        }
         for (ModelL model : defaultModelList) {
-
             // 插入新Model
             ModelL newModel = new ModelL();
             newModel.setId(IDUtils.uuid());
@@ -130,9 +134,8 @@ public class OrgModelServiceImpl extends BaseServiceImpl<OrgModelMapper, OrgMode
             newModel.setProvider(model.getProvider());
             newModel.setModelType(model.getModelType());
             newModel.setModelVersion(model.getModelVersion());
+            newModel.setVisibleRange(model.getVisibleRange());
             newModelList.add(newModel);
-            isInsert = modelLService.insert(newModel);
-
             // 插入新OrgModel
             OrgModel newOrgModel = new OrgModel();
             newOrgModel.setId(IDUtils.uuid());
@@ -146,8 +149,11 @@ public class OrgModelServiceImpl extends BaseServiceImpl<OrgModelMapper, OrgMode
             // 创建该企业模板子项
             this.createModelItem(newModel.getId(), defaultModelItemList);
         }
-
-        if (isInsert && newOrgModelList != null && newOrgModelList.size() > 0) {
+        boolean insertBatch1 = modelLService.insertBatch(newModelList);
+        if (!insertBatch1){
+            logger.error("批量插入model数据失败");
+        }
+        if (insertBatch1 && CollectionUtils.isNotEmpty(newOrgModelList)) {
             isInsert = this.insertBatch(newOrgModelList);
             if (!isInsert) {
                 try {
@@ -163,6 +169,44 @@ public class OrgModelServiceImpl extends BaseServiceImpl<OrgModelMapper, OrgMode
                 logger.error("企业的审批模板(model)批量插入失败", e);
             }
         }
+        // 将已经初始化好的model进行分组
+        // 出勤休假
+        String modelName1 = "请假,出差，外出，加班";
+        // 人事
+        String modelName2 = "转正申请，招聘申请";
+        // 行政
+        String modelName3 = "用车申请，物品领用，用印申请，通用审批";
+        // 财务
+        String modelName4 = "报销，备用金申请";
+        newModelList.forEach(modelL -> {
+            if (modelName1.contains(modelL.getModelName())){
+                List<String> ids = newCategoryList.stream().filter(modelCategory -> modelCategory.getCategoryName().equals("出勤休假")).map(ModelCategory::getId).collect(Collectors.toList());
+                if(CollectionUtils.isNotEmpty(ids)){
+                    modelL.setCategoryId(ids.get(0));
+                }
+            }else if(modelName2.contains(modelL.getModelName())){
+                List<String> ids = newCategoryList.stream().filter(modelCategory -> modelCategory.getCategoryName().equals("人事")).map(ModelCategory::getId).collect(Collectors.toList());
+                if(CollectionUtils.isNotEmpty(ids)){
+                    modelL.setCategoryId(ids.get(0));
+                }
+            }else if(modelName3.contains(modelL.getModelName())){
+                List<String> ids = newCategoryList.stream().filter(modelCategory -> modelCategory.getCategoryName().equals("行政")).map(ModelCategory::getId).collect(Collectors.toList());
+                if(CollectionUtils.isNotEmpty(ids)){
+                    modelL.setCategoryId(ids.get(0));
+                }
+            }else if(modelName4.contains(modelL.getModelName())){
+                List<String> ids = newCategoryList.stream().filter(modelCategory -> modelCategory.getCategoryName().equals("财务")).map(ModelCategory::getId).collect(Collectors.toList());
+                if(CollectionUtils.isNotEmpty(ids)){
+                    modelL.setCategoryId(ids.get(0));
+                }
+            }else {
+                List<String> ids = newCategoryList.stream().filter(modelCategory -> modelCategory.getCategoryName().equals("其他")).map(ModelCategory::getId).collect(Collectors.toList());
+                if(CollectionUtils.isNotEmpty(ids)){
+                    modelL.setCategoryId(ids.get(0));
+                }
+            }
+        });
+        modelLService.updateBatchById(newModelList);
 
         return isInsert;
     }
@@ -177,8 +221,8 @@ public class OrgModelServiceImpl extends BaseServiceImpl<OrgModelMapper, OrgMode
      */
     private boolean createModelItem(String modelId, List<ModelItem> defaltModelItemsList) {
         boolean flag = false;
+        List<ModelItem> newModelItemList = new ArrayList<>();
         if (defaltModelItemsList != null && defaltModelItemsList.size() > 0) {
-
             String modelItemId = "";
             for (ModelItem modelItem : defaltModelItemsList) {
                 if (StringUtils.isNotBlank(modelItem.getIsChild())) {
@@ -189,7 +233,6 @@ public class OrgModelServiceImpl extends BaseServiceImpl<OrgModelMapper, OrgMode
             String parent = "";
             for (ModelItem modelItem : defaltModelItemsList) {
                 if (StringUtils.isBlank(modelItem.getIsChild())) {
-
                     ModelItem newModelItem = new ModelItem();
                     newModelItem.setId(IDUtils.uuid());
                     newModelItem.setModelId(modelId);
@@ -209,8 +252,7 @@ public class OrgModelServiceImpl extends BaseServiceImpl<OrgModelMapper, OrgMode
                     newModelItem.setIsJudge(modelItem.getIsJudge());
                     newModelItem.setIsChild(null);
                     newModelItem.setItemVersion(modelItem.getItemVersion());
-                    flag = modelItemService.insert(newModelItem);
-
+                    newModelItemList.add(newModelItem);
                     // 此模板子项是其他模板子项的子项情况
                     if (StringUtils.isNotBlank(modelItemId) && modelItem.getId().equals(modelItemId)) {
                         parent = newModelItem.getId();
@@ -221,7 +263,6 @@ public class OrgModelServiceImpl extends BaseServiceImpl<OrgModelMapper, OrgMode
             if (StringUtils.isNotBlank(parent)) {
                 for (ModelItem modelItem : defaltModelItemsList) {
                     if (StringUtils.isNotBlank(modelItem.getIsChild())) {
-
                         ModelItem newModelItem = new ModelItem();
                         newModelItem.setId(IDUtils.uuid());
                         newModelItem.setModelId(modelId);
@@ -241,11 +282,12 @@ public class OrgModelServiceImpl extends BaseServiceImpl<OrgModelMapper, OrgMode
                         newModelItem.setIsJudge(modelItem.getIsJudge());
                         newModelItem.setIsChild(parent);
                         newModelItem.setItemVersion(modelItem.getItemVersion());
-                        flag = modelItemService.insert(newModelItem);
+                        newModelItemList.add(newModelItem);
                     }
                 }
             }
         }
+        flag = modelItemService.insertBatch(newModelItemList);
         if (!flag) {
             try {
                 throw new InsertMessageFailureException("该企业的模板子项初始化失败");
@@ -269,7 +311,10 @@ public class OrgModelServiceImpl extends BaseServiceImpl<OrgModelMapper, OrgMode
             boolean b = modelItemService.deleteModelItemListByOrgId(orgId);
             if (b) {
                 // 删除model数据
-                flag = modelLService.deleteModel(orgId);
+                boolean isDeleteModel = modelLService.deleteModel(orgId);
+                if (isDeleteModel) {
+                    flag = categoryService.delete(Condition.create().where("org_id={0}", orgId));
+                }
             }
         }
         return flag;
