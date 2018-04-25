@@ -81,6 +81,11 @@ public class ApprovalDetailDTO {
     private String userId;
 
     /**
+     * 账号id
+     */
+    private String passportId;
+
+    /**
      * 用户名
      */
     private String name;
