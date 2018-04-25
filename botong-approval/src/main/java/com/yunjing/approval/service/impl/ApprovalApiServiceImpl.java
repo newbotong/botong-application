@@ -234,6 +234,7 @@ public class ApprovalApiServiceImpl implements IApprovalApiService {
             // 审批主体信息
             clientApprovalDetailVO.setName(approvalById.getName());
             clientApprovalDetailVO.setMemberId(approvalById.getUserId());
+            clientApprovalDetailVO.setPassportId(approvalById.getPassportId());
             ModelL modelL = modelService.selectOne(Condition.create().where("id={0}", approvalById.getModelId()));
             clientApprovalDetailVO.setModelName(modelL.getModelName() != null ? modelL.getModelName() : null);
             clientApprovalDetailVO.setDeptName(approvalById.getDeptName());
