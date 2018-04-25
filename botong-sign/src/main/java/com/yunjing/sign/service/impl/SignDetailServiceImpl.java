@@ -331,7 +331,7 @@ public class SignDetailServiceImpl extends ServiceImpl<SignDetailMapper, SignDet
             String[] userIds = StringUtils.split(searchParam.getUserIds(), SignConstant.SEPARATE_STR);
             memList = userRemoteApiService.findSubLists(deptIds, userIds);
         }
-        if (!memList.isEmpty()) {
+        if (memList != null && !memList.isEmpty()) {
             Set<Object> memberIds = new HashSet<>();
             for (SignUserInfoVO vo : memList) {
                 memberIds.add(vo.getMemberId());
