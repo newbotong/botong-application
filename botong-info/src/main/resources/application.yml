@@ -60,18 +60,18 @@ spring:
     # 连接池中的最小空闲连接
         min-idle: 0
 
-  ##Redis配置-日志
-  redis-info:
-    database: ${redis-info.dbindex}
-    host: ${redis-info.host}
-    port: ${redis-info.port}
-    password: ${redis-info.password}
-    timeout: 0
-    pool:
-      max-active: 8
-      max-wait: -1
-      max-idle: 8
-      min-idle: 0
+#  ##Redis配置-日志
+#  redis-info:
+#    database: ${redis-info.dbindex}
+#    host: ${redis-info.host}
+#    port: ${redis-info.port}
+#    password: ${redis-info.password}
+#    timeout: 0
+#    pool:
+#      max-active: 8
+#      max-wait: -1
+#      max-idle: 8
+#      min-idle: 0
 
 ##配置mybatis-plus
 mybatis-plus:
@@ -89,7 +89,7 @@ logging:
 
 #绑定的资讯的APPID
 info:
-     appId: 432a6733ee2f4bfea6429a1569f4ed54
+     appId: ${info.appId}
 #     appId: 670f3d5d33ea11e885970242ac110006
 
 #okHttp调用
