@@ -62,6 +62,7 @@ public class CopyServiceImpl extends BaseServiceImpl<CopyMapper, Copy> implement
                     userVO.setMemberId(user.getId());
                     userVO.setProfile(user.getAvatar());
                     userVO.setName(user.getName());
+                    userVO.setPassportId(user.getPassportId());
                 } else {
                     userVO.setMemberId(copy.getUserId());
                 }

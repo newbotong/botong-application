@@ -399,10 +399,16 @@ public class LogSearchServiceImpl implements ILogSearchService {
             logTemplVOList.add(logTemplVO3);
             logTemplVOList.add(logTemplVO2);
             excelModel.setTitles(logTemplVOList);
-
+            List<LogExcelVO> collect = new ArrayList<>();
             // 注入日志数据
-            List<LogExcelVO> collect = logExcelVOList.stream().filter(logExcelVO -> logExcelVO.getType().equals(model.get(key).get(0).getType().toString()))
-                    .collect(Collectors.toList());
+            if (logExcelVOList != null && !logExcelVOList.isEmpty()) {
+                collect  = logExcelVOList.stream().filter(logExcelVO -> logExcelVO.getType().equals(model.get(key).get(0).getType().toString()))
+                        .collect(Collectors.toList());
+            }
+            if (collect == null) {
+                collect = new ArrayList<>();
+            }
+
             excelModel.setLogList(collect);
             excelModelList.add(excelModel);
         }

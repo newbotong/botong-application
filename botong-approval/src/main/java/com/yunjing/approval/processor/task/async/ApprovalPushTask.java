@@ -46,6 +46,11 @@ public class ApprovalPushTask extends BaseTask {
      */
     @Value("${botong.approval.appId}")
     private String appId;
+    /**
+     * 绑定的前端审批域名
+     */
+    @Value("${botong.approval.h5domainName}")
+    private String domainName;
 
     @Autowired
     private IApprovalUserService approvalUserService;
@@ -234,7 +239,7 @@ public class ApprovalPushTask extends BaseTask {
         Map<String, String> maps = new HashMap<>(5);
         maps.put("appName", "审批");
         maps.put("subModuleName", modelL.getModelName());
-        maps.put("url", "http://192.168.10.230:1300/#/examineHandle?approvalId=" + approval.getId());
+        maps.put("url", domainName+"approvalId=" + approval.getId());
         // 审批提醒
         JSONArray array = new JSONArray();
         JSONObject json1 = new JSONObject();
