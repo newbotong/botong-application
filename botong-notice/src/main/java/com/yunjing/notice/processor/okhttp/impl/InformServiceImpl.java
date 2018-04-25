@@ -7,6 +7,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import retrofit2.Call;
+import retrofit2.Response;
 import retrofit2.Retrofit;
 import retrofit2.converter.gson.GsonConverterFactory;
 
@@ -46,16 +47,12 @@ public class InformServiceImpl implements InformService {
      */
     @Override
     public Call<ResponseEntityWrapper> pushAllTargetByUser(AppPushParam pushParam) {
+        Call<ResponseEntityWrapper> call;
+
         if (service == null) {
             initRetrofit();
         }
-        try {
-            Call<ResponseEntityWrapper> call = service.pushAllTargetByUser(pushParam);
-            call.execute();
-            return call.clone();
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-        return null;
+        call = service.pushAllTargetByUser(pushParam);
+        return call;
     }
 }
