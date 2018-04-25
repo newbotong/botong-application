@@ -46,17 +46,13 @@ public class DangServiceImpl implements DangService {
      */
     @Override
     public Call<ResponseEntityWrapper> sendDang(DangParam dangParam) {
+        Call<ResponseEntityWrapper> call;
+
         if (service == null) {
             initRetrofit();
         }
-        try {
-            Call<ResponseEntityWrapper> call = service.sendDang(dangParam);
-            call.execute();
-            return call.clone();
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-        return null;
+        call = service.sendDang(dangParam);
+        return call;
 
         //异步请求
 //        authorityService.authority(appId, memberId).enqueue(new Callback<ResponseEntityWrapper>() {

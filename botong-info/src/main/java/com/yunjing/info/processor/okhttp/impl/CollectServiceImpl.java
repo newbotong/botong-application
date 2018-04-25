@@ -50,11 +50,12 @@ public class CollectServiceImpl implements CollectService {
      */
     @Override
     public Call<ResponseEntityWrapper> collectState(String userId, String originId) throws BaseException, IOException {
+        Call<ResponseEntityWrapper> call;
+
         if (service == null) {
             initRetrofit();
         }
-        Call<ResponseEntityWrapper> call = service.collectState(userId, originId);
-        call.execute();
-        return call.clone();
+        call = service.collectState(userId,originId);
+        return call;
     }
 }

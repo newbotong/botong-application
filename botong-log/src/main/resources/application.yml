@@ -9,6 +9,12 @@ eureka:
     fetch-registry: true
     serviceUrl:
       defaultZone: http://${eureka.server}:${eureka.port}/eureka/
+  instance:
+    preferIpAddress: true
+    # 续约更新时间间隔（默认30秒）
+    lease-renewal-interval-in-seconds: 1
+    # 续约到期时间（默认90秒）
+    lease-expiration-duration-in-seconds: 1
 
 ### 设置服务名称
 spring:

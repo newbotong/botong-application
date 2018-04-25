@@ -46,16 +46,12 @@ public class AuthorityServiceImpl implements AuthorityService {
      */
     @Override
     public Call<ResponseEntityWrapper> authority(String appId, String memberId) {
+        Call<ResponseEntityWrapper> call;
+
         if (service == null) {
             initRetrofit();
         }
-        try {
-            Call<ResponseEntityWrapper> call = service.authority(appId, memberId);
-            call.execute();
-            return call.clone();
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-        return null;
+        call = service.authority(appId, memberId);
+        return call;
     }
 }

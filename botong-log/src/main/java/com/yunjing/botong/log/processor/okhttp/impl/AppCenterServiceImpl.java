@@ -126,7 +126,7 @@ public class AppCenterServiceImpl implements AppCenterService {
                         log.info("调用推送结果异常，code:{},message:{}", body.getStatusCode(), body.getStatusMessage());
                     }
                 } else {
-                    log.error("body is null");
+                    log.error("调用推送结果 body is null");
                 }
             }
 
@@ -155,7 +155,7 @@ public class AppCenterServiceImpl implements AppCenterService {
                 if (body != null) {
                     log.info("调用 dang 结果，code:{},message:{}", body.getStatusCode(), body.getStatusMessage());
                 } else {
-                    log.error("body is null");
+                    log.error("用 dang 结果 body is null");
                 }
             }
 
@@ -211,7 +211,7 @@ public class AppCenterServiceImpl implements AppCenterService {
                         return body.getData();
                     }
                 } else {
-                    log.error("body is null");
+                    log.error("获取指定企业所有成员信息 body is null");
                 }
                 return null;
             } catch (IOException e) {
@@ -223,10 +223,10 @@ public class AppCenterServiceImpl implements AppCenterService {
                 public void onResponse(Call<ResponseEntityWrapper<List<Member>>> call, Response<ResponseEntityWrapper<List<Member>>> response) {
                     ResponseEntityWrapper<List<Member>> body = response.body();
                     if (body != null && orgMemberCallback != null) {
-                        log.info("code:{},message:{}", body.getStatusCode(), body.getStatusMessage());
+                        log.info("获取指定企业所有成员信息:code:{},message:{}", body.getStatusCode(), body.getStatusMessage());
                         orgMemberCallback.result(body.getData());
                     } else {
-                        log.error("body is null");
+                        log.error("获取指定企业所有成员信息body is null");
                     }
                 }
 
@@ -256,7 +256,7 @@ public class AppCenterServiceImpl implements AppCenterService {
                     throw new BaseRuntimeException(body.getStatusCode(), body.getStatusMessage());
                 }
             } else {
-                log.error("body is null");
+                log.error("设置任务调度 body is null");
             }
             return null;
         } catch (IOException e) {
@@ -312,7 +312,7 @@ public class AppCenterServiceImpl implements AppCenterService {
                     return body.getData();
                 }
             } else {
-                log.error("body is null");
+                log.error("根据多部门id和成员id查询成员集合 body is null");
             }
             return null;
         } catch (IOException e) {
