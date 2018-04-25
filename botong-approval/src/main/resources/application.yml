@@ -46,11 +46,11 @@ spring:
   ##Redis配置
   # Redis数据库索引（默认为0）
   redis:
-    database: ${redis.dbindex}
+    database: 0
   # Redis服务器地址
-    host: ${redis.host}
+    host: 192.168.10.48
   # Redis服务器连接端口
-    port: ${redis.port}
+    port: 10351
   # Redis服务器连接密码（默认为空）
     password: ${redis.password}
     # 连接超时时间（毫秒）
@@ -121,6 +121,8 @@ logging:
 botong:
   approval:
     appId: ${botong.approval.appId}
+    h5domainName: ${botong.approval.h5domainName}
+
 
 
 

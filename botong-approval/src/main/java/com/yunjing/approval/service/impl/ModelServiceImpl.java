@@ -53,7 +53,6 @@ public class ModelServiceImpl extends BaseServiceImpl<ModelMapper, ModelL> imple
             List<ModelItem> items = modelItems.stream().filter(modelItem -> modelItem.getModelId().equals(modelVO.getModelId())).collect(Collectors.toList());
             // 过滤出类型是单选框的modelItem
             Set<ModelItem> itemSet = items.stream().filter(modelItem -> modelItem.getDataType().equals(ApproConstants.RADIO_TYPE_3)).collect(Collectors.toSet());
-            modelVO.setItemVOSet(itemSet);
             // 过滤出所有需要必填的单选框
             Set<ModelItem> set = itemSet.stream().filter(modelItem -> modelItem.getIsRequired().equals(1)).collect(Collectors.toSet());
             if (!set.isEmpty()) {
