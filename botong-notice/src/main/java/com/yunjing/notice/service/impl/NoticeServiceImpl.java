@@ -1,5 +1,6 @@
 package com.yunjing.notice.service.impl;
 
+import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 import com.baomidou.mybatisplus.mapper.EntityWrapper;
@@ -27,6 +28,7 @@ import com.yunjing.notice.processor.okhttp.OrgStructureService;
 import com.yunjing.notice.service.NoticeService;
 import com.yunjing.notice.service.NoticeUserService;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.beanutils.ConvertUtils;
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.BeanUtils;
@@ -110,6 +112,7 @@ public class NoticeServiceImpl extends ServiceImpl<NoticeMapper, NoticeEntity> i
             throw new BaseRuntimeException(StatusCode.ROLE_LIST_NOT_EXISTS.getStatusCode(),"该用户查询不到");
         }
         String[] passportIds = memberList.stream().map(Member::getPassportId).toArray(String[]::new);
+        List<String> newList = new ArrayList(new HashSet(Arrays.asList(passportIds)));
         String[] memberIds = memberList.stream().map(Member::getId).toArray(String[]::new);
 
         List<String> userInfoBodies = Arrays.asList(memberIds);
@@ -177,7 +180,7 @@ public class NoticeServiceImpl extends ServiceImpl<NoticeMapper, NoticeEntity> i
         //构建发送公告参数
         AppPushParam pushParam = new AppPushParam();
         pushParam.setNotificationTitle("公告");
-        pushParam.setAlias(passportIds);
+        pushParam.setAlias(newList.toArray(new String[0]));
         pushParam.setTitle(noticeEntity.getTitle());
         pushParam.setMap(map);
         pushParam.setMsg("您有一条新公告，请注意查收！");
@@ -185,12 +188,14 @@ public class NoticeServiceImpl extends ServiceImpl<NoticeMapper, NoticeEntity> i
         pushParam.setAppId(appId);
         // okhttp调用工作通知
 
+        System.out.println(JSON.toJSONString(pushParam ) + "=======================");
+
         Call<ResponseEntityWrapper> push = informService.pushAllTargetByUser(pushParam);
-        Response<ResponseEntityWrapper> ex = push.execute();
-        ResponseEntityWrapper response = ex.body();
-        if (null != response) {
-            if (response.getStatusCode() != StatusCode.SUCCESS.getStatusCode()) {
-                throw new BaseRuntimeException(response.getStatusCode(), response.getStatusMessage());
+        Response<ResponseEntityWrapper> response = push.execute();
+        ResponseEntityWrapper responseBody = response.body();
+        if (null != responseBody) {
+            if (responseBody.getStatusCode() != StatusCode.SUCCESS.getStatusCode()) {
+                throw new BaseRuntimeException(responseBody.getStatusCode(), responseBody.getStatusMessage());
             }
         }
         //Dang
@@ -212,6 +217,10 @@ public class NoticeServiceImpl extends ServiceImpl<NoticeMapper, NoticeEntity> i
                 }
                 userInfoModelList.add(userInfoModel);
             }
+            List<UserInfoModel> userList = new ArrayList<>();
+            if (CollectionUtils.isNotEmpty(userInfoModelList)){
+                userList = new ArrayList(new HashSet(userInfoModelList));
+            }
             if (null != result) {
                 if (null != result.getData()) {
                     List<Member> listMember = result.getData();
@@ -222,7 +231,7 @@ public class NoticeServiceImpl extends ServiceImpl<NoticeMapper, NoticeEntity> i
             dangParam.setBizId(noticeEntity.getId());
             dangParam.setSendTelephone(noticeBody.getPhone());
             dangParam.setBizType(1);
-            dangParam.setReceiveBody(userInfoModelList);
+            dangParam.setReceiveBody(userList);
             dangParam.setDangType(1);
             dangParam.setRemindType(1);
             dangParam.setSendType(1);

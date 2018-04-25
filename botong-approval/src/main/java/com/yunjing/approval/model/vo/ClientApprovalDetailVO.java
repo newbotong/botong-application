@@ -19,6 +19,11 @@ public class ClientApprovalDetailVO {
     private String memberId;
 
     /**
+     * 审批发起人账号id
+     */
+    private String passportId;
+
+    /**
      * 审批发起人姓名
      */
     private String name;

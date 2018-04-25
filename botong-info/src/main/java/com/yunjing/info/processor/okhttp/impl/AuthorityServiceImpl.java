@@ -49,11 +49,12 @@ public class AuthorityServiceImpl implements AuthorityService {
      */
     @Override
     public Call<ResponseEntityWrapper> authority(String appId, String memberId) throws BaseException,IOException {
+        Call<ResponseEntityWrapper> call;
+
         if (service == null) {
             initRetrofit();
         }
-        Call<ResponseEntityWrapper> call = service.authority(appId, memberId);
-        call.execute();
-        return call.clone();
+        call = service.authority(appId,memberId);
+        return call;
     }
 }

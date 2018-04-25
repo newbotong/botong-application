@@ -49,10 +49,11 @@ public class ApprovalUserServiceImpl extends BaseServiceImpl<ApprovalUserMapper,
         boolean isInserted = false;
         List<ApprovalUser> approvalUsers = new ArrayList<>();
         List<ApprovalUser> list = this.selectList(Condition.create());
-        List<String> ids = list.stream().map(ApprovalUser::getId).collect(Collectors.toList());
+        List<String> memberIds = list.stream().map(ApprovalUser::getId).collect(Collectors.toList());
         approvalUserList.forEach(approvalUser -> {
-            Set<String> idSet = ids.stream().filter(id -> id.equals(approvalUser.getId())).collect(Collectors.toSet());
-            if (idSet.size() == 0) {
+            Set<String> memberIdSet = memberIds.stream().filter(id -> id.equals(approvalUser.getId())).collect(Collectors.toSet());
+            // 如果成员信息不存在就插入
+            if (memberIdSet.size() == 0) {
                 ApprovalUser newUser = new ApprovalUser();
                 newUser.setId(approvalUser.getId());
                 newUser.setName(approvalUser.getName());
@@ -62,25 +63,30 @@ public class ApprovalUserServiceImpl extends BaseServiceImpl<ApprovalUserMapper,
                 newUser.setOrgId(approvalUser.getOrgId());
                 newUser.setPassportId(approvalUser.getPassportId());
                 newUser.setColor(approvalUser.getColor());
-                approvalUser.setDeptId(approvalUser.getDeptId());
-                approvalUser.setDeptName(approvalUser.getDeptName());
+                newUser.setDeptId(approvalUser.getDeptId());
+                newUser.setDeptName(approvalUser.getDeptName());
                 approvalUsers.add(approvalUser);
+            }else {
+                // 如果成员信息已存在就更新
+                memberIdSet.forEach(memberId->{
+                    ApprovalUser approvalUser1 = this.selectById(memberId);
+                    approvalUser1.setName(approvalUser.getName());
+                    approvalUser1.setPosition(approvalUser.getPosition());
+                    approvalUser1.setMobile(approvalUser.getMobile());
+                    approvalUser1.setAvatar(approvalUser.getAvatar());
+                    approvalUser1.setOrgId(approvalUser.getOrgId());
+                    approvalUser1.setPassportId(approvalUser.getPassportId());
+                    approvalUser1.setColor(approvalUser.getColor());
+                    approvalUser1.setDeptId(approvalUser.getDeptId());
+                    approvalUser1.setDeptName(approvalUser.getDeptName());
+                    approvalUsers.add(approvalUser1);
+                });
             }
         });
-
         if (!approvalUsers.isEmpty()) {
-            isInserted = this.insertBatch(approvalUsers);
+            isInserted = this.insertOrUpdateBatch(approvalUsers);
         }
         return isInserted;
-    }
-
-    @Override
-    public boolean updateMember(List<ApprovalUser> approvalUserList) {
-        boolean isUpdated = false;
-        if (CollectionUtils.isNotEmpty(approvalUserList)) {
-            isUpdated = this.insertOrUpdateBatch(approvalUserList);
-        }
-        return isUpdated;
     }
 
     @Override

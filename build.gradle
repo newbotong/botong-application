@@ -74,7 +74,7 @@ subprojects {
         compile 'com.squareup.retrofit2:converter-gson:2.3.0'
         compile 'org.ligboy.retrofit2:converter-fastjson:2.1.0'
 
-        compile('com.yunjing.botong:commons:2.0.0.7-SNAPSHOT') {
+        compile('com.yunjing.botong:commons:2.0.0.8-SNAPSHOT') {
             changing = true //实时更新jar包
         }
 
