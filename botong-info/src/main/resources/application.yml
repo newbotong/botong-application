@@ -89,7 +89,7 @@ logging:
 
 #绑定的资讯的APPID
 info:
-     appId: 432a6733ee2f4bfea6429a1569f4ed54
+     appId: ${info.appId}
 #     appId: 670f3d5d33ea11e885970242ac110006
 
 #okHttp调用
