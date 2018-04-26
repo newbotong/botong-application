@@ -13,7 +13,7 @@ import org.springframework.web.bind.annotation.*;
  * @date 2018/03/21
  */
 @RestController
-@RequestMapping("/approval/category")
+@RequestMapping("/web/approval/category")
 public class CategoryController extends BaseController {
 
     @Autowired

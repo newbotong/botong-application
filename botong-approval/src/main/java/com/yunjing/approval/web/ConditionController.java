@@ -14,7 +14,7 @@ import org.springframework.web.bind.annotation.RestController;
  * @date 2017/12/21
  */
 @RestController
-@RequestMapping("/approval/condition")
+@RequestMapping("/web/approval/condition")
 public class ConditionController extends BaseController {
 
     @Autowired
