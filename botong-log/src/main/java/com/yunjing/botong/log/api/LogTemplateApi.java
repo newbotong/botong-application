@@ -1,11 +1,15 @@
 package com.yunjing.botong.log.api;
 
 import com.yunjing.botong.log.params.LogTemplateParam;
+import com.yunjing.botong.log.processor.mq.producer.LogTemplateCreateProducer;
 import com.yunjing.botong.log.processor.okhttp.AppCenterService;
 import com.yunjing.botong.log.service.LogTemplateService;
 import com.yunjing.botong.log.vo.LogTemplateItemVo;
 import com.yunjing.botong.log.vo.LogTemplateVo;
+import com.yunjing.message.model.Message;
+import com.yunjing.message.share.org.OrgAppMessage;
 import com.yunjing.mommon.base.BaseController;
+import com.yunjing.mommon.constant.StatusCode;
 import com.yunjing.mommon.wrapper.PageWrapper;
 import com.yunjing.mommon.wrapper.ResponseEntityWrapper;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -28,6 +32,9 @@ public class LogTemplateApi extends BaseController {
 
     @Value("${botong.log.appId}")
     private String appId;
+
+    @Autowired
+    private LogTemplateCreateProducer logTemplateCreateProducer;
 
 
     @GetMapping("/verify-manager")
@@ -61,4 +68,12 @@ public class LogTemplateApi extends BaseController {
         return this.success(this.logTemplateService.deleteLogTemplate(id));
     }
 
+    @RequestMapping(value = "/org-init", method = RequestMethod.POST)
+    public ResponseEntityWrapper orgInit(@RequestParam("what") String what, @RequestParam("orgId")  String orgId){
+        OrgAppMessage orgAppMessage = new OrgAppMessage();
+        orgAppMessage.setCompanyId(orgId);
+        Message message = Message.obtain(what, System.currentTimeMillis(), orgAppMessage);
+        logTemplateCreateProducer.sendMessage(message);
+        return this.success();
+    }
 }
