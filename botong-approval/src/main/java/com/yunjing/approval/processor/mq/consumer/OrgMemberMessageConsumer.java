@@ -3,7 +3,6 @@ package com.yunjing.approval.processor.mq.consumer;
 import com.yunjing.approval.model.entity.ApprovalUser;
 import com.yunjing.approval.processor.mq.configuration.OrgMemberQueueConfig;
 import com.yunjing.approval.service.IApprovalUserService;
-import com.yunjing.approval.service.IOrgModelService;
 import com.yunjing.message.annotation.MessageQueueDeclarable;
 import com.yunjing.message.declare.consumer.AbstractMessageConsumerWithQueueDeclare;
 import com.yunjing.message.model.Message;
@@ -16,20 +15,15 @@ import java.util.ArrayList;
 import java.util.List;
 
 /**
- * <p>
- * <p> 提醒消息接受者
- * </p>
+ * 企业成员数据信息消息接受者
  *
- * @author tao.zeng.
- * @since 2018/3/27.
+ * @author 刘小鹏
+ * @date 2018/04/22
  */
 @Slf4j
 @Component
 @MessageQueueDeclarable
 public class OrgMemberMessageConsumer extends AbstractMessageConsumerWithQueueDeclare<Message, OrgMemberQueueConfig> {
-
-    @Autowired
-    private IOrgModelService orgModelService;
 
     @Autowired
     private IApprovalUserService approvalUserService;

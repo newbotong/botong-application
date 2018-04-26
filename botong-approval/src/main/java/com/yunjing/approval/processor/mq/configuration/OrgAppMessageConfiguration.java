@@ -4,12 +4,10 @@ import com.yunjing.message.declare.configuration.DefaultQueueConfiguration;
 import org.springframework.stereotype.Component;
 
 /**
- * <p>
- * <p> 提醒消息配置
- * </p>
+ * 企业信息消息配置
  *
- * @author tao.zeng.
- * @since 2018/3/28.
+ * @author 刘小鹏
+ * @date 2018/04/22
  */
 @Component
 public class OrgAppMessageConfiguration extends DefaultQueueConfiguration {

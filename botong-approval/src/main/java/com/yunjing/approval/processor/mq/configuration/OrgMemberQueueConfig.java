@@ -4,10 +4,10 @@ import com.yunjing.message.declare.configuration.DefaultQueueConfiguration;
 import org.springframework.context.annotation.Configuration;
 
 /**
- * @version: 1.0.0
- * @author: yangc
- * @date: 2018/4/4 9:17
- * @description:
+ * 企业成员信息消息配置
+ *
+ * @author 刘小鹏
+ * @date 2018/04/22
  */
 @Configuration
 public class OrgMemberQueueConfig extends DefaultQueueConfiguration {
