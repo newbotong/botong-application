@@ -21,11 +21,11 @@ public class OrgAppMessageConfiguration extends DefaultQueueConfiguration {
 
     @Override
     public String exchange() {
-        return "botong:org-app.exchange";
+        return "botong.org-app.exchange";
     }
 
     @Override
     public String routingKey() {
-        return "botong:org-app.route";
+        return "botong.org-app.route";
     }
 }
