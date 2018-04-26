@@ -20,7 +20,7 @@ import java.io.OutputStream;
  * @date 2018/04/03
  */
 @RestController
-@RequestMapping("/approval/data")
+@RequestMapping("/web/approval/data")
 public class ExportController extends BaseController {
 
     @Autowired
