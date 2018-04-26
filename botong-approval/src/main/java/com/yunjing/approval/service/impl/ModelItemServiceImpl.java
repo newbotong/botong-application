@@ -10,10 +10,7 @@ import com.yunjing.approval.dao.mapper.ConditionMapper;
 import com.yunjing.approval.dao.mapper.ModelItemMapper;
 import com.yunjing.approval.dao.mapper.ModelMapper;
 import com.yunjing.approval.model.dto.CompanyDeptDTO;
-import com.yunjing.approval.model.entity.ModelItem;
-import com.yunjing.approval.model.entity.ModelL;
-import com.yunjing.approval.model.entity.OrgModel;
-import com.yunjing.approval.model.entity.SetsCondition;
+import com.yunjing.approval.model.entity.*;
 import com.yunjing.approval.model.vo.*;
 import com.yunjing.approval.service.*;
 import com.yunjing.approval.util.ApproConstants;
@@ -143,15 +140,28 @@ public class ModelItemServiceImpl extends BaseServiceImpl<ModelItemMapper, Model
         clientModelItemVO.setCopyerVOS(userVOList);
 
         // 获取部门信息
+        ApprovalUser approvalUser = approvalUserService.selectById(memberId);
         List<DeptVO> deptVOList = new ArrayList<>();
-        DeptVO deptVO = new DeptVO();
-        deptVO.setDeptId("6384295807830462465");
-        deptVO.setDeptName("行政部");
-        DeptVO deptVO1 = new DeptVO();
-        deptVO1.setDeptId("6384295807830462466");
-        deptVO1.setDeptName("行政部2");
-        deptVOList.add(deptVO);
-        deptVOList.add(deptVO1);
+        if (approvalUser != null && StringUtils.isNotBlank(approvalUser.getDeptId()) && StringUtils.isNotBlank(approvalUser.getDeptName())) {
+            String[] deptIds = approvalUser.getDeptId().split(",");
+            String[] deptNames = approvalUser.getDeptName().split(",");
+            for (int i = 0; i < (deptIds.length < deptNames.length ? deptNames.length : deptIds.length); i++) {
+                DeptVO deptVO = new DeptVO();
+                deptVO.setDeptId(deptIds[i]);
+                deptVO.setDeptName(deptNames[i]);
+                deptVOList.add(deptVO);
+            }
+        } else {
+            // 假数据，为了不报错
+            DeptVO deptVO = new DeptVO();
+            deptVO.setDeptId("6384295807830462465");
+            deptVO.setDeptName("行政部");
+            DeptVO deptVO1 = new DeptVO();
+            deptVO1.setDeptId("6384295807830462466");
+            deptVO1.setDeptName("行政部2");
+            deptVOList.add(deptVO);
+            deptVOList.add(deptVO1);
+        }
         clientModelItemVO.setDeptList(deptVOList);
         return clientModelItemVO;
 

@@ -236,7 +236,7 @@ public class NoticeServiceImpl extends ServiceImpl<NoticeMapper, NoticeEntity> i
             dangParam.setRemindType(1);
             dangParam.setSendType(1);
             dangParam.setSendTime(System.currentTimeMillis());
-            dangParam.setSendContent(noticeEntity.getTitle());
+            dangParam.setSendContent("公告：《"+noticeEntity.getTitle()+"》");
             dangParam.setVoiceTimeLength(0);
             if (!StringUtils.isAnyBlank(noticeBody.getPicture(), noticeBody.getPictureName(), noticeBody.getSize())) {
                 dangParam.setIsAccessory(1);
