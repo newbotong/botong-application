@@ -330,6 +330,11 @@ public class ApprovalApiServiceImpl implements IApprovalApiService {
         } else {
             clientApprovalDetailVO.setApprovalUserList(approvalUserList);
         }
+        // 当有审批人做拒绝操作后审批详情中移除正在审批的审批人集合
+        Set<ApprovalUserVO> collect1 = approvalUserList.stream().filter(approvalUserVO -> approvalUserVO.getProcessState() == 2).collect(Collectors.toSet());
+        if (CollectionUtils.isNotEmpty(collect1)) {
+            approvalUserList.removeIf(approvalUserVO -> approvalUserVO.getProcessState() == 0);
+        }
         // 获取抄送人信息
         List<CopyUserVO> copyUserList = copysMapper.getCopyUserList(approvalId);
         copyUserList.forEach(copyUserVO -> {
@@ -347,8 +352,8 @@ public class ApprovalApiServiceImpl implements IApprovalApiService {
     public boolean solveApproval(String companyId, String memberId, String approvalId, Integer state) {
         logger.info("companyId: " + companyId + " memberId: " + memberId + " approvalId: " + approvalId + "state: " + state);
         boolean flag = false;
-        List<ApprovalProcess> processList = approvalProcessService.selectList(Condition.create().where("approval_id={0}", approvalId));
-        if (processList != null && !processList.isEmpty()) {
+        List<ApprovalProcess> processList = approvalProcessService.selectList(Condition.create().where("approval_id={0}", approvalId).orderBy("seq", true));
+        if (processList != null && CollectionUtils.isNotEmpty(processList)) {
             for (ApprovalProcess process : processList) {
                 // 当审批流程中的审批未处理时（0：未处理）
                 if (process.getProcessState() == 0) {
@@ -565,6 +570,18 @@ public class ApprovalApiServiceImpl implements IApprovalApiService {
                     for (Map.Entry<Integer, List<ApproveAttrVO>> entry : map.entrySet()) {
                         details.add(new ApproveRowVO(entry.getKey(), entry.getValue()));
                     }
+                    Collections.sort(details, new Comparator<ApproveRowVO>() {
+                        @Override
+                        public int compare(ApproveRowVO o1, ApproveRowVO o2) {
+                            if (o1.getNum() > o2.getNum()) {
+                                return 1;
+                            } else if (o1.getNum() < o2.getNum()) {
+                                return -1;
+                            } else {
+                                return 0;
+                            }
+                        }
+                    });
                     attrVo.setContents(details);
                 }
                 attrs.add(attrVo);

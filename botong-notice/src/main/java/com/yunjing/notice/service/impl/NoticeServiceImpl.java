@@ -97,7 +97,7 @@ public class NoticeServiceImpl extends ServiceImpl<NoticeMapper, NoticeEntity> i
         BeanUtils.copyProperties(noticeBody, noticeEntity);
         noticeEntity.setLogicDelete(NoticeConstant.LOGIC_DELETE_NORMAL);
         if (StringUtils.isEmpty(noticeBody.getMemberIds()) && StringUtils.isEmpty(noticeBody.getDepartmentIds())) {
-            throw new BaseRuntimeException(StatusCode.ADMIN_USER_NOT_FOUND.getStatusCode(),"成员不能为空");
+            throw new BaseRuntimeException(StatusCode.ADMIN_USER_NOT_FOUND.getStatusCode(), "成员不能为空");
         }
         //okhttp
 
@@ -109,7 +109,7 @@ public class NoticeServiceImpl extends ServiceImpl<NoticeMapper, NoticeEntity> i
         if (null != body.getData()) {
             memberList = body.getData();
         } else {
-            throw new BaseRuntimeException(StatusCode.ROLE_LIST_NOT_EXISTS.getStatusCode(),"该用户查询不到");
+            throw new BaseRuntimeException(StatusCode.ROLE_LIST_NOT_EXISTS.getStatusCode(), "该用户查询不到");
         }
         String[] passportIds = memberList.stream().map(Member::getPassportId).toArray(String[]::new);
         List<String> newList = new ArrayList(new HashSet(Arrays.asList(passportIds)));
@@ -120,7 +120,7 @@ public class NoticeServiceImpl extends ServiceImpl<NoticeMapper, NoticeEntity> i
             noticeEntity.setNotReadNum(userInfoBodies.size());
             noticeEntity.setReadNum(0);
         } else {
-            throw new BaseRuntimeException(StatusCode.ROLE_LIST_NOT_EXISTS.getStatusCode(),"选择用户不能为空");
+            throw new BaseRuntimeException(StatusCode.ROLE_LIST_NOT_EXISTS.getStatusCode(), "选择用户不能为空");
         }
         List<NoticeUserEntity> userInfoBodyList = new ArrayList<>();
 
@@ -188,7 +188,7 @@ public class NoticeServiceImpl extends ServiceImpl<NoticeMapper, NoticeEntity> i
         pushParam.setAppId(appId);
         // okhttp调用工作通知
 
-        System.out.println(JSON.toJSONString(pushParam ) + "=======================");
+        System.out.println(JSON.toJSONString(pushParam) + "=======================");
 
         Call<ResponseEntityWrapper> push = informService.pushAllTargetByUser(pushParam);
         Response<ResponseEntityWrapper> response = push.execute();
@@ -205,28 +205,29 @@ public class NoticeServiceImpl extends ServiceImpl<NoticeMapper, NoticeEntity> i
             Call<ResponseEntityWrapper<List<Member>>> ca = orgStructureService.findSubLists("", noticeBody.getIssueUserId(), 0);
             Response<ResponseEntityWrapper<List<Member>>> re = ca.execute();
             ResponseEntityWrapper<List<Member>> result = re.body();
-            //查询发布人的账户id
-            List<UserInfoModel> userInfoModelList = new ArrayList<>();
-            for (Member member : memberList) {
-                UserInfoModel userInfoModel = new UserInfoModel();
-                if (StringUtils.isNotEmpty(member.getPassportId())) {
-                    userInfoModel.setUserId(member.getPassportId());
-                }
-                if (StringUtils.isNotEmpty(member.getMobile())) {
-                    userInfoModel.setUserTelephone(Long.parseLong(member.getMobile()));
-                }
-                userInfoModelList.add(userInfoModel);
-            }
-            List<UserInfoModel> userList = new ArrayList<>();
-            if (CollectionUtils.isNotEmpty(userInfoModelList)){
-                userList = new ArrayList(new HashSet(userInfoModelList));
-            }
             if (null != result) {
                 if (null != result.getData()) {
                     List<Member> listMember = result.getData();
                     String[] passportId = listMember.stream().map(Member::getPassportId).toArray(String[]::new);
                     dangParam.setUserId(passportId[0]);
                 }
+            }
+            //查询发布人的账户id !member.getParentId().equals(dangParam.getUserId())
+            List<UserInfoModel> userInfoModelList = new ArrayList<>();
+            for (Member member : memberList) {
+                if (member.getPassportId().equals(dangParam.getUserId())) {
+                    continue;
+                }
+                UserInfoModel userInfoModel = new UserInfoModel();
+                userInfoModel.setUserId(member.getPassportId());
+                if (StringUtils.isNotEmpty(member.getMobile())) {
+                    userInfoModel.setUserTelephone(Long.parseLong(member.getMobile()));
+                }
+                userInfoModelList.add(userInfoModel);
+            }
+            List<UserInfoModel> userList = new ArrayList<>();
+            if (CollectionUtils.isNotEmpty(userInfoModelList)) {
+                userList = new ArrayList(new HashSet(userInfoModelList));
             }
             dangParam.setBizId(noticeEntity.getId());
             dangParam.setSendTelephone(noticeBody.getPhone());
@@ -236,7 +237,7 @@ public class NoticeServiceImpl extends ServiceImpl<NoticeMapper, NoticeEntity> i
             dangParam.setRemindType(1);
             dangParam.setSendType(1);
             dangParam.setSendTime(System.currentTimeMillis());
-            dangParam.setSendContent("公告：《"+noticeEntity.getTitle()+"》。请及时查看。");
+            dangParam.setSendContent("公告：《" + noticeEntity.getTitle() + "》。请及时查看。");
             dangParam.setVoiceTimeLength(0);
             if (!StringUtils.isAnyBlank(noticeBody.getPicture(), noticeBody.getPictureName(), noticeBody.getSize())) {
                 dangParam.setIsAccessory(1);
@@ -305,7 +306,7 @@ public class NoticeServiceImpl extends ServiceImpl<NoticeMapper, NoticeEntity> i
         List<NoticeEntity> noticeEntityList = new NoticeEntity().selectList(new EntityWrapper<NoticeEntity>()
                 .eq("logic_delete", NoticeConstant.LOGIC_DELETE_NORMAL).in("id", Arrays.asList(idArrays)));
         if (CollectionUtils.isEmpty(noticeEntityList)) {
-            throw new BaseRuntimeException(StatusCode.RESOURCE_NOT_MESSAGE_EXIT.getStatusCode(),"公告已被删除");
+            throw new BaseRuntimeException(StatusCode.RESOURCE_NOT_MESSAGE_EXIT.getStatusCode(), "公告已被删除");
         }
         for (NoticeEntity noticeEntity : noticeEntityList) {
             noticeEntity.setLogicDelete(NoticeConstant.LOGIC_DELETE_DELETE);
@@ -321,7 +322,7 @@ public class NoticeServiceImpl extends ServiceImpl<NoticeMapper, NoticeEntity> i
             b = noticeUserService.updateBatchById(noticeUserEntityList);
         }
         if (!a && !b) {
-            throw new BaseRuntimeException(StatusCode.RESOURCE_DELETE_FAILED.getStatusCode(),StatusCode.RESOURCE_DELETE_FAILED.getStatusMessage());
+            throw new BaseRuntimeException(StatusCode.RESOURCE_DELETE_FAILED.getStatusCode(), StatusCode.RESOURCE_DELETE_FAILED.getStatusMessage());
         }
     }
 
@@ -338,12 +339,13 @@ public class NoticeServiceImpl extends ServiceImpl<NoticeMapper, NoticeEntity> i
      * @throws IOException
      */
     @Override
-    public Map<String, Object> selectNoticePage(String userId, Integer state, String orgId, Integer pageNo, Integer pageSize) throws BaseException, IOException {
+    public Map<String, Object> selectNoticePage(String userId, Integer state, String orgId, Integer pageNo, Integer
+            pageSize) throws BaseException, IOException {
         Page<NoticePageBody> page = new Page<>(pageNo, pageSize);
         Map<String, Object> map = new HashMap<>(4);
         Map<String, Object> maps = new HashMap<String, Object>(3);
         if (StringUtils.isEmpty(orgId)) {
-            throw new BaseRuntimeException(StatusCode.MISSING_REQUIRE_FIELD.getStatusCode(),"企业id不能为空");
+            throw new BaseRuntimeException(StatusCode.MISSING_REQUIRE_FIELD.getStatusCode(), "企业id不能为空");
         }
         map.put("orgId", orgId);
         if (null == state) {
@@ -391,7 +393,8 @@ public class NoticeServiceImpl extends ServiceImpl<NoticeMapper, NoticeEntity> i
      * @throws BaseException
      */
     @Override
-    public Page<UserInfoBody> selectNoticeUser(String id, Integer state, Integer pageNo, Integer pageSize) throws BaseException, IOException {
+    public Page<UserInfoBody> selectNoticeUser(String id, Integer state, Integer pageNo, Integer pageSize) throws
+            BaseException, IOException {
         Page<UserInfoBody> page = new Page<>(pageNo, pageSize);
         List<NoticeUserEntity> list = new NoticeUserEntity().selectList(new EntityWrapper<NoticeUserEntity>()
                 .eq("logic_delete", NoticeConstant.LOGIC_DELETE_NORMAL).eq("notice_id", id).eq("state", state));
@@ -445,7 +448,7 @@ public class NoticeServiceImpl extends ServiceImpl<NoticeMapper, NoticeEntity> i
     public NoticeDetailBody selectNoticeDetail(String id, String userId) throws BaseException, IOException {
         NoticeEntity noticeEntity = new NoticeEntity().selectOne(new EntityWrapper<NoticeEntity>().eq("id", id).eq("logic_delete", NoticeConstant.LOGIC_DELETE_NORMAL));
         if (null == noticeEntity) {
-            throw new BaseRuntimeException(StatusCode.RESOURCE_NOT_MESSAGE_EXIT.getStatusCode(),"公告已被删除");
+            throw new BaseRuntimeException(StatusCode.RESOURCE_NOT_MESSAGE_EXIT.getStatusCode(), "公告已被删除");
         }
         Integer i = this.updateNoticeState(userId, id);
         NoticeDetailBody noticeDetailBody = new NoticeDetailBody();
