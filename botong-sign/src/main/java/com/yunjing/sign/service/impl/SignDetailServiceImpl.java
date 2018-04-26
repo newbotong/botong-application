@@ -322,11 +322,14 @@ public class SignDetailServiceImpl extends ServiceImpl<SignDetailMapper, SignDet
         //如果没有选择范围
         if (StringUtils.isEmpty(searchParam.getDeptIds()) && StringUtils.isEmpty(searchParam.getUserIds())) {
             if (StringUtils.isNotEmpty(searchParam.getOrgId())) {
+                log.info("默认根据企业查询");
                 // 查询该企业下面的所有人
                 memList = userRemoteApiService.findAllOrgMember(searchParam.getOrgId());
             }
         } else {
             //选择了发送人范围
+            log.info("根据选择的部门和人员查询成员，部门：{}，成员：{}", searchParam.getDeptIds(), searchParam.getUserIds());
+
             String[] deptIds = StringUtils.split(searchParam.getDeptIds(), SignConstant.SEPARATE_STR);
             String[] userIds = StringUtils.split(searchParam.getUserIds(), SignConstant.SEPARATE_STR);
             memList = userRemoteApiService.findSubLists(deptIds, userIds);
