@@ -6,7 +6,7 @@ import org.springframework.stereotype.Component;
 import javax.annotation.Resource;
 
 /**
- * 公告reids操作类
+ * 审批reids操作类
  *
  * @author tandk
  * @date 2018/4/9 17:58

@@ -153,9 +153,9 @@ public class ApprovalServiceImpl extends BaseServiceImpl<ApprovalMapper, Approva
                     String field = contents.getString("field");
                     Integer num = contents.getInteger("num");
                     attr1.setAttrType(type);
-                    if (StringUtils.isNotBlank(field)){
+                    if (StringUtils.isNotBlank(field)) {
                         attr1.setAttrName(field);
-                    }else {
+                    } else {
                         attr1.setAttrName("mingxi");
                     }
                     contentSet.add(attr1);
@@ -181,9 +181,15 @@ public class ApprovalServiceImpl extends BaseServiceImpl<ApprovalMapper, Approva
                                     detailValue = detailArray.toJSONString();
                                 }
                                 entity.setAttrValue(EmojiFilterUtils.filterEmoji(detailValue));
+                                // 明细中类型是时间区间（开始时间，结束时间）的情况 values中存的是结束时间
                             } else if (detailType == ApproConstants.TIME_INTERVAL_TYPE_5) {
                                 detailValues = detail.getString("values");
-                                entity.setAttrValue(EmojiFilterUtils.filterEmoji(detailValue) + "," + detailValues);
+                                // 类型是时间区间时，detailValue是开始时间，detailValues是结束时间
+                                if (Long.valueOf(detailValue) < Long.valueOf(detailValues)) {
+                                    entity.setAttrValue(detailValue + "," + detailValues);
+                                } else {
+                                    throw new ParameterErrorException("开始时间不能大于结束时间");
+                                }
                             } else {
                                 entity.setAttrValue(EmojiFilterUtils.filterEmoji(detailValue));
                             }
@@ -209,8 +215,14 @@ public class ApprovalServiceImpl extends BaseServiceImpl<ApprovalMapper, Approva
                     attr.setAttrType(type);
                     val = obj.getString("value");
                     values = obj.getString("values");
-                    if (type == ApproConstants.TIME_INTERVAL_TYPE_5 && values != null) {
-                        attr.setAttrValue(EmojiFilterUtils.filterEmoji(val) + "," + values);
+                    // 明细中类型是时间区间（开始时间，结束时间）的情况 values 中存的是结束时间
+                    if (type == ApproConstants.TIME_INTERVAL_TYPE_5 && StringUtils.isNotBlank(values) && StringUtils.isNotBlank(val)) {
+                        // 类型是时间区间时，val 是开始时间，values 是结束时间
+                        if (Long.valueOf(val) < Long.valueOf(values)) {
+                            attr.setAttrValue(val + "," + values);
+                        } else {
+                            throw new ParameterErrorException("开始时间不能大于结束时间");
+                        }
                     } else {
                         attr.setAttrValue(EmojiFilterUtils.filterEmoji(val));
                     }
