@@ -48,6 +48,12 @@ public class LogTemplateCreateConsumer extends AbstractMessageConsumerWithQueueD
     public void onMessageReceive(Message message) {
         if (message.getObj() instanceof  OrgAppMessage){
             OrgAppMessage appMessage = (OrgAppMessage) message.getObj();
+            // 如果机构已经有了日志模板，则不创建新的日志模板。
+            long count = this.logTemplateMapper.totalLogTemplateByOrgId(appMessage.getCompanyId());
+            if(count>0){
+                return ;
+            }
+
             // 查询系统默认模板
             LogTemplateEntity logTemplateEntity = new LogTemplateEntity();
             List<LogTemplateEntity> builtInLogTemplateList = logTemplateEntity.selectList(new EntityWrapper().eq("user_defined",0).eq("deleted",0));
