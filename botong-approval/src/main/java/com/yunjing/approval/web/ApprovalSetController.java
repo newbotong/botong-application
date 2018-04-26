@@ -14,7 +14,7 @@ import org.springframework.web.bind.annotation.RestController;
  * @date 2018/04/04
  */
 @RestController
-@RequestMapping("/approval/set")
+@RequestMapping("/web/approval/set")
 public class ApprovalSetController extends BaseController {
 
 

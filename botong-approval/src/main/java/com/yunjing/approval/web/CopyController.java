@@ -14,7 +14,7 @@ import org.springframework.web.bind.annotation.RestController;
  * @date 2017/12/21
  */
 @RestController
-@RequestMapping("/approval/copy")
+@RequestMapping("/web/approval/copy")
 public class CopyController extends BaseController {
 
     @Autowired
