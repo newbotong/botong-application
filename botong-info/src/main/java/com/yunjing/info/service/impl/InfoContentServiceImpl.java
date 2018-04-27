@@ -87,6 +87,9 @@ public class InfoContentServiceImpl extends ServiceImpl<InfoContentMapper, InfoC
         BeanUtils.copyProperties(infoContent, infoContentDetailDto);
         //调用收藏的OKHttp
         Call<ResponseEntityWrapper<List<Member>>> call1 = orgStructureService.findSubLists("", userId, 0);
+        if (null == call1){
+            throw new BaseRuntimeException(StatusCode.GET_RESPONSE_NULL.getStatusCode(), "该用户查询不到");
+        }
         Response<ResponseEntityWrapper<List<Member>>> execute1 = call1.execute();
         ResponseEntityWrapper<List<Member>> body1 = execute1.body();
         List<Member> memberList;

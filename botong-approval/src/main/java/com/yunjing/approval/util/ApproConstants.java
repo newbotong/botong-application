@@ -8,6 +8,7 @@ public class ApproConstants {
 
     public final static String  BOTONG_ORG_MEMBER = "botong:org:dept:member";
     public final static String  BOTONG_ORG = "botong:org:company";
+    public final static String  BOTONG_APPROVAL = "botong:approval:info";
 
     public final static String DEFAULT_COLOR = "#1E90FF";
     /**
