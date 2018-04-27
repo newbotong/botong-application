@@ -79,14 +79,15 @@ public class ApprovalServiceImpl extends BaseServiceImpl<ApprovalMapper, Approva
 
     @Override
     @Transactional(rollbackFor = Exception.class)
-    public boolean submit(String companyId, String memberId, String modelId, JSONArray jsonData, String sendUserIds, String sendCopyIds) throws Exception {
-        logger.info("companyId: " + companyId + " memberId: " + memberId + " modelId: " + modelId + " jsonData： " + jsonData.toJSONString() + " sendUserIds： " + sendUserIds + " sendCopyIds: " + sendCopyIds);
+    public boolean submit(String companyId, String memberId, String modelId, JSONArray jsonData, String sendUserIds, String sendCopyIds, String deptId) throws Exception {
+        logger.info("companyId: " + companyId + " memberId: " + memberId + " modelId: " + modelId + " jsonData： " + jsonData.toJSONString() + " sendUserIds： " + sendUserIds + " sendCopyIds: " + sendCopyIds + " deptId: " + deptId);
         ModelL modelL = modelService.selectById(modelId);
         Approval approval = new Approval();
         approval.setId(IDUtils.uuid());
         approval.setModelId(modelId);
         approval.setOrgId(companyId);
         approval.setUserId(memberId);
+        approval.setDeptId(deptId);
         approval.setCreateTime(System.currentTimeMillis());
         approval.setState(0);
         approval.setModelVersion(modelL.getModelVersion());
@@ -222,6 +223,12 @@ public class ApprovalServiceImpl extends BaseServiceImpl<ApprovalMapper, Approva
                             attr.setAttrValue(val + "," + values);
                         } else {
                             throw new ParameterErrorException("结束时间不能早于开始时间");
+                        }
+                    } else if (type == ApproConstants.NUMBER_TYPE_2) {
+                        if (val.length() < 9) {
+                            attr.setAttrValue(EmojiFilterUtils.filterEmoji(val));
+                        } else {
+                            throw new ParameterErrorException("请输入小于9位的数字");
                         }
                     } else {
                         attr.setAttrValue(EmojiFilterUtils.filterEmoji(val));

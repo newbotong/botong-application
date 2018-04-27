@@ -163,7 +163,7 @@ public class SignDailyDetailController extends BaseController {
      * @return                      返回明细列表
      */
     @PostMapping("/list")
-    public ResponseEntityWrapper statistics(@RequestBody SignDetailParam signDetailParam){
+    public ResponseEntityWrapper list(@RequestBody SignDetailParam signDetailParam){
         // 基础校验
         BeanFieldValidator.getInstance().validate(signDetailParam);
         List<SignDetailDaily> list = iSignDetailDailyService.queryDetailList(signDetailParam);

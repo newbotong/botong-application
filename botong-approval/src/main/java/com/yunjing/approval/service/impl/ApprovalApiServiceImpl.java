@@ -253,7 +253,15 @@ public class ApprovalApiServiceImpl implements IApprovalApiService {
             clientApprovalDetailVO.setPassportId(approvalById.getPassportId());
             ModelL modelL = modelService.selectOne(Condition.create().where("id={0}", approvalById.getModelId()));
             clientApprovalDetailVO.setModelName(modelL.getModelName() != null ? modelL.getModelName() : null);
-            clientApprovalDetailVO.setDeptName(approvalById.getDeptName());
+            String[] deptIds = approvalById.getDeptId().split(",");
+            String[] deptNames = approvalById.getDeptName().split(",");
+            String deptName = "部门名称";
+            for (int i = 0; i < (deptIds.length < deptNames.length ? deptNames.length : deptIds.length); i++) {
+                if (approvalById.getDeptPartId().equals(deptIds[i])) {
+                    deptName = deptNames[i];
+                }
+            }
+            clientApprovalDetailVO.setDeptName(deptName);
             clientApprovalDetailVO.setPosition(approvalById.getPosition());
             if (StringUtils.isNotBlank(approvalById.getAvatar())) {
                 clientApprovalDetailVO.setAvatar(approvalById.getAvatar());
@@ -482,7 +490,7 @@ public class ApprovalApiServiceImpl implements IApprovalApiService {
     public boolean transferApproval(String companyId, String memberId, String transferredUserId, String approvalId) {
         logger.info("companyId: " + companyId + " memberId: " + memberId + " transferredUserId: " + transferredUserId + "approvalId: " + approvalId);
         Approval approval = approvalService.selectById(approvalId);
-        if (approval != null && approval.getUserId().equals(transferredUserId)){
+        if (approval != null && approval.getUserId().equals(transferredUserId)) {
             throw new ParameterErrorException("不能将审批转交给审批发起人");
         }
         List<ApprovalProcess> processList = approvalProcessService.selectList(Condition.create().where("approval_id={0}", approvalId).orderBy("seq", true));
