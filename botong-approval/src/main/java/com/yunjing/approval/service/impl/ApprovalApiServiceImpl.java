@@ -16,6 +16,7 @@ import com.yunjing.approval.service.*;
 import com.yunjing.approval.util.ApproConstants;
 import com.yunjing.mommon.Enum.DateStyle;
 import com.yunjing.mommon.global.exception.InsertMessageFailureException;
+import com.yunjing.mommon.global.exception.ParameterErrorException;
 import com.yunjing.mommon.global.exception.UpdateMessageFailureException;
 import com.yunjing.mommon.utils.DateUtil;
 import com.yunjing.mommon.utils.IDUtils;
@@ -480,6 +481,10 @@ public class ApprovalApiServiceImpl implements IApprovalApiService {
     @Transactional(rollbackFor = Exception.class)
     public boolean transferApproval(String companyId, String memberId, String transferredUserId, String approvalId) {
         logger.info("companyId: " + companyId + " memberId: " + memberId + " transferredUserId: " + transferredUserId + "approvalId: " + approvalId);
+        Approval approval = approvalService.selectById(approvalId);
+        if (approval != null && approval.getUserId().equals(transferredUserId)){
+            throw new ParameterErrorException("不能将审批转交给审批发起人");
+        }
         List<ApprovalProcess> processList = approvalProcessService.selectList(Condition.create().where("approval_id={0}", approvalId).orderBy("seq", true));
         int num = 0;
         List<ApprovalProcess> list = new ArrayList<>();
