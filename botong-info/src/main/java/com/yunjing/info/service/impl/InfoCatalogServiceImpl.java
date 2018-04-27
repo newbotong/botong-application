@@ -199,7 +199,7 @@ public class InfoCatalogServiceImpl extends ServiceImpl<InfoCatalogMapper, InfoC
                 }
             }
         } else {
-            throw new BaseRuntimeException(StatusCode.ADMIN_USER_UPDATE_FAILED.getStatusCode(),"请先初始化公共类目缓存");
+            throw new BaseRuntimeException(StatusCode.ADMIN_USER_UPDATE_FAILED.getStatusCode(), "请先初始化公共类目缓存");
         }
     }
 
@@ -247,10 +247,10 @@ public class InfoCatalogServiceImpl extends ServiceImpl<InfoCatalogMapper, InfoC
     /**
      * 修改分类
      *
-     * @param orgId       企业id
-     * @param parentId    父id
-     * @param id          二级id
-     * @param name        名称
+     * @param orgId    企业id
+     * @param parentId 父id
+     * @param id       二级id
+     * @param name     名称
      * @return
      * @throws BaseException
      */
@@ -326,6 +326,34 @@ public class InfoCatalogServiceImpl extends ServiceImpl<InfoCatalogMapper, InfoC
         infoContent.setIsDelete(InfoConstant.LOGIC_DELETE_DELETE);
         infoContentEntityWrapper.where("org_id={0}", orgId).and("id={0}", id);
         int flag = infoContentMapper.update(infoContent, infoContentEntityWrapper);
+        InfoContent parentInfoDetailDto = new InfoContent().selectOne(new EntityWrapper<InfoContent>().eq("id", id).eq("org_id",orgId));
+        InfoCatalog infoCatalog = new InfoCatalog().selectOne(new EntityWrapper<InfoCatalog>().eq("org_id",orgId).eq("id", parentInfoDetailDto.getCatalogId()).eq("is_delete", InfoConstant.LOGIC_DELETE_NORMAL));
+        String oneCatalogId;
+        if (infoCatalog.getId().equals(infoCatalog.getParentId())) {
+            oneCatalogId = infoCatalog.getParentId();
+
+        } else {
+            InfoCatalog infoCatalog1 = new InfoCatalog().selectOne(new EntityWrapper<InfoCatalog>().eq("org_id",orgId).eq("id", infoCatalog.getParentId()).eq("is_delete", InfoConstant.LOGIC_DELETE_NORMAL));
+            oneCatalogId = infoCatalog1.getId();
+        }
+        //删除最新一级目录下数据
+        redisTemplate.opsForHash().delete(InfoConstant.REDIS_HOME + ":" + orgId, oneCatalogId);
+        //根据一级目录下最新的一条数据
+        List<InfoCatalog> infoCatalogList = new InfoCatalog().selectList(new EntityWrapper<InfoCatalog>().eq("org_id",orgId).eq("parent_id", oneCatalogId).eq("is_delete", InfoConstant.LOGIC_DELETE_NORMAL));
+        if (CollectionUtils.isNotEmpty(infoCatalogList)) {
+            String[] ids = infoCatalogList.stream().map(InfoCatalog::getId).toArray(String[]::new);
+            List<InfoContent> infoContentList = new InfoContent().selectList(new EntityWrapper<InfoContent>().eq("org_id",orgId).in("catalog_id", ids).eq("is_delete", InfoConstant.LOGIC_DELETE_NORMAL).orderBy("sort", false));
+            if (CollectionUtils.isNotEmpty(infoContentList)) {
+                InfoContent infoContent1 = infoContentList.get(0);
+                ParentInfoDetailDto parentInfoDetailDto1 = new ParentInfoDetailDto();
+                BeanUtils.copyProperties(infoContent1, parentInfoDetailDto1);
+                InfoCatalog infoCatalog1 = new InfoCatalog().selectOne(new EntityWrapper<InfoCatalog>().eq("org_id",orgId).eq("is_delete", InfoConstant.LOGIC_DELETE_NORMAL).eq("id", oneCatalogId));
+                parentInfoDetailDto1.setName(infoCatalog1.getName());
+                parentInfoDetailDto1.setCatalogSort(infoCatalog1.getSort());
+                parentInfoDetailDto1.setCatalogId(oneCatalogId);
+                redisTemplate.opsForHash().put(InfoConstant.REDIS_HOME + ":" + orgId, oneCatalogId, JSON.toJSONString(parentInfoDetailDto1));
+            }
+        }
         return flag > 0 ? InfoConstant.StateCode.CODE_200 : InfoConstant.StateCode.CODE_602;
     }
 
@@ -375,7 +403,6 @@ public class InfoCatalogServiceImpl extends ServiceImpl<InfoCatalogMapper, InfoC
     }
 
 
-
     /**
      * 更新资讯分类缓存操作
      *
@@ -389,14 +416,14 @@ public class InfoCatalogServiceImpl extends ServiceImpl<InfoCatalogMapper, InfoC
         infoCatalog.setOrgId(orgId);
         infoCatalog.setParentId(parentId);
         infoCatalog.setId(id);
-        infoCatalog =  infoCatalogMapper.selectOne(infoCatalog);
+        infoCatalog = infoCatalogMapper.selectOne(infoCatalog);
         if (!ValidationUtil.isEmpty(infoCatalog)) {
             //先删除   botong:info:org:orgid:yijikey->object
             if (redisTemplate.hasKey(InfoConstant.BOTONG_INFO_CATALOG_LIST + orgId + InfoConstant.BOTONG_INFO_FIX + parentId)) {
                 redisTemplate.opsForHash().delete(InfoConstant.BOTONG_INFO_CATALOG_LIST + orgId + InfoConstant.BOTONG_INFO_FIX + parentId, infoCatalog.getId());
                 // 在更新
                 redisTemplate.opsForHash().put(InfoConstant.BOTONG_INFO_CATALOG_LIST + orgId + InfoConstant.BOTONG_INFO_FIX + parentId, infoCatalog.getId(), JSON.toJSONString(infoCatalog));
-            }else {
+            } else {
                 //不存在放入缓存
                 redisTemplate.opsForHash().put(InfoConstant.BOTONG_INFO_CATALOG_LIST + orgId + InfoConstant.BOTONG_INFO_FIX + parentId, infoCatalog.getId(), JSON.toJSONString(infoCatalog));
             }
@@ -461,7 +488,7 @@ public class InfoCatalogServiceImpl extends ServiceImpl<InfoCatalogMapper, InfoC
         InfoContent infoContent2 = new InfoContent();
         infoContent2.setOrgId(orgId);
         infoContent2.setId(id2);
-        infoContent2 =  infoContentMapper.selectOne(infoContent2);
+        infoContent2 = infoContentMapper.selectOne(infoContent2);
         int flag = 0;
         if (!ValidationUtil.isEmpty(infoContent1) && !ValidationUtil.isEmpty(infoContent2)) {
             int sort1 = infoContent1.getSort();
@@ -493,16 +520,16 @@ public class InfoCatalogServiceImpl extends ServiceImpl<InfoCatalogMapper, InfoC
      * @throws BaseException
      */
     @Override
-    public PageWrapper<InfoContentDto> selectParentPage(String orgId, String parentId, String catalogId,String title, Integer pageNo, Integer pageSize) throws BaseException {
+    public PageWrapper<InfoContentDto> selectParentPage(String orgId, String parentId, String catalogId, String title, Integer pageNo, Integer pageSize) throws BaseException {
 
-        Integer count=0;
+        Integer count = 0;
         //一级查询内容
-        if(!ValidationUtil.isEmpty(parentId)){
+        if (!ValidationUtil.isEmpty(parentId)) {
             //一级查询资讯总数量
             count = infoContentMapper.selectParentPage(orgId, parentId, null, null, null, null).size();
             //一级内容下的内容
-            catalogId =null;
-        }else{
+            catalogId = null;
+        } else {
             //统计二级资讯内容总数
             Wrapper<InfoContent> wrapper = new EntityWrapper<>();
             wrapper.eq("org_id", orgId).and().eq("catalog_id", catalogId).and().eq("is_delete", InfoConstant.LOGIC_DELETE_NORMAL);
@@ -532,7 +559,7 @@ public class InfoCatalogServiceImpl extends ServiceImpl<InfoCatalogMapper, InfoC
      * @return
      */
     @Transactional(rollbackFor = Exception.class)
-    public void initCompany(String orgId){
+    public void initCompany(String orgId) {
         Map<Object, Object> map = redisTemplate.opsForHash().entries(InfoConstant.REDIS_CATALOG_ONE);
         List<InfoCatalog> infoCatalogList = new ArrayList<>();
         //取一级目录的id和对应的属性
@@ -551,7 +578,7 @@ public class InfoCatalogServiceImpl extends ServiceImpl<InfoCatalogMapper, InfoC
             infoCatalog.setUpdateTime(System.currentTimeMillis());
             infoCatalogList.add(infoCatalog);
             List<String> list = redisTemplate.opsForList().range(InfoConstant.REDIS_CATALOG_TWO + ":" + entry.getKey(), 0, -1);
-            redisTemplate.opsForHash().put(InfoConstant.COMPANY_INFO_REDIS+orgId,infoCatalog.getId(),JSONObject.toJSONString(infoCatalog));
+            redisTemplate.opsForHash().put(InfoConstant.COMPANY_INFO_REDIS + orgId, infoCatalog.getId(), JSONObject.toJSONString(infoCatalog));
             if (CollectionUtils.isEmpty(list)) {
                 continue;
             }
@@ -569,7 +596,7 @@ public class InfoCatalogServiceImpl extends ServiceImpl<InfoCatalogMapper, InfoC
                     info.setParentId(infoCatalog.getId());
                     info.setUpdateTime(System.currentTimeMillis());
                     info.setCreateTime(System.currentTimeMillis());
-                    redisTemplate.opsForHash().put(InfoConstant.BOTONG_INFO_CATALOG_LIST+orgId+InfoConstant.BOTONG_INFO_FIX+infoCatalog.getId(),info.getId(),JSONObject.toJSONString(info));
+                    redisTemplate.opsForHash().put(InfoConstant.BOTONG_INFO_CATALOG_LIST + orgId + InfoConstant.BOTONG_INFO_FIX + infoCatalog.getId(), info.getId(), JSONObject.toJSONString(info));
                     infoCatalogList.add(info);
                 }
             }
@@ -582,7 +609,7 @@ public class InfoCatalogServiceImpl extends ServiceImpl<InfoCatalogMapper, InfoC
      * 资讯1.0数据转换
      */
     @Override
-    public void intoV1DataTransfer(){
+    public void intoV1DataTransfer() {
         //资讯分类V1.0列表
         Wrapper<ContentColumn> wrapper1 = new EntityWrapper<>();
         List<ContentColumn> contentColumnList = contentColumnMapper.selectList(wrapper1);
@@ -590,26 +617,26 @@ public class InfoCatalogServiceImpl extends ServiceImpl<InfoCatalogMapper, InfoC
         List<InfoCatalog> infoCatalogList = new ArrayList<>();
 
 
-        if(!ValidationUtil.isEmpty(contentColumnList)){
-            for (ContentColumn contentColumn:contentColumnList){
+        if (!ValidationUtil.isEmpty(contentColumnList)) {
+            for (ContentColumn contentColumn : contentColumnList) {
                 InfoCatalog infoCatalog = new InfoCatalog();
                 infoCatalog.setId(contentColumn.getColumnId());
                 infoCatalog.setName(contentColumn.getColumnName());
                 infoCatalog.setOrgId(contentColumn.getOrgId());
-                if(ValidationUtil.isEmpty(contentColumn.getParentId())){
+                if (ValidationUtil.isEmpty(contentColumn.getParentId())) {
                     infoCatalog.setParentId(contentColumn.getColumnId());
                     //1级
                     infoCatalog.setLevel(1);
-                }else{
+                } else {
                     infoCatalog.setParentId(contentColumn.getParentId());
                     //2级
                     infoCatalog.setLevel(2);
                 }
                 infoCatalog.setSort(contentColumn.getColumnType());
-                infoCatalog.setWhetherShow(contentColumn.getColumnShowType()==1?1:0);
+                infoCatalog.setWhetherShow(contentColumn.getColumnShowType() == 1 ? 1 : 0);
                 infoCatalog.setIsDelete(0);
 
-                if (ValidationUtil.isEmpty(contentColumn.getCreateTime())){
+                if (ValidationUtil.isEmpty(contentColumn.getCreateTime())) {
                     infoCatalog.setCreateTime(contentColumn.getCreateTime().getTime());
                     infoCatalog.setUpdateTime(contentColumn.getCreateTime().getTime());
                 }
@@ -621,10 +648,10 @@ public class InfoCatalogServiceImpl extends ServiceImpl<InfoCatalogMapper, InfoC
                 //2.0资讯内容列表
                 List<InfoContent> infoContentList = new ArrayList<>();
                 Wrapper<Content> wrapper = new EntityWrapper<>();
-                wrapper.eq("column_id",contentColumn.getColumnId()).orderBy("create_time",true);
+                wrapper.eq("column_id", contentColumn.getColumnId()).orderBy("create_time", true);
                 List<Content> contentList = contentMapper.selectList(wrapper);
-                if(!ValidationUtil.isEmpty(contentList)){
-                    for (int i=0;i<contentList.size();i++){
+                if (!ValidationUtil.isEmpty(contentList)) {
+                    for (int i = 0; i < contentList.size(); i++) {
                         InfoContent infoContent = new InfoContent();
                         infoContent.setId(contentList.get(i).getContentId());
                         infoContent.setCatalogId(contentList.get(i).getColumnId());
@@ -635,12 +662,12 @@ public class InfoCatalogServiceImpl extends ServiceImpl<InfoCatalogMapper, InfoC
                         infoContent.setContent(contentList.get(i).getContentDetail());
                         infoContent.setReadNumber(0);
                         infoContent.setWhetherShow(contentList.get(i).getIsView());
-                        infoContent.setSort(i+1);
+                        infoContent.setSort(i + 1);
                         infoContent.setIsDelete(contentList.get(i).getStatus());
-                        if (!ValidationUtil.isEmpty(contentList.get(i).getCreateTime())){
+                        if (!ValidationUtil.isEmpty(contentList.get(i).getCreateTime())) {
                             infoContent.setCreateTime(contentList.get(i).getCreateTime().getTime());
                             infoContent.setUpdateTime(contentList.get(i).getLastMdfTime().getTime());
-                        }else{
+                        } else {
                             infoContent.setCreateTime(System.currentTimeMillis());
                             infoContent.setUpdateTime(System.currentTimeMillis());
                         }
@@ -654,36 +681,28 @@ public class InfoCatalogServiceImpl extends ServiceImpl<InfoCatalogMapper, InfoC
             //批量入库资讯分类
             boolean flag = insertBatch(infoCatalogList);
             //成功后 将分类录入到缓存
-            if(!flag){
+            if (!flag) {
                 return;
             }
-            for(InfoCatalog infoCatalog:infoCatalogList){
-                if(ValidationUtil.equals(infoCatalog.getId(),infoCatalog.getParentId())){
-                //初始化1级
-                    redisTemplate.opsForHash().put(InfoConstant.COMPANY_INFO_REDIS+infoCatalog.getOrgId(),infoCatalog.getId(),JSONObject.toJSONString(infoCatalog));
-                }else{
+            for (InfoCatalog infoCatalog : infoCatalogList) {
+                if (ValidationUtil.equals(infoCatalog.getId(), infoCatalog.getParentId())) {
+                    //初始化1级
+                    redisTemplate.opsForHash().put(InfoConstant.COMPANY_INFO_REDIS + infoCatalog.getOrgId(), infoCatalog.getId(), JSONObject.toJSONString(infoCatalog));
+                } else {
                     if (redisTemplate.hasKey(InfoConstant.BOTONG_INFO_CATALOG_LIST + infoCatalog.getOrgId() + InfoConstant.BOTONG_INFO_FIX + infoCatalog.getParentId())) {
-                        redisTemplate.opsForHash().delete(InfoConstant.BOTONG_INFO_CATALOG_LIST + infoCatalog.getOrgId() + InfoConstant.BOTONG_INFO_FIX + infoCatalog.getParentId(),infoCatalog.getId());
+                        redisTemplate.opsForHash().delete(InfoConstant.BOTONG_INFO_CATALOG_LIST + infoCatalog.getOrgId() + InfoConstant.BOTONG_INFO_FIX + infoCatalog.getParentId(), infoCatalog.getId());
                         // 在更新
-                        redisTemplate.opsForHash().put(InfoConstant.BOTONG_INFO_CATALOG_LIST + infoCatalog.getOrgId() + InfoConstant.BOTONG_INFO_FIX +infoCatalog.getParentId(), infoCatalog.getId(), JSON.toJSONString(infoCatalog));
-                    }else {
+                        redisTemplate.opsForHash().put(InfoConstant.BOTONG_INFO_CATALOG_LIST + infoCatalog.getOrgId() + InfoConstant.BOTONG_INFO_FIX + infoCatalog.getParentId(), infoCatalog.getId(), JSON.toJSONString(infoCatalog));
+                    } else {
                         //不存在放入缓存
                         //2级初始化
-                        redisTemplate.opsForHash().put(InfoConstant.BOTONG_INFO_CATALOG_LIST + infoCatalog.getOrgId() + InfoConstant.BOTONG_INFO_FIX +infoCatalog.getParentId(), infoCatalog.getId(), JSON.toJSONString(infoCatalog));
+                        redisTemplate.opsForHash().put(InfoConstant.BOTONG_INFO_CATALOG_LIST + infoCatalog.getOrgId() + InfoConstant.BOTONG_INFO_FIX + infoCatalog.getParentId(), infoCatalog.getId(), JSON.toJSONString(infoCatalog));
                     }
 
                 }
             }
 
         }
-
-
-
-
-
-
-
-
 
 
     }
