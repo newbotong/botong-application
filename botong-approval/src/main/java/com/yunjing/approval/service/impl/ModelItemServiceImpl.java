@@ -85,7 +85,10 @@ public class ModelItemServiceImpl extends BaseServiceImpl<ModelItemMapper, Model
     public ClientModelItemVO getModelItem(String modelId, String memberId) throws Exception {
         logger.info("modelId: " + modelId + " memberId: " + memberId);
         ModelL modelL = modelService.selectById(modelId);
-        List<ModelItem> itemList = this.selectList(Condition.create().where("model_id={0}", modelId).and("item_version={0}", modelL.getModelVersion()).orderBy("priority"));
+        List<ModelItem> itemList = new ArrayList<>();
+        if (modelL != null) {
+            itemList = this.selectList(Condition.create().where("model_id={0}", modelId).and("item_version={0}", modelL.getModelVersion()).orderBy("priority"));
+        }
         ModelVO modelVO = new ModelVO();
         modelVO.setModelId(modelId);
         modelVO.setModelName(modelL.getModelName());
