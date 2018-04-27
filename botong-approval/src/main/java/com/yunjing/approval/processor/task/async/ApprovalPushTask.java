@@ -205,11 +205,7 @@ public class ApprovalPushTask extends BaseTask {
                                 passIds.removeAll(passIds);
                                 String[] pidArray = passIdList.toArray(new String[passIdList.size()]);
                                 // 审批推送入参
-                                PushParam pushParam2 = new PushParam();
-                                pushParam2.setMsg(message);
-                                pushParam2.setAlias(pidArray);
-                                pushParam2.setRegistrationId(passportId);
-                                pushParam2.setNotificationTitle(message);
+                                PushParam pushParam2 = setPushParam(passportId, pidArray, approval);
                                 // 推送审批
                                 appCenterService.push(pushParam2);
                             }

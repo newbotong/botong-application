@@ -30,4 +30,10 @@ public interface LogTemplateMapper extends BaseMapper<LogTemplateEntity>{
      * @return
      */
     List<LogTemplateItemVo> listLogTemplateByOrgId(@Param("orgId") String orgId, @Param("offset") int offset, @Param("pageSize") int pageSize);
+
+    /**
+     * 批量创建LogTemplate实体
+     * @param logTemplateList
+     */
+    void batchCreateLogTemplateEntity(@Param("logTemplateList") List<LogTemplateEntity> logTemplateList);
 }

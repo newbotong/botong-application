@@ -4,7 +4,6 @@ import com.baomidou.mybatisplus.mapper.Condition;
 import com.baomidou.mybatisplus.toolkit.CollectionUtils;
 import com.baomidou.mybatisplus.toolkit.MapUtils;
 import com.common.mybatis.page.Page;
-import com.yunjing.approval.config.RedisApproval;
 import com.yunjing.approval.dao.mapper.*;
 import com.yunjing.approval.model.dto.ApprovalContentDTO;
 import com.yunjing.approval.model.dto.ApprovalDetailDTO;
@@ -17,6 +16,7 @@ import com.yunjing.approval.service.*;
 import com.yunjing.approval.util.ApproConstants;
 import com.yunjing.mommon.Enum.DateStyle;
 import com.yunjing.mommon.global.exception.InsertMessageFailureException;
+import com.yunjing.mommon.global.exception.ParameterErrorException;
 import com.yunjing.mommon.global.exception.UpdateMessageFailureException;
 import com.yunjing.mommon.utils.DateUtil;
 import com.yunjing.mommon.utils.IDUtils;
@@ -42,8 +42,6 @@ public class ApprovalApiServiceImpl implements IApprovalApiService {
     @Autowired
     private IApprovalUserService approvalUserService;
     @Autowired
-    private ApprovalUserMapper approvalUserMapper;
-    @Autowired
     private ModelMapper modelMapper;
     @Autowired
     private ApprovalProcessMapper approvalProcessMapper;
@@ -64,8 +62,6 @@ public class ApprovalApiServiceImpl implements IApprovalApiService {
     @Autowired
     private AppCenterService appCenterService;
 
-    @Autowired
-    private RedisApproval redisApproval;
     private final Log logger = LogFactory.getLog(ApprovalApiServiceImpl.class);
 
     @Override
@@ -83,6 +79,11 @@ public class ApprovalApiServiceImpl implements IApprovalApiService {
     @Override
     public Page<ClientApprovalVO> getWaited(Page page, String companyId, String memberId, FilterParam filterParam) {
         logger.info("companyId: " + companyId + " memberId: " + memberId + " filterParam: " + filterParam.toString());
+        // 全部
+        int all = 9;
+        if (filterParam.getState() != null && filterParam.getState() == all) {
+            filterParam.setState(null);
+        }
         int current = page.getCurrentPage();
         int size = page.getPageSize();
         int index = (current - 1) * size;
@@ -124,6 +125,11 @@ public class ApprovalApiServiceImpl implements IApprovalApiService {
     @Override
     public Page<ClientApprovalVO> getCompleted(Page page, String companyId, String memberId, FilterParam filterParam) {
         logger.info("companyId: " + companyId + " memberId: " + memberId + " filterParam: " + filterParam.toString());
+        // 全部
+        int all = 9;
+        if (filterParam.getState() != null && filterParam.getState() == all) {
+            filterParam.setState(null);
+        }
         int current = page.getCurrentPage();
         int size = page.getPageSize();
         int index = (current - 1) * size;
@@ -147,6 +153,11 @@ public class ApprovalApiServiceImpl implements IApprovalApiService {
 
     @Override
     public Page<ClientApprovalVO> getLaunched(Page page, String companyId, String memberId, FilterParam filterParam) {
+        // 全部
+        int all = 9;
+        if (filterParam.getState() != null && filterParam.getState() == all) {
+            filterParam.setState(null);
+        }
         if (filterParam.getTime() != null) {
             String date = DateUtil.convert(filterParam.getTime()).replace("00:00:00", "08:00:00");
             filterParam.setTime(DateUtil.StringToDate(date, DateStyle.YYYY_MM_DD_HH_MM_SS).getTime());
@@ -203,6 +214,11 @@ public class ApprovalApiServiceImpl implements IApprovalApiService {
     @Override
     public Page<ClientApprovalVO> getCopied(Page page, String companyId, String memberId, FilterParam filterParam) {
         logger.info("companyId: " + companyId + " memberId: " + memberId + " filterParam: " + filterParam.toString());
+        // 全部
+        int all = 9;
+        if (filterParam.getState() != null && filterParam.getState() == all) {
+            filterParam.setState(null);
+        }
         if (filterParam.getTime() != null) {
             String date = DateUtil.convert(filterParam.getTime()).replace("00:00:00", "08:00:00");
             filterParam.setTime(DateUtil.StringToDate(date, DateStyle.YYYY_MM_DD_HH_MM_SS).getTime());
@@ -266,7 +282,6 @@ public class ApprovalApiServiceImpl implements IApprovalApiService {
             approvalUserVO.setColor(approvalUserVO.getColor() != null ? approvalUserVO.getColor() : ApproConstants.DEFAULT_COLOR);
             if (StringUtils.isBlank(approvalUserVO.getAvatar())) {
                 approvalUserVO.setColor(approvalUserVO.getColor() != null ? approvalUserVO.getColor() : ApproConstants.DEFAULT_COLOR);
-                approvalUserVO.setAvatarName(approvalUserVO.getName().length() <= 2 ? approvalUserVO.getName() : approvalUserVO.getName().substring(1, 3));
             }
             if (approvalUserVO.getProcessState() != null && approvalUserVO.getProcessState() == 0) {
                 approvalUserVO.setApprovalTime(null);
@@ -330,6 +345,11 @@ public class ApprovalApiServiceImpl implements IApprovalApiService {
         } else {
             clientApprovalDetailVO.setApprovalUserList(approvalUserList);
         }
+        // 当有审批人做拒绝操作后审批详情中移除正在审批的审批人集合
+        Set<ApprovalUserVO> collect1 = approvalUserList.stream().filter(approvalUserVO -> approvalUserVO.getProcessState() == 2).collect(Collectors.toSet());
+        if (CollectionUtils.isNotEmpty(collect1)) {
+            approvalUserList.removeIf(approvalUserVO -> approvalUserVO.getProcessState() == 0);
+        }
         // 获取抄送人信息
         List<CopyUserVO> copyUserList = copysMapper.getCopyUserList(approvalId);
         copyUserList.forEach(copyUserVO -> {
@@ -347,8 +367,8 @@ public class ApprovalApiServiceImpl implements IApprovalApiService {
     public boolean solveApproval(String companyId, String memberId, String approvalId, Integer state) {
         logger.info("companyId: " + companyId + " memberId: " + memberId + " approvalId: " + approvalId + "state: " + state);
         boolean flag = false;
-        List<ApprovalProcess> processList = approvalProcessService.selectList(Condition.create().where("approval_id={0}", approvalId));
-        if (processList != null && !processList.isEmpty()) {
+        List<ApprovalProcess> processList = approvalProcessService.selectList(Condition.create().where("approval_id={0}", approvalId).orderBy("seq", true));
+        if (processList != null && CollectionUtils.isNotEmpty(processList)) {
             for (ApprovalProcess process : processList) {
                 // 当审批流程中的审批未处理时（0：未处理）
                 if (process.getProcessState() == 0) {
@@ -461,6 +481,10 @@ public class ApprovalApiServiceImpl implements IApprovalApiService {
     @Transactional(rollbackFor = Exception.class)
     public boolean transferApproval(String companyId, String memberId, String transferredUserId, String approvalId) {
         logger.info("companyId: " + companyId + " memberId: " + memberId + " transferredUserId: " + transferredUserId + "approvalId: " + approvalId);
+        Approval approval = approvalService.selectById(approvalId);
+        if (approval != null && approval.getUserId().equals(transferredUserId)){
+            throw new ParameterErrorException("不能将审批转交给审批发起人");
+        }
         List<ApprovalProcess> processList = approvalProcessService.selectList(Condition.create().where("approval_id={0}", approvalId).orderBy("seq", true));
         int num = 0;
         List<ApprovalProcess> list = new ArrayList<>();
@@ -565,6 +589,18 @@ public class ApprovalApiServiceImpl implements IApprovalApiService {
                     for (Map.Entry<Integer, List<ApproveAttrVO>> entry : map.entrySet()) {
                         details.add(new ApproveRowVO(entry.getKey(), entry.getValue()));
                     }
+                    Collections.sort(details, new Comparator<ApproveRowVO>() {
+                        @Override
+                        public int compare(ApproveRowVO o1, ApproveRowVO o2) {
+                            if (o1.getNum() > o2.getNum()) {
+                                return 1;
+                            } else if (o1.getNum() < o2.getNum()) {
+                                return -1;
+                            } else {
+                                return 0;
+                            }
+                        }
+                    });
                     attrVo.setContents(details);
                 }
                 attrs.add(attrVo);
