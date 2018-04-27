@@ -4,7 +4,6 @@ import com.baomidou.mybatisplus.mapper.Condition;
 import com.baomidou.mybatisplus.toolkit.CollectionUtils;
 import com.baomidou.mybatisplus.toolkit.MapUtils;
 import com.common.mybatis.page.Page;
-import com.yunjing.approval.config.RedisApproval;
 import com.yunjing.approval.dao.mapper.*;
 import com.yunjing.approval.model.dto.ApprovalContentDTO;
 import com.yunjing.approval.model.dto.ApprovalDetailDTO;
@@ -17,6 +16,7 @@ import com.yunjing.approval.service.*;
 import com.yunjing.approval.util.ApproConstants;
 import com.yunjing.mommon.Enum.DateStyle;
 import com.yunjing.mommon.global.exception.InsertMessageFailureException;
+import com.yunjing.mommon.global.exception.ParameterErrorException;
 import com.yunjing.mommon.global.exception.UpdateMessageFailureException;
 import com.yunjing.mommon.utils.DateUtil;
 import com.yunjing.mommon.utils.IDUtils;
@@ -42,8 +42,6 @@ public class ApprovalApiServiceImpl implements IApprovalApiService {
     @Autowired
     private IApprovalUserService approvalUserService;
     @Autowired
-    private ApprovalUserMapper approvalUserMapper;
-    @Autowired
     private ModelMapper modelMapper;
     @Autowired
     private ApprovalProcessMapper approvalProcessMapper;
@@ -64,8 +62,6 @@ public class ApprovalApiServiceImpl implements IApprovalApiService {
     @Autowired
     private AppCenterService appCenterService;
 
-    @Autowired
-    private RedisApproval redisApproval;
     private final Log logger = LogFactory.getLog(ApprovalApiServiceImpl.class);
 
     @Override
@@ -83,6 +79,11 @@ public class ApprovalApiServiceImpl implements IApprovalApiService {
     @Override
     public Page<ClientApprovalVO> getWaited(Page page, String companyId, String memberId, FilterParam filterParam) {
         logger.info("companyId: " + companyId + " memberId: " + memberId + " filterParam: " + filterParam.toString());
+        // 全部
+        int all = 9;
+        if (filterParam.getState() != null && filterParam.getState() == all) {
+            filterParam.setState(null);
+        }
         int current = page.getCurrentPage();
         int size = page.getPageSize();
         int index = (current - 1) * size;
@@ -124,6 +125,11 @@ public class ApprovalApiServiceImpl implements IApprovalApiService {
     @Override
     public Page<ClientApprovalVO> getCompleted(Page page, String companyId, String memberId, FilterParam filterParam) {
         logger.info("companyId: " + companyId + " memberId: " + memberId + " filterParam: " + filterParam.toString());
+        // 全部
+        int all = 9;
+        if (filterParam.getState() != null && filterParam.getState() == all) {
+            filterParam.setState(null);
+        }
         int current = page.getCurrentPage();
         int size = page.getPageSize();
         int index = (current - 1) * size;
@@ -147,6 +153,11 @@ public class ApprovalApiServiceImpl implements IApprovalApiService {
 
     @Override
     public Page<ClientApprovalVO> getLaunched(Page page, String companyId, String memberId, FilterParam filterParam) {
+        // 全部
+        int all = 9;
+        if (filterParam.getState() != null && filterParam.getState() == all) {
+            filterParam.setState(null);
+        }
         if (filterParam.getTime() != null) {
             String date = DateUtil.convert(filterParam.getTime()).replace("00:00:00", "08:00:00");
             filterParam.setTime(DateUtil.StringToDate(date, DateStyle.YYYY_MM_DD_HH_MM_SS).getTime());
@@ -203,6 +214,11 @@ public class ApprovalApiServiceImpl implements IApprovalApiService {
     @Override
     public Page<ClientApprovalVO> getCopied(Page page, String companyId, String memberId, FilterParam filterParam) {
         logger.info("companyId: " + companyId + " memberId: " + memberId + " filterParam: " + filterParam.toString());
+        // 全部
+        int all = 9;
+        if (filterParam.getState() != null && filterParam.getState() == all) {
+            filterParam.setState(null);
+        }
         if (filterParam.getTime() != null) {
             String date = DateUtil.convert(filterParam.getTime()).replace("00:00:00", "08:00:00");
             filterParam.setTime(DateUtil.StringToDate(date, DateStyle.YYYY_MM_DD_HH_MM_SS).getTime());
@@ -237,7 +253,15 @@ public class ApprovalApiServiceImpl implements IApprovalApiService {
             clientApprovalDetailVO.setPassportId(approvalById.getPassportId());
             ModelL modelL = modelService.selectOne(Condition.create().where("id={0}", approvalById.getModelId()));
             clientApprovalDetailVO.setModelName(modelL.getModelName() != null ? modelL.getModelName() : null);
-            clientApprovalDetailVO.setDeptName(approvalById.getDeptName());
+            String[] deptIds = approvalById.getDeptId().split(",");
+            String[] deptNames = approvalById.getDeptName().split(",");
+            String deptName = "部门名称";
+            for (int i = 0; i < (deptIds.length < deptNames.length ? deptNames.length : deptIds.length); i++) {
+                if (approvalById.getDeptPartId().equals(deptIds[i])) {
+                    deptName = deptNames[i];
+                }
+            }
+            clientApprovalDetailVO.setDeptName(deptName);
             clientApprovalDetailVO.setPosition(approvalById.getPosition());
             if (StringUtils.isNotBlank(approvalById.getAvatar())) {
                 clientApprovalDetailVO.setAvatar(approvalById.getAvatar());
@@ -266,7 +290,6 @@ public class ApprovalApiServiceImpl implements IApprovalApiService {
             approvalUserVO.setColor(approvalUserVO.getColor() != null ? approvalUserVO.getColor() : ApproConstants.DEFAULT_COLOR);
             if (StringUtils.isBlank(approvalUserVO.getAvatar())) {
                 approvalUserVO.setColor(approvalUserVO.getColor() != null ? approvalUserVO.getColor() : ApproConstants.DEFAULT_COLOR);
-                approvalUserVO.setAvatarName(approvalUserVO.getName().length() <= 2 ? approvalUserVO.getName() : approvalUserVO.getName().substring(1, 3));
             }
             if (approvalUserVO.getProcessState() != null && approvalUserVO.getProcessState() == 0) {
                 approvalUserVO.setApprovalTime(null);
@@ -466,6 +489,10 @@ public class ApprovalApiServiceImpl implements IApprovalApiService {
     @Transactional(rollbackFor = Exception.class)
     public boolean transferApproval(String companyId, String memberId, String transferredUserId, String approvalId) {
         logger.info("companyId: " + companyId + " memberId: " + memberId + " transferredUserId: " + transferredUserId + "approvalId: " + approvalId);
+        Approval approval = approvalService.selectById(approvalId);
+        if (approval != null && approval.getUserId().equals(transferredUserId)) {
+            throw new ParameterErrorException("不能将审批转交给审批发起人");
+        }
         List<ApprovalProcess> processList = approvalProcessService.selectList(Condition.create().where("approval_id={0}", approvalId).orderBy("seq", true));
         int num = 0;
         List<ApprovalProcess> list = new ArrayList<>();

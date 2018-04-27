@@ -258,6 +258,10 @@ public class LogSearchServiceImpl implements ILogSearchService {
         List<Member> memList = new ArrayList<>();
         //如果没有选择范围
         if (searchParam.getDeptIds() == null && searchParam.getUserIds() == null) {
+            if (StringUtils.isEmpty(searchParam.getMemberId())) {
+                log.info("所选范围和memberId都为空，不查询api，直接返回");
+                return memList;
+            }
             // 校验是否是管理员
             boolean manager1 = appCenterService.isManager(searchParam.getAppId(), searchParam.getMemberId());
             if (manager1) {
@@ -269,11 +273,13 @@ public class LogSearchServiceImpl implements ILogSearchService {
             } else {
                 Member user = memberRedisOperator.getMember(searchParam.getMemberId());
                 UserInfo userInfo = memberRedisOperator.getUserInfo(user.getPassportId());
-                user.setProfile(userInfo.getProfile());
-                user.setColor(userInfo.getColor());
-                user.setName(userInfo.getNick());
-                // 不是管理员查自己的
-                memList.add(user);
+                if (userInfo != null) {
+                    user.setProfile(userInfo.getProfile());
+                    user.setColor(userInfo.getColor());
+                    user.setName(userInfo.getNick());
+                    // 不是管理员查自己的
+                    memList.add(user);
+                }
             }
         } else {
             //选择了发送人范围

@@ -6,6 +6,7 @@ import com.baomidou.mybatisplus.mapper.Condition;
 import com.baomidou.mybatisplus.mapper.EntityWrapper;
 import com.baomidou.mybatisplus.mapper.Wrapper;
 import com.common.mybatis.service.impl.BaseServiceImpl;
+import com.yunjing.approval.config.RedisApproval;
 import com.yunjing.approval.dao.mapper.ConditionMapper;
 import com.yunjing.approval.dao.mapper.ModelItemMapper;
 import com.yunjing.approval.dao.mapper.ModelMapper;
@@ -71,10 +72,8 @@ public class ModelItemServiceImpl extends BaseServiceImpl<ModelItemMapper, Model
     private IApprovalUserService approvalUserService;
 
     @Autowired
-    StringRedisTemplate redisTemplate;
+    RedisApproval redisApproval;
 
-    private Type companyDeptType = new TypeReference<List<CompanyDeptDTO>>() {
-    }.getType();
 
     /**
      * 1-多行输入框 2-数字输入框 3-单选框 4-日期 5-日期区间 6-单行输入框 7-明细 8-说明文字 9-金额 10- 图片 11-附件
@@ -85,7 +84,10 @@ public class ModelItemServiceImpl extends BaseServiceImpl<ModelItemMapper, Model
     public ClientModelItemVO getModelItem(String modelId, String memberId) throws Exception {
         logger.info("modelId: " + modelId + " memberId: " + memberId);
         ModelL modelL = modelService.selectById(modelId);
-        List<ModelItem> itemList = this.selectList(Condition.create().where("model_id={0}", modelId).and("item_version={0}", modelL.getModelVersion()).orderBy("priority"));
+        List<ModelItem> itemList = new ArrayList<>();
+        if (modelL != null) {
+            itemList = this.selectList(Condition.create().where("model_id={0}", modelId).and("item_version={0}", modelL.getModelVersion()).orderBy("priority"));
+        }
         ModelVO modelVO = new ModelVO();
         modelVO.setModelId(modelId);
         modelVO.setModelName(modelL.getModelName());

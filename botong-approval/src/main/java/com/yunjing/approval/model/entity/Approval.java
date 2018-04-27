@@ -31,6 +31,12 @@ public class Approval extends BaseModel<Approval> {
     private String modelId;
 
     /**
+     * 审批所属部门ID
+     */
+    @TableField("dept_id")
+    private String deptId;
+
+    /**
      * 标题
      */
     @TableField("title")

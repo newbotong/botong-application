@@ -79,14 +79,15 @@ public class ApprovalServiceImpl extends BaseServiceImpl<ApprovalMapper, Approva
 
     @Override
     @Transactional(rollbackFor = Exception.class)
-    public boolean submit(String companyId, String memberId, String modelId, JSONArray jsonData, String sendUserIds, String sendCopyIds) throws Exception {
-        logger.info("companyId: " + companyId + " memberId: " + memberId + " modelId: " + modelId + " jsonData： " + jsonData.toJSONString() + " sendUserIds： " + sendUserIds + " sendCopyIds: " + sendCopyIds);
+    public boolean submit(String companyId, String memberId, String modelId, JSONArray jsonData, String sendUserIds, String sendCopyIds, String deptId) throws Exception {
+        logger.info("companyId: " + companyId + " memberId: " + memberId + " modelId: " + modelId + " jsonData： " + jsonData.toJSONString() + " sendUserIds： " + sendUserIds + " sendCopyIds: " + sendCopyIds + " deptId: " + deptId);
         ModelL modelL = modelService.selectById(modelId);
         Approval approval = new Approval();
         approval.setId(IDUtils.uuid());
         approval.setModelId(modelId);
         approval.setOrgId(companyId);
         approval.setUserId(memberId);
+        approval.setDeptId(deptId);
         approval.setCreateTime(System.currentTimeMillis());
         approval.setState(0);
         approval.setModelVersion(modelL.getModelVersion());
@@ -188,7 +189,7 @@ public class ApprovalServiceImpl extends BaseServiceImpl<ApprovalMapper, Approva
                                 if (Long.valueOf(detailValue) < Long.valueOf(detailValues)) {
                                     entity.setAttrValue(detailValue + "," + detailValues);
                                 } else {
-                                    throw new ParameterErrorException("开始时间不能大于结束时间");
+                                    throw new ParameterErrorException("结束时间不能早于开始时间");
                                 }
                             } else {
                                 entity.setAttrValue(EmojiFilterUtils.filterEmoji(detailValue));
@@ -221,7 +222,7 @@ public class ApprovalServiceImpl extends BaseServiceImpl<ApprovalMapper, Approva
                         if (Long.valueOf(val) < Long.valueOf(values)) {
                             attr.setAttrValue(val + "," + values);
                         } else {
-                            throw new ParameterErrorException("开始时间不能大于结束时间");
+                            throw new ParameterErrorException("结束时间不能早于开始时间");
                         }
                     } else {
                         attr.setAttrValue(EmojiFilterUtils.filterEmoji(val));

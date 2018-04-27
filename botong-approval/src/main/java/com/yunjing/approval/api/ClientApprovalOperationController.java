@@ -3,7 +3,6 @@ package com.yunjing.approval.api;
 import com.alibaba.fastjson.JSONArray;
 import com.yunjing.approval.service.IApprovalApiService;
 import com.yunjing.approval.service.IApprovalService;
-import com.yunjing.approval.service.IApprovalUserService;
 import com.yunjing.mommon.base.BaseController;
 import com.yunjing.mommon.wrapper.ResponseEntityWrapper;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -25,8 +24,6 @@ public class ClientApprovalOperationController extends BaseController {
 
     @Autowired
     private IApprovalApiService approvalApiService;
-    @Autowired
-    private IApprovalUserService approvalUserService;
     @Autowired
     private IApprovalService approvalService;
 
@@ -59,7 +56,7 @@ public class ClientApprovalOperationController extends BaseController {
                                         @RequestParam("sendUserIds") String sendUserIds,
                                         @RequestParam(value = "sendCopyIds", required = false) String sendCopyIds) throws Exception {
         JSONArray list = JSONArray.parseArray(jsonData);
-        return success(approvalService.submit(companyId, memberId, modelId, list, sendUserIds, sendCopyIds));
+        return success(approvalService.submit(companyId, memberId, modelId, list, sendUserIds, sendCopyIds, deptId));
     }
 
     /**
