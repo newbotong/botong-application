@@ -4,7 +4,6 @@ import com.baomidou.mybatisplus.mapper.Condition;
 import com.baomidou.mybatisplus.toolkit.CollectionUtils;
 import com.baomidou.mybatisplus.toolkit.MapUtils;
 import com.common.mybatis.page.Page;
-import com.yunjing.approval.config.RedisApproval;
 import com.yunjing.approval.dao.mapper.*;
 import com.yunjing.approval.model.dto.ApprovalContentDTO;
 import com.yunjing.approval.model.dto.ApprovalDetailDTO;
@@ -42,8 +41,6 @@ public class ApprovalApiServiceImpl implements IApprovalApiService {
     @Autowired
     private IApprovalUserService approvalUserService;
     @Autowired
-    private ApprovalUserMapper approvalUserMapper;
-    @Autowired
     private ModelMapper modelMapper;
     @Autowired
     private ApprovalProcessMapper approvalProcessMapper;
@@ -64,8 +61,6 @@ public class ApprovalApiServiceImpl implements IApprovalApiService {
     @Autowired
     private AppCenterService appCenterService;
 
-    @Autowired
-    private RedisApproval redisApproval;
     private final Log logger = LogFactory.getLog(ApprovalApiServiceImpl.class);
 
     @Override
@@ -83,6 +78,11 @@ public class ApprovalApiServiceImpl implements IApprovalApiService {
     @Override
     public Page<ClientApprovalVO> getWaited(Page page, String companyId, String memberId, FilterParam filterParam) {
         logger.info("companyId: " + companyId + " memberId: " + memberId + " filterParam: " + filterParam.toString());
+        // 全部
+        int all = 9;
+        if (filterParam.getState() != null && filterParam.getState() == all) {
+            filterParam.setState(null);
+        }
         int current = page.getCurrentPage();
         int size = page.getPageSize();
         int index = (current - 1) * size;
@@ -124,6 +124,11 @@ public class ApprovalApiServiceImpl implements IApprovalApiService {
     @Override
     public Page<ClientApprovalVO> getCompleted(Page page, String companyId, String memberId, FilterParam filterParam) {
         logger.info("companyId: " + companyId + " memberId: " + memberId + " filterParam: " + filterParam.toString());
+        // 全部
+        int all = 9;
+        if (filterParam.getState() != null && filterParam.getState() == all) {
+            filterParam.setState(null);
+        }
         int current = page.getCurrentPage();
         int size = page.getPageSize();
         int index = (current - 1) * size;
@@ -147,6 +152,11 @@ public class ApprovalApiServiceImpl implements IApprovalApiService {
 
     @Override
     public Page<ClientApprovalVO> getLaunched(Page page, String companyId, String memberId, FilterParam filterParam) {
+        // 全部
+        int all = 9;
+        if (filterParam.getState() != null && filterParam.getState() == all) {
+            filterParam.setState(null);
+        }
         if (filterParam.getTime() != null) {
             String date = DateUtil.convert(filterParam.getTime()).replace("00:00:00", "08:00:00");
             filterParam.setTime(DateUtil.StringToDate(date, DateStyle.YYYY_MM_DD_HH_MM_SS).getTime());
@@ -203,6 +213,11 @@ public class ApprovalApiServiceImpl implements IApprovalApiService {
     @Override
     public Page<ClientApprovalVO> getCopied(Page page, String companyId, String memberId, FilterParam filterParam) {
         logger.info("companyId: " + companyId + " memberId: " + memberId + " filterParam: " + filterParam.toString());
+        // 全部
+        int all = 9;
+        if (filterParam.getState() != null && filterParam.getState() == all) {
+            filterParam.setState(null);
+        }
         if (filterParam.getTime() != null) {
             String date = DateUtil.convert(filterParam.getTime()).replace("00:00:00", "08:00:00");
             filterParam.setTime(DateUtil.StringToDate(date, DateStyle.YYYY_MM_DD_HH_MM_SS).getTime());
@@ -266,7 +281,6 @@ public class ApprovalApiServiceImpl implements IApprovalApiService {
             approvalUserVO.setColor(approvalUserVO.getColor() != null ? approvalUserVO.getColor() : ApproConstants.DEFAULT_COLOR);
             if (StringUtils.isBlank(approvalUserVO.getAvatar())) {
                 approvalUserVO.setColor(approvalUserVO.getColor() != null ? approvalUserVO.getColor() : ApproConstants.DEFAULT_COLOR);
-                approvalUserVO.setAvatarName(approvalUserVO.getName().length() <= 2 ? approvalUserVO.getName() : approvalUserVO.getName().substring(1, 3));
             }
             if (approvalUserVO.getProcessState() != null && approvalUserVO.getProcessState() == 0) {
                 approvalUserVO.setApprovalTime(null);
