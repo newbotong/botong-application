@@ -326,28 +326,28 @@ public class InfoCatalogServiceImpl extends ServiceImpl<InfoCatalogMapper, InfoC
         infoContent.setIsDelete(InfoConstant.LOGIC_DELETE_DELETE);
         infoContentEntityWrapper.where("org_id={0}", orgId).and("id={0}", id);
         int flag = infoContentMapper.update(infoContent, infoContentEntityWrapper);
-        InfoContent parentInfoDetailDto = new InfoContent().selectOne(new EntityWrapper<InfoContent>().eq("id", id).eq("org_id",orgId));
-        InfoCatalog infoCatalog = new InfoCatalog().selectOne(new EntityWrapper<InfoCatalog>().eq("org_id",orgId).eq("id", parentInfoDetailDto.getCatalogId()).eq("is_delete", InfoConstant.LOGIC_DELETE_NORMAL));
+        InfoContent parentInfoDetailDto = new InfoContent().selectOne(new EntityWrapper<InfoContent>().eq("id", id).eq("org_id", orgId));
+        InfoCatalog infoCatalog = new InfoCatalog().selectOne(new EntityWrapper<InfoCatalog>().eq("org_id", orgId).eq("id", parentInfoDetailDto.getCatalogId()).eq("is_delete", InfoConstant.LOGIC_DELETE_NORMAL));
         String oneCatalogId;
         if (infoCatalog.getId().equals(infoCatalog.getParentId())) {
             oneCatalogId = infoCatalog.getParentId();
 
         } else {
-            InfoCatalog infoCatalog1 = new InfoCatalog().selectOne(new EntityWrapper<InfoCatalog>().eq("org_id",orgId).eq("id", infoCatalog.getParentId()).eq("is_delete", InfoConstant.LOGIC_DELETE_NORMAL));
+            InfoCatalog infoCatalog1 = new InfoCatalog().selectOne(new EntityWrapper<InfoCatalog>().eq("org_id", orgId).eq("id", infoCatalog.getParentId()).eq("is_delete", InfoConstant.LOGIC_DELETE_NORMAL));
             oneCatalogId = infoCatalog1.getId();
         }
         //删除最新一级目录下数据
         redisTemplate.opsForHash().delete(InfoConstant.REDIS_HOME + ":" + orgId, oneCatalogId);
         //根据一级目录下最新的一条数据
-        List<InfoCatalog> infoCatalogList = new InfoCatalog().selectList(new EntityWrapper<InfoCatalog>().eq("org_id",orgId).eq("parent_id", oneCatalogId).eq("is_delete", InfoConstant.LOGIC_DELETE_NORMAL));
+        List<InfoCatalog> infoCatalogList = new InfoCatalog().selectList(new EntityWrapper<InfoCatalog>().eq("org_id", orgId).eq("parent_id", oneCatalogId).eq("is_delete", InfoConstant.LOGIC_DELETE_NORMAL));
         if (CollectionUtils.isNotEmpty(infoCatalogList)) {
             String[] ids = infoCatalogList.stream().map(InfoCatalog::getId).toArray(String[]::new);
-            List<InfoContent> infoContentList = new InfoContent().selectList(new EntityWrapper<InfoContent>().eq("org_id",orgId).in("catalog_id", ids).eq("is_delete", InfoConstant.LOGIC_DELETE_NORMAL).orderBy("sort", false));
+            List<InfoContent> infoContentList = new InfoContent().selectList(new EntityWrapper<InfoContent>().eq("org_id", orgId).in("catalog_id", ids).eq("is_delete", InfoConstant.LOGIC_DELETE_NORMAL).orderBy("sort", false));
             if (CollectionUtils.isNotEmpty(infoContentList)) {
                 InfoContent infoContent1 = infoContentList.get(0);
                 ParentInfoDetailDto parentInfoDetailDto1 = new ParentInfoDetailDto();
                 BeanUtils.copyProperties(infoContent1, parentInfoDetailDto1);
-                InfoCatalog infoCatalog1 = new InfoCatalog().selectOne(new EntityWrapper<InfoCatalog>().eq("org_id",orgId).eq("is_delete", InfoConstant.LOGIC_DELETE_NORMAL).eq("id", oneCatalogId));
+                InfoCatalog infoCatalog1 = new InfoCatalog().selectOne(new EntityWrapper<InfoCatalog>().eq("org_id", orgId).eq("is_delete", InfoConstant.LOGIC_DELETE_NORMAL).eq("id", oneCatalogId));
                 parentInfoDetailDto1.setName(infoCatalog1.getName());
                 parentInfoDetailDto1.setCatalogSort(infoCatalog1.getSort());
                 parentInfoDetailDto1.setCatalogId(oneCatalogId);
@@ -561,47 +561,49 @@ public class InfoCatalogServiceImpl extends ServiceImpl<InfoCatalogMapper, InfoC
     @Transactional(rollbackFor = Exception.class)
     public void initCompany(String orgId) {
         Map<Object, Object> map = redisTemplate.opsForHash().entries(InfoConstant.REDIS_CATALOG_ONE);
-        List<InfoCatalog> infoCatalogList = new ArrayList<>();
-        //取一级目录的id和对应的属性
-        for (Map.Entry<Object, Object> entry : map.entrySet()) {
-            InfoRedisInit infoRedisInit = JSONObject.parseObject(entry.getValue().toString(), InfoRedisInit.class);
-            InfoCatalog infoCatalog = new InfoCatalog();
-            infoCatalog.setId(IDUtils.uuid());
-            infoCatalog.setParentId(infoCatalog.getId());
-            infoCatalog.setIsDelete(InfoConstant.LOGIC_DELETE_NORMAL);
-            infoCatalog.setLevel(infoRedisInit.getLevel());
-            infoCatalog.setName(infoRedisInit.getName());
-            infoCatalog.setOrgId(orgId);
-            infoCatalog.setSort(infoRedisInit.getSort());
-            infoCatalog.setWhetherShow(1);
-            infoCatalog.setCreateTime(System.currentTimeMillis());
-            infoCatalog.setUpdateTime(System.currentTimeMillis());
-            infoCatalogList.add(infoCatalog);
-            List<String> list = redisTemplate.opsForList().range(InfoConstant.REDIS_CATALOG_TWO + ":" + entry.getKey(), 0, -1);
-            redisTemplate.opsForHash().put(InfoConstant.COMPANY_INFO_REDIS + orgId, infoCatalog.getId(), JSONObject.toJSONString(infoCatalog));
-            if (CollectionUtils.isEmpty(list)) {
-                continue;
-            }
-            List<InfoDictionary> objList = JSONObject.parseArray(list.get(0), InfoDictionary.class);
-            if (CollectionUtils.isNotEmpty(objList)) {
-                for (InfoDictionary infoDictionary : objList) {
-                    InfoCatalog info = new InfoCatalog();
-                    info.setId(IDUtils.uuid());
-                    info.setWhetherShow(1);
-                    info.setSort(infoDictionary.getSort());
-                    info.setLevel(infoDictionary.getLevel());
-                    info.setName(infoDictionary.getName());
-                    info.setOrgId(orgId);
-                    info.setIsDelete(InfoConstant.LOGIC_DELETE_NORMAL);
-                    info.setParentId(infoCatalog.getId());
-                    info.setUpdateTime(System.currentTimeMillis());
-                    info.setCreateTime(System.currentTimeMillis());
-                    redisTemplate.opsForHash().put(InfoConstant.BOTONG_INFO_CATALOG_LIST + orgId + InfoConstant.BOTONG_INFO_FIX + infoCatalog.getId(), info.getId(), JSONObject.toJSONString(info));
-                    infoCatalogList.add(info);
+        if (map.size() > 0) {
+            List<InfoCatalog> infoCatalogList = new ArrayList<>();
+            //取一级目录的id和对应的属性
+            for (Map.Entry<Object, Object> entry : map.entrySet()) {
+                InfoRedisInit infoRedisInit = JSONObject.parseObject(entry.getValue().toString(), InfoRedisInit.class);
+                InfoCatalog infoCatalog = new InfoCatalog();
+                infoCatalog.setId(IDUtils.uuid());
+                infoCatalog.setParentId(infoCatalog.getId());
+                infoCatalog.setIsDelete(InfoConstant.LOGIC_DELETE_NORMAL);
+                infoCatalog.setLevel(infoRedisInit.getLevel());
+                infoCatalog.setName(infoRedisInit.getName());
+                infoCatalog.setOrgId(orgId);
+                infoCatalog.setSort(infoRedisInit.getSort());
+                infoCatalog.setWhetherShow(1);
+                infoCatalog.setCreateTime(System.currentTimeMillis());
+                infoCatalog.setUpdateTime(System.currentTimeMillis());
+                infoCatalogList.add(infoCatalog);
+                List<String> list = redisTemplate.opsForList().range(InfoConstant.REDIS_CATALOG_TWO + ":" + entry.getKey(), 0, -1);
+                redisTemplate.opsForHash().put(InfoConstant.COMPANY_INFO_REDIS + orgId, infoCatalog.getId(), JSONObject.toJSONString(infoCatalog));
+                if (CollectionUtils.isEmpty(list)) {
+                    continue;
+                }
+                List<InfoDictionary> objList = JSONObject.parseArray(list.get(0), InfoDictionary.class);
+                if (CollectionUtils.isNotEmpty(objList)) {
+                    for (InfoDictionary infoDictionary : objList) {
+                        InfoCatalog info = new InfoCatalog();
+                        info.setId(IDUtils.uuid());
+                        info.setWhetherShow(1);
+                        info.setSort(infoDictionary.getSort());
+                        info.setLevel(infoDictionary.getLevel());
+                        info.setName(infoDictionary.getName());
+                        info.setOrgId(orgId);
+                        info.setIsDelete(InfoConstant.LOGIC_DELETE_NORMAL);
+                        info.setParentId(infoCatalog.getId());
+                        info.setUpdateTime(System.currentTimeMillis());
+                        info.setCreateTime(System.currentTimeMillis());
+                        redisTemplate.opsForHash().put(InfoConstant.BOTONG_INFO_CATALOG_LIST + orgId + InfoConstant.BOTONG_INFO_FIX + infoCatalog.getId(), info.getId(), JSONObject.toJSONString(info));
+                        infoCatalogList.add(info);
+                    }
                 }
             }
+            this.insertBatch(infoCatalogList);
         }
-        this.insertBatch(infoCatalogList);
     }
 
 
