@@ -121,6 +121,16 @@ public class ApprovalDetailDTO {
     private String deptName;
 
     /**
+     * 部门ID
+     */
+    private String deptId;
+
+    /**
+     * 审批信息的所属部门ID
+     */
+    private String deptPartId;
+
+    /**
      * 职位
      */
     private String position;
