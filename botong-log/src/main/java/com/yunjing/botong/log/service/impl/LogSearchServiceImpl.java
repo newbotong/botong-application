@@ -269,11 +269,13 @@ public class LogSearchServiceImpl implements ILogSearchService {
             } else {
                 Member user = memberRedisOperator.getMember(searchParam.getMemberId());
                 UserInfo userInfo = memberRedisOperator.getUserInfo(user.getPassportId());
-                user.setProfile(userInfo.getProfile());
-                user.setColor(userInfo.getColor());
-                user.setName(userInfo.getNick());
-                // 不是管理员查自己的
-                memList.add(user);
+                if (userInfo != null) {
+                    user.setProfile(userInfo.getProfile());
+                    user.setColor(userInfo.getColor());
+                    user.setName(userInfo.getNick());
+                    // 不是管理员查自己的
+                    memList.add(user);
+                }
             }
         } else {
             //选择了发送人范围
