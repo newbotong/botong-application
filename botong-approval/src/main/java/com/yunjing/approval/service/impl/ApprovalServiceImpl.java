@@ -188,7 +188,7 @@ public class ApprovalServiceImpl extends BaseServiceImpl<ApprovalMapper, Approva
                                 if (Long.valueOf(detailValue) < Long.valueOf(detailValues)) {
                                     entity.setAttrValue(detailValue + "," + detailValues);
                                 } else {
-                                    throw new ParameterErrorException("开始时间不能大于结束时间");
+                                    throw new ParameterErrorException("结束时间不能早于开始时间");
                                 }
                             } else {
                                 entity.setAttrValue(EmojiFilterUtils.filterEmoji(detailValue));
@@ -221,7 +221,7 @@ public class ApprovalServiceImpl extends BaseServiceImpl<ApprovalMapper, Approva
                         if (Long.valueOf(val) < Long.valueOf(values)) {
                             attr.setAttrValue(val + "," + values);
                         } else {
-                            throw new ParameterErrorException("开始时间不能大于结束时间");
+                            throw new ParameterErrorException("结束时间不能早于开始时间");
                         }
                     } else {
                         attr.setAttrValue(EmojiFilterUtils.filterEmoji(val));
