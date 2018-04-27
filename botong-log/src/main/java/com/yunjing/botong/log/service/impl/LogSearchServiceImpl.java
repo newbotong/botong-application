@@ -272,8 +272,8 @@ public class LogSearchServiceImpl implements ILogSearchService {
                 }
             } else {
                 Member user = memberRedisOperator.getMember(searchParam.getMemberId());
-                UserInfo userInfo = memberRedisOperator.getUserInfo(user.getPassportId());
-                if (userInfo != null) {
+                if (user != null) {
+                    UserInfo userInfo = memberRedisOperator.getUserInfo(user.getPassportId());
                     user.setProfile(userInfo.getProfile());
                     user.setColor(userInfo.getColor());
                     user.setName(userInfo.getNick());
