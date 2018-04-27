@@ -128,7 +128,7 @@ public class RemindMessageConsumer extends AbstractMessageConsumerWithQueueDecla
             RemindVo remind = JSON.parseObject(json.toString(), RemindVo.class);
             handler(remind, memberId, appId);
         } else {
-            log.error("日志提醒成员信息不存在。。。");
+            log.error("日志提醒成员信息不存在。。。memberId:{}", memberId);
         }
     }
 
