@@ -258,6 +258,10 @@ public class LogSearchServiceImpl implements ILogSearchService {
         List<Member> memList = new ArrayList<>();
         //如果没有选择范围
         if (searchParam.getDeptIds() == null && searchParam.getUserIds() == null) {
+            if (StringUtils.isEmpty(searchParam.getMemberId())) {
+                log.info("所选范围和memberId都为空，不查询api，直接返回");
+                return memList;
+            }
             // 校验是否是管理员
             boolean manager1 = appCenterService.isManager(searchParam.getAppId(), searchParam.getMemberId());
             if (manager1) {
