@@ -103,12 +103,12 @@ public class LogDetailDao extends BaseMongoDaoImpl<LogDetail> {
      * @return
      */
     private Query findOne(String logId, String userId) {
-        Query query = new Query(Criteria.where("logId").is(logId));
+        Query query = new Query(Criteria.where("logId").is(logId).and("memberId").ne(userId));
         return query;
     }
 
     /**
-       根据日志查看
+     * 根据日志查看
      * @param logId
      * @param userId
      * @return

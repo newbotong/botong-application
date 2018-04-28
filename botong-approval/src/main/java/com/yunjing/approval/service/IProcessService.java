@@ -33,7 +33,7 @@ public interface IProcessService extends IBaseService<SetsProcess> {
      * @return
      * @throws Exception
      */
-    List<UserVO> getProcess(String modelId, List<String> conditionIds) throws Exception;
+    List<UserVO> getProcess(String modelId, List<String> conditionIds);
 
     /**
      * 设置审批流程信息
@@ -44,7 +44,7 @@ public interface IProcessService extends IBaseService<SetsProcess> {
      * @return
      * @throws Exception
      */
-    boolean updateProcess(String modelId, String conditionId, String userArray) throws Exception;
+    boolean updateProcess(String modelId, String conditionId, String userArray);
 
     /**
      * 删除审批流程人
@@ -66,10 +66,10 @@ public interface IProcessService extends IBaseService<SetsProcess> {
      * @return ApproverVO
      * @throws Exception
      */
-    ApproverVO getApprover(String companyId, String memberId, String modelId, String deptId, String conditionId, String judge) throws Exception;
+    ApproverVO getApprover(String companyId, String memberId, String modelId, String deptId, String conditionId, String judge);
 
     /**
-     * 保存默认审批人和抄送人
+     * 管理端--保存默认审批人和抄送人
      *
      * @param modelId     模型Id
      * @param approverIds 审批人ID集合
@@ -78,4 +78,13 @@ public interface IProcessService extends IBaseService<SetsProcess> {
      * @throws BaseException
      */
     boolean saveDefaultApprover(String modelId, String approverIds, String copyIds);
+
+    /**
+     * 管理端--获取默认审批人和抄送人
+     *
+     * @param modelId     模型Id
+     * @return
+     * @throws BaseException
+     */
+    ApproverVO getDefaultApprover(String modelId);
 }
