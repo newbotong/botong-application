@@ -46,20 +46,13 @@ public class ProcessServiceImpl extends BaseServiceImpl<ProcessMapper, SetsProce
     private ICopyService copyService;
 
     @Override
-    public boolean delete(String modelId, String conditions) throws Exception {
-
-        if (null == modelId) {
-            throw new ParameterErrorException("模型主键不存在");
-        }
-
+    public boolean delete(String modelId, String conditions) {
         Wrapper<SetsProcess> wrapper;
-
         if (null == conditions) {
             wrapper = Condition.create().where("model_id={0}", modelId).and("condition_id=''").or("condition_id is null");
         } else {
             wrapper = Condition.create().where("model_id={0}", modelId).and("condition_id={0}", conditions);
         }
-
         this.delete(wrapper);
 
         return true;
@@ -224,6 +217,10 @@ public class ProcessServiceImpl extends BaseServiceImpl<ProcessMapper, SetsProce
     @Override
     public boolean saveDefaultApprover(String modelId, String approverIds, String copyIds) {
         boolean isInserted = false;
+        //先清除之前保存的默认审批人
+        this.delete(modelId, null);
+        // 清除默认抄送人
+        copyService.delete(Condition.create().where("model_id={0}", modelId));
         String[] aIds = approverIds.split(",");
         String[] cIds = copyIds.split(",");
         // 批量保存审批人信息

@@ -23,7 +23,7 @@ public interface IProcessService extends IBaseService<SetsProcess> {
      * @return
      * @throws Exception
      */
-    boolean delete(String modelId, String conditionId) throws Exception;
+    boolean delete(String modelId, String conditionId);
 
     /**
      * 获取审批流程
