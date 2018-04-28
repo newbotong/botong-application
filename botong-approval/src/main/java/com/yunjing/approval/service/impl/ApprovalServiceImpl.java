@@ -36,6 +36,7 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.*;
@@ -44,7 +45,7 @@ import java.util.stream.Collectors;
 import static java.util.Comparator.comparing;
 
 /**
- * @author roc
+ * @author 刘小鹏
  * @date 2018/1/15
  */
 @Service
@@ -78,7 +79,7 @@ public class ApprovalServiceImpl extends BaseServiceImpl<ApprovalMapper, Approva
     private RedisApproval redisTemplate;
 
     @Override
-    @Transactional(rollbackFor = Exception.class)
+    @Transactional(propagation = Propagation.REQUIRED, rollbackFor = Exception.class)
     public boolean submit(String companyId, String memberId, String modelId, JSONArray jsonData, String sendUserIds, String sendCopyIds, String deptId) throws Exception {
         logger.info("companyId: " + companyId + " memberId: " + memberId + " modelId: " + modelId + " jsonData： " + jsonData.toJSONString() + " sendUserIds： " + sendUserIds + " sendCopyIds: " + sendCopyIds + " deptId: " + deptId);
         ModelL modelL = modelService.selectById(modelId);
