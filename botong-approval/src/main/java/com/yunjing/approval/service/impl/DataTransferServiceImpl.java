@@ -106,7 +106,13 @@ public class DataTransferServiceImpl implements IDataTransferService {
         boolean isInserted = false;
         List<ModelL> modelLList = new ArrayList<>();
         for (ModelDTO dto : dtoList) {
-            if(dto.getModelType() == 2){
+            if (dto.getModelName().equals("立项申请")) {
+                continue;
+            }
+            if (dto.getModelName().equals("工作指示")){
+                continue;
+            }
+            if(dto.getModelType() == 2 ){
                 ModelL modelL = new ModelL();
                 modelL.setId(dto.getModelId());
                 modelL.setVisibleRange("全部可见");
@@ -224,7 +230,7 @@ public class DataTransferServiceImpl implements IDataTransferService {
                 modelItemList.add(modelItem);
             } else if (dto.getDataType() == 4) {
                 ModelItem modelItem = new ModelItem();
-                modelItem.setDataType(10);
+                modelItem.setDataType(dto.getDataType());
                 modelItem.setDateFormat("yyyy-MM-dd HH:mm");
                 modelItem.setItemLabel(dto.getItemLabel());
                 modelItem.setItemLabels("");
