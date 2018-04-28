@@ -9,6 +9,7 @@ import com.yunjing.info.model.InfoCatalog;
 import com.yunjing.info.param.InfoCategoryParam;
 import com.yunjing.mommon.global.exception.BaseException;
 import com.yunjing.mommon.wrapper.PageWrapper;
+import com.yunjing.mommon.wrapper.ResponseEntityWrapper;
 
 import java.io.IOException;
 import java.util.List;
@@ -162,11 +163,19 @@ public interface InfoCatalogService extends IService<InfoCatalog> {
      * @return
      * @throws BaseException
      */
-    PageWrapper<InfoContentDto> selectParentPage(String orgId, String parentId, String catalogId,String title, Integer pageNo, Integer pageSize) throws BaseException;
+    PageWrapper<InfoContentDto> selectParentPage(String orgId, String parentId, String catalogId, String title, Integer pageNo, Integer pageSize) throws BaseException;
 
 
     /**
-     * V1.0资讯数据转换 以及redis处理
+     * V1.0资讯数据转换 以及redis处理(第一步)
      */
     void intoV1DataTransfer();
+
+
+    /**
+     * V1.0初始化 Home（第二步）
+     *
+     * @return
+     */
+    void initOrg();
 }

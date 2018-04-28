@@ -202,7 +202,7 @@ public class InfoController extends BaseController {
      * 查询资讯父级目录下分页列表
      *
      * @param orgId     企业id
-     * @param parentId 一级目录
+     * @param parentId  一级目录
      * @param catalogId 第二级目录id
      * @param title     标题
      * @param pageNo    页码 ，默认1
@@ -217,7 +217,7 @@ public class InfoController extends BaseController {
                                                   @RequestParam(required = false, defaultValue = "") String title,
                                                   @RequestParam(required = false, defaultValue = "1") Integer pageNo,
                                                   @RequestParam(required = false, defaultValue = "20") Integer pageSize) throws BaseException {
-        PageWrapper<InfoContentDto> page = infoCatalogService.selectParentPage(orgId, parentId,catalogId,title, pageNo, pageSize);
+        PageWrapper<InfoContentDto> page = infoCatalogService.selectParentPage(orgId, parentId, catalogId, title, pageNo, pageSize);
         return success(page);
     }
 
@@ -229,7 +229,7 @@ public class InfoController extends BaseController {
     /**
      * 根据id查询详情接口
      *
-     * @param id  资讯id
+     * @param id 资讯id
      * @return
      * @throws BaseException
      */
@@ -241,8 +241,14 @@ public class InfoController extends BaseController {
 
 
     @GetMapping("/intoV1DataTransfer")
-    public void intoV1DataTransfer(){
+    public void intoV1DataTransfer() {
         infoCatalogService.intoV1DataTransfer();
     }
 
+
+    @PostMapping("/initOrg")
+    public ResponseEntityWrapper initOrg() {
+        infoCatalogService.initOrg();
+        return success();
+    }
 }

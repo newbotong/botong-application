@@ -27,4 +27,11 @@ public interface InfoCatalogMapper extends IBaseMapper<InfoCatalog> {
      * @return
      */
     List<InfoDto> selectInfoCatalog(Map<String, Object> map, Page<InfoDto> page);
+
+    /**
+     * 查询所有企业id
+     *
+     * @return
+     */
+    List<String> selectOrgId();
 }

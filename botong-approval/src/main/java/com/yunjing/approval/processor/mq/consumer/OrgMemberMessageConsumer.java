@@ -3,7 +3,9 @@ package com.yunjing.approval.processor.mq.consumer;
 import com.yunjing.approval.model.entity.ApprovalUser;
 import com.yunjing.approval.processor.mq.configuration.OrgMemberQueueConfig;
 import com.yunjing.approval.service.IApprovalUserService;
+import com.yunjing.message.annotation.MessageConsumerDeclarable;
 import com.yunjing.message.annotation.MessageQueueDeclarable;
+import com.yunjing.message.declare.consumer.AbstractMessageConsumer;
 import com.yunjing.message.declare.consumer.AbstractMessageConsumerWithQueueDeclare;
 import com.yunjing.message.model.Message;
 import com.yunjing.message.share.org.OrgMemberMessage;
@@ -22,15 +24,14 @@ import java.util.List;
  */
 @Slf4j
 @Component
-@MessageQueueDeclarable
-public class OrgMemberMessageConsumer extends AbstractMessageConsumerWithQueueDeclare<Message, OrgMemberQueueConfig> {
+@MessageConsumerDeclarable
+public class OrgMemberMessageConsumer extends AbstractMessageConsumer<Message> {
 
     @Autowired
     private IApprovalUserService approvalUserService;
 
-    public OrgMemberMessageConsumer(OrgMemberQueueConfig configuration) {
-        super(configuration);
-    }
+    @Autowired
+    private OrgMemberQueueConfig orgMemberQueueConfig;
 
     @Override
     public void onMessageReceive(Message message) {
@@ -86,5 +87,10 @@ public class OrgMemberMessageConsumer extends AbstractMessageConsumerWithQueueDe
         approvalUser.setDeptName(dNames);
 
         return approvalUser;
+    }
+
+    @Override
+    public String queueName() {
+        return orgMemberQueueConfig.queueName();
     }
 }

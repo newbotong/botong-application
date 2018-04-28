@@ -19,4 +19,12 @@
         catalog_id = #{catalogId}
         ORDER BY sort DESC
     </select>
+
+
+    <select id="selectOrgId" resultType="java.lang.String">
+        SELECT org_id
+        FROM info_catalog
+        WHERE is_delete = 0
+        GROUP BY org_id
+    </select>
 </mapper>
