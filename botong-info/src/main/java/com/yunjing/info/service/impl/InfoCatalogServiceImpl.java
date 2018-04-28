@@ -635,7 +635,7 @@ public class InfoCatalogServiceImpl extends ServiceImpl<InfoCatalogMapper, InfoC
                     infoCatalog.setLevel(2);
                 }
                 infoCatalog.setSort(contentColumn.getColumnType());
-                infoCatalog.setWhetherShow(contentColumn.getColumnShowType() == 1 ? 1 : 0);
+                infoCatalog.setWhetherShow(1);
                 infoCatalog.setIsDelete(0);
 
                 if (ValidationUtil.isEmpty(contentColumn.getCreateTime())) {
@@ -643,7 +643,29 @@ public class InfoCatalogServiceImpl extends ServiceImpl<InfoCatalogMapper, InfoC
                     infoCatalog.setUpdateTime(contentColumn.getCreateTime().getTime());
                 }
                 infoCatalogList.add(infoCatalog);
-
+                //给公司制度 下加三个 2级，并且将 【企业制度、产品制度、人事制度】 将公司制度的东西赋值给企业制度
+                if(ValidationUtil.equals(infoCatalog.getName(),"公司制度")){
+                    for(int i=0;i<3;i++){
+                        InfoCatalog infoCatalog1 = new InfoCatalog();
+                        infoCatalog1.setId(IDUtils.uuid());
+                        infoCatalog1.setOrgId(contentColumn.getOrgId());
+                        if(i==0){
+                            infoCatalog1.setName("企业制度");
+                        }else if(i==1){
+                            infoCatalog1.setName("产品制度");
+                        }else{
+                            infoCatalog1.setName("人事制度");
+                        }
+                        infoCatalog1.setParentId(infoCatalog.getId());
+                        infoCatalog1.setLevel(2);
+                        infoCatalog1.setSort(i+1);
+                        infoCatalog1.setWhetherShow(1);
+                        infoCatalog1.setIsDelete(0);
+                        infoCatalog1.setCreateTime(infoCatalog.getCreateTime());
+                        infoCatalog1.setUpdateTime(infoCatalog.getUpdateTime());
+                        infoCatalogList.add(infoCatalog1);
+                    }
+                }
                 //遍历内容
                 //根据 分类列表 遍历 内容 并排序
                 //1.0资讯内容列表
@@ -656,9 +678,32 @@ public class InfoCatalogServiceImpl extends ServiceImpl<InfoCatalogMapper, InfoC
                     for (int i = 0; i < contentList.size(); i++) {
                         InfoContent infoContent = new InfoContent();
                         infoContent.setId(contentList.get(i).getContentId());
-                        infoContent.setCatalogId(contentList.get(i).getColumnId());
+
+                        //判断  contentList.get(i).getColumnId() 是否是一级的 公司制度
+                        //如果是，则拿出它下级的 企业制度的ID 赋给内容
+                        if(!ValidationUtil.isEmpty(contentList.get(i).getColumnId())){
+                            for(InfoCatalog infoCatalog1 :infoCatalogList){
+                                if(ValidationUtil.equals(contentList.get(i).getColumnId(),infoCatalog1.getId()) && ValidationUtil.equals(infoCatalog1.getName(),"公司制度")){
+                                    //然后在遍历 list 拿出他二级的 企业制度的ID
+                                    for (InfoCatalog infoCatalog2 :infoCatalogList){
+                                        //2级目录 ，并且2级的父ID == 一级目录id
+                                        if(ValidationUtil.equals(infoCatalog2.getParentId(),infoCatalog1.getId()) && ValidationUtil.equals(infoCatalog2.getLevel(),2)){
+                                            infoContent.setCatalogId(infoCatalog1.getId());
+                                            break;
+                                        }else{
+                                            infoContent.setCatalogId(contentList.get(i).getColumnId());
+                                            break;
+                                        }
+                                    }
+                                }else{
+                                    infoContent.setCatalogId(contentList.get(i).getColumnId());
+                                    break;
+                                }
+                            }
+                        }
+
                         infoContent.setOrgId(infoCatalog.getOrgId());
-                        infoContent.setDepartmentName("");
+                        infoContent.setDepartmentName("暂无信息");
                         infoContent.setTitle(contentList.get(i).getContentTitle());
                         infoContent.setPictureUrl(contentList.get(i).getContentImg());
                         infoContent.setContent(contentList.get(i).getContentDetail());
