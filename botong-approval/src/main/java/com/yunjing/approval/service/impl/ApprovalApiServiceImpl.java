@@ -101,12 +101,13 @@ public class ApprovalApiServiceImpl implements IApprovalApiService {
 
     /**
      * 获取待我审批的列表总数
-     * @param companyId 公司id
-     * @param memberId 成员id
+     *
+     * @param companyId   公司id
+     * @param memberId    成员id
      * @param filterParam 筛选参数
      * @return Integer
      */
-    private Integer getWaitedTotalCount(String companyId,String memberId, FilterParam filterParam){
+    private Integer getWaitedTotalCount(String companyId, String memberId, FilterParam filterParam) {
         List<ApprovalContentDTO> waitedMeApprovalList = approvalProcessMapper.getAllWaitedMeApprovalList(companyId, memberId, filterParam);
         List<ApprovalContentDTO> result = new ArrayList<>();
         waitedMeApprovalListToResult(memberId, waitedMeApprovalList, result);
@@ -254,12 +255,16 @@ public class ApprovalApiServiceImpl implements IApprovalApiService {
             clientApprovalDetailVO.setPassportId(approvalById.getPassportId());
             ModelL modelL = modelService.selectOne(Condition.create().where("id={0}", approvalById.getModelId()));
             clientApprovalDetailVO.setModelName(modelL.getModelName() != null ? modelL.getModelName() : null);
-            String[] deptIds = approvalById.getDeptId().split(",");
-            String[] deptNames = approvalById.getDeptName().split(",");
+            String[] deptIds;
+            String[] deptNames;
             String deptName = "部门名称";
-            for (int i = 0; i < (deptIds.length < deptNames.length ? deptNames.length : deptIds.length); i++) {
-                if (approvalById.getDeptPartId().equals(deptIds[i])) {
-                    deptName = deptNames[i];
+            if (approvalById.getDeptId() != null) {
+                deptIds = approvalById.getDeptId().split(",");
+                deptNames = approvalById.getDeptName().split(",");
+                for (int i = 0; i < (deptIds.length < deptNames.length ? deptNames.length : deptIds.length); i++) {
+                    if (approvalById.getDeptPartId().equals(deptIds[i])) {
+                        deptName = deptNames[i];
+                    }
                 }
             }
             clientApprovalDetailVO.setDeptName(deptName);
@@ -603,11 +608,11 @@ public class ApprovalApiServiceImpl implements IApprovalApiService {
                     attrVo.setNum(num);
                 }
                 attrs.add(attrVo);
-                if (CollectionUtils.isNotEmpty(attrs)){
+                if (CollectionUtils.isNotEmpty(attrs)) {
                     Collections.sort(attrs, new Comparator<ApproveAttrVO>() {
                         @Override
                         public int compare(ApproveAttrVO o1, ApproveAttrVO o2) {
-                            if (o1.getNum() == null || o2.getNum() == null){
+                            if (o1.getNum() == null || o2.getNum() == null) {
                                 return 0;
                             }
                             if (o1.getNum() > o2.getNum()) {

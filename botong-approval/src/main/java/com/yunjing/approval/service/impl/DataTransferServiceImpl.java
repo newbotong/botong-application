@@ -1,9 +1,12 @@
 package com.yunjing.approval.service.impl;
 
+import com.baomidou.mybatisplus.mapper.Condition;
 import com.yunjing.approval.model.dto.*;
 import com.yunjing.approval.model.entity.*;
 import com.yunjing.approval.service.*;
+import com.yunjing.approval.transfer.UserIdToMemberId;
 import com.yunjing.mommon.global.exception.InsertMessageFailureException;
+import org.apache.commons.collections.CollectionUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -42,15 +45,20 @@ public class DataTransferServiceImpl implements IDataTransferService {
     private IConditionService conditionService;
 
     private List<ModelDTO> modelDTOS;
+    @Autowired
+    private UserIdToMemberId userIdToMemberId;
+
 
     @Override
     public boolean addApproval(List<ApprovalDTO> dtoList) {
+        userIdToMemberId.init();
         List<Approval> list = new ArrayList<>();
         for (ApprovalDTO dto : dtoList) {
             Approval approval = new Approval();
             approval.setId(dto.getId());
             approval.setOrgId(dto.getOrgId());
-            approval.setUserId(dto.getUserId());
+            String memberId = userIdToMemberId.getMemberId(dto.getOrgId(), dto.getUserId());
+            approval.setUserId(memberId);
             approval.setModelId(dto.getModelId());
             approval.setResult(dto.getResult());
             approval.setState(dto.getState());
@@ -69,9 +77,16 @@ public class DataTransferServiceImpl implements IDataTransferService {
     public boolean addCopy(List<CopyDTO> dtoList) {
         boolean isInserted = false;
         List<Copy> list = new ArrayList<>();
+        List<OrgModel> orgModelDTOList = orgModelService.selectList(Condition.create());
         for (CopyDTO dto : dtoList) {
             Copy copy = new Copy();
-            copy.setUserId(dto.getUserId());
+            List<OrgModel> collect = orgModelDTOList.stream().filter(orgModelDTO -> orgModelDTO.getModelId().equals(dto.getModelId())).collect(Collectors.toList());
+            String memberId = "";
+            if(CollectionUtils.isNotEmpty(collect)){
+                String orgId = collect.get(0).getOrgId();
+                memberId = userIdToMemberId.getMemberId(orgId, dto.getUserId());
+            }
+            copy.setUserId(memberId);
             copy.setSort(dto.getSort());
             copy.setModelId(dto.getModelId());
             copy.setType(dto.getType());
@@ -94,7 +109,6 @@ public class DataTransferServiceImpl implements IDataTransferService {
         List<ModelL> modelLList = new ArrayList<>();
         for (ModelDTO dto : dtoList) {
             if(dto.getModelType() == 2){
-
                 ModelL modelL = new ModelL();
                 modelL.setId(dto.getModelId());
                 modelL.setVisibleRange("全部可见");
@@ -289,6 +303,7 @@ public class DataTransferServiceImpl implements IDataTransferService {
     public boolean addApprovalProcess(List<ApprovalProcessDTO> dtoList) {
         boolean isInserted = false;
         List<ApprovalProcess> processList = new ArrayList<>();
+        List<Approval> approvalList = approvalService.selectList(Condition.create());
         for (ApprovalProcessDTO dto : dtoList) {
             ApprovalProcess approvalProcess = new ApprovalProcess();
             approvalProcess.setId(dto.getProcessId());
@@ -296,7 +311,13 @@ public class DataTransferServiceImpl implements IDataTransferService {
             approvalProcess.setProcessTime(dto.getProcessTime().getTime());
             approvalProcess.setApprovalId(dto.getApprovalId());
             approvalProcess.setSeq(dto.getSeq());
-            approvalProcess.setUserId(dto.getUserId());
+            List<Approval> approvals = approvalList.stream().filter(approval -> approval.getId().equals(dto.getApprovalId())).collect(Collectors.toList());
+            String memberId = "";
+            if(CollectionUtils.isNotEmpty(approvals)){
+                String orgId = approvals.get(0).getOrgId();
+                memberId = userIdToMemberId.getMemberId(orgId, dto.getUserId());
+            }
+            approvalProcess.setUserId(memberId);
             approvalProcess.setReason(dto.getReason());
             processList.add(approvalProcess);
         }
