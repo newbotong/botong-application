@@ -3,6 +3,7 @@ package com.yunjing.approval.processor.mq.consumer;
 import com.yunjing.approval.model.entity.ApprovalUser;
 import com.yunjing.approval.processor.mq.configuration.OrgMemberQueueConfig;
 import com.yunjing.approval.service.IApprovalUserService;
+import com.yunjing.message.annotation.MessageConsumerDeclarable;
 import com.yunjing.message.annotation.MessageQueueDeclarable;
 import com.yunjing.message.declare.consumer.AbstractMessageConsumerWithQueueDeclare;
 import com.yunjing.message.model.Message;
@@ -22,7 +23,7 @@ import java.util.List;
  */
 @Slf4j
 @Component
-@MessageQueueDeclarable
+@MessageConsumerDeclarable
 public class OrgMemberMessageConsumer extends AbstractMessageConsumerWithQueueDeclare<Message, OrgMemberQueueConfig> {
 
     @Autowired

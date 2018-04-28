@@ -2,6 +2,7 @@ package com.yunjing.approval.processor.mq.consumer;
 
 import com.yunjing.approval.processor.mq.configuration.OrgAppMessageConfiguration;
 import com.yunjing.approval.service.IOrgModelService;
+import com.yunjing.message.annotation.MessageConsumerDeclarable;
 import com.yunjing.message.annotation.MessageQueueDeclarable;
 import com.yunjing.message.declare.consumer.AbstractMessageConsumerWithQueueDeclare;
 import com.yunjing.message.model.Message;
@@ -19,7 +20,7 @@ import org.springframework.stereotype.Component;
  */
 @Slf4j
 @Component
-@MessageQueueDeclarable
+@MessageConsumerDeclarable
 public class OrgAppMessageConsumer extends AbstractMessageConsumerWithQueueDeclare<Message, OrgAppMessageConfiguration> {
 
     @Autowired
