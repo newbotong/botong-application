@@ -43,8 +43,6 @@ public class DataTransferServiceImpl implements IDataTransferService {
     private IProcessService processService;
     @Autowired
     private IConditionService conditionService;
-
-    private List<ModelDTO> modelDTOS;
     @Autowired
     private UserIdToMemberId userIdToMemberId;
 
@@ -76,6 +74,7 @@ public class DataTransferServiceImpl implements IDataTransferService {
     @Override
     public boolean addCopy(List<CopyDTO> dtoList) {
         boolean isInserted = false;
+        userIdToMemberId.init();
         List<Copy> list = new ArrayList<>();
         List<OrgModel> orgModelDTOList = orgModelService.selectList(Condition.create());
         for (CopyDTO dto : dtoList) {
@@ -104,7 +103,6 @@ public class DataTransferServiceImpl implements IDataTransferService {
 
     @Override
     public boolean addModel(List<ModelDTO> dtoList) {
-        modelDTOS = dtoList;
         boolean isInserted = false;
         List<ModelL> modelLList = new ArrayList<>();
         for (ModelDTO dto : dtoList) {
@@ -176,10 +174,10 @@ public class DataTransferServiceImpl implements IDataTransferService {
     @Override
     public boolean addModelItem(List<ModelItemDTO> dtoList) {
         boolean isInserted = false;
-        Set<String> mids = modelDTOS.stream().filter(modelDTO -> "请假".equals(modelDTO.getModelName())).map(ModelDTO::getModelId).collect(Collectors.toSet());
+        List<ModelL> modelLList = modelService.selectList(Condition.create());
+        Set<String> mids = modelLList.stream().filter(modelL -> "请假".equals(modelL.getModelName())).map(ModelL::getId).collect(Collectors.toSet());
         List<ModelItem> modelItemList = new ArrayList<>();
         for (ModelItemDTO dto : dtoList) {
-
             if (dto.getDataType() == 5) {
                 ModelItem modelItem = new ModelItem();
                 modelItem.setIsJudge(dto.getIsJudge());
@@ -302,6 +300,7 @@ public class DataTransferServiceImpl implements IDataTransferService {
     @Override
     public boolean addApprovalProcess(List<ApprovalProcessDTO> dtoList) {
         boolean isInserted = false;
+        userIdToMemberId.init();
         List<ApprovalProcess> processList = new ArrayList<>();
         List<Approval> approvalList = approvalService.selectList(Condition.create());
         for (ApprovalProcessDTO dto : dtoList) {
@@ -378,6 +377,8 @@ public class DataTransferServiceImpl implements IDataTransferService {
     @Override
     public boolean addCopyS(List<CopySDTO> dtoList) {
         boolean isInserted = false;
+        userIdToMemberId.init();
+        List<Approval> approvalList = approvalService.selectList(Condition.create());
         List<Copys> copysList = new ArrayList<>();
         for (CopySDTO sdto : dtoList) {
             Copys copys = new Copys();
@@ -385,7 +386,13 @@ public class DataTransferServiceImpl implements IDataTransferService {
             copys.setCopySType(sdto.getCopySType());
             copys.setApprovalId(sdto.getApprovalId());
             copys.setId(sdto.getCopySId());
-            copys.setUserId(sdto.getUserId());
+            List<Approval> approvals = approvalList.stream().filter(approval -> approval.getId().equals(sdto.getApprovalId())).collect(Collectors.toList());
+            String memberId = "";
+            if(CollectionUtils.isNotEmpty(approvals)){
+                String orgId = approvals.get(0).getOrgId();
+                memberId = userIdToMemberId.getMemberId(orgId, sdto.getUserId());
+            }
+            copys.setUserId(memberId);
             copysList.add(copys);
         }
         if (!copysList.isEmpty()) {
