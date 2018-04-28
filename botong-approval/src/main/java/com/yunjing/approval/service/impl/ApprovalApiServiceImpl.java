@@ -492,7 +492,7 @@ public class ApprovalApiServiceImpl implements IApprovalApiService {
         logger.info("companyId: " + companyId + " memberId: " + memberId + " transferredUserId: " + transferredUserId + "approvalId: " + approvalId);
         Approval approval = approvalService.selectById(approvalId);
         if (approval != null && approval.getUserId().equals(transferredUserId)) {
-            throw new ParameterErrorException("不能将审批转交给审批发起人");
+            throw new ParameterErrorException("不能转交给审批发起人");
         }
         List<ApprovalProcess> processList = approvalProcessService.selectList(Condition.create().where("approval_id={0}", approvalId).orderBy("seq", true));
         int num = 0;
