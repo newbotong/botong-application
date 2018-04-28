@@ -108,7 +108,7 @@ public class LogDetailDao extends BaseMongoDaoImpl<LogDetail> {
     }
 
     /**
-       根据日志查看
+     * 根据日志查看
      * @param logId
      * @param userId
      * @return
