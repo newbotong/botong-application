@@ -20,7 +20,7 @@ public interface ICopyService extends IBaseService<Copy> {
      * @return List<UserVO>
      * @throws Exception 抛异常
      */
-    List<UserVO> get(String modelId) throws Exception;
+    List<UserVO> get(String modelId);
 
     /**
      * 客户端获取抄送人
@@ -31,7 +31,7 @@ public interface ICopyService extends IBaseService<Copy> {
      * @return List<UserVO>
      * @throws Exception 抛异常
      */
-    List<UserVO> getCopy(String companyId, String memberId, String modelId) throws Exception;
+    List<UserVO> getCopy(String companyId, String memberId, String modelId);
 
     /**
      * 保存抄送人
@@ -41,7 +41,7 @@ public interface ICopyService extends IBaseService<Copy> {
      * @return boolean
      * @throws Exception 抛异常
      */
-    boolean save(String modelId, String memberIds) throws Exception;
+    boolean save(String modelId, String memberIds);
 
     /**
      * 删除审批抄送人

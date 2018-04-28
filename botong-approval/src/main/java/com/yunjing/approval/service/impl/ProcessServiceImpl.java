@@ -45,9 +45,6 @@ public class ProcessServiceImpl extends BaseServiceImpl<ProcessMapper, SetsProce
     @Autowired
     private ICopyService copyService;
 
-    @Autowired
-    private AppCenterService appCenterService;
-
     @Override
     public boolean delete(String modelId, String conditions) throws Exception {
 
@@ -69,7 +66,7 @@ public class ProcessServiceImpl extends BaseServiceImpl<ProcessMapper, SetsProce
     }
 
     @Override
-    public List<UserVO> getProcess(String modelId, List<String> conditionIds) throws Exception {
+    public List<UserVO> getProcess(String modelId, List<String> conditionIds) {
 
         List<UserVO> users = new ArrayList<>();
         List<SetsProcess> list;
@@ -110,7 +107,7 @@ public class ProcessServiceImpl extends BaseServiceImpl<ProcessMapper, SetsProce
     }
 
     @Override
-    public boolean updateProcess(String modelId, String conditionId, String userArray) throws Exception {
+    public boolean updateProcess(String modelId, String conditionId, String userArray) {
         String[] userIds = userArray.split(",");
         // 批量保存审批人信息
         List<SetsProcess> list = new ArrayList<>();
@@ -136,7 +133,7 @@ public class ProcessServiceImpl extends BaseServiceImpl<ProcessMapper, SetsProce
     }
 
     @Override
-    public ApproverVO getApprover(String companyId, String memberId, String modelId, String deptId, String conditionId, String judge) throws Exception {
+    public ApproverVO getApprover(String companyId, String memberId, String modelId, String deptId, String conditionId, String judge) {
         // 解析
         Map<String, String> param = new HashMap<>(1);
         JSONArray jsonArray = JSON.parseArray(judge);
@@ -262,6 +259,16 @@ public class ProcessServiceImpl extends BaseServiceImpl<ProcessMapper, SetsProce
             }
         }
         return isInserted;
+    }
+
+    @Override
+    public ApproverVO getDefaultApprover(String modelId) {
+        ApproverVO approverVO = new ApproverVO();
+        List<UserVO> process = processService.getProcess(modelId, null);
+        approverVO.setApprovers(process);
+        List<UserVO> voList = copyService.get(modelId);
+        approverVO.setCopys(voList);
+        return approverVO;
     }
 
     /**
