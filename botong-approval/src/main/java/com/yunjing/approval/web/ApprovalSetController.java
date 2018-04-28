@@ -27,7 +27,7 @@ public class ApprovalSetController extends BaseController {
      * @return
      * @throws Exception
      */
-    @PostMapping("/get-default-approver")
+    @PostMapping("/get-default-process")
     public ResponseEntityWrapper getDefaultApproverAndCopy(@RequestParam String modelId) throws Exception {
         return success(processService.getDefaultApprover(modelId));
     }
