@@ -45,11 +45,11 @@ public class CopyServiceImpl extends BaseServiceImpl<CopyMapper, Copy> implement
     public List<UserVO> get(String modelId) {
         List<Copy> copyList = this.selectList(Condition.create().where("model_id={0}", modelId).orderBy("sort", true));
         List<UserVO> userVOList = new ArrayList<>();
-        List<Long> ids = new ArrayList<>(copyList.size());
+        List<String > ids = new ArrayList<>(copyList.size());
         for (Copy c : copyList) {
             //0.用户 1.主管
             if (c.getType() == 0) {
-                ids.add(Long.valueOf(c.getUserId()));
+                ids.add(c.getUserId());
             }
         }
         List<ApprovalUser> users = approvalUserService.selectList(Condition.create().in("id", ids));

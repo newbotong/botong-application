@@ -1,10 +1,10 @@
 spring:
   cloud:
     config:
-      profile: dev
-      uri: http://192.168.10.233:10200/
+#      profile: dev
+#      uri: http://192.168.10.233:10200/
 #      profile: test
-#      uri: http://10.30.137.38:10020/
+#      uri: http://192.168.10.229:10200/
 #      profile: pro
 #      uri: http://10.1.24.15:10020/
   mvc:
