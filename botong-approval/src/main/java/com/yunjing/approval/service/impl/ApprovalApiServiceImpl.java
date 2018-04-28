@@ -87,19 +87,33 @@ public class ApprovalApiServiceImpl implements IApprovalApiService {
         int current = page.getCurrentPage();
         int size = page.getPageSize();
         int index = (current - 1) * size;
-        String deptId = filterParam.getDeptId();
-        // 查询部门中成员
-        String[] did = new String[]{deptId};
-        List<Member> members = appCenterService.findSubLists(did, null);
-        List<String> userIds = new ArrayList<>();
-        if (members != null) {
-            userIds = members.stream().map(Member::getId).collect(Collectors.toList());
-        }
-        userIds.add(memberId);
         Page<ClientApprovalVO> clientApprovalVOPage = new Page<>(current, size);
         List<ClientApprovalVO> clientApprovalVOS = new ArrayList<>();
-        List<ApprovalContentDTO> waitedMeApprovalList = approvalProcessMapper.getWaitedMeApprovalList(index, size, companyId, userIds, filterParam);
+        List<ApprovalContentDTO> waitedMeApprovalList = approvalProcessMapper.getWaitedMeApprovalList(index, size, companyId, memberId, filterParam);
         List<ApprovalContentDTO> result = new ArrayList<>();
+        waitedMeApprovalListToResult(memberId, waitedMeApprovalList, result);
+        convertList(clientApprovalVOS, result);
+        clientApprovalVOPage.build(clientApprovalVOS != null ? clientApprovalVOS : new ArrayList<>());
+        Integer waitedTotalCount = getWaitedTotalCount(companyId, memberId, filterParam);
+        clientApprovalVOPage.setTotalCount(waitedTotalCount);
+        return clientApprovalVOPage;
+    }
+
+    /**
+     * 获取待我审批的列表总数
+     * @param companyId 公司id
+     * @param memberId 成员id
+     * @param filterParam 筛选参数
+     * @return Integer
+     */
+    private Integer getWaitedTotalCount(String companyId,String memberId, FilterParam filterParam){
+        List<ApprovalContentDTO> waitedMeApprovalList = approvalProcessMapper.getAllWaitedMeApprovalList(companyId, memberId, filterParam);
+        List<ApprovalContentDTO> result = new ArrayList<>();
+        waitedMeApprovalListToResult(memberId, waitedMeApprovalList, result);
+        return result.size();
+    }
+
+    private void waitedMeApprovalListToResult(String memberId, List<ApprovalContentDTO> waitedMeApprovalList, List<ApprovalContentDTO> result) {
         for (ApprovalContentDTO contentDTO : waitedMeApprovalList) {
             List<ApprovalProcess> processList = approvalProcessService.selectList(Condition.create().where("approval_id={0}", contentDTO.getApprovalId()).and("user_id={0}", memberId));
             for (ApprovalProcess process : processList) {
@@ -116,10 +130,6 @@ public class ApprovalApiServiceImpl implements IApprovalApiService {
                 }
             }
         }
-        convertList(clientApprovalVOS, result);
-        clientApprovalVOPage.build(clientApprovalVOS != null ? clientApprovalVOS : new ArrayList<>());
-        clientApprovalVOPage.setTotalCount(clientApprovalVOS.size());
-        return clientApprovalVOPage;
     }
 
     @Override
@@ -133,18 +143,9 @@ public class ApprovalApiServiceImpl implements IApprovalApiService {
         int current = page.getCurrentPage();
         int size = page.getPageSize();
         int index = (current - 1) * size;
-        String deptId = filterParam.getDeptId();
-        // 查询部门中成员
-        String[] did = new String[]{deptId};
-        List<Member> members = appCenterService.findSubLists(did, null);
-        List<String> userIds = new ArrayList<>();
-        if (members != null) {
-            userIds = members.stream().map(Member::getId).collect(Collectors.toList());
-        }
-        userIds.add(memberId);
         Page<ClientApprovalVO> clientApprovalVOPage = new Page<>(current, size);
         List<ClientApprovalVO> clientApprovalVOS = new ArrayList<>();
-        List<ApprovalContentDTO> completedMeApprovalList = approvalProcessMapper.getCompletedApprovalList(index, size, companyId, userIds, filterParam);
+        List<ApprovalContentDTO> completedMeApprovalList = approvalProcessMapper.getCompletedApprovalList(index, size, companyId, memberId, filterParam);
         convertList(clientApprovalVOS, completedMeApprovalList);
         clientApprovalVOPage.build(clientApprovalVOS != null ? clientApprovalVOS : new ArrayList<>());
         clientApprovalVOPage.setTotalCount(clientApprovalVOS.size());
@@ -602,18 +603,21 @@ public class ApprovalApiServiceImpl implements IApprovalApiService {
                     attrVo.setNum(num);
                 }
                 attrs.add(attrVo);
-                Collections.sort(attrs, new Comparator<ApproveAttrVO>() {
-                    @Override
-                    public int compare(ApproveAttrVO o1, ApproveAttrVO o2) {
-                        if (o1.getNum() > o2.getNum()) {
-                            return 1;
-                        } else if (o1.getNum() < o2.getNum()) {
-                            return -1;
-                        } else {
-                            return 0;
+                if (CollectionUtils.isNotEmpty(attrs)){
+                    Collections.sort(attrs, new Comparator<ApproveAttrVO>() {
+                        @Override
+                        public int compare(ApproveAttrVO o1, ApproveAttrVO o2) {
+
+                            if (o1.getNum() > o2.getNum()) {
+                                return 1;
+                            } else if (o1.getNum() < o2.getNum()) {
+                                return -1;
+                            } else {
+                                return 0;
+                            }
                         }
-                    }
-                });
+                    });
+                }
             } else {
                 attrs.add(new ApproveAttrVO(attr));
             }

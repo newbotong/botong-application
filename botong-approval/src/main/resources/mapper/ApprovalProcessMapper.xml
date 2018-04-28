@@ -20,14 +20,9 @@
         FROM approval_process ap,approval a,model m
         <where>
             ap. approval_id = a.id AND m.id = a.model_id AND ap.process_state = 0
-            <if test="userIds != null and userIds.size()>0">
-                AND ap.user_id IN
-                <foreach collection="userIds" item="userId" index="index"
-                         open="(" separator="," close=")">#{userId}
-                </foreach>
-            </if>
-            <if test="orgId != null and orgId != ''">
-                and a.org_id = #{orgId}
+            AND a.org_id = #{orgId} AND ap.user_id = #{userId}
+            <if test="filterParam.deptId != null and filterParam.deptId != ''">
+                and a.dept_id = #{filterParam.deptId}
             </if>
             <if test="filterParam.state != null">
                 and a.state = #{filterParam.state}
@@ -45,14 +40,9 @@
         FROM approval_process ap,approval a,model m
         <where>
             ap. approval_id = a.id AND m.id = a.model_id AND ap.process_state > 0 and 4 > ap.process_state
-            <if test="userIds != null and userIds.size()>0">
-                AND ap.user_id IN
-                <foreach collection="userIds" item="userId" index="index"
-                         open="(" separator="," close=")">#{userId}
-                </foreach>
-            </if>
-            <if test="orgId != null and orgId != ''">
-                and a.org_id = #{orgId}
+            AND a.org_id = #{orgId} AND ap.user_id = #{userId}
+            <if test="filterParam.deptId != null and filterParam.deptId != ''">
+                and a.dept_id = #{filterParam.deptId}
             </if>
             <if test="filterParam.state != null">
                 and a.state = #{filterParam.state}
@@ -99,5 +89,24 @@
         LEFT JOIN approval_user au ON ap.user_id = au.id
         WHERE ap.approval_id = #{approvalId}
         ORDER BY ap.seq ASC
+    </select>
+    <select id="getAllWaitedMeApprovalList" resultMap="ApprovalMap">
+        SELECT ap.approval_id, a.user_id, ap.process_state, a.title, a.state,a.result, ap.seq, ap.process_time,
+        ap.reason, a.model_id,a.create_time,m.model_name
+        FROM approval_process ap,approval a,model m
+        <where>
+            ap. approval_id = a.id AND m.id = a.model_id AND ap.process_state = 0
+            AND a.org_id = #{orgId} AND ap.user_id = #{userId}
+            <if test="filterParam.deptId != null and filterParam.deptId != ''">
+                and a.dept_id = #{filterParam.deptId}
+            </if>
+            <if test="filterParam.state != null">
+                and a.state = #{filterParam.state}
+            </if>
+            <if test="filterParam.searchKey != null and filterParam.searchKey != ''">
+                and concat(a.id,a.title) like CONCAT('%',#{filterParam.searchKey},'%')
+            </if>
+        </where>
+        ORDER BY ap.process_time DESC
     </select>
 </mapper>

@@ -191,6 +191,12 @@ public class ApprovalServiceImpl extends BaseServiceImpl<ApprovalMapper, Approva
                                 } else {
                                     throw new ParameterErrorException("结束时间不能早于开始时间");
                                 }
+                            } else if (detailType == ApproConstants.NUMBER_TYPE_2) {
+                                if (detailValue.length() < 9) {
+                                    entity.setAttrValue(detailValue);
+                                } else {
+                                    throw new ParameterErrorException("请输入小于9位的数字");
+                                }
                             } else {
                                 entity.setAttrValue(EmojiFilterUtils.filterEmoji(detailValue));
                             }
