@@ -607,7 +607,9 @@ public class ApprovalApiServiceImpl implements IApprovalApiService {
                     Collections.sort(attrs, new Comparator<ApproveAttrVO>() {
                         @Override
                         public int compare(ApproveAttrVO o1, ApproveAttrVO o2) {
-
+                            if (o1.getNum() == null || o2.getNum() == null){
+                                return 0;
+                            }
                             if (o1.getNum() > o2.getNum()) {
                                 return 1;
                             } else if (o1.getNum() < o2.getNum()) {
