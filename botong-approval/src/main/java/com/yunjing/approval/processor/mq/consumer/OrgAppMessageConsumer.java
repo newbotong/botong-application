@@ -4,6 +4,7 @@ import com.yunjing.approval.processor.mq.configuration.OrgAppMessageConfiguratio
 import com.yunjing.approval.service.IOrgModelService;
 import com.yunjing.message.annotation.MessageConsumerDeclarable;
 import com.yunjing.message.annotation.MessageQueueDeclarable;
+import com.yunjing.message.declare.consumer.AbstractMessageConsumer;
 import com.yunjing.message.declare.consumer.AbstractMessageConsumerWithQueueDeclare;
 import com.yunjing.message.model.Message;
 import com.yunjing.message.share.org.OrgAppMessage;
@@ -21,13 +22,15 @@ import org.springframework.stereotype.Component;
 @Slf4j
 @Component
 @MessageConsumerDeclarable
-public class OrgAppMessageConsumer extends AbstractMessageConsumerWithQueueDeclare<Message, OrgAppMessageConfiguration> {
+public class OrgAppMessageConsumer extends AbstractMessageConsumer<Message> {
 
     @Autowired
     private IOrgModelService orgModelService;
 
+    private OrgAppMessageConfiguration configuration;
+
     public OrgAppMessageConsumer(OrgAppMessageConfiguration configuration) {
-        super(configuration);
+        this.configuration = configuration;
     }
 
     @Override
@@ -36,11 +39,20 @@ public class OrgAppMessageConsumer extends AbstractMessageConsumerWithQueueDecla
         if (messageObj instanceof OrgAppMessage) {
             OrgAppMessage appMessage = (OrgAppMessage) messageObj;
             String companyId = appMessage.getCompanyId();
+            if(appMessage.getMessageType() == null){
+                log.warn("消息接受缺少消息类型，MessageType " + appMessage.getMessageType());
+                return;
+            }
             if (StringUtils.isNotBlank(companyId) && appMessage.getMessageType().equals(OrgAppMessage.MessageType.INIT)) {
                 orgModelService.createApprovalModel(companyId);
             } else if (StringUtils.isNotBlank(companyId) && appMessage.getMessageType().equals(OrgAppMessage.MessageType.DISBAND)) {
                 orgModelService.deleteApprovalModel(companyId);
             }
         }
+    }
+
+    @Override
+    public String queueName() {
+        return configuration.queueName();
     }
 }
