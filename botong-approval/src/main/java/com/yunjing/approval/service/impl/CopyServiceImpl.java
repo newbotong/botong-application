@@ -22,7 +22,7 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 /**
- * @author roc
+ * @author
  * @date 2017/12/21
  */
 @Service
@@ -42,7 +42,7 @@ public class CopyServiceImpl extends BaseServiceImpl<CopyMapper, Copy> implement
      * @throws Exception
      */
     @Override
-    public List<UserVO> get(String modelId) throws Exception {
+    public List<UserVO> get(String modelId) {
         List<Copy> copyList = this.selectList(Condition.create().where("model_id={0}", modelId).orderBy("sort", true));
         List<UserVO> userVOList = new ArrayList<>();
         List<Long> ids = new ArrayList<>(copyList.size());
@@ -73,7 +73,7 @@ public class CopyServiceImpl extends BaseServiceImpl<CopyMapper, Copy> implement
     }
 
     @Override
-    public List<UserVO> getCopy(String companyId, String memberId, String modelId) throws Exception {
+    public List<UserVO> getCopy(String companyId, String memberId, String modelId) {
         List<Copy> copyList = this.selectList(Condition.create().where("model_id={0}", modelId).orderBy("sort", true));
         String[] deptIds = approvalUserService.selectById(memberId).getDeptId().split(",");
         List<ApprovalUser> userList = new ArrayList<>();
@@ -102,7 +102,7 @@ public class CopyServiceImpl extends BaseServiceImpl<CopyMapper, Copy> implement
             if (user.getAvatar() != null && !"".equals(user.getAvatar())) {
                 uservo.setProfile(user.getAvatar());
             } else {
-                uservo.setColor(user.getColor()!= null ? user.getColor(): ApproConstants.DEFAULT_COLOR);
+                uservo.setColor(user.getColor() != null ? user.getColor() : ApproConstants.DEFAULT_COLOR);
             }
             uservos.add(uservo);
         }
@@ -154,7 +154,7 @@ public class CopyServiceImpl extends BaseServiceImpl<CopyMapper, Copy> implement
      * @throws Exception
      */
     @Override
-    public boolean save(String modelId, String userIds) throws Exception {
+    public boolean save(String modelId, String userIds) {
 
         if (null == modelId) {
             throw new ParameterErrorException("模型主键不存在");

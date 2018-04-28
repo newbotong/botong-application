@@ -20,6 +20,17 @@ public class ApprovalSetController extends BaseController {
 
     @Autowired
     private IProcessService processService;
+    /**
+     * 获取设置的默认审批人及抄送人
+     *
+     * @param modelId 模型主键
+     * @return
+     * @throws Exception
+     */
+    @PostMapping("/get-default-process")
+    public ResponseEntityWrapper getDefaultApproverAndCopy(@RequestParam String modelId) throws Exception {
+        return success(processService.getDefaultApprover(modelId));
+    }
 
     /**
      * 设置默认审批人和抄送人

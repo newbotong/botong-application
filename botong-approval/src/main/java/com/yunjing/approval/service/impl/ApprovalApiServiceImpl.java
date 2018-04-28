@@ -579,11 +579,12 @@ public class ApprovalApiServiceImpl implements IApprovalApiService {
                 continue;
             }
             if (type == 7) {
+                Integer num = null;
                 ApproveAttrVO attrVo = new ApproveAttrVO(attr);
                 Map<Integer, List<ApproveAttrVO>> map = new HashMap<>(1);
                 for (ApproveAttributeVO childAttr : attrList) {
                     if (childAttr.getAttrParent() != null && childAttr.getAttrNum() != null && attr.getId().equals(childAttr.getAttrParent())) {
-                        Integer num = childAttr.getAttrNum();
+                        num = childAttr.getAttrNum();
                         List<ApproveAttrVO> childAttrs = map.get(num);
                         if (CollectionUtils.isEmpty(childAttrs)) {
                             childAttrs = new ArrayList<>();
@@ -597,21 +598,22 @@ public class ApprovalApiServiceImpl implements IApprovalApiService {
                     for (Map.Entry<Integer, List<ApproveAttrVO>> entry : map.entrySet()) {
                         details.add(new ApproveRowVO(entry.getKey(), entry.getValue()));
                     }
-                    Collections.sort(details, new Comparator<ApproveRowVO>() {
-                        @Override
-                        public int compare(ApproveRowVO o1, ApproveRowVO o2) {
-                            if (o1.getNum() > o2.getNum()) {
-                                return 1;
-                            } else if (o1.getNum() < o2.getNum()) {
-                                return -1;
-                            } else {
-                                return 0;
-                            }
-                        }
-                    });
                     attrVo.setContents(details);
+                    attrVo.setNum(num);
                 }
                 attrs.add(attrVo);
+                Collections.sort(attrs, new Comparator<ApproveAttrVO>() {
+                    @Override
+                    public int compare(ApproveAttrVO o1, ApproveAttrVO o2) {
+                        if (o1.getNum() > o2.getNum()) {
+                            return 1;
+                        } else if (o1.getNum() < o2.getNum()) {
+                            return -1;
+                        } else {
+                            return 0;
+                        }
+                    }
+                });
             } else {
                 attrs.add(new ApproveAttrVO(attr));
             }

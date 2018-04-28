@@ -44,12 +44,16 @@ public class TimingMessageConsumer extends AbstractMessageConsumerWithQueueDecla
         log.info("【企业初始化监听消息结果】orgId:{}", JSON.toJSONString(message));
         //1、先需要判断类型是否为初始化
         OrgAppMessage orgAppMessage = (OrgAppMessage) message.getObj();
-        if (orgAppMessage.getMessageType().equals(OrgAppMessage.MessageType.INIT)) {
-            String orgId = orgAppMessage.getCompanyId();
-            List<InfoCatalog> infoCatalogList = new InfoCatalog().selectList(new EntityWrapper<InfoCatalog>()
-                    .eq("is_delete", InfoConstant.LOGIC_DELETE_NORMAL).eq("org_id", orgId));
-            if (CollectionUtils.isEmpty(infoCatalogList)) {
-                infoCatalogService.initCompany(orgId);
+        if (null != orgAppMessage) {
+            if (null != orgAppMessage.getMessageType()) {
+                if (orgAppMessage.getMessageType().equals(OrgAppMessage.MessageType.INIT)) {
+                    String orgId = orgAppMessage.getCompanyId();
+                    List<InfoCatalog> infoCatalogList = new InfoCatalog().selectList(new EntityWrapper<InfoCatalog>()
+                            .eq("is_delete", InfoConstant.LOGIC_DELETE_NORMAL).eq("org_id", orgId));
+                    if (CollectionUtils.isEmpty(infoCatalogList)) {
+                        infoCatalogService.initCompany(orgId);
+                    }
+                }
             }
         }
     }
