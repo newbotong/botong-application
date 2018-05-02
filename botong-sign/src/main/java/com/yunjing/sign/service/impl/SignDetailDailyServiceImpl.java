@@ -67,7 +67,7 @@ public class SignDetailDailyServiceImpl extends ServiceImpl<SignDetailDailyMappe
         SignDetailVO result = new SignDetailVO();
         SignConfigDaily signConfigModel = new SignConfigDaily().selectOne(new EntityWrapper<SignConfigDaily>().eq("org_id", signDetailParam.getOrgId()).eq("is_delete", 0));
         if (signConfigModel != null) {
-            if (signConfigModel.getTimeStatus() == 1) {
+            if (signConfigModel.getTimeStatus() != null && signConfigModel.getTimeStatus() == 1) {
                 Date start = DateUtil.StringToDate(DateUtil.getDate(new Date()) + SignConstant.SEPARATE_STR_SPACE + signConfigModel.getStartTime(), DateStyle.YYYY_MM_DD_HH_MM);
                 Date end = DateUtil.StringToDate(DateUtil.getDate(new Date())  + SignConstant.SEPARATE_STR_SPACE + signConfigModel.getEndTime(), DateStyle.YYYY_MM_DD_HH_MM);
                 /**
