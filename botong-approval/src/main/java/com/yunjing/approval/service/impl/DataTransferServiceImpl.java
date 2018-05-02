@@ -10,7 +10,6 @@ import org.apache.commons.collections.CollectionUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import java.awt.*;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
@@ -45,18 +44,24 @@ public class DataTransferServiceImpl implements IDataTransferService {
     private IConditionService conditionService;
     @Autowired
     private UserIdToMemberId userIdToMemberId;
-
+    @Autowired
+    private IApprovalUserService approvalUserService;
 
     @Override
     public boolean addApproval(List<ApprovalDTO> dtoList) {
-        userIdToMemberId.init();
+        List<ApprovalUser> userList = approvalUserService.selectList(Condition.create());
         List<Approval> list = new ArrayList<>();
         for (ApprovalDTO dto : dtoList) {
             Approval approval = new Approval();
             approval.setId(dto.getId());
             approval.setOrgId(dto.getOrgId());
-            String memberId = userIdToMemberId.getMemberId(dto.getOrgId(), dto.getUserId());
-            approval.setUserId(memberId);
+            List<String> memberIds = userList.parallelStream().filter(approvalUser -> approvalUser.getOrgId().equals(dto.getOrgId()))
+                    .filter(approvalUser -> approvalUser.getPassportId().equals(dto.getUserId())).map(ApprovalUser::getId).collect(Collectors.toList());
+            if (memberIds != null && CollectionUtils.isNotEmpty(memberIds)) {
+                approval.setUserId(memberIds.get(0));
+            } else {
+                approval.setUserId(dto.getOrgId() + dto.getUserId());
+            }
             approval.setModelId(dto.getModelId());
             approval.setResult(dto.getResult());
             approval.setState(dto.getState());
@@ -74,18 +79,22 @@ public class DataTransferServiceImpl implements IDataTransferService {
     @Override
     public boolean addCopy(List<CopyDTO> dtoList) {
         boolean isInserted = false;
-        userIdToMemberId.init();
+        List<ApprovalUser> userList = approvalUserService.selectList(Condition.create());
         List<Copy> list = new ArrayList<>();
         List<OrgModel> orgModelDTOList = orgModelService.selectList(Condition.create());
         for (CopyDTO dto : dtoList) {
             Copy copy = new Copy();
             List<OrgModel> collect = orgModelDTOList.stream().filter(orgModelDTO -> orgModelDTO.getModelId().equals(dto.getModelId())).collect(Collectors.toList());
-            String memberId = "";
-            if(CollectionUtils.isNotEmpty(collect)){
+            if (CollectionUtils.isNotEmpty(collect)) {
                 String orgId = collect.get(0).getOrgId();
-                memberId = userIdToMemberId.getMemberId(orgId, dto.getUserId());
+                List<String> memberIds = userList.parallelStream().filter(approvalUser -> approvalUser.getOrgId().equals(orgId))
+                        .filter(approvalUser -> approvalUser.getPassportId().equals(dto.getUserId())).map(ApprovalUser::getId).collect(Collectors.toList());
+                if (memberIds != null && CollectionUtils.isNotEmpty(memberIds)) {
+                    copy.setUserId(memberIds.get(0));
+                } else {
+                    copy.setUserId(orgId + dto.getUserId());
+                }
             }
-            copy.setUserId(memberId);
             copy.setSort(dto.getSort());
             copy.setModelId(dto.getModelId());
             copy.setType(dto.getType());
@@ -109,10 +118,10 @@ public class DataTransferServiceImpl implements IDataTransferService {
             if (dto.getModelName().equals("立项申请")) {
                 continue;
             }
-            if (dto.getModelName().equals("工作指示")){
+            if (dto.getModelName().equals("工作指示")) {
                 continue;
             }
-            if(dto.getModelType() == 2 ){
+            if (dto.getModelType() == 2) {
                 ModelL modelL = new ModelL();
                 modelL.setId(dto.getModelId());
                 modelL.setVisibleRange("全部可见");
@@ -122,45 +131,45 @@ public class DataTransferServiceImpl implements IDataTransferService {
                 modelL.setIntroduce(dto.getIntroduce());
                 modelL.setIsDef(dto.getIsDef());
                 modelL.setModelName(dto.getModelName());
-                if("请假".equals(modelL.getModelName())){
+                if ("请假".equals(modelL.getModelName())) {
                     modelL.setLogo("http://192.168.1.218:8082/group1/M00/00/16/wKgK6FrLLK-EZRAKAAAAAADM1Po171.png");
-                }else if("报销".equals(modelL.getModelName())){
+                } else if ("报销".equals(modelL.getModelName())) {
                     modelL.setLogo("http://192.168.1.218:8082/group1/M00/00/16/wKgK6FrLKgOECgqqAAAAAMxO4pE961.png");
-                }else if("出差".equals(modelL.getModelName())){
+                } else if ("出差".equals(modelL.getModelName())) {
                     modelL.setLogo("http://192.168.1.218:8082/group1/M00/00/16/wKgK6FrLKxSEEZSIAAAAAG9PwlQ492.png");
-                }else if("外出".equals(modelL.getModelName())){
+                } else if ("外出".equals(modelL.getModelName())) {
                     modelL.setLogo("http://192.168.1.218:8082/group1/M00/00/16/wKgK6FrLLSGER-r6AAAAALJcqiM336.png");
-                }else if("物品领用".equals(modelL.getModelName())){
+                } else if ("物品领用".equals(modelL.getModelName())) {
                     modelL.setLogo("http://192.168.1.218:8082/group1/M00/00/16/wKgK6FrLLOmEJ3OUAAAAAEYArX0949.png");
-                }else if("采购".equals(modelL.getModelName())){
+                } else if ("采购".equals(modelL.getModelName())) {
                     modelL.setLogo("http://192.168.1.218:8082/group1/M00/00/16/wKgK6FrLKuqEZ77nAAAAAFWicdM495.png");
-                }else if("通用审批".equals(modelL.getModelName())){
+                } else if ("通用审批".equals(modelL.getModelName())) {
                     modelL.setLogo("http://192.168.1.218:8082/group1/M00/00/16/wKgK6FrLLOmEJ3OUAAAAAEYArX0949.png");
-                }else if("转正申请".equals(modelL.getModelName())){
+                } else if ("转正申请".equals(modelL.getModelName())) {
                     modelL.setLogo("http://192.168.1.218:8082/group1/M00/00/16/wKgK6FrLLhSEAXIJAAAAAOwQlHI173.png");
-                }else if("离职申请".equals(modelL.getModelName())){
+                } else if ("离职申请".equals(modelL.getModelName())) {
                     modelL.setLogo("http://192.168.1.218:8082/group1/M00/00/16/wKgK6FrLLByEDtjlAAAAAHDza6I863.png");
-                }else if("用车申请".equals(modelL.getModelName())){
+                } else if ("用车申请".equals(modelL.getModelName())) {
                     modelL.setLogo("http://192.168.1.218:8082/group1/M00/00/16/wKgK6FrLLX2EXFtjAAAAALHMY78501.png");
-                }else if("用印申请".equals(modelL.getModelName())){
+                } else if ("用印申请".equals(modelL.getModelName())) {
                     modelL.setLogo("http://192.168.1.218:8082/group1/M00/00/16/wKgK6FrLLaKEaK0GAAAAAIPoYq8986.png");
-                }else if("礼品领用申请".equals(modelL.getModelName())){
+                } else if ("礼品领用申请".equals(modelL.getModelName())) {
                     modelL.setLogo("http://192.168.1.218:8082/group1/M00/00/16/wKgK6FrLLE6Ee-NAAAAAAHUICl8552.png");
-                }else if("合同审批".equals(modelL.getModelName())){
+                } else if ("合同审批".equals(modelL.getModelName())) {
                     modelL.setLogo("http://192.168.1.218:8082/group1/M00/00/16/wKgK6FrLK4qETVVAAAAAAAcnIfo108.png");
-                }else if("招聘申请".equals(modelL.getModelName())){
+                } else if ("招聘申请".equals(modelL.getModelName())) {
                     modelL.setLogo("http://192.168.1.218:8082/group1/M00/00/16/wKgK6FrLLeCEfwhvAAAAAGIWFno144.png");
-                }else if("备用金申请".equals(modelL.getModelName())){
+                } else if ("备用金申请".equals(modelL.getModelName())) {
                     modelL.setLogo("http://192.168.1.218:8082/group1/M00/00/16/wKgK6FrLKlGEa1XLAAAAABF2Nvs138.png");
-                }else if("部门协作".equals(modelL.getModelName())){
+                } else if ("部门协作".equals(modelL.getModelName())) {
                     modelL.setLogo("http://192.168.1.218:8082/group1/M00/00/16/wKgK6FrLKpaET2ODAAAAAA571Pw532.png");
-                }else if("发文申请".equals(modelL.getModelName())){
+                } else if ("发文申请".equals(modelL.getModelName())) {
                     modelL.setLogo("http://192.168.1.218:8082/group1/M00/00/16/wKgK6FrLK1CEEzsrAAAAAMhfmC8675.png");
-                }else if("名片申请".equals(modelL.getModelName())){
+                } else if ("名片申请".equals(modelL.getModelName())) {
                     modelL.setLogo("http://192.168.1.218:8082/group1/M00/00/16/wKgK6FrLLIeEShe2AAAAAA_tcvI932.png");
-                }else if("加班申请".equals(modelL.getModelName())){
+                } else if ("加班申请".equals(modelL.getModelName())) {
                     modelL.setLogo("http://192.168.1.218:8082/group1/M00/00/16/wKgK6FrLK7SEROcaAAAAACpcZZU206.png");
-                }else if("接待申请".equals(modelL.getModelName())){
+                } else if ("接待申请".equals(modelL.getModelName())) {
                     modelL.setLogo("http://192.168.1.218:8082/group1/M00/00/16/wKgK6FrLK_CEA6-hAAAAAAm_yMk601.png");
                 }
                 modelL.setProvider(dto.getProvider());
@@ -306,7 +315,7 @@ public class DataTransferServiceImpl implements IDataTransferService {
     @Override
     public boolean addApprovalProcess(List<ApprovalProcessDTO> dtoList) {
         boolean isInserted = false;
-        userIdToMemberId.init();
+        List<ApprovalUser> userList = approvalUserService.selectList(Condition.create());
         List<ApprovalProcess> processList = new ArrayList<>();
         List<Approval> approvalList = approvalService.selectList(Condition.create());
         for (ApprovalProcessDTO dto : dtoList) {
@@ -317,12 +326,16 @@ public class DataTransferServiceImpl implements IDataTransferService {
             approvalProcess.setApprovalId(dto.getApprovalId());
             approvalProcess.setSeq(dto.getSeq());
             List<Approval> approvals = approvalList.stream().filter(approval -> approval.getId().equals(dto.getApprovalId())).collect(Collectors.toList());
-            String memberId = "";
-            if(CollectionUtils.isNotEmpty(approvals)){
+            if (CollectionUtils.isNotEmpty(approvals)) {
                 String orgId = approvals.get(0).getOrgId();
-                memberId = userIdToMemberId.getMemberId(orgId, dto.getUserId());
+                List<String> memberIds = userList.parallelStream().filter(approvalUser -> approvalUser.getOrgId().equals(orgId))
+                        .filter(approvalUser -> approvalUser.getPassportId().equals(dto.getUserId())).map(ApprovalUser::getId).collect(Collectors.toList());
+                if (memberIds != null && CollectionUtils.isNotEmpty(memberIds)) {
+                    approvalProcess.setUserId(memberIds.get(0));
+                } else {
+                    approvalProcess.setUserId(orgId + dto.getUserId());
+                }
             }
-            approvalProcess.setUserId(memberId);
             approvalProcess.setReason(dto.getReason());
             processList.add(approvalProcess);
         }
@@ -371,9 +384,9 @@ public class DataTransferServiceImpl implements IDataTransferService {
             process.setConditionId(dto.getConditions());
             processeList.add(process);
         }
-        if(!processeList.isEmpty()){
+        if (!processeList.isEmpty()) {
             isInserted = processService.insertBatch(processeList);
-            if(!isInserted){
+            if (!isInserted) {
                 throw new InsertMessageFailureException("批量迁移approval_sets_process表数据失败");
             }
         }
@@ -383,7 +396,7 @@ public class DataTransferServiceImpl implements IDataTransferService {
     @Override
     public boolean addCopyS(List<CopySDTO> dtoList) {
         boolean isInserted = false;
-        userIdToMemberId.init();
+        List<ApprovalUser> userList = approvalUserService.selectList(Condition.create());
         List<Approval> approvalList = approvalService.selectList(Condition.create());
         List<Copys> copysList = new ArrayList<>();
         for (CopySDTO sdto : dtoList) {
@@ -393,12 +406,16 @@ public class DataTransferServiceImpl implements IDataTransferService {
             copys.setApprovalId(sdto.getApprovalId());
             copys.setId(sdto.getCopySId());
             List<Approval> approvals = approvalList.stream().filter(approval -> approval.getId().equals(sdto.getApprovalId())).collect(Collectors.toList());
-            String memberId = "";
-            if(CollectionUtils.isNotEmpty(approvals)){
+            if (CollectionUtils.isNotEmpty(approvals)) {
                 String orgId = approvals.get(0).getOrgId();
-                memberId = userIdToMemberId.getMemberId(orgId, sdto.getUserId());
+                List<String> memberIds = userList.parallelStream().filter(approvalUser -> approvalUser.getOrgId().equals(orgId))
+                        .filter(approvalUser -> approvalUser.getPassportId().equals(sdto.getUserId())).map(ApprovalUser::getId).collect(Collectors.toList());
+                if (memberIds != null && CollectionUtils.isNotEmpty(memberIds)) {
+                    copys.setUserId(memberIds.get(0));
+                } else {
+                    copys.setUserId(orgId + sdto.getUserId());
+                }
             }
-            copys.setUserId(memberId);
             copysList.add(copys);
         }
         if (!copysList.isEmpty()) {
@@ -425,9 +442,9 @@ public class DataTransferServiceImpl implements IDataTransferService {
             attr.setAttrParent(dto.getAttrParent());
             attrList.add(attr);
         }
-        if (!attrList.isEmpty()){
+        if (!attrList.isEmpty()) {
             isInserted = approvalAttrService.insertBatch(attrList);
-            if (!isInserted){
+            if (!isInserted) {
                 throw new InsertMessageFailureException("批量迁移approval_attr表数据失败");
             }
         }

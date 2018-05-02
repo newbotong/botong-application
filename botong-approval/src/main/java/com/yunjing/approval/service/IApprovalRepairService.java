@@ -26,4 +26,12 @@ public interface IApprovalRepairService extends IBaseService<Approval> {
      * @return 审批列表
      */
     List<Approval> repairFinishTime(String companyId);
+
+    /**
+     * 修复审批所属部门id数据
+     *
+     * @param companyId 公司id
+     * @return 审批列表
+     */
+    List<Approval> repairDeptId(String companyId);
 }

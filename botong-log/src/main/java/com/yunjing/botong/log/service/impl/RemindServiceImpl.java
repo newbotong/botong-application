@@ -180,27 +180,25 @@ public class RemindServiceImpl extends BaseServiceImpl<RemindMapper, RemindEntit
         taskId = appCenterService.setTask(param);
 
         if (taskId != null) {
-            boolean flag = updateByMemberIdAndAppId(taskId, remind.getMemberId(), appId);
-            if (flag) {
-                remind.setTaskId(taskId);
-                String value = gson.toJson(remind);
+            updateByMemberIdAndAppId(taskId, remind.getMemberId(), appId);
+            remind.setTaskId(taskId);
+            String value = gson.toJson(remind);
 
-                switch (remind.getSubmitType()) {
-                    case 1:
-                        // 日报
-                        redisTemplate.opsForHash().put(LogConstant.LOG_SET_DAY_REMIND + appId, key, value);
-                        break;
-                    case 2:
-                        // 周报
-                        redisTemplate.opsForHash().put(LogConstant.LOG_SET_WEEK_REMIND + appId, key, value);
-                        break;
-                    case 3:
-                        // 月报
-                        redisTemplate.opsForHash().put(LogConstant.LOG_SET_MONTH_REMIND + appId, key, value);
-                        break;
-                    default:
-                        break;
-                }
+            switch (remind.getSubmitType()) {
+                case 1:
+                    // 日报
+                    redisTemplate.opsForHash().put(LogConstant.LOG_SET_DAY_REMIND + appId, key, value);
+                    break;
+                case 2:
+                    // 周报
+                    redisTemplate.opsForHash().put(LogConstant.LOG_SET_WEEK_REMIND + appId, key, value);
+                    break;
+                case 3:
+                    // 月报
+                    redisTemplate.opsForHash().put(LogConstant.LOG_SET_MONTH_REMIND + appId, key, value);
+                    break;
+                default:
+                    throw new BaseRuntimeException(301, "请设置正确的日志提醒类型！");
             }
         } else {
             throw new BaseRuntimeException(StatusCode.SEND_REQUEST_ERROR.getStatusCode(), "设置任务失败！");
