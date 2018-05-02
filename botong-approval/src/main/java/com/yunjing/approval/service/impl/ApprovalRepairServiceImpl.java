@@ -3,15 +3,13 @@ package com.yunjing.approval.service.impl;
 import com.baomidou.mybatisplus.mapper.Condition;
 import com.baomidou.mybatisplus.service.impl.ServiceImpl;
 import com.common.mybatis.service.impl.BaseServiceImpl;
+import com.yunjing.approval.dao.mapper.ApprovalAttrMapper;
 import com.yunjing.approval.dao.mapper.ApprovalMapper;
-import com.yunjing.approval.model.entity.Approval;
-import com.yunjing.approval.model.entity.ApprovalProcess;
-import com.yunjing.approval.model.entity.ApprovalUser;
-import com.yunjing.approval.model.entity.ModelL;
-import com.yunjing.approval.service.IApprovalProcessService;
-import com.yunjing.approval.service.IApprovalRepairService;
-import com.yunjing.approval.service.IApprovalUserService;
-import com.yunjing.approval.service.IModelService;
+import com.yunjing.approval.dao.mapper.ModelItemMapper;
+import com.yunjing.approval.model.entity.*;
+import com.yunjing.approval.model.vo.ApproveAttributeVO;
+import com.yunjing.approval.service.*;
+import com.yunjing.mommon.global.exception.UpdateMessageFailureException;
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.lang.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -22,6 +20,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 /**
  * @author 刘小鹏
@@ -33,12 +32,19 @@ public class ApprovalRepairServiceImpl extends BaseServiceImpl<ApprovalMapper, A
 
     @Autowired
     private IModelService modelService;
+    @Autowired
+    private ModelItemMapper modelItemMapper;
 
     @Autowired
     private IApprovalUserService approvalUserService;
 
     @Autowired
     private IApprovalProcessService approvalProcessService;
+
+    @Autowired
+    private ApprovalAttrMapper attrMapper;
+    @Autowired
+    private IApprovalAttrService attrService;
 
     @Override
     public List<Approval> repairTitle(String companyId) {
@@ -108,4 +114,47 @@ public class ApprovalRepairServiceImpl extends BaseServiceImpl<ApprovalMapper, A
         }
         return null;
     }
+
+    @Override
+    public List<Approval> repairDeptId(String companyId) {
+        List<Approval> approvalList = this.selectList(Condition.create().where("org_id={0}",companyId));
+        List<ModelItem> modelItemList = modelItemMapper.selectAll(companyId);
+        List<ApprovalUser> userList = approvalUserService.selectList(Condition.create().where("org_id={0}", companyId));
+        List<ApprovalAttr> attrList = attrMapper.selectAttrByOrgId(companyId);
+        for (Approval approval : approvalList) {
+            List<String> deptIds = userList.parallelStream().filter(approvalUser -> approvalUser.getOrgId().equals(approval.getOrgId()))
+                    .filter(approvalUser -> approvalUser.getId().equals(approval.getUserId()))
+                    .map(ApprovalUser::getDeptId).collect(Collectors.toList());
+            if (CollectionUtils.isNotEmpty(deptIds)){
+                String[] deptId = deptIds.get(0).split(",");
+                approval.setDeptId(deptId[0]);
+            }
+            List<Integer> modelVersions = modelItemList.parallelStream().filter(modelItem -> modelItem.getModelId().equals(approval.getModelId())).map(ModelItem::getItemVersion).collect(Collectors.toList());
+            List<ModelItem> items = modelItemList.parallelStream().filter(modelItem -> modelItem.getModelId().equals(approval.getModelId())).collect(Collectors.toList());
+            if (CollectionUtils.isNotEmpty(modelVersions)){
+                approval.setModelVersion(modelVersions.get(0));
+            }
+            if (CollectionUtils.isNotEmpty(items)){
+                for (ModelItem item : items) {
+                    attrList.parallelStream().filter(approvalAttr -> approvalAttr.getApprovalId().equals(approval.getId()))
+                            .filter(approvalAttr -> approvalAttr.getAttrName().equals(item.getField()))
+                            .forEach(approvalAttr -> approvalAttr.setAttrType(item.getDataType()));
+                }
+            }
+        }
+        if(CollectionUtils.isNotEmpty(approvalList)){
+            boolean b = this.updateBatchById(approvalList);
+            if (!b){
+                throw new UpdateMessageFailureException("修复所属部门id失败");
+            }
+        }
+        if (CollectionUtils.isNotEmpty(attrList)){
+            boolean b1 = attrService.updateBatchById(attrList);
+            if (!b1){
+                throw new UpdateMessageFailureException("修复所属部门id失败");
+            }
+        }
+        return approvalList;
+    }
+
 }
