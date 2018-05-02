@@ -43,6 +43,15 @@ public class ApprovalRepairController extends BaseController {
     public ResponseEntityWrapper finish(@RequestParam("companyId") String companyId) {
         return success(approvalRepairService.repairFinishTime(companyId));
     }
-
+    /**
+     * 修复审批所属部门/版本号/审批详情数据
+     *
+     * @param companyId 企业主键
+     * @return 审批列表
+     */
+    @PostMapping("/dept")
+    public ResponseEntityWrapper repairDeptId(@RequestParam("companyId") String companyId) {
+        return success(approvalRepairService.repairDeptId(companyId));
+    }
 
 }

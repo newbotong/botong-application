@@ -3,7 +3,7 @@
 <mapper namespace="com.yunjing.approval.dao.mapper.ApprovalAttrMapper">
 
     <select id="selectAttrByOrgId" resultType="com.yunjing.approval.model.entity.ApprovalAttr">
-        select attr.id as attrId,attr.attr_name as attrName,attr.attr_parent as attrParent,attr.attr_value as attrValue,
+        select attr.id as id,attr.attr_name as attrName,attr.attr_parent as attrParent,attr.attr_value as attrValue,
         attr.attr_num as attrNum,attr.attr_type as attrType,attr.approval_id as approvalId
         from approval_attr attr
         join approval app on app.id = attr.approval_id
