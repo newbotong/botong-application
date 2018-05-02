@@ -12,6 +12,7 @@ import com.yunjing.approval.service.IApprovalProcessService;
 import com.yunjing.approval.service.IApprovalRepairService;
 import com.yunjing.approval.service.IApprovalUserService;
 import com.yunjing.approval.service.IModelService;
+import com.yunjing.mommon.global.exception.UpdateMessageFailureException;
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.lang.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -107,5 +108,25 @@ public class ApprovalRepairServiceImpl extends BaseServiceImpl<ApprovalMapper, A
             return entityList;
         }
         return null;
+    }
+
+    @Override
+    public List<Approval> repairDeptId(String companyId) {
+        List<Approval> approvalList = this.selectList(Condition.create().where("org_id={0}",companyId));
+        List<ApprovalUser> userList = approvalUserService.selectList(Condition.create().where("org_id={0}", companyId));
+        for (Approval approval : approvalList) {
+            List<String> deptIds = userList.parallelStream().filter(approvalUser -> approvalUser.getOrgId().equals(approval.getOrgId()))
+                    .filter(approvalUser -> approvalUser.getId().equals(approval.getUserId()))
+                    .map(ApprovalUser::getDeptId).collect(Collectors.toList());
+            if (CollectionUtils.isNotEmpty(deptIds)){
+                String[] deptId = deptIds.get(0).split(",");
+                approval.setDeptId(deptId[0]);
+            }
+        }
+        boolean b = this.updateBatchById(approvalList);
+        if (!b){
+            throw new UpdateMessageFailureException("修复所属部门id失败");
+        }
+        return approvalList;
     }
 }

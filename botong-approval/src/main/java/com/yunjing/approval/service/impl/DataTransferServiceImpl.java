@@ -79,18 +79,22 @@ public class DataTransferServiceImpl implements IDataTransferService {
     @Override
     public boolean addCopy(List<CopyDTO> dtoList) {
         boolean isInserted = false;
-        userIdToMemberId.init();
+        List<ApprovalUser> userList = approvalUserService.selectList(Condition.create());
         List<Copy> list = new ArrayList<>();
         List<OrgModel> orgModelDTOList = orgModelService.selectList(Condition.create());
         for (CopyDTO dto : dtoList) {
             Copy copy = new Copy();
             List<OrgModel> collect = orgModelDTOList.stream().filter(orgModelDTO -> orgModelDTO.getModelId().equals(dto.getModelId())).collect(Collectors.toList());
-            String memberId = "";
             if (CollectionUtils.isNotEmpty(collect)) {
                 String orgId = collect.get(0).getOrgId();
-                memberId = userIdToMemberId.getMemberId(orgId, dto.getUserId());
+                List<String> memberIds = userList.parallelStream().filter(approvalUser -> approvalUser.getOrgId().equals(orgId))
+                        .filter(approvalUser -> approvalUser.getPassportId().equals(dto.getUserId())).map(ApprovalUser::getId).collect(Collectors.toList());
+                if (memberIds != null && CollectionUtils.isNotEmpty(memberIds)) {
+                    copy.setUserId(memberIds.get(0));
+                } else {
+                    copy.setUserId(orgId + dto.getUserId());
+                }
             }
-            copy.setUserId(memberId);
             copy.setSort(dto.getSort());
             copy.setModelId(dto.getModelId());
             copy.setType(dto.getType());
@@ -311,7 +315,7 @@ public class DataTransferServiceImpl implements IDataTransferService {
     @Override
     public boolean addApprovalProcess(List<ApprovalProcessDTO> dtoList) {
         boolean isInserted = false;
-        userIdToMemberId.init();
+        List<ApprovalUser> userList = approvalUserService.selectList(Condition.create());
         List<ApprovalProcess> processList = new ArrayList<>();
         List<Approval> approvalList = approvalService.selectList(Condition.create());
         for (ApprovalProcessDTO dto : dtoList) {
@@ -322,12 +326,16 @@ public class DataTransferServiceImpl implements IDataTransferService {
             approvalProcess.setApprovalId(dto.getApprovalId());
             approvalProcess.setSeq(dto.getSeq());
             List<Approval> approvals = approvalList.stream().filter(approval -> approval.getId().equals(dto.getApprovalId())).collect(Collectors.toList());
-            String memberId = "";
             if (CollectionUtils.isNotEmpty(approvals)) {
                 String orgId = approvals.get(0).getOrgId();
-                memberId = userIdToMemberId.getMemberId(orgId, dto.getUserId());
+                List<String> memberIds = userList.parallelStream().filter(approvalUser -> approvalUser.getOrgId().equals(orgId))
+                        .filter(approvalUser -> approvalUser.getPassportId().equals(dto.getUserId())).map(ApprovalUser::getId).collect(Collectors.toList());
+                if (memberIds != null && CollectionUtils.isNotEmpty(memberIds)) {
+                    approvalProcess.setUserId(memberIds.get(0));
+                } else {
+                    approvalProcess.setUserId(orgId + dto.getUserId());
+                }
             }
-            approvalProcess.setUserId(memberId);
             approvalProcess.setReason(dto.getReason());
             processList.add(approvalProcess);
         }
@@ -388,7 +396,7 @@ public class DataTransferServiceImpl implements IDataTransferService {
     @Override
     public boolean addCopyS(List<CopySDTO> dtoList) {
         boolean isInserted = false;
-        userIdToMemberId.init();
+        List<ApprovalUser> userList = approvalUserService.selectList(Condition.create());
         List<Approval> approvalList = approvalService.selectList(Condition.create());
         List<Copys> copysList = new ArrayList<>();
         for (CopySDTO sdto : dtoList) {
@@ -398,12 +406,16 @@ public class DataTransferServiceImpl implements IDataTransferService {
             copys.setApprovalId(sdto.getApprovalId());
             copys.setId(sdto.getCopySId());
             List<Approval> approvals = approvalList.stream().filter(approval -> approval.getId().equals(sdto.getApprovalId())).collect(Collectors.toList());
-            String memberId = "";
             if (CollectionUtils.isNotEmpty(approvals)) {
                 String orgId = approvals.get(0).getOrgId();
-                memberId = userIdToMemberId.getMemberId(orgId, sdto.getUserId());
+                List<String> memberIds = userList.parallelStream().filter(approvalUser -> approvalUser.getOrgId().equals(orgId))
+                        .filter(approvalUser -> approvalUser.getPassportId().equals(sdto.getUserId())).map(ApprovalUser::getId).collect(Collectors.toList());
+                if (memberIds != null && CollectionUtils.isNotEmpty(memberIds)) {
+                    copys.setUserId(memberIds.get(0));
+                } else {
+                    copys.setUserId(orgId + sdto.getUserId());
+                }
             }
-            copys.setUserId(memberId);
             copysList.add(copys);
         }
         if (!copysList.isEmpty()) {
