@@ -2,6 +2,7 @@ package com.yunjing.approval.api;
 
 import com.yunjing.approval.processor.task.async.ApprovalPushTask;
 import com.yunjing.approval.service.IApprovalUserService;
+import com.yunjing.approval.service.IModelCategoryService;
 import com.yunjing.approval.service.IOrgModelService;
 import com.yunjing.mommon.base.BaseController;
 import com.yunjing.mommon.wrapper.ResponseEntityWrapper;
@@ -21,6 +22,8 @@ public class TestController extends BaseController {
 
     @Autowired
     private IOrgModelService orgModelService;
+    @Autowired
+    private IModelCategoryService categoryService;
 
     /**
      * 审批模板初始化
@@ -59,12 +62,14 @@ public class TestController extends BaseController {
         return success();
     }
 
-    @Autowired
-    private IApprovalUserService approvalUserService;
-
-    @GetMapping("/test")
+    /**
+     * 给旧数据初始化分组信息并更新model表分组字段信息
+     * @param companyId 公司id
+     * @return
+     */
+    @GetMapping("/test/init/category")
     public ResponseEntityWrapper test(@RequestParam("companyId") String companyId) {
 
-        return success(approvalUserService.updateContract(companyId));
+        return success(categoryService.initModelCategory(companyId));
     }
 }

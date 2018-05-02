@@ -48,4 +48,11 @@ public interface IModelCategoryService extends IBaseService<ModelCategory> {
      * @return  List<ModelCategoryVO>
      */
     List<ModelCategoryVO> getCategoryList(String companyId);
+
+    /**
+     * 给旧数据初始化分组信息并更新model表分组字段信息
+     * @param companyId 公司id
+     * @return
+     */
+    boolean initModelCategory(String companyId);
 }

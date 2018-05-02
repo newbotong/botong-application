@@ -57,6 +57,7 @@ public class DataTransferServiceImpl implements IDataTransferService {
             approval.setOrgId(dto.getOrgId());
             String memberId = userIdToMemberId.getMemberId(dto.getOrgId(), dto.getUserId());
             approval.setUserId(memberId);
+            memberId = "";
             approval.setModelId(dto.getModelId());
             approval.setResult(dto.getResult());
             approval.setState(dto.getState());
