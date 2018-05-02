@@ -55,6 +55,12 @@ public class Member implements Serializable {
     protected String name;
 
     /**
+     * 真实姓名在1.0时候被重置为nick，
+     * 从提醒进去查看日志详情的时候，又需要真实姓名，所以修改此处
+     */
+    protected String memberName;
+
+    /**
      * 创建时间
      */
     protected Long createTime;
@@ -101,4 +107,9 @@ public class Member implements Serializable {
      * 头像颜色
      */
     private String color;
+
+    @JSONField(name="name")
+    public void setMemberName(String memberName) {
+        this.memberName = memberName;
+    }
 }

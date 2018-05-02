@@ -63,7 +63,7 @@ public class LogDetailDao extends BaseMongoDaoImpl<LogDetail> {
      * @return
      */
     public WriteResult updateReadByLogId(String logId, String userId) {
-        Query query = findOne(logId, userId);
+        Query query = findOne(logId, userId, LogConstant.BOTONG_ONE_STR);
         return  updateQuery(query, userId);
     }
 
@@ -102,8 +102,11 @@ public class LogDetailDao extends BaseMongoDaoImpl<LogDetail> {
      * @param userId
      * @return
      */
-    private Query findOne(String logId, String userId) {
-        Query query = new Query(Criteria.where("logId").is(logId).and("memberId").ne(userId));
+    private Query findOne(String logId, String userId, String isCompare) {
+        Query query = new Query(Criteria.where("logId").is(logId));
+        if (StringUtils.isNotEmpty(isCompare)) {
+            query = new Query(Criteria.where("logId").is(logId).and("memberId").ne(userId));
+        }
         return query;
     }
 
@@ -114,7 +117,7 @@ public class LogDetailDao extends BaseMongoDaoImpl<LogDetail> {
      * @return
      */
     public LogDetail findByLogId(String logId, String userId){
-        return findOne(findOne(logId, userId));
+        return findOne(findOne(logId, userId,""));
     }
 
     /**
@@ -154,7 +157,7 @@ public class LogDetailDao extends BaseMongoDaoImpl<LogDetail> {
      * @return
      */
     public WriteResult delete(String logId, String userId) {
-        Query query = findOne(logId, userId);
+        Query query = findOne(logId, userId,"");
         BasicDBObject basicDBObject = new BasicDBObject();
         basicDBObject.put("$set", new BasicDBObject("deleteStatus", LogConstant.BOTONG_ONE_NUM));
         Update update = new BasicUpdate(basicDBObject);
