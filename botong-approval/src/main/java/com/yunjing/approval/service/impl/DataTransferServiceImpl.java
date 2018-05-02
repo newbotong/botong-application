@@ -442,9 +442,6 @@ public class DataTransferServiceImpl implements IDataTransferService {
                         Long time1 = DateUtil.StringToDate(attrValue[0], DateStyle.YYYY_MM_DD_HH_MM_SS).getTime();
                         Long time2 = DateUtil.StringToDate(attrValue[1], DateStyle.YYYY_MM_DD_HH_MM_SS).getTime();
                         attr.setAttrValue(time1.toString() + "," + time2.toString());
-                    } else {
-                        Long time = DateUtil.StringToDate(attrValue[0], DateStyle.YYYY_MM_DD_HH_MM_SS).getTime();
-                        attr.setAttrValue(time.toString());
                     }
                 } else {
                     attr.setAttrValue(dto.getAttrValue());
