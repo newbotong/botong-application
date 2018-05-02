@@ -435,20 +435,7 @@ public class DataTransferServiceImpl implements IDataTransferService {
         for (ApprovalAttrDTO dto : dtoList) {
             ApprovalAttr attr = new ApprovalAttr();
             attr.setId(dto.getAttrId());
-            if (StringUtils.isNotBlank(dto.getAttrValue())) {
-                String[] attrValue = dto.getAttrValue().split(",");
-                if (attrValue.length > 0 && DateUtil.isDate(attrValue[0])) {
-                    if (attrValue.length > 1) {
-                        Long time1 = DateUtil.StringToDate(attrValue[0], DateStyle.YYYY_MM_DD_HH_MM_SS).getTime();
-                        Long time2 = DateUtil.StringToDate(attrValue[1], DateStyle.YYYY_MM_DD_HH_MM_SS).getTime();
-                        attr.setAttrValue(time1.toString() + "," + time2.toString());
-                    }
-                } else {
-                    attr.setAttrValue(dto.getAttrValue());
-                }
-            }else {
-                attr.setAttrValue(dto.getAttrValue());
-            }
+            attr.setAttrValue(dto.getAttrValue());
             attr.setApprovalId(dto.getApprovalId());
             attr.setAttrName(dto.getAttrName());
             attr.setAttrType(dto.getAttrType());
