@@ -16,6 +16,8 @@ import com.yunjing.mommon.global.exception.MessageNotExitException;
 import com.yunjing.mommon.global.exception.MissingRequireFieldException;
 import com.yunjing.mommon.global.exception.UpdateMessageFailureException;
 import com.yunjing.mommon.utils.IDUtils;
+import org.apache.commons.collections.CollectionUtils;
+import org.apache.commons.lang.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -141,5 +143,70 @@ public class ModelCategoryServiceImpl extends BaseServiceImpl<ModelCategoryMappe
         });
 
         return modelCategoryVOList;
+    }
+
+    @Override
+    public boolean initModelCategory(String companyId) {
+        boolean isUpdated = false;
+        // 查询系统分组
+        List<ModelCategory> defaultCategoryList = this.selectList(Condition.create().where("is_default={0}", 1));
+        List<ModelCategory> newCategoryList = new ArrayList<>();
+        for (ModelCategory category : defaultCategoryList) {
+            ModelCategory newCategory = new ModelCategory();
+            newCategory.setId(IDUtils.uuid());
+            newCategory.setOrgId(companyId);
+            newCategory.setSort(category.getSort());
+            newCategory.setCategoryName(category.getCategoryName());
+            newCategory.setIsDefault(0);
+            newCategory.setCreateTime(category.getCreateTime());
+            newCategory.setUpdateTime(category.getUpdateTime());
+            newCategoryList.add(newCategory);
+        }
+        boolean insertBatch = this.insertBatch(newCategoryList);
+        if (!insertBatch) {
+            logger.error("批量插入分组失败");
+        }
+        List<ModelL> modelLList = modelService.findModel(companyId);
+        // 将已经初始化好的model进行分组
+        // 出勤休假
+        String modelName1 = "请假,出差，外出，加班";
+        // 人事
+        String modelName2 = "转正申请，招聘申请";
+        // 行政
+        String modelName3 = "用车申请，物品领用，用印申请，通用审批";
+        // 财务
+        String modelName4 = "报销，备用金申请";
+        modelLList.forEach(modelL -> {
+            if (StringUtils.isBlank(modelL.getCategoryId())) {
+                if (modelName1.contains(modelL.getModelName())) {
+                    List<String> ids = newCategoryList.stream().filter(modelCategory -> modelCategory.getCategoryName().equals("出勤休假")).map(ModelCategory::getId).collect(Collectors.toList());
+                    if (CollectionUtils.isNotEmpty(ids)) {
+                        modelL.setCategoryId(ids.get(0));
+                    }
+                } else if (modelName2.contains(modelL.getModelName())) {
+                    List<String> ids = newCategoryList.stream().filter(modelCategory -> modelCategory.getCategoryName().equals("人事")).map(ModelCategory::getId).collect(Collectors.toList());
+                    if (CollectionUtils.isNotEmpty(ids)) {
+                        modelL.setCategoryId(ids.get(0));
+                    }
+                } else if (modelName3.contains(modelL.getModelName())) {
+                    List<String> ids = newCategoryList.stream().filter(modelCategory -> modelCategory.getCategoryName().equals("行政")).map(ModelCategory::getId).collect(Collectors.toList());
+                    if (CollectionUtils.isNotEmpty(ids)) {
+                        modelL.setCategoryId(ids.get(0));
+                    }
+                } else if (modelName4.contains(modelL.getModelName())) {
+                    List<String> ids = newCategoryList.stream().filter(modelCategory -> modelCategory.getCategoryName().equals("财务")).map(ModelCategory::getId).collect(Collectors.toList());
+                    if (CollectionUtils.isNotEmpty(ids)) {
+                        modelL.setCategoryId(ids.get(0));
+                    }
+                } else {
+                    List<String> ids = newCategoryList.stream().filter(modelCategory -> modelCategory.getCategoryName().equals("其他")).map(ModelCategory::getId).collect(Collectors.toList());
+                    if (CollectionUtils.isNotEmpty(ids)) {
+                        modelL.setCategoryId(ids.get(0));
+                    }
+                }
+            }
+        });
+        isUpdated = modelService.updateBatchById(modelLList);
+        return isUpdated;
     }
 }
