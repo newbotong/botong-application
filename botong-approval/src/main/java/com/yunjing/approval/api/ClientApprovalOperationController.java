@@ -122,20 +122,4 @@ public class ClientApprovalOperationController extends BaseController {
     public ResponseEntityWrapper updateCopyReadState(@RequestParam("approvalId") String[] approvalId) throws Exception {
         return success(approvalApiService.updateCopyReadState(approvalId));
     }
-
-    /**
-     * 审批发送dang提醒
-     *
-     * @param companyId
-     * @param memberId
-     * @param message
-     * @return
-     * @throws Exception
-     */
-    @PostMapping("/send-dang")
-    public ResponseEntityWrapper sendApprovalDang(@RequestParam("companyId") String companyId,
-                                                  @RequestParam("memberId") String memberId,
-                                                  @RequestParam("message") String message) throws Exception {
-        return success();
-    }
 }

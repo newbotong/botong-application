@@ -44,7 +44,7 @@ public class ApprovalRepairServiceImpl extends BaseServiceImpl<ApprovalMapper, A
     public List<Approval> repairTitle(String companyId) {
         List<Approval> list = this.selectList(Condition.create().where("org_id={0}",companyId));
         List<ModelL> modelList = modelService.findModel(companyId);
-        List<ApprovalUser> approvalUserList = approvalUserService.selectList(Condition.create());
+        List<ApprovalUser> approvalUserList = approvalUserService.selectList(Condition.create().where("org_id={0}",companyId));
         if (CollectionUtils.isNotEmpty(list)) {
             List<Approval> entityList = new ArrayList<>();
             for (Approval approval : list) {
