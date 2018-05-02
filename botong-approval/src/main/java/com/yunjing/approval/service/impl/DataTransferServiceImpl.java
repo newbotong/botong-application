@@ -42,8 +42,7 @@ public class DataTransferServiceImpl implements IDataTransferService {
     private IProcessService processService;
     @Autowired
     private IConditionService conditionService;
-    @Autowired
-    private UserIdToMemberId userIdToMemberId;
+
     @Autowired
     private IApprovalUserService approvalUserService;
 

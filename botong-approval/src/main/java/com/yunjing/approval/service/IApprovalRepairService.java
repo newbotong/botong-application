@@ -2,6 +2,7 @@ package com.yunjing.approval.service;
 
 import com.common.mybatis.service.IBaseService;
 import com.yunjing.approval.model.entity.Approval;
+import com.yunjing.approval.model.entity.ApprovalAttr;
 
 import java.util.List;
 
@@ -34,4 +35,5 @@ public interface IApprovalRepairService extends IBaseService<Approval> {
      * @return 审批列表
      */
     List<Approval> repairDeptId(String companyId);
+
 }
