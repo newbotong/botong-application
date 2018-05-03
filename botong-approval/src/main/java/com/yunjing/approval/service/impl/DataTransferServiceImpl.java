@@ -393,11 +393,12 @@ public class DataTransferServiceImpl implements IDataTransferService {
                         .filter(approvalUser -> approvalUser.getPassportId().equals(dto.getApprover())).map(ApprovalUser::getId).collect(Collectors.toList());
                 if (memberIds != null && CollectionUtils.isNotEmpty(memberIds)) {
                     process.setApprover(memberIds.get(0));
+                } else if (memberIds == null || CollectionUtils.isEmpty(memberIds)) {
+                    process.setApprover(orgId + dto.getApprover());
                 } else {
                     process.setApprover(dto.getApprover());
                 }
             }
-            process.setApprover(dto.getApprover());
             process.setModelId(dto.getModel());
             process.setSort(dto.getSort());
             process.setConditionId(dto.getConditions());
@@ -461,7 +462,7 @@ public class DataTransferServiceImpl implements IDataTransferService {
                     if (s1.length > 1) {
                         Long time2 = DateUtil.StringToDate(s1[0], DateStyle.YYYY_MM_DD_HH_MM).getTime();
                         attr.setAttrValue(time1.toString() + "," + time2);
-                    }else {
+                    } else {
                         attr.setAttrValue(time1.toString());
                     }
                 } else if (s2.length > 0 && s1.length != 2 && isDateString(s2[0], DateStyle.YYYY_MM_DD_HH_MM.getValue())) {
@@ -469,7 +470,7 @@ public class DataTransferServiceImpl implements IDataTransferService {
                     if (s2.length > 1) {
                         Long time4 = DateUtil.StringToDate(s2[0], DateStyle.YYYY_MM_DD_HH_MM).getTime();
                         attr.setAttrValue(time3.toString() + "," + time4);
-                    }else {
+                    } else {
                         attr.setAttrValue(time3.toString());
                     }
                 } else {
