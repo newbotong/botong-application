@@ -458,8 +458,6 @@ public class DataTransferServiceImpl implements IDataTransferService {
                 } else {
                     attr.setAttrValue(dto.getAttrValue());
                 }
-            }else {
-                attr.setAttrValue(dto.getAttrValue());
             }
             attr.setAttrValue(dto.getAttrValue());
             attr.setApprovalId(dto.getApprovalId());
