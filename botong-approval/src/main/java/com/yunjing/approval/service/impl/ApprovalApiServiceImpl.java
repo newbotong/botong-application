@@ -262,7 +262,7 @@ public class ApprovalApiServiceImpl implements IApprovalApiService {
                 deptIds = approvalById.getDeptId().split(",");
                 deptNames = approvalById.getDeptName().split(",");
                 for (int i = 0; i < (deptIds.length < deptNames.length ? deptNames.length : deptIds.length); i++) {
-                    if (approvalById.getDeptPartId().equals(deptIds[i])) {
+                    if (approvalById.getDeptPartId() != null && approvalById.getDeptPartId().equals(deptIds[i])) {
                         deptName = deptNames[i];
                     }
                 }
@@ -344,6 +344,10 @@ public class ApprovalApiServiceImpl implements IApprovalApiService {
         Set<ApprovalUserVO> collect = approvalUserList.stream().filter(approvalUserVO -> approvalUserVO.getProcessState() == 4).collect(Collectors.toSet());
         if (collect.size() > 0) {
             boolean b = approvalUserList.removeIf(approvalUserVO -> approvalUserVO.getProcessState() == 4);
+            int sort = 0;
+            for (ApprovalUserVO userVO : approvalUserList) {
+                sort = userVO.getSort();
+            }
             if (b) {
                 ApprovalUserVO initiator2 = new ApprovalUserVO();
                 initiator2.setName(null != approvalById.getName() ? approvalById.getName() : "");
@@ -352,7 +356,7 @@ public class ApprovalApiServiceImpl implements IApprovalApiService {
                 initiator2.setColor(approvalById.getColor() != null ? approvalById.getColor() : ApproConstants.DEFAULT_COLOR);
                 initiator2.setMessage("已撤销");
                 initiator2.setProcessState(4);
-                initiator2.setSort(1);
+                initiator2.setSort(sort + 1);
                 approvalUserList.add(initiator2);
                 clientApprovalDetailVO.setApprovalUserList(approvalUserList);
             }
@@ -469,7 +473,7 @@ public class ApprovalApiServiceImpl implements IApprovalApiService {
     public boolean revokeApproval(String companyId, String memberId, String approvalId) {
         logger.info("companyId: " + companyId + " memberId: " + memberId + " approvalId: " + approvalId);
         boolean flag = false;
-        List<ApprovalProcess> processList = approvalProcessService.selectList(Condition.create().where("approval_id={0}", approvalId));
+        List<ApprovalProcess> processList = approvalProcessService.selectList(Condition.create().where("approval_id={0}", approvalId).and("process_state=0"));
         processList.forEach(approvalProcess -> {
             approvalProcess.setProcessState(4);
             approvalProcess.setProcessTime(System.currentTimeMillis());
