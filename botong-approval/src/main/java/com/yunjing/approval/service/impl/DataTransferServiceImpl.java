@@ -378,10 +378,23 @@ public class DataTransferServiceImpl implements IDataTransferService {
     @Override
     public boolean addSetsProcess(List<SetsProcessDTO> dtoList) {
         boolean isInserted = false;
+        List<ApprovalUser> userList = approvalUserService.selectList(Condition.create());
         List<SetsProcess> processeList = new ArrayList<>();
+        List<OrgModel> orgModelDTOList = orgModelService.selectList(Condition.create());
         for (SetsProcessDTO dto : dtoList) {
             SetsProcess process = new SetsProcess();
             process.setId(dto.getProcess());
+            List<OrgModel> collect = orgModelDTOList.stream().filter(orgModelDTO -> orgModelDTO.getModelId().equals(dto.getModel())).collect(Collectors.toList());
+            if (CollectionUtils.isNotEmpty(collect)) {
+                String orgId = collect.get(0).getOrgId();
+                List<String> memberIds = userList.parallelStream().filter(approvalUser -> approvalUser.getOrgId().equals(orgId))
+                        .filter(approvalUser -> approvalUser.getPassportId().equals(dto.getApprover())).map(ApprovalUser::getId).collect(Collectors.toList());
+                if (memberIds != null && CollectionUtils.isNotEmpty(memberIds)) {
+                    process.setApprover(memberIds.get(0));
+                } else {
+                    process.setApprover(dto.getApprover());
+                }
+            }
             process.setApprover(dto.getApprover());
             process.setModelId(dto.getModel());
             process.setSort(dto.getSort());
