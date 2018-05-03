@@ -6,6 +6,7 @@ import com.yunjing.approval.model.vo.OrgMemberVo;
 import com.yunjing.approval.param.DangParam;
 import com.yunjing.approval.param.PushParam;
 import com.yunjing.approval.param.SchedulerParam;
+import com.yunjing.message.share.org.OrgAppMessage;
 import com.yunjing.mommon.wrapper.PageWrapper;
 import com.yunjing.mommon.wrapper.ResponseEntityWrapper;
 import retrofit2.Call;
@@ -13,6 +14,7 @@ import retrofit2.http.GET;
 import retrofit2.http.Query;
 
 import java.util.List;
+import java.util.Map;
 
 
 /**
@@ -146,5 +148,14 @@ public interface AppCenterService {
      * @return
      */
     List<Member> manageScope(@Query("appId") String appId, @Query("memberId") String memberId);
+
+    /**
+     * 获取部门主管
+     *
+     * @param companyId
+     * @param memberId
+     * @return
+     */
+    Map<String,List<OrgAppMessage>> findDeptManager(@Query("companyId") String companyId, @Query("memberId") String memberId);
 
 }

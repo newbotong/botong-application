@@ -10,12 +10,9 @@ import com.yunjing.approval.dao.mapper.ProcessMapper;
 import com.yunjing.approval.model.entity.*;
 import com.yunjing.approval.model.vo.ApproverVO;
 import com.yunjing.approval.model.vo.UserVO;
-import com.yunjing.approval.processor.okhttp.AppCenterService;
 import com.yunjing.approval.service.*;
 import com.yunjing.mommon.global.exception.InsertMessageFailureException;
-import com.yunjing.mommon.global.exception.ParameterErrorException;
 import com.yunjing.mommon.utils.IDUtils;
-import org.apache.commons.lang.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -126,7 +123,7 @@ public class ProcessServiceImpl extends BaseServiceImpl<ProcessMapper, SetsProce
     }
 
     @Override
-    public ApproverVO getApprover(String companyId, String memberId, String modelId, String deptId, String conditionId, String judge) {
+    public ApproverVO getApprover(String companyId, String memberId, String modelId, String deptId, String judge) {
         // 解析
         Map<String, String> param = new HashMap<>(1);
         JSONArray jsonArray = JSON.parseArray(judge);
@@ -144,16 +141,11 @@ public class ProcessServiceImpl extends BaseServiceImpl<ProcessMapper, SetsProce
             List<String> cdnIds = new ArrayList<>();
             // 分条件审批
             if (sets.getSetting() == 1) {
-                if (StringUtils.isBlank(deptId)) {
-                    //rpc获取成员所在的根部门信息
-                    result.setDeptName("互联网时代");
-                }
                 List<String> conditionIds = new ArrayList<>();
                 for (Map.Entry<String, String> m : param.entrySet()) {
                     String id = conditionService.getCondition(modelId, m.getValue());
                     conditionIds.add(id);
                 }
-
                 if (conditionIds.isEmpty()) {
                     List<SetsCondition> conditionSet = conditionService.getFirstCondition(modelId);
                     for (SetsCondition sc : conditionSet) {
@@ -163,9 +155,7 @@ public class ProcessServiceImpl extends BaseServiceImpl<ProcessMapper, SetsProce
                             if (sc != null && field.equals(m.getKey()) && m.getValue().equals(value)) {
                                 cdnIds.add(sc.getId());
                             }
-
                         }
-
                     }
                 } else {
                     cdnIds.addAll(conditionIds);
@@ -175,15 +165,11 @@ public class ProcessServiceImpl extends BaseServiceImpl<ProcessMapper, SetsProce
                 }
                 result.setConditionId(cdnIds);
             }
-
             List<UserVO> users = processService.getProcess(modelId, cdnIds);
-
             List<UserVO> list = new ArrayList<>();
-
             if (users != null && users.size() > 0) {
                 // 根据部门主键和成员主键判断是不是主管
                 boolean flag = isAdmins(deptId, memberId);
-
                 for (UserVO user : users) {
                     if (user.getMemberId().indexOf("admin_") != -1) {
                         String[] temp = user.getMemberId().split("_");
@@ -203,10 +189,9 @@ public class ProcessServiceImpl extends BaseServiceImpl<ProcessMapper, SetsProce
                     }
                 }
             }
-            if (list != null && list.size() > 0) {
-                result.setApprovers(list);
-            }
-            // 获取抄送人
+            // 注入审批人
+            result.setApprovers(list);
+            // 注入抄送人
             result.setCopys(copyService.getCopy(companyId, memberId, modelId));
 
             return result;
