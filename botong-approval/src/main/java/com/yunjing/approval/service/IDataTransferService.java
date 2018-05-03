@@ -91,6 +91,12 @@ public interface IDataTransferService {
      */
     boolean addApprovalAttr(List<ApprovalAttrDTO> dtoList);
 
-
+    /**
+     * 保存botong1.0 approval_sets 表数据到 botong2.0数据库中
+     *
+     * @param dtoList
+     * @return boolean
+     */
+    boolean addApprovalSets(List<ApprovalSetsDTO> dtoList);
 
 }

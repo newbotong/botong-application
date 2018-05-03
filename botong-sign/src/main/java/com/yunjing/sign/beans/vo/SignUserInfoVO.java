@@ -21,7 +21,7 @@ public class SignUserInfoVO {
     /**
      * 姓名
      */
-    @SerializedName(value = "nick")
+    @SerializedName(value = "memberName")
     private String name;
 
     /**

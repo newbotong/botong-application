@@ -59,7 +59,7 @@ public class MemberRedisOperator {
             for (UserInfo userInfo : passportList) {
                 map.get(userInfo.getPassportId()).setColor(userInfo.getColor());
                 map.get(userInfo.getPassportId()).setProfile(userInfo.getProfile());
-                map.get(userInfo.getPassportId()).setName(userInfo.getNick());
+                //map.get(userInfo.getPassportId()).setName(userInfo.getNick());
             }
         }
         return new ArrayList<>(map.values());
