@@ -447,19 +447,18 @@ public class DataTransferServiceImpl implements IDataTransferService {
                     if (s1.length > 1) {
                         time2 = DateUtil.StringToDate(s1[0], DateStyle.YYYY_MM_DD_HH_MM).getTime();
                     }
-                    attr.setAttrValue(time1.toString() + time2 != null ? "," + time2 : "");
+                    attr.setAttrValue(time1.toString() + time2 != null ? ("," + time2) : "");
                 } else if (s2.length > 0 && s1.length != 2 && isDateString(s2[0], DateStyle.YYYY_MM_DD_HH_MM.getValue())) {
                     Long time3 = DateUtil.StringToDate(s2[0], DateStyle.YYYY_MM_DD_HH_MM).getTime();
                     Long time4 = null;
                     if (s2.length > 1) {
                         time4 = DateUtil.StringToDate(s2[0], DateStyle.YYYY_MM_DD_HH_MM).getTime();
                     }
-                    attr.setAttrValue(time3.toString() + time4 != null ? "," + time4 : "");
+                    attr.setAttrValue(time3.toString() + time4 != null ? ("," + time4) : "");
                 } else {
                     attr.setAttrValue(dto.getAttrValue());
                 }
             }
-            attr.setAttrValue(dto.getAttrValue());
             attr.setApprovalId(dto.getApprovalId());
             attr.setAttrName(dto.getAttrName());
             attr.setAttrType(dto.getAttrType());
@@ -467,7 +466,6 @@ public class DataTransferServiceImpl implements IDataTransferService {
             attr.setAttrParent(dto.getAttrParent());
             attrList.add(attr);
         }
-
         if (!attrList.isEmpty()) {
             isInserted = approvalAttrService.insertBatch(attrList);
             if (!isInserted) {
@@ -477,7 +475,7 @@ public class DataTransferServiceImpl implements IDataTransferService {
         return isInserted;
     }
 
-    public boolean isDateString(String dateValue, String dateFormat) {
+    public static boolean isDateString(String dateValue, String dateFormat) {
         if (!hasValue(dateValue)) {
             return false;
         }
