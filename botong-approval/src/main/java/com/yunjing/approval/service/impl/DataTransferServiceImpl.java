@@ -442,19 +442,21 @@ public class DataTransferServiceImpl implements IDataTransferService {
                 String[] s1 = dto.getAttrValue().split(",");
                 String[] s2 = dto.getAttrValue().split(";");
                 if (s1.length > 0 && s2.length != 2 && isDateString(s1[0], DateStyle.YYYY_MM_DD_HH_MM.getValue())) {
-                    Long time2 = null;
                     Long time1 = DateUtil.StringToDate(s1[0], DateStyle.YYYY_MM_DD_HH_MM).getTime();
                     if (s1.length > 1) {
-                        time2 = DateUtil.StringToDate(s1[0], DateStyle.YYYY_MM_DD_HH_MM).getTime();
+                        Long time2 = DateUtil.StringToDate(s1[0], DateStyle.YYYY_MM_DD_HH_MM).getTime();
+                        attr.setAttrValue(time1.toString() + "," + time2);
+                    }else {
+                        attr.setAttrValue(time1.toString());
                     }
-                    attr.setAttrValue(time1.toString() + "," + time2);
                 } else if (s2.length > 0 && s1.length != 2 && isDateString(s2[0], DateStyle.YYYY_MM_DD_HH_MM.getValue())) {
                     Long time3 = DateUtil.StringToDate(s2[0], DateStyle.YYYY_MM_DD_HH_MM).getTime();
-                    Long time4 = null;
                     if (s2.length > 1) {
-                        time4 = DateUtil.StringToDate(s2[0], DateStyle.YYYY_MM_DD_HH_MM).getTime();
+                        Long time4 = DateUtil.StringToDate(s2[0], DateStyle.YYYY_MM_DD_HH_MM).getTime();
+                        attr.setAttrValue(time3.toString() + "," + time4);
+                    }else {
+                        attr.setAttrValue(time3.toString());
                     }
-                    attr.setAttrValue(time3.toString() + "," + time4);
                 } else {
                     attr.setAttrValue(dto.getAttrValue());
                 }
