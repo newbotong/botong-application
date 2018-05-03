@@ -5,6 +5,7 @@ import com.alibaba.fastjson.TypeReference;
 import com.common.redis.share.UserInfo;
 import com.yunjing.botong.log.config.LogConstant;
 import com.yunjing.botong.log.vo.Member;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.stereotype.Component;
 
@@ -17,6 +18,7 @@ import java.util.*;
  * @date 2018/4/10 17:23
  */
 @Component
+@Slf4j
 public class MemberRedisOperator {
 
     @Resource(name = "redisReadonlyTemplate")
@@ -44,6 +46,7 @@ public class MemberRedisOperator {
             if (member == null) {
                 continue;
             }
+            member.setRealName(member.getName());
             passportIds.add(member.getPassportId());
             map.put(member.getPassportId(), member);
         }
