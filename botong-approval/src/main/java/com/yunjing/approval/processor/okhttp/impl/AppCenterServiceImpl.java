@@ -10,6 +10,7 @@ import com.yunjing.approval.param.SchedulerParam;
 import com.yunjing.approval.processor.okhttp.ApiService;
 import com.yunjing.approval.processor.okhttp.AppCenterService;
 import com.yunjing.approval.util.ApproConstants;
+import com.yunjing.message.share.org.OrgAppMessage;
 import com.yunjing.mommon.constant.StatusCode;
 import com.yunjing.mommon.global.exception.BaseRuntimeException;
 import com.yunjing.mommon.wrapper.PageWrapper;
@@ -25,6 +26,7 @@ import retrofit2.converter.gson.GsonConverterFactory;
 
 import java.io.IOException;
 import java.util.List;
+import java.util.Map;
 
 /**
  * <p>
@@ -356,6 +358,29 @@ public class AppCenterServiceImpl implements AppCenterService {
             ResponseEntityWrapper<List<Member>> body = response.body();
             if (body != null) {
                 log.info("获取管理范围：code:{}，message:{}，data:{}", body.getStatusCode(), body.getStatusMessage(), JSON.toJSON(body.getData()));
+                if (response.isSuccessful() && body.getStatusCode() == StatusCode.SUCCESS.getStatusCode()) {
+                    return body.getData();
+                }
+            } else {
+                log.error("body is null");
+            }
+            return null;
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        return null;
+    }
+
+    @Override
+    public Map<String,List<OrgAppMessage>> findDeptManager(String companyId, String memberId) {
+        if (apiService == null) {
+            init();
+        }
+        try {
+            Response<ResponseEntityWrapper<Map<String,List<OrgAppMessage>>>> response = apiService.findDeptManager(companyId, memberId).execute();
+            ResponseEntityWrapper<Map<String,List<OrgAppMessage>>> body = response.body();
+            if (body != null) {
+                log.info("获取部门主管：code:{}，message:{}，data:{}", body.getStatusCode(), body.getStatusMessage(), JSON.toJSON(body.getData()));
                 if (response.isSuccessful() && body.getStatusCode() == StatusCode.SUCCESS.getStatusCode()) {
                     return body.getData();
                 }
