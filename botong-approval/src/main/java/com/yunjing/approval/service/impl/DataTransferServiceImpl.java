@@ -7,6 +7,7 @@ import com.yunjing.approval.service.*;
 import com.yunjing.mommon.Enum.DateStyle;
 import com.yunjing.mommon.global.exception.InsertMessageFailureException;
 import com.yunjing.mommon.utils.DateUtil;
+import com.yunjing.mommon.utils.IDUtils;
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.lang.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -47,9 +48,10 @@ public class DataTransferServiceImpl implements IDataTransferService {
     private IProcessService processService;
     @Autowired
     private IConditionService conditionService;
-
     @Autowired
     private IApprovalUserService approvalUserService;
+    @Autowired
+    private IApprovalSetsService setsService;
 
     @Override
     public boolean addApproval(List<ApprovalDTO> dtoList) {
@@ -485,6 +487,25 @@ public class DataTransferServiceImpl implements IDataTransferService {
             isInserted = approvalAttrService.insertBatch(attrList);
             if (!isInserted) {
                 throw new InsertMessageFailureException("批量迁移approval_attr表数据失败");
+            }
+        }
+        return isInserted;
+    }
+
+    @Override
+    public boolean addApprovalSets(List<ApprovalSetsDTO> dtoList) {
+        boolean isInserted = false;
+        List<ApprovalSets> setsList = new ArrayList<>();
+        for (ApprovalSetsDTO dto : dtoList) {
+            ApprovalSets sets = new ApprovalSets();
+            sets.setId(IDUtils.uuid());
+            sets.setModelId(dto.getModelId());
+            sets.setSetting(dto.getSetting());
+        }
+        if (!setsList.isEmpty()) {
+            isInserted = setsService.insertBatch(setsList);
+            if (!isInserted) {
+                throw new InsertMessageFailureException("批量迁移approval_sets表数据失败");
             }
         }
         return isInserted;
