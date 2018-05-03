@@ -7,6 +7,7 @@ import com.yunjing.approval.service.*;
 import com.yunjing.mommon.Enum.DateStyle;
 import com.yunjing.mommon.global.exception.InsertMessageFailureException;
 import com.yunjing.mommon.utils.DateUtil;
+import com.yunjing.mommon.utils.IDUtils;
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.lang.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -47,9 +48,10 @@ public class DataTransferServiceImpl implements IDataTransferService {
     private IProcessService processService;
     @Autowired
     private IConditionService conditionService;
-
     @Autowired
     private IApprovalUserService approvalUserService;
+    @Autowired
+    private IApprovalSetsService setsService;
 
     @Override
     public boolean addApproval(List<ApprovalDTO> dtoList) {
@@ -378,11 +380,23 @@ public class DataTransferServiceImpl implements IDataTransferService {
     @Override
     public boolean addSetsProcess(List<SetsProcessDTO> dtoList) {
         boolean isInserted = false;
+        List<ApprovalUser> userList = approvalUserService.selectList(Condition.create());
         List<SetsProcess> processeList = new ArrayList<>();
+        List<OrgModel> orgModelDTOList = orgModelService.selectList(Condition.create());
         for (SetsProcessDTO dto : dtoList) {
             SetsProcess process = new SetsProcess();
             process.setId(dto.getProcess());
-            process.setApprover(dto.getApprover());
+            List<OrgModel> collect = orgModelDTOList.stream().filter(orgModelDTO -> orgModelDTO.getModelId().equals(dto.getModel())).collect(Collectors.toList());
+            if (CollectionUtils.isNotEmpty(collect)) {
+                String orgId = collect.get(0).getOrgId();
+                List<String> memberIds = userList.parallelStream().filter(approvalUser -> approvalUser.getOrgId().equals(orgId))
+                        .filter(approvalUser -> approvalUser.getPassportId().equals(dto.getApprover())).map(ApprovalUser::getId).collect(Collectors.toList());
+                if (memberIds != null && CollectionUtils.isNotEmpty(memberIds)) {
+                    process.setApprover(memberIds.get(0));
+                } else {
+                    process.setApprover(dto.getApprover());
+                }
+            }
             process.setModelId(dto.getModel());
             process.setSort(dto.getSort());
             process.setConditionId(dto.getConditions());
@@ -446,7 +460,7 @@ public class DataTransferServiceImpl implements IDataTransferService {
                     if (s1.length > 1) {
                         Long time2 = DateUtil.StringToDate(s1[0], DateStyle.YYYY_MM_DD_HH_MM).getTime();
                         attr.setAttrValue(time1.toString() + "," + time2);
-                    }else {
+                    } else {
                         attr.setAttrValue(time1.toString());
                     }
                 } else if (s2.length > 0 && s1.length != 2 && isDateString(s2[0], DateStyle.YYYY_MM_DD_HH_MM.getValue())) {
@@ -454,7 +468,7 @@ public class DataTransferServiceImpl implements IDataTransferService {
                     if (s2.length > 1) {
                         Long time4 = DateUtil.StringToDate(s2[0], DateStyle.YYYY_MM_DD_HH_MM).getTime();
                         attr.setAttrValue(time3.toString() + "," + time4);
-                    }else {
+                    } else {
                         attr.setAttrValue(time3.toString());
                     }
                 } else {
@@ -472,6 +486,26 @@ public class DataTransferServiceImpl implements IDataTransferService {
             isInserted = approvalAttrService.insertBatch(attrList);
             if (!isInserted) {
                 throw new InsertMessageFailureException("批量迁移approval_attr表数据失败");
+            }
+        }
+        return isInserted;
+    }
+
+    @Override
+    public boolean addApprovalSets(List<ApprovalSetsDTO> dtoList) {
+        boolean isInserted = false;
+        List<ApprovalSets> setsList = new ArrayList<>();
+        for (ApprovalSetsDTO dto : dtoList) {
+            ApprovalSets sets = new ApprovalSets();
+            sets.setId(IDUtils.uuid());
+            sets.setModelId(dto.getModelId());
+            sets.setSetting(dto.getSetting());
+            setsList.add(sets);
+        }
+        if (!setsList.isEmpty()) {
+            isInserted = setsService.insertBatch(setsList);
+            if (!isInserted) {
+                throw new InsertMessageFailureException("批量迁移approval_sets表数据失败");
             }
         }
         return isInserted;

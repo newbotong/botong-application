@@ -81,6 +81,7 @@ public class ConditionServiceImpl extends BaseServiceImpl<ConditionMapper, SetsC
             SetConditionVO setConditionVO = new SetConditionVO();
             conditionIds.add(setsCondition.getId());
             List<UserVO> userVoList = processService.getProcess(modelId, conditionIds);
+            conditionIds.clear();
             setConditionVO.setConditionId(setsCondition.getId());
             setConditionVO.setCdn(setsCondition.getCdn());
             setConditionVO.setContent(setsCondition.getContent());
