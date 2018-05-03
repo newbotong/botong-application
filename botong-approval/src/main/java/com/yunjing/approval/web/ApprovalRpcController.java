@@ -134,4 +134,15 @@ public class ApprovalRpcController extends BaseController {
     public ResponseEntityWrapper addAttr(@RequestBody List<ApprovalAttrDTO> dtoList) throws Exception {
         return success(transferService.addApprovalAttr(dtoList));
     }
+    /**
+     * 保存botong1.0 approval_sets 表数据到 botong2.0数据库中
+     *
+     * @param dtoList
+     * @return ResponseEntityWrapper
+     */
+    @PostMapping("/save-sets")
+    public ResponseEntityWrapper addSets(@RequestBody List<ApprovalSetsDTO> dtoList) throws Exception {
+        return success(transferService.addApprovalSets(dtoList));
+    }
+
 }
