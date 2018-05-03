@@ -441,26 +441,27 @@ public class DataTransferServiceImpl implements IDataTransferService {
             if (StringUtils.isNotBlank(dto.getAttrValue())) {
                 String[] s1 = dto.getAttrValue().split(",");
                 String[] s2 = dto.getAttrValue().split(";");
-                if (s1.length>0 && s2.length !=2 && isDateString(s1[0],DateStyle.YYYY_MM_DD_HH_MM.getValue())) {
+                if (s1.length > 0 && s2.length != 2 && isDateString(s1[0], DateStyle.YYYY_MM_DD_HH_MM.getValue())) {
                     Long time2 = null;
                     Long time1 = DateUtil.StringToDate(s1[0], DateStyle.YYYY_MM_DD_HH_MM).getTime();
-                    if (s1.length>1){
+                    if (s1.length > 1) {
                         time2 = DateUtil.StringToDate(s1[0], DateStyle.YYYY_MM_DD_HH_MM).getTime();
                     }
-                    attr.setAttrValue(time1.toString() + "," + time2);
-                } else  if (s2.length>0 && s1.length !=2 && isDateString(s2[0],DateStyle.YYYY_MM_DD_HH_MM.getValue())){
+                    attr.setAttrValue(time1.toString() + time2 != null ? "," + time2 : "");
+                } else if (s2.length > 0 && s1.length != 2 && isDateString(s2[0], DateStyle.YYYY_MM_DD_HH_MM.getValue())) {
                     Long time3 = DateUtil.StringToDate(s2[0], DateStyle.YYYY_MM_DD_HH_MM).getTime();
                     Long time4 = null;
-                    if (s2.length>1){
+                    if (s2.length > 1) {
                         time4 = DateUtil.StringToDate(s2[0], DateStyle.YYYY_MM_DD_HH_MM).getTime();
                     }
-                    attr.setAttrValue(time3.toString() + "," + time4);
-                }else {
+                    attr.setAttrValue(time3.toString() + time4 != null ? "," + time4 : "");
+                } else {
                     attr.setAttrValue(dto.getAttrValue());
                 }
             }else {
                 attr.setAttrValue(dto.getAttrValue());
             }
+            attr.setAttrValue(dto.getAttrValue());
             attr.setApprovalId(dto.getApprovalId());
             attr.setAttrName(dto.getAttrName());
             attr.setAttrType(dto.getAttrType());
@@ -478,14 +479,14 @@ public class DataTransferServiceImpl implements IDataTransferService {
         return isInserted;
     }
 
-    public static boolean isDateString(String datevalue, String dateFormat) {
-        if (!hasValue(datevalue)) {
+    public boolean isDateString(String dateValue, String dateFormat) {
+        if (!hasValue(dateValue)) {
             return false;
         }
         try {
             SimpleDateFormat fmt = new SimpleDateFormat(dateFormat);
-            java.util.Date dd = fmt.parse(datevalue);
-            if (datevalue.equals(fmt.format(dd))) {
+            java.util.Date dd = fmt.parse(dateValue);
+            if (dateValue.equals(fmt.format(dd))) {
                 return true;
             } else {
                 return false;
