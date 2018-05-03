@@ -12,10 +12,13 @@ import org.apache.commons.lang.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
+
+import static org.springframework.integration.util.MessagingAnnotationUtils.hasValue;
 
 /**
  * @author 刘小鹏
@@ -435,7 +438,29 @@ public class DataTransferServiceImpl implements IDataTransferService {
         for (ApprovalAttrDTO dto : dtoList) {
             ApprovalAttr attr = new ApprovalAttr();
             attr.setId(dto.getAttrId());
-            attr.setAttrValue(dto.getAttrValue());
+            if (StringUtils.isNotBlank(dto.getAttrValue())) {
+                String[] s1 = dto.getAttrValue().split(",");
+                String[] s2 = dto.getAttrValue().split(";");
+                if (s1.length>0 && s2.length !=2 && isDateString(s1[0],DateStyle.YYYY_MM_DD_HH_MM.getValue())) {
+                    Long time2 = null;
+                    Long time1 = DateUtil.StringToDate(s1[0], DateStyle.YYYY_MM_DD_HH_MM).getTime();
+                    if (s1.length>1){
+                        time2 = DateUtil.StringToDate(s1[0], DateStyle.YYYY_MM_DD_HH_MM).getTime();
+                    }
+                    attr.setAttrValue(time1.toString() + "," + time2);
+                } else  if (s2.length>0 && s1.length !=2 && isDateString(s2[0],DateStyle.YYYY_MM_DD_HH_MM.getValue())){
+                    Long time3 = DateUtil.StringToDate(s2[0], DateStyle.YYYY_MM_DD_HH_MM).getTime();
+                    Long time4 = null;
+                    if (s2.length>1){
+                        time4 = DateUtil.StringToDate(s2[0], DateStyle.YYYY_MM_DD_HH_MM).getTime();
+                    }
+                    attr.setAttrValue(time3.toString() + "," + time4);
+                }else {
+                    attr.setAttrValue(dto.getAttrValue());
+                }
+            }else {
+                attr.setAttrValue(dto.getAttrValue());
+            }
             attr.setApprovalId(dto.getApprovalId());
             attr.setAttrName(dto.getAttrName());
             attr.setAttrType(dto.getAttrType());
@@ -443,6 +468,7 @@ public class DataTransferServiceImpl implements IDataTransferService {
             attr.setAttrParent(dto.getAttrParent());
             attrList.add(attr);
         }
+
         if (!attrList.isEmpty()) {
             isInserted = approvalAttrService.insertBatch(attrList);
             if (!isInserted) {
@@ -452,4 +478,20 @@ public class DataTransferServiceImpl implements IDataTransferService {
         return isInserted;
     }
 
+    public static boolean isDateString(String datevalue, String dateFormat) {
+        if (!hasValue(datevalue)) {
+            return false;
+        }
+        try {
+            SimpleDateFormat fmt = new SimpleDateFormat(dateFormat);
+            java.util.Date dd = fmt.parse(datevalue);
+            if (datevalue.equals(fmt.format(dd))) {
+                return true;
+            } else {
+                return false;
+            }
+        } catch (Exception e) {
+            return false;
+        }
+    }
 }
