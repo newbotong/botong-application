@@ -4,16 +4,21 @@ import com.baomidou.mybatisplus.mapper.Condition;
 import com.yunjing.approval.model.dto.*;
 import com.yunjing.approval.model.entity.*;
 import com.yunjing.approval.service.*;
-import com.yunjing.approval.transfer.UserIdToMemberId;
+import com.yunjing.mommon.Enum.DateStyle;
 import com.yunjing.mommon.global.exception.InsertMessageFailureException;
+import com.yunjing.mommon.utils.DateUtil;
 import org.apache.commons.collections.CollectionUtils;
+import org.apache.commons.lang.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
+
+import static org.springframework.integration.util.MessagingAnnotationUtils.hasValue;
 
 /**
  * @author 刘小鹏
@@ -433,7 +438,29 @@ public class DataTransferServiceImpl implements IDataTransferService {
         for (ApprovalAttrDTO dto : dtoList) {
             ApprovalAttr attr = new ApprovalAttr();
             attr.setId(dto.getAttrId());
-            attr.setAttrValue(dto.getAttrValue());
+            if (StringUtils.isNotBlank(dto.getAttrValue())) {
+                String[] s1 = dto.getAttrValue().split(",");
+                String[] s2 = dto.getAttrValue().split(";");
+                if (s1.length > 0 && s2.length != 2 && isDateString(s1[0], DateStyle.YYYY_MM_DD_HH_MM.getValue())) {
+                    Long time1 = DateUtil.StringToDate(s1[0], DateStyle.YYYY_MM_DD_HH_MM).getTime();
+                    if (s1.length > 1) {
+                        Long time2 = DateUtil.StringToDate(s1[0], DateStyle.YYYY_MM_DD_HH_MM).getTime();
+                        attr.setAttrValue(time1.toString() + "," + time2);
+                    }else {
+                        attr.setAttrValue(time1.toString());
+                    }
+                } else if (s2.length > 0 && s1.length != 2 && isDateString(s2[0], DateStyle.YYYY_MM_DD_HH_MM.getValue())) {
+                    Long time3 = DateUtil.StringToDate(s2[0], DateStyle.YYYY_MM_DD_HH_MM).getTime();
+                    if (s2.length > 1) {
+                        Long time4 = DateUtil.StringToDate(s2[0], DateStyle.YYYY_MM_DD_HH_MM).getTime();
+                        attr.setAttrValue(time3.toString() + "," + time4);
+                    }else {
+                        attr.setAttrValue(time3.toString());
+                    }
+                } else {
+                    attr.setAttrValue(dto.getAttrValue());
+                }
+            }
             attr.setApprovalId(dto.getApprovalId());
             attr.setAttrName(dto.getAttrName());
             attr.setAttrType(dto.getAttrType());
@@ -448,5 +475,22 @@ public class DataTransferServiceImpl implements IDataTransferService {
             }
         }
         return isInserted;
+    }
+
+    public static boolean isDateString(String dateValue, String dateFormat) {
+        if (!hasValue(dateValue)) {
+            return false;
+        }
+        try {
+            SimpleDateFormat fmt = new SimpleDateFormat(dateFormat);
+            java.util.Date dd = fmt.parse(dateValue);
+            if (dateValue.equals(fmt.format(dd))) {
+                return true;
+            } else {
+                return false;
+            }
+        } catch (Exception e) {
+            return false;
+        }
     }
 }
