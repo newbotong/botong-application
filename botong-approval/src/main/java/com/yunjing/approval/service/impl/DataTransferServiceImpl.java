@@ -501,6 +501,7 @@ public class DataTransferServiceImpl implements IDataTransferService {
             sets.setId(IDUtils.uuid());
             sets.setModelId(dto.getModelId());
             sets.setSetting(dto.getSetting());
+            setsList.add(sets);
         }
         if (!setsList.isEmpty()) {
             isInserted = setsService.insertBatch(setsList);
