@@ -107,9 +107,4 @@ public class Member implements Serializable {
      * 头像颜色
      */
     private String color;
-
-    @JSONField(name="name")
-    public void setRealName(String realName) {
-        this.realName = realName;
-    }
 }
