@@ -393,8 +393,6 @@ public class DataTransferServiceImpl implements IDataTransferService {
                         .filter(approvalUser -> approvalUser.getPassportId().equals(dto.getApprover())).map(ApprovalUser::getId).collect(Collectors.toList());
                 if (memberIds != null && CollectionUtils.isNotEmpty(memberIds)) {
                     process.setApprover(memberIds.get(0));
-                } else if (memberIds == null || CollectionUtils.isEmpty(memberIds)) {
-                    process.setApprover(orgId + dto.getApprover());
                 } else {
                     process.setApprover(dto.getApprover());
                 }
