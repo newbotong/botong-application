@@ -117,7 +117,9 @@ public class CopyServiceImpl extends BaseServiceImpl<CopyMapper, Copy> implement
             }
             userVOList.add(uservo);
         }
-        return userVOList;
+        // 去重
+        List<UserVO> distinctUserList = userVOList.stream().distinct().collect(Collectors.toList());
+        return distinctUserList;
     }
 
     /**

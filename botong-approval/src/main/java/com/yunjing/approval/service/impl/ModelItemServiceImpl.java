@@ -132,7 +132,10 @@ public class ModelItemServiceImpl extends BaseServiceImpl<ModelItemMapper, Model
         clientModelItemVO.setField(keys);
         // 获取默认审批人
         List<UserVO> processUser = this.getDefaultProcess(companyId, memberId, modelId, null);
-        clientModelItemVO.setApproverVOS(processUser);
+
+        // 过滤重复的并保持顺序不变
+        List<UserVO> distinctUserList = processUser.stream().distinct().collect(Collectors.toList());
+        clientModelItemVO.setApproverVOS(distinctUserList);
 
         // 获取默认抄送人
         List<UserVO> userVOList = copyService.get(modelId);

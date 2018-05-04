@@ -150,22 +150,9 @@ public class ProcessServiceImpl extends BaseServiceImpl<ProcessMapper, SetsProce
             String id = conditionService.getCondition(modelId, conditionVO);
             conditionIds.add(id);
         }
-//        if (conditionIds.isEmpty()) {
-//            List<SetsCondition> conditionSet = conditionService.getFirstCondition(modelId);
-//            for (SetsCondition sc : conditionSet) {
-//                String field = sc.getCdn().substring(0, sc.getCdn().indexOf(" "));
-//                String value = sc.getCdn().substring(sc.getCdn().lastIndexOf(" "), sc.getCdn().length()).trim();
-//                for (ConditionVO conditionVO : conditionVOList) {
-//                    if (sc != null && field.equals(conditionVO.getField()) && conditionVO.getValue().equals(value)) {
-//                        cdnIds.add(sc.getId());
-//                    }
-//                }
-//            }
-//        } else {
-//            cdnIds.addAll(conditionIds);
-//        }
         result.setConditionId(conditionIds);
         List<UserVO> users = processService.getProcess(modelId, conditionIds);
+
         // 从应用中心获取部门主管
         Map<String, List<OrgMemberMessage>> deptManager = appCenterService.findDeptManager(companyId, memberId);
         List<UserVO> list = new ArrayList<>();
@@ -185,7 +172,8 @@ public class ProcessServiceImpl extends BaseServiceImpl<ProcessMapper, SetsProce
             }
         }
         // 注入审批人
-        result.setApprovers(list);
+        List<UserVO> distinctUserList = list.stream().distinct().collect(Collectors.toList());
+        result.setApprovers(distinctUserList);
         // 注入抄送人
         result.setCopys(copyService.getCopy(companyId, memberId, modelId));
 
