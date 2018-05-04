@@ -182,21 +182,27 @@ public class ModelItemServiceImpl extends BaseServiceImpl<ModelItemMapper, Model
                 String[] temp = String.valueOf(userId).split("_");
                 int num = Integer.parseInt(temp[2]);
                 Map<String, List<OrgMemberMessage>> deptManager = appCenterService.findDeptManager(companyId, memberId);
-                deptManager.forEach((s, orgMemberMessages) -> {
-                    int nums = num - 1;
-                    if (nums == 0) {
-                        for (OrgMemberMessage admin : orgMemberMessages) {
-                            if (admin != null) {
-                                UserVO vo = new UserVO();
-                                vo.setMemberId(admin.getMemberId());
-                                vo.setName(admin.getMemberName());
-                                vo.setProfile(admin.getProfile());
-                                vo.setPassportId(admin.getPassportId());
-                                users.add(vo);
+                List<ApprovalUser> uid = userList.stream().filter(approvalUser -> approvalUser.getId().equals(memberId)).collect(Collectors.toList());
+                if (uid != null && CollectionUtils.isNotEmpty(uid)) {
+                    String[] deptId = uid.get(0).getDeptId().split(",");
+                    deptManager.forEach((s, orgMemberMessages) -> {
+                        if (deptId[0].equals(s)) {
+                            int nums = num - 1;
+                            if (nums == 0) {
+                                for (OrgMemberMessage admin : orgMemberMessages) {
+                                    if (admin != null) {
+                                        UserVO vo = new UserVO();
+                                        vo.setMemberId(admin.getMemberId());
+                                        vo.setName(admin.getMemberName());
+                                        vo.setProfile(admin.getProfile());
+                                        vo.setPassportId(admin.getPassportId());
+                                        users.add(vo);
+                                    }
+                                }
                             }
                         }
-                    }
-                });
+                    });
+                }
             } else {
                 String passportId = "";
                 String userNick = "";
