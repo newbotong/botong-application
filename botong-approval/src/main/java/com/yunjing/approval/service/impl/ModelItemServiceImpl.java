@@ -21,6 +21,7 @@ import com.yunjing.mommon.global.exception.ParameterErrorException;
 import com.yunjing.mommon.global.exception.UpdateMessageFailureException;
 import com.yunjing.mommon.utils.IDUtils;
 import org.apache.commons.collections.CollectionUtils;
+import org.apache.commons.collections.MapUtils;
 import org.apache.commons.lang.ArrayUtils;
 import org.apache.commons.lang.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -165,7 +166,7 @@ public class ModelItemServiceImpl extends BaseServiceImpl<ModelItemMapper, Model
 
     }
 
-    public List<UserVO> getDefaultProcess(String companyId, String memberId, String modelId, List<String> conditionIds) {
+    private List<UserVO> getDefaultProcess(String companyId, String memberId, String modelId, List<String> conditionIds) {
 
         List<UserVO> users = new ArrayList<>();
         List<SetsProcess> list;
@@ -175,15 +176,14 @@ public class ModelItemServiceImpl extends BaseServiceImpl<ModelItemMapper, Model
             list = processService.selectList(Condition.create().where("model_id={0}", modelId).and("(condition_id is null or condition_id='')").orderBy(true, "sort", true));
         }
         List<ApprovalUser> userList = approvalUserService.selectList(Condition.create());
-
+        Map<String, List<OrgMemberMessage>> deptManager = appCenterService.findDeptManager(companyId, memberId);
         for (SetsProcess process : list) {
             String userId = process.getApprover();
             if (userId.indexOf("admin_") != -1) {
                 String[] temp = String.valueOf(userId).split("_");
                 int num = Integer.parseInt(temp[2]);
-                Map<String, List<OrgMemberMessage>> deptManager = appCenterService.findDeptManager(companyId, memberId);
                 List<ApprovalUser> uid = userList.stream().filter(approvalUser -> approvalUser.getId().equals(memberId)).collect(Collectors.toList());
-                if (uid != null && CollectionUtils.isNotEmpty(uid)) {
+                if (uid != null && CollectionUtils.isNotEmpty(uid) && deptManager != null && MapUtils.isNotEmpty(deptManager)) {
                     String[] deptId = uid.get(0).getDeptId().split(",");
                     deptManager.forEach((s, orgMemberMessages) -> {
                         if (deptId[0].equals(s)) {

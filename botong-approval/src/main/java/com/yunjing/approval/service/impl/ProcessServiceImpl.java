@@ -7,17 +7,19 @@ import com.baomidou.mybatisplus.mapper.Condition;
 import com.baomidou.mybatisplus.mapper.Wrapper;
 import com.common.mybatis.service.impl.BaseServiceImpl;
 import com.yunjing.approval.dao.mapper.ProcessMapper;
-import com.yunjing.approval.model.entity.*;
+import com.yunjing.approval.model.entity.ApprovalUser;
+import com.yunjing.approval.model.entity.Copy;
+import com.yunjing.approval.model.entity.SetsProcess;
 import com.yunjing.approval.model.vo.ApproverVO;
 import com.yunjing.approval.model.vo.ConditionVO;
 import com.yunjing.approval.model.vo.UserVO;
 import com.yunjing.approval.processor.okhttp.AppCenterService;
 import com.yunjing.approval.service.*;
-import com.yunjing.approval.util.ApproConstants;
 import com.yunjing.message.share.org.OrgMemberMessage;
 import com.yunjing.mommon.global.exception.InsertMessageFailureException;
 import com.yunjing.mommon.utils.IDUtils;
 import org.apache.commons.collections.CollectionUtils;
+import org.apache.commons.collections.MapUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -142,95 +144,84 @@ public class ProcessServiceImpl extends BaseServiceImpl<ProcessMapper, SetsProce
             conditionVOList.add(conditionVO);
         }
         ApproverVO result = new ApproverVO();
-        // 获取审批流程设置类型，set=0:不分条件设置审批人 set=1:分条件设置审批人
-        ApprovalSets sets = approvalSetsService.selectOne(Condition.create().where("model_id={0}", modelId));
-        if (sets != null) {
-            List<String> cdnIds = new ArrayList<>();
-            // 分条件审批
-            if (sets.getSetting() == 1) {
-                List<String> conditionIds = new ArrayList<>();
-                for (ConditionVO conditionVO : conditionVOList) {
-                    if (ApproConstants.RADIO_TYPE_3 == conditionVO.getType()) {
-                        String id = conditionService.getCondition(modelId, conditionVO);
-                        conditionIds.add(id);
-                    }
-                }
-                if (conditionIds.isEmpty()) {
-                    List<SetsCondition> conditionSet = conditionService.getFirstCondition(modelId);
-                    for (SetsCondition sc : conditionSet) {
-                        String field = sc.getCdn().substring(0, sc.getCdn().indexOf(" "));
-                        String value = sc.getCdn().substring(sc.getCdn().lastIndexOf(" "), sc.getCdn().length()).trim();
-                        for (ConditionVO conditionVO : conditionVOList) {
-                            if (sc != null && field.equals(conditionVO.getField()) && conditionVO.getValue().equals(value)) {
-                                cdnIds.add(sc.getId());
-                            }
-                        }
+        List<String> conditionIds = new ArrayList<>();
+        for (ConditionVO conditionVO : conditionVOList) {
+            String id = conditionService.getCondition(modelId, conditionVO);
+            conditionIds.add(id);
+        }
+//        if (conditionIds.isEmpty()) {
+//            List<SetsCondition> conditionSet = conditionService.getFirstCondition(modelId);
+//            for (SetsCondition sc : conditionSet) {
+//                String field = sc.getCdn().substring(0, sc.getCdn().indexOf(" "));
+//                String value = sc.getCdn().substring(sc.getCdn().lastIndexOf(" "), sc.getCdn().length()).trim();
+//                for (ConditionVO conditionVO : conditionVOList) {
+//                    if (sc != null && field.equals(conditionVO.getField()) && conditionVO.getValue().equals(value)) {
+//                        cdnIds.add(sc.getId());
+//                    }
+//                }
+//            }
+//        } else {
+//            cdnIds.addAll(conditionIds);
+//        }
+        result.setConditionId(conditionIds);
+        List<UserVO> users = processService.getProcess(modelId, conditionIds);
+        // 从应用中心获取部门主管
+        Map<String, List<OrgMemberMessage>> deptManager = appCenterService.findDeptManager(companyId, memberId);
+        List<UserVO> list = new ArrayList<>();
+        if (users != null && users.size() > 0) {
+            for (UserVO user : users) {
+                if (user.getMemberId().indexOf("admin_") != -1) {
+                    String[] temp = user.getMemberId().split("_");
+                    int num = Integer.parseInt(temp[2]);
+                    // 根据部门主键和级数查询出该主管
+                    List<UserVO> admins = getAdmins(deptId, num, deptManager);
+                    if (admins != null && CollectionUtils.isNotEmpty(admins)) {
+                        list.addAll(admins);
                     }
                 } else {
-                    cdnIds.addAll(conditionIds);
-                }
-                if (cdnIds.isEmpty()) {
-                    return null;
-                }
-                result.setConditionId(cdnIds);
-            }
-            List<UserVO> users = processService.getProcess(modelId, cdnIds);
-            List<UserVO> list = new ArrayList<>();
-            if (users != null && users.size() > 0) {
-                for (UserVO user : users) {
-                    if (user.getMemberId().indexOf("admin_") != -1) {
-                        String[] temp = user.getMemberId().split("_");
-                        int num = Integer.parseInt(temp[2]);
-                        // 根据部门主键和级数查询出该主管
-                        List<UserVO> admins = getAdmins(companyId, memberId, deptId, num);
-                        if (admins != null && CollectionUtils.isNotEmpty(admins)) {
-                            list.addAll(admins);
-                        }
-                    } else {
-                        list.add(user);
-                    }
+                    list.add(user);
                 }
             }
-            // 注入审批人
-            result.setApprovers(list);
-            // 注入抄送人
-            result.setCopys(copyService.getCopy(companyId, memberId, modelId));
-
-            return result;
         }
-        return null;
+        // 注入审批人
+        result.setApprovers(list);
+        // 注入抄送人
+        result.setCopys(copyService.getCopy(companyId, memberId, modelId));
+
+        return result;
     }
 
     /**
      * 获取主管
      */
-    public List<UserVO> getAdmins(String companyId, String memberId, String deptId, int num) {
-        Map<String, List<OrgMemberMessage>> deptManager = appCenterService.findDeptManager(companyId, memberId);
+    public List<UserVO> getAdmins(String deptId, int num, Map<String, List<OrgMemberMessage>> deptManager) {
         List<UserVO> userVOList = new ArrayList<>();
-        deptManager.forEach((s, orgMemberMessages) -> {
-            if (s.equals(deptId)) {
-                int nums = num - 1;
-                if (nums == 0) {
-                    for (OrgMemberMessage admin : orgMemberMessages) {
-                        if (admin != null) {
-                            UserVO vo = new UserVO();
-                            vo.setName(admin.getMemberName());
-                            vo.setMemberId(admin.getMemberId());
-                            vo.setProfile(admin.getProfile());
-                            vo.setPassportId(admin.getPassportId());
-                            userVOList.add(vo);
+        if (deptManager != null && MapUtils.isNotEmpty(deptManager)) {
+            deptManager.forEach((s, orgMemberMessages) -> {
+                if (s.equals(deptId)) {
+                    int nums = num - 1;
+                    if (nums == 0) {
+                        for (OrgMemberMessage admin : orgMemberMessages) {
+                            if (admin != null) {
+                                UserVO vo = new UserVO();
+                                vo.setName(admin.getMemberName());
+                                vo.setMemberId(admin.getMemberId());
+                                vo.setProfile(admin.getProfile());
+                                vo.setPassportId(admin.getPassportId());
+                                userVOList.add(vo);
+                            }
                         }
-                    }
-                } else {
-                    if (deptId != null) {
-                        List<UserVO> admin = getAdmins(companyId, memberId, deptId, num);
-                        if (admin != null && CollectionUtils.isNotEmpty(admin)) {
-                            userVOList.addAll(admin);
+                    } else {
+                        if (deptId != null) {
+                            List<UserVO> admin = getAdmins(deptId, num, deptManager);
+                            if (admin != null && CollectionUtils.isNotEmpty(admin)) {
+                                userVOList.addAll(admin);
+                            }
                         }
                     }
                 }
-            }
-        });
+            });
+        }
         return userVOList;
     }
 
