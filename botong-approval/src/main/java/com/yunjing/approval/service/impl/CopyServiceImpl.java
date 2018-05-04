@@ -38,6 +38,7 @@ public class CopyServiceImpl extends BaseServiceImpl<CopyMapper, Copy> implement
     private IApprovalUserService approvalUserService;
     @Autowired
     private AppCenterService appCenterService;
+
     /**
      * 获取抄送人
      *
@@ -49,7 +50,7 @@ public class CopyServiceImpl extends BaseServiceImpl<CopyMapper, Copy> implement
     public List<UserVO> get(String modelId) {
         List<Copy> copyList = this.selectList(Condition.create().where("model_id={0}", modelId).orderBy("sort", true));
         List<UserVO> userVOList = new ArrayList<>();
-        List<String > ids = new ArrayList<>(copyList.size());
+        List<String> ids = new ArrayList<>(copyList.size());
         for (Copy c : copyList) {
             //0.用户 1.主管
             if (c.getType() == 0) {
@@ -92,7 +93,7 @@ public class CopyServiceImpl extends BaseServiceImpl<CopyMapper, Copy> implement
                     // 查询成员所在部门
                     for (String deptId : deptIds) {
                         String[] erids = copy.getUserId().split("_");
-                        getAdmin(companyId,memberId,deptId, Integer.parseInt(erids[2]));
+                        getAdmin(companyId, memberId, deptId, Integer.parseInt(erids[2]));
                     }
                 }
             }
@@ -124,10 +125,11 @@ public class CopyServiceImpl extends BaseServiceImpl<CopyMapper, Copy> implement
         }
         return true;
     }
+
     /**
      * 递归查找部门主管
      **/
-    public void getAdmin(String companyId,String memberId,String deptId, int num) {
+    public void getAdmin(String companyId, String memberId, String deptId, int num) {
         Map<String, List<OrgMemberMessage>> deptManager = appCenterService.findDeptManager(companyId, memberId);
         List<ApprovalUser> userList = new ArrayList<>();
         deptManager.forEach((s, orgMemberMessages) -> {
@@ -135,10 +137,12 @@ public class CopyServiceImpl extends BaseServiceImpl<CopyMapper, Copy> implement
                 int nums = num - 1;
                 if (nums == 0) {
                     for (OrgMemberMessage admin : orgMemberMessages) {
-                        ApprovalUser user = covertObj(admin);
                         if (admin.getMemberId() != null) {
-                            if (selectList(userList, user.getId())) {
-                                userList.add(user);
+                            ApprovalUser user = covertObj(admin);
+                            if (admin.getMemberId() != null) {
+                                if (selectList(userList, user.getId())) {
+                                    userList.add(user);
+                                }
                             }
                         }
                     }
@@ -150,6 +154,7 @@ public class CopyServiceImpl extends BaseServiceImpl<CopyMapper, Copy> implement
             }
         });
     }
+
     private ApprovalUser covertObj(OrgMemberMessage memberMessage) {
         ApprovalUser approvalUser = new ApprovalUser();
         approvalUser.setPassportId(memberMessage.getPassportId());
@@ -179,6 +184,7 @@ public class CopyServiceImpl extends BaseServiceImpl<CopyMapper, Copy> implement
 
         return approvalUser;
     }
+
     /**
      * 保存抄送人
      *

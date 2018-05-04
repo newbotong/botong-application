@@ -170,9 +170,9 @@ public class ModelItemServiceImpl extends BaseServiceImpl<ModelItemMapper, Model
         List<UserVO> users = new ArrayList<>();
         List<SetsProcess> list;
         if (conditionIds != null && !conditionIds.isEmpty()) {
-            list = this.selectList(Condition.create().where("model_id={0}", modelId).in("condition_id", conditionIds).orderBy(true, "sort", true));
+            list = processService.selectList(Condition.create().where("model_id={0}", modelId).in("condition_id", conditionIds).orderBy(true, "sort", true));
         } else {
-            list = this.selectList(Condition.create().where("model_id={0}", modelId).and("(condition_id is null or condition_id='')").orderBy(true, "sort", true));
+            list = processService.selectList(Condition.create().where("model_id={0}", modelId).and("(condition_id is null or condition_id='')").orderBy(true, "sort", true));
         }
         List<ApprovalUser> userList = approvalUserService.selectList(Condition.create());
 
@@ -186,12 +186,14 @@ public class ModelItemServiceImpl extends BaseServiceImpl<ModelItemMapper, Model
                     int nums = num - 1;
                     if (nums == 0) {
                         for (OrgMemberMessage admin : orgMemberMessages) {
-                            UserVO vo = new UserVO();
-                            vo.setMemberId(admin.getMemberId());
-                            vo.setName(admin.getMemberName());
-                            vo.setProfile(admin.getProfile());
-                            vo.setPassportId(admin.getPassportId());
-                            users.add(vo);
+                            if (admin != null) {
+                                UserVO vo = new UserVO();
+                                vo.setMemberId(admin.getMemberId());
+                                vo.setName(admin.getMemberName());
+                                vo.setProfile(admin.getProfile());
+                                vo.setPassportId(admin.getPassportId());
+                                users.add(vo);
+                            }
                         }
                     }
                 });

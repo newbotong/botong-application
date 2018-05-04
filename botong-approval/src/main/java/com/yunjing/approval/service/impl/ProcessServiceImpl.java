@@ -17,7 +17,6 @@ import com.yunjing.approval.util.ApproConstants;
 import com.yunjing.message.share.org.OrgMemberMessage;
 import com.yunjing.mommon.global.exception.InsertMessageFailureException;
 import com.yunjing.mommon.utils.IDUtils;
-import org.apache.catalina.User;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -150,7 +149,7 @@ public class ProcessServiceImpl extends BaseServiceImpl<ProcessMapper, SetsProce
             if (sets.getSetting() == 1) {
                 List<String> conditionIds = new ArrayList<>();
                 for (ConditionVO conditionVO : conditionVOList) {
-                    if(ApproConstants.RADIO_TYPE_3==conditionVO.getType()){
+                    if (ApproConstants.RADIO_TYPE_3 == conditionVO.getType()) {
                         String id = conditionService.getCondition(modelId, conditionVO);
                         conditionIds.add(id);
                     }
@@ -215,10 +214,12 @@ public class ProcessServiceImpl extends BaseServiceImpl<ProcessMapper, SetsProce
                 int nums = num - 1;
                 if (nums == 0) {
                     for (OrgMemberMessage admin : orgMemberMessages) {
-                        ApprovalUser user = covertObj(admin);
-                        if (admin.getMemberId() != null) {
-                            if (selectList(userList, user.getId())) {
-                                userList.add(user);
+                        if (admin != null) {
+                            ApprovalUser user = covertObj(admin);
+                            if (admin.getMemberId() != null) {
+                                if (selectList(userList, user.getId())) {
+                                    userList.add(user);
+                                }
                             }
                         }
                     }
@@ -240,6 +241,7 @@ public class ProcessServiceImpl extends BaseServiceImpl<ProcessMapper, SetsProce
         }
         return userVOList;
     }
+
     private ApprovalUser covertObj(OrgMemberMessage memberMessage) {
         ApprovalUser approvalUser = new ApprovalUser();
         approvalUser.setPassportId(memberMessage.getPassportId());
@@ -269,15 +271,17 @@ public class ProcessServiceImpl extends BaseServiceImpl<ProcessMapper, SetsProce
 
         return approvalUser;
     }
+
     // 判断list是否存在ID
-    public boolean selectList(List<ApprovalUser> list,String id){
-        for(ApprovalUser user:list){
-            if(user.getId().equals(id)){
+    public boolean selectList(List<ApprovalUser> list, String id) {
+        for (ApprovalUser user : list) {
+            if (user.getId().equals(id)) {
                 return false;
             }
         }
         return true;
     }
+
     @Override
     public boolean saveDefaultApprover(String modelId, String approverIds, String copyIds) {
         boolean isInserted = false;
