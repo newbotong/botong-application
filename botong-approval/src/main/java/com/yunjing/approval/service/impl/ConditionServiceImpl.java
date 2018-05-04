@@ -31,7 +31,10 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Iterator;
+import java.util.List;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 /**
@@ -97,18 +100,21 @@ public class ConditionServiceImpl extends BaseServiceImpl<ConditionMapper, SetsC
     }
 
     @Override
-    public String getCondition(String modelId, String value) {
-        if (StringUtils.isBlank(value)) {
+    public String getCondition(String modelId, ConditionVO conditionVO) {
+        if (conditionVO == null) {
             return null;
         }
         List<SetsCondition> list = this.selectList(Condition.create().where("model_id={0}", modelId));
-        if (list != null && list.size() > 0) {
+        if (list != null && CollectionUtils.isNotEmpty(list)) {
             for (SetsCondition condition : list) {
                 String cdn = condition.getCdn();
                 String[] temp = cdn.split(" ");
-                if (StringUtils.isNotBlank(temp[2])) {
-                    if (temp[2].contains(value)) {
+                if (ApproConstants.RADIO_TYPE_3 == condition.getType()) {
+                    if (StringUtils.isNotBlank(temp[2]) && temp[2].contains(conditionVO.getValue())) {
                         return condition.getId();
+                    }
+                } else if (ApproConstants.NUMBER_TYPE_2 == condition.getType()) {
+                    for (int i = 0; i < temp.length; i++) {
                     }
                 }
             }
@@ -131,7 +137,7 @@ public class ConditionServiceImpl extends BaseServiceImpl<ConditionMapper, SetsC
             throw new MessageNotExitException("模型版本异常");
         }
         Wrapper<ModelItem> wrapper = new EntityWrapper<>();
-        wrapper.eq("model_id", modelId).eq("data_type", 3).eq("item_version", version);
+        wrapper.eq("model_id", modelId).in("data_type", "2,3").eq("item_version", version);
         wrapper.orderBy(true, "priority", true);
         List<ModelItem> list = modelItemService.selectList(wrapper);
         if (CollectionUtils.isEmpty(list)) {
@@ -172,10 +178,12 @@ public class ConditionServiceImpl extends BaseServiceImpl<ConditionMapper, SetsC
                 SetsCondition condition = new SetsCondition();
                 condition.setId(IDUtils.uuid());
                 condition.setModelId(modelId);
-                if (ApproConstants.RADIO_TYPE_3 == conditionVO.getType()){
+                if (ApproConstants.RADIO_TYPE_3 == conditionVO.getType()) {
                     condition.setCdn(conditionVO.getField() + " = " + conditionVO.getValue());
-                }else if (ApproConstants.NUMBER_TYPE_2 == conditionVO.getType()){
+                    condition.setType(ApproConstants.RADIO_TYPE_3);
+                } else if (ApproConstants.NUMBER_TYPE_2 == conditionVO.getType()) {
                     condition.setCdn(conditionVO.getValue());
+                    condition.setType(ApproConstants.NUMBER_TYPE_2);
                 }
                 condition.setEnabled(1);
                 condition.setSort(i + 1);
