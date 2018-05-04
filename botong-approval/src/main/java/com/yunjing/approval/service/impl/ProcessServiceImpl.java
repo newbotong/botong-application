@@ -17,6 +17,7 @@ import com.yunjing.approval.util.ApproConstants;
 import com.yunjing.message.share.org.OrgMemberMessage;
 import com.yunjing.mommon.global.exception.InsertMessageFailureException;
 import com.yunjing.mommon.utils.IDUtils;
+import org.apache.catalina.User;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -182,7 +183,6 @@ public class ProcessServiceImpl extends BaseServiceImpl<ProcessMapper, SetsProce
                         int num = Integer.parseInt(temp[2]);
                         // 根据部门主键和级数查询出该主管
                         List<UserVO> admins = getAdmins(companyId, memberId, deptId, num);
-
                         if (admins != null && admins.size() > 0) {
                             for (UserVO admin : admins) {
                                 list.add(admin);
@@ -209,6 +209,7 @@ public class ProcessServiceImpl extends BaseServiceImpl<ProcessMapper, SetsProce
     public List<UserVO> getAdmins(String companyId, String memberId, String deptId, int num) {
         Map<String, List<OrgMemberMessage>> deptManager = appCenterService.findDeptManager(companyId, memberId);
         List<ApprovalUser> userList = new ArrayList<>();
+        List<UserVO> userVOList = new ArrayList<>();
         deptManager.forEach((s, orgMemberMessages) -> {
             if (s.equals(deptId)) {
                 int nums = num - 1;
@@ -228,7 +229,16 @@ public class ProcessServiceImpl extends BaseServiceImpl<ProcessMapper, SetsProce
                 }
             }
         });
-        return null;
+        for (ApprovalUser user : userList) {
+            UserVO userVO = new UserVO();
+            userVO.setPassportId(user.getPassportId());
+            userVO.setProfile(user.getAvatar());
+            userVO.setName(user.getName());
+            userVO.setMemberId(user.getId());
+            userVO.setColor(user.getColor());
+            userVOList.add(userVO);
+        }
+        return userVOList;
     }
     private ApprovalUser covertObj(OrgMemberMessage memberMessage) {
         ApprovalUser approvalUser = new ApprovalUser();
