@@ -53,8 +53,8 @@ public class ClientApprovalController extends BaseController {
      * @throws Exception
      */
     @GetMapping("/model-item-detail")
-    public ResponseEntityWrapper getItem(@RequestParam("modelId") String modelId, @RequestParam("memberId") String memberId) throws Exception {
-        return success(modelItemService.getModelItem(modelId, memberId));
+    public ResponseEntityWrapper getItem(@RequestParam("companyId") String companyId, @RequestParam("modelId") String modelId, @RequestParam("memberId") String memberId) throws Exception {
+        return success(modelItemService.getModelItem(companyId,modelId, memberId));
     }
 
 

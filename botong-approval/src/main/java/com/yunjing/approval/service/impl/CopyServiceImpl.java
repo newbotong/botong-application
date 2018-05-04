@@ -7,9 +7,11 @@ import com.yunjing.approval.dao.mapper.CopyMapper;
 import com.yunjing.approval.model.entity.ApprovalUser;
 import com.yunjing.approval.model.entity.Copy;
 import com.yunjing.approval.model.vo.UserVO;
+import com.yunjing.approval.processor.okhttp.AppCenterService;
 import com.yunjing.approval.service.IApprovalUserService;
 import com.yunjing.approval.service.ICopyService;
 import com.yunjing.approval.util.ApproConstants;
+import com.yunjing.message.share.org.OrgMemberMessage;
 import com.yunjing.mommon.global.exception.ParameterErrorException;
 import com.yunjing.mommon.utils.IDUtils;
 import org.apache.commons.lang.ArrayUtils;
@@ -19,6 +21,7 @@ import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 import java.util.stream.Collectors;
 
 /**
@@ -33,7 +36,8 @@ public class CopyServiceImpl extends BaseServiceImpl<CopyMapper, Copy> implement
 
     @Autowired
     private IApprovalUserService approvalUserService;
-
+    @Autowired
+    private AppCenterService appCenterService;
     /**
      * 获取抄送人
      *
@@ -88,7 +92,7 @@ public class CopyServiceImpl extends BaseServiceImpl<CopyMapper, Copy> implement
                     // 查询成员所在部门
                     for (String deptId : deptIds) {
                         String[] erids = copy.getUserId().split("_");
-                        getAdmin(deptId, Integer.parseInt(erids[2]));
+                        getAdmin(companyId,memberId,deptId, Integer.parseInt(erids[2]));
                     }
                 }
             }
@@ -120,31 +124,61 @@ public class CopyServiceImpl extends BaseServiceImpl<CopyMapper, Copy> implement
         }
         return true;
     }
-
     /**
      * 递归查找部门主管
      **/
-    public void getAdmin(String deptId, int num) {
-//        Dept dept = deptDao.get(deptId);
-//        int nums = num - 1;
-//        if (nums == 0) {
-//
-//            List<DeptAdmin> deptAdmin = deptAdminDao.getList("deptId", dept.getDeptId());
-//            for (DeptAdmin admin : deptAdmin) {
-//                if (admin.getAdminId() != null) {
-//                    User _user = userDao.get(admin.getAdminId());
-//                    if (selectList(userList, _user.getUserId())) {
-//                        userList.add(_user);
-//                    }
-//                }
-//            }
-//        } else {
-//            if (dept.getDept() != null) {
-//                getAdmin(dept.getDept().getDeptId(), nums);
-//            }
-//        }
+    public void getAdmin(String companyId,String memberId,String deptId, int num) {
+        Map<String, List<OrgMemberMessage>> deptManager = appCenterService.findDeptManager(companyId, memberId);
+        List<ApprovalUser> userList = new ArrayList<>();
+        deptManager.forEach((s, orgMemberMessages) -> {
+            if (s.equals(deptId)) {
+                int nums = num - 1;
+                if (nums == 0) {
+                    for (OrgMemberMessage admin : orgMemberMessages) {
+                        ApprovalUser user = covertObj(admin);
+                        if (admin.getMemberId() != null) {
+                            if (selectList(userList, user.getId())) {
+                                userList.add(user);
+                            }
+                        }
+                    }
+                } else {
+                    if (deptId != null) {
+                        getAdmin(companyId, memberId, deptId, num);
+                    }
+                }
+            }
+        });
     }
+    private ApprovalUser covertObj(OrgMemberMessage memberMessage) {
+        ApprovalUser approvalUser = new ApprovalUser();
+        approvalUser.setPassportId(memberMessage.getPassportId());
+        approvalUser.setColor(memberMessage.getColor());
+        approvalUser.setOrgId(memberMessage.getCompanyId());
+        approvalUser.setAvatar(memberMessage.getProfile());
+        approvalUser.setName(memberMessage.getMemberName());
+        approvalUser.setMobile(memberMessage.getMobile());
+        approvalUser.setPosition(memberMessage.getPosition());
+        approvalUser.setId(memberMessage.getMemberId());
+        List<String> deptIds = memberMessage.getDeptIds();
+        String dIds = "";
+        if (deptIds != null && !deptIds.isEmpty()) {
+            for (String deptId : deptIds) {
+                dIds = deptId + ",";
+            }
+        }
+        approvalUser.setDeptId(dIds);
+        List<String> deptNames = memberMessage.getDeptNames();
+        String dNames = "";
+        if (deptNames != null && !deptNames.isEmpty()) {
+            for (String deptName : deptNames) {
+                dNames = deptName + ",";
+            }
+        }
+        approvalUser.setDeptName(dNames);
 
+        return approvalUser;
+    }
     /**
      * 保存抄送人
      *

@@ -81,7 +81,7 @@ public class ModelItemServiceImpl extends BaseServiceImpl<ModelItemMapper, Model
     private final int[] types = {1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11};
 
     @Override
-    public ClientModelItemVO getModelItem(String modelId, String memberId) throws Exception {
+    public ClientModelItemVO getModelItem(String companyId,String modelId, String memberId) throws Exception {
         logger.info("modelId: " + modelId + " memberId: " + memberId);
         ModelL modelL = modelService.selectById(modelId);
         List<ModelItem> itemList = new ArrayList<>();
