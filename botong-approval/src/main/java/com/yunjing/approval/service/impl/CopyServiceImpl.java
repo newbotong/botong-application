@@ -14,6 +14,7 @@ import com.yunjing.approval.util.ApproConstants;
 import com.yunjing.message.share.org.OrgMemberMessage;
 import com.yunjing.mommon.global.exception.ParameterErrorException;
 import com.yunjing.mommon.utils.IDUtils;
+import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.lang.ArrayUtils;
 import org.apache.commons.lang.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -82,6 +83,7 @@ public class CopyServiceImpl extends BaseServiceImpl<CopyMapper, Copy> implement
         List<Copy> copyList = this.selectList(Condition.create().where("model_id={0}", modelId).orderBy("sort", true));
         String[] deptIds = approvalUserService.selectById(memberId).getDeptId().split(",");
         List<ApprovalUser> userList = new ArrayList<>();
+        List<UserVO> userVOList = new ArrayList<>();
         if (copyList != null && !copyList.isEmpty()) {
             for (Copy copy : copyList) {
                 if (copy.getType() == 0) {
@@ -93,13 +95,15 @@ public class CopyServiceImpl extends BaseServiceImpl<CopyMapper, Copy> implement
                     // 查询成员所在部门
                     for (String deptId : deptIds) {
                         String[] erids = copy.getUserId().split("_");
-                        getAdmin(companyId, memberId, deptId, Integer.parseInt(erids[2]));
+                        List<UserVO> admin = getAdmin(companyId, memberId, deptId, Integer.parseInt(erids[2]));
+                        if (admin != null && CollectionUtils.isNotEmpty(admin)) {
+                            userVOList.addAll(admin);
+                        }
                     }
                 }
             }
         }
         //处理用户头像
-        List<UserVO> uservos = new ArrayList<>();
         for (ApprovalUser user : userList) {
             UserVO uservo = new UserVO();
             uservo.setMemberId(user.getId());
@@ -109,9 +113,9 @@ public class CopyServiceImpl extends BaseServiceImpl<CopyMapper, Copy> implement
             } else {
                 uservo.setColor(user.getColor() != null ? user.getColor() : ApproConstants.DEFAULT_COLOR);
             }
-            uservos.add(uservo);
+            userVOList.add(uservo);
         }
-        return uservos;
+        return userVOList;
     }
 
     /**
@@ -129,61 +133,36 @@ public class CopyServiceImpl extends BaseServiceImpl<CopyMapper, Copy> implement
     /**
      * 递归查找部门主管
      **/
-    public void getAdmin(String companyId, String memberId, String deptId, int num) {
+    public List<UserVO> getAdmin(String companyId, String memberId, String deptId, int num) {
         Map<String, List<OrgMemberMessage>> deptManager = appCenterService.findDeptManager(companyId, memberId);
-        List<ApprovalUser> userList = new ArrayList<>();
+        List<UserVO> userVOList = new ArrayList<>();
         deptManager.forEach((s, orgMemberMessages) -> {
             if (s.equals(deptId)) {
                 int nums = num - 1;
                 if (nums == 0) {
                     for (OrgMemberMessage admin : orgMemberMessages) {
-                        if (admin.getMemberId() != null) {
-                            ApprovalUser user = covertObj(admin);
-                            if (admin.getMemberId() != null) {
-                                if (selectList(userList, user.getId())) {
-                                    userList.add(user);
-                                }
-                            }
+                        if (admin != null) {
+                            UserVO vo = new UserVO();
+                            vo.setName(admin.getMemberName());
+                            vo.setProfile(admin.getProfile());
+                            vo.setMemberId(admin.getMemberId());
+                            vo.setPassportId(admin.getPassportId());
+                            userVOList.add(vo);
                         }
                     }
                 } else {
                     if (deptId != null) {
-                        getAdmin(companyId, memberId, deptId, num);
+                        List<UserVO> admin = getAdmin(companyId, memberId, deptId, num);
+                        if (admin != null && CollectionUtils.isNotEmpty(admin)) {
+                            userVOList.addAll(admin);
+                        }
                     }
                 }
             }
         });
+        return userVOList;
     }
 
-    private ApprovalUser covertObj(OrgMemberMessage memberMessage) {
-        ApprovalUser approvalUser = new ApprovalUser();
-        approvalUser.setPassportId(memberMessage.getPassportId());
-        approvalUser.setColor(memberMessage.getColor());
-        approvalUser.setOrgId(memberMessage.getCompanyId());
-        approvalUser.setAvatar(memberMessage.getProfile());
-        approvalUser.setName(memberMessage.getMemberName());
-        approvalUser.setMobile(memberMessage.getMobile());
-        approvalUser.setPosition(memberMessage.getPosition());
-        approvalUser.setId(memberMessage.getMemberId());
-        List<String> deptIds = memberMessage.getDeptIds();
-        String dIds = "";
-        if (deptIds != null && !deptIds.isEmpty()) {
-            for (String deptId : deptIds) {
-                dIds = deptId + ",";
-            }
-        }
-        approvalUser.setDeptId(dIds);
-        List<String> deptNames = memberMessage.getDeptNames();
-        String dNames = "";
-        if (deptNames != null && !deptNames.isEmpty()) {
-            for (String deptName : deptNames) {
-                dNames = deptName + ",";
-            }
-        }
-        approvalUser.setDeptName(dNames);
-
-        return approvalUser;
-    }
 
     /**
      * 保存抄送人

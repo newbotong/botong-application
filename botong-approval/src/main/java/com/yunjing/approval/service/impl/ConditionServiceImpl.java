@@ -128,7 +128,7 @@ public class ConditionServiceImpl extends BaseServiceImpl<ConditionMapper, SetsC
     private boolean judgeDay(String[] temp, ConditionVO conditionVO) {
         boolean result1 = false;
         boolean result2 = false;
-        final String f1 = "＜", f2 = "≤", f3 = "＞", f4 = "≥", f5 = "=";
+        final String f1 = "<", f2 = "≤", f3 = ">", f4 = "≥", f5 = "=";
         if (temp.length == 5) {
             int a = Integer.valueOf(temp[0]);
             int b = Integer.valueOf(temp[4]);
