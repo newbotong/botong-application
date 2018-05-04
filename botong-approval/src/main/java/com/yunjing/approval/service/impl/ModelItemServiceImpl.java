@@ -1,7 +1,6 @@
 package com.yunjing.approval.service.impl;
 
 import com.alibaba.fastjson.JSONObject;
-import com.alibaba.fastjson.TypeReference;
 import com.baomidou.mybatisplus.mapper.Condition;
 import com.baomidou.mybatisplus.mapper.EntityWrapper;
 import com.baomidou.mybatisplus.mapper.Wrapper;
@@ -10,11 +9,12 @@ import com.yunjing.approval.config.RedisApproval;
 import com.yunjing.approval.dao.mapper.ConditionMapper;
 import com.yunjing.approval.dao.mapper.ModelItemMapper;
 import com.yunjing.approval.dao.mapper.ModelMapper;
-import com.yunjing.approval.model.dto.CompanyDeptDTO;
 import com.yunjing.approval.model.entity.*;
 import com.yunjing.approval.model.vo.*;
+import com.yunjing.approval.processor.okhttp.AppCenterService;
 import com.yunjing.approval.service.*;
 import com.yunjing.approval.util.ApproConstants;
+import com.yunjing.message.share.org.OrgMemberMessage;
 import com.yunjing.mommon.global.exception.InsertMessageFailureException;
 import com.yunjing.mommon.global.exception.MissingRequireFieldException;
 import com.yunjing.mommon.global.exception.ParameterErrorException;
@@ -24,15 +24,10 @@ import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.lang.ArrayUtils;
 import org.apache.commons.lang.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.stereotype.Service;
 
-import java.lang.reflect.Type;
 import java.sql.Timestamp;
-import java.util.ArrayList;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
+import java.util.*;
 import java.util.stream.Collectors;
 
 import static java.util.Comparator.comparing;
@@ -63,6 +58,8 @@ public class ModelItemServiceImpl extends BaseServiceImpl<ModelItemMapper, Model
 
     @Autowired
     private IProcessService processService;
+    @Autowired
+    private AppCenterService appCenterService;
 
     @Autowired
     private ICopyService copyService;
@@ -81,7 +78,7 @@ public class ModelItemServiceImpl extends BaseServiceImpl<ModelItemMapper, Model
     private final int[] types = {1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11};
 
     @Override
-    public ClientModelItemVO getModelItem(String companyId,String modelId, String memberId) throws Exception {
+    public ClientModelItemVO getModelItem(String companyId, String modelId, String memberId) throws Exception {
         logger.info("modelId: " + modelId + " memberId: " + memberId);
         ModelL modelL = modelService.selectById(modelId);
         List<ModelItem> itemList = new ArrayList<>();
@@ -112,7 +109,6 @@ public class ModelItemServiceImpl extends BaseServiceImpl<ModelItemMapper, Model
                 modelItemVO.setItems(modelItems);
             }
             modelItemVOS.add(modelItemVO);
-
         }
 
         modelVO.setItems(modelItemVOS);
@@ -134,7 +130,7 @@ public class ModelItemServiceImpl extends BaseServiceImpl<ModelItemMapper, Model
         }
         clientModelItemVO.setField(keys);
         // 获取默认审批人
-        List<UserVO> processUser = processService.getProcess(modelId, null);
+        List<UserVO> processUser = this.getDefaultProcess(companyId, memberId, modelId, null);
         clientModelItemVO.setApproverVOS(processUser);
 
         // 获取默认抄送人
@@ -167,6 +163,61 @@ public class ModelItemServiceImpl extends BaseServiceImpl<ModelItemMapper, Model
         clientModelItemVO.setDeptList(deptVOList);
         return clientModelItemVO;
 
+    }
+
+    public List<UserVO> getDefaultProcess(String companyId, String memberId, String modelId, List<String> conditionIds) {
+
+        List<UserVO> users = new ArrayList<>();
+        List<SetsProcess> list;
+        if (conditionIds != null && !conditionIds.isEmpty()) {
+            list = processService.selectList(Condition.create().where("model_id={0}", modelId).in("condition_id", conditionIds).orderBy(true, "sort", true));
+        } else {
+            list = processService.selectList(Condition.create().where("model_id={0}", modelId).and("(condition_id is null or condition_id='')").orderBy(true, "sort", true));
+        }
+        List<ApprovalUser> userList = approvalUserService.selectList(Condition.create());
+
+        for (SetsProcess process : list) {
+            String userId = process.getApprover();
+            if (userId.indexOf("admin_") != -1) {
+                String[] temp = String.valueOf(userId).split("_");
+                int num = Integer.parseInt(temp[2]);
+                Map<String, List<OrgMemberMessage>> deptManager = appCenterService.findDeptManager(companyId, memberId);
+                deptManager.forEach((s, orgMemberMessages) -> {
+                    int nums = num - 1;
+                    if (nums == 0) {
+                        for (OrgMemberMessage admin : orgMemberMessages) {
+                            if (admin != null) {
+                                UserVO vo = new UserVO();
+                                vo.setMemberId(admin.getMemberId());
+                                vo.setName(admin.getMemberName());
+                                vo.setProfile(admin.getProfile());
+                                vo.setPassportId(admin.getPassportId());
+                                users.add(vo);
+                            }
+                        }
+                    }
+                });
+            } else {
+                String passportId = "";
+                String userNick = "";
+                String userAvatar = null;
+                Set<ApprovalUser> userSet = userList.stream().filter(user -> user.getId().equals(userId)).collect(Collectors.toSet());
+                for (ApprovalUser user : userSet) {
+                    if (user != null) {
+                        passportId = user.getPassportId();
+                        userNick = user.getName();
+                        userAvatar = user.getAvatar();
+                    }
+                }
+                UserVO vo = new UserVO();
+                vo.setMemberId(userId);
+                vo.setName(userNick);
+                vo.setProfile(userAvatar);
+                vo.setPassportId(passportId);
+                users.add(vo);
+            }
+        }
+        return users;
     }
 
     private ModelVO getModelVO(ModelL modelL, List<ModelItem> itemList) {
