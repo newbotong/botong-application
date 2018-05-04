@@ -15,12 +15,13 @@ public interface IModelItemService extends IBaseService<ModelItem> {
     /**
      * 获取模型
      *
+     * @param companyId 公司id
      * @param modelId 模型主键
      * @param memberId 成员id
      * @return 模型视图
      * @throws Exception 异常
      */
-    ClientModelItemVO getModelItem(String modelId,String memberId) throws Exception;
+    ClientModelItemVO getModelItem(String companyId,String modelId,String memberId) throws Exception;
 
     /**
      * 获取模型

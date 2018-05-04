@@ -11,6 +11,7 @@ import com.yunjing.approval.dao.mapper.ConditionMapper;
 import com.yunjing.approval.model.entity.ModelItem;
 import com.yunjing.approval.model.entity.ModelL;
 import com.yunjing.approval.model.entity.SetsCondition;
+import com.yunjing.approval.model.vo.ConditionVO;
 import com.yunjing.approval.model.vo.ModelItemVO;
 import com.yunjing.approval.model.vo.SetConditionVO;
 import com.yunjing.approval.model.vo.UserVO;
@@ -18,6 +19,7 @@ import com.yunjing.approval.service.IConditionService;
 import com.yunjing.approval.service.IModelItemService;
 import com.yunjing.approval.service.IModelService;
 import com.yunjing.approval.service.IProcessService;
+import com.yunjing.approval.util.ApproConstants;
 import com.yunjing.mommon.global.exception.DeleteMessageFailureException;
 import com.yunjing.mommon.global.exception.InsertMessageFailureException;
 import com.yunjing.mommon.global.exception.MessageNotExitException;
@@ -29,7 +31,10 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Iterator;
+import java.util.List;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 /**
@@ -95,18 +100,21 @@ public class ConditionServiceImpl extends BaseServiceImpl<ConditionMapper, SetsC
     }
 
     @Override
-    public String getCondition(String modelId, String value) {
-        if (StringUtils.isBlank(value)) {
+    public String getCondition(String modelId, ConditionVO conditionVO) {
+        if (conditionVO == null) {
             return null;
         }
         List<SetsCondition> list = this.selectList(Condition.create().where("model_id={0}", modelId));
-        if (list != null && list.size() > 0) {
+        if (list != null && CollectionUtils.isNotEmpty(list)) {
             for (SetsCondition condition : list) {
                 String cdn = condition.getCdn();
                 String[] temp = cdn.split(" ");
-                if (StringUtils.isNotBlank(temp[2])) {
-                    if (temp[2].contains(value)) {
+                if (ApproConstants.RADIO_TYPE_3 == condition.getType()) {
+                    if (StringUtils.isNotBlank(temp[2]) && temp[2].contains(conditionVO.getValue())) {
                         return condition.getId();
+                    }
+                } else if (ApproConstants.NUMBER_TYPE_2 == condition.getType()) {
+                    for (int i = 0; i < temp.length; i++) {
                     }
                 }
             }
@@ -129,7 +137,7 @@ public class ConditionServiceImpl extends BaseServiceImpl<ConditionMapper, SetsC
             throw new MessageNotExitException("模型版本异常");
         }
         Wrapper<ModelItem> wrapper = new EntityWrapper<>();
-        wrapper.eq("model_id", modelId).eq("data_type", 3).eq("item_version", version);
+        wrapper.eq("model_id", modelId).in("data_type", "2,3").eq("item_version", version);
         wrapper.orderBy(true, "priority", true);
         List<ModelItem> list = modelItemService.selectList(wrapper);
         if (CollectionUtils.isEmpty(list)) {
@@ -154,31 +162,29 @@ public class ConditionServiceImpl extends BaseServiceImpl<ConditionMapper, SetsC
     @Transactional(propagation = Propagation.REQUIRED, rollbackFor = Exception.class)
     public List<SetConditionVO> save(String modelId, String judge, String memberIds) throws Exception {
         // 解析
-        Map<String, String> cdnMap = new HashMap<>(1);
         JSONArray jsonArray = JSON.parseArray(judge);
         Iterator<Object> it = jsonArray.iterator();
+        List<ConditionVO> conditionVOList = new ArrayList<>();
         while (it.hasNext()) {
-            String field = "";
-            String value = "";
             JSONObject obj = (JSONObject) it.next();
-            field = obj.getString("field");
-            JSONArray v = obj.getJSONArray("value");
-            Iterator<Object> val = v.iterator();
-            while (val.hasNext()) {
-                String next = (String) val.next();
-                value = new StringBuilder(value) + next + ",";
-            }
-            cdnMap.put(field, value.substring(0, value.length() - 1));
+            ConditionVO conditionVO = JSONObject.parseObject(obj.toJSONString(), ConditionVO.class);
+            conditionVOList.add(conditionVO);
         }
         // 先删除旧的审批条件，再设置新的审批条件
         boolean delete = this.delete(Condition.create().where("model_id={0}", modelId));
         if (delete) {
             int i = 0;
-            for (Map.Entry<String, String> cdn : cdnMap.entrySet()) {
+            for (ConditionVO conditionVO : conditionVOList) {
                 SetsCondition condition = new SetsCondition();
                 condition.setId(IDUtils.uuid());
                 condition.setModelId(modelId);
-                condition.setCdn(cdn.getKey() + " = " + cdn.getValue());
+                if (ApproConstants.RADIO_TYPE_3 == conditionVO.getType()) {
+                    condition.setCdn(conditionVO.getField() + " = " + conditionVO.getValue());
+                    condition.setType(ApproConstants.RADIO_TYPE_3);
+                } else if (ApproConstants.NUMBER_TYPE_2 == conditionVO.getType()) {
+                    condition.setCdn(conditionVO.getValue());
+                    condition.setType(ApproConstants.NUMBER_TYPE_2);
+                }
                 condition.setEnabled(1);
                 condition.setSort(i + 1);
                 boolean insert = this.insert(condition);
@@ -187,7 +193,6 @@ public class ConditionServiceImpl extends BaseServiceImpl<ConditionMapper, SetsC
                 }
                 // 保存审批人
                 boolean b = processService.updateProcess(modelId, condition.getId(), memberIds);
-
             }
         }
         return this.getConditionList(modelId);

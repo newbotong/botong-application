@@ -53,8 +53,8 @@ public class ClientApprovalController extends BaseController {
      * @throws Exception
      */
     @GetMapping("/model-item-detail")
-    public ResponseEntityWrapper getItem(@RequestParam("modelId") String modelId, @RequestParam("memberId") String memberId) throws Exception {
-        return success(modelItemService.getModelItem(modelId, memberId));
+    public ResponseEntityWrapper getItem(@RequestParam("companyId") String companyId, @RequestParam("modelId") String modelId, @RequestParam("memberId") String memberId) throws Exception {
+        return success(modelItemService.getModelItem(companyId,modelId, memberId));
     }
 
 
@@ -149,15 +149,13 @@ public class ClientApprovalController extends BaseController {
      *
      * @param modelId     模型主键
      * @param deptId      部门主键
-     * @param conditionId 条件主键
      * @param judge       审批条件的值
      * @return
      */
     @PostMapping("/get-approver")
     public ResponseEntityWrapper getApprovalMember(@RequestParam("companyId") String companyId, @RequestParam("memberId") String memberId,
                                                    @RequestParam("modelId") String modelId, @RequestParam(value = "deptId", required = false) String deptId,
-                                                   @RequestParam(value = "conditionId", required = false) String conditionId,
                                                    @RequestParam(value = "judge", required = false) String judge) throws Exception {
-        return success(processService.getApprover(companyId, memberId, modelId, deptId, conditionId, judge));
+        return success(processService.getApprover(companyId, memberId, modelId, deptId, judge));
     }
 }

@@ -6,13 +6,12 @@ import com.yunjing.approval.model.vo.OrgMemberVo;
 import com.yunjing.approval.param.DangParam;
 import com.yunjing.approval.param.PushParam;
 import com.yunjing.approval.param.SchedulerParam;
+import com.yunjing.message.share.org.OrgMemberMessage;
 import com.yunjing.mommon.wrapper.PageWrapper;
-import com.yunjing.mommon.wrapper.ResponseEntityWrapper;
-import retrofit2.Call;
-import retrofit2.http.GET;
 import retrofit2.http.Query;
 
 import java.util.List;
+import java.util.Map;
 
 
 /**
@@ -94,6 +93,7 @@ public interface AppCenterService {
          */
         void result(List<OrgMemberVo> infos);
     }
+
     /**
      * 部门成员回调
      */
@@ -121,6 +121,7 @@ public interface AppCenterService {
 
     /**
      * 获取所有的人员id
+     *
      * @param deptIds
      * @param memberIds
      * @return
@@ -129,6 +130,7 @@ public interface AppCenterService {
 
     /**
      * 分页获取人员id
+     *
      * @param deptIds
      * @param memberIds
      * @param pageNo
@@ -136,7 +138,7 @@ public interface AppCenterService {
      * @return
      */
     PageWrapper<Member> findMemberPage(@Query("deptIds") String[] deptIds, @Query("memberIds") String[] memberIds,
-                                       @Query("pageNo") int pageNo, @Query("pageSize")int pageSize);
+                                       @Query("pageNo") int pageNo, @Query("pageSize") int pageSize);
 
     /**
      * 获取企业成员管理范围
@@ -146,5 +148,14 @@ public interface AppCenterService {
      * @return
      */
     List<Member> manageScope(@Query("appId") String appId, @Query("memberId") String memberId);
+
+    /**
+     * 获取部门主管
+     *
+     * @param companyId
+     * @param memberId
+     * @return
+     */
+    Map<String, List<OrgMemberMessage>> findDeptManager(@Query("companyId") String companyId, @Query("memberId") String memberId);
 
 }

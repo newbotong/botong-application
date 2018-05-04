@@ -2,7 +2,6 @@ package com.yunjing.approval.processor.okhttp.impl;
 
 import com.alibaba.fastjson.JSON;
 import com.yunjing.approval.model.vo.Member;
-import com.yunjing.approval.model.vo.MemberInfo;
 import com.yunjing.approval.model.vo.OrgMemberVo;
 import com.yunjing.approval.param.DangParam;
 import com.yunjing.approval.param.PushParam;
@@ -10,6 +9,7 @@ import com.yunjing.approval.param.SchedulerParam;
 import com.yunjing.approval.processor.okhttp.ApiService;
 import com.yunjing.approval.processor.okhttp.AppCenterService;
 import com.yunjing.approval.util.ApproConstants;
+import com.yunjing.message.share.org.OrgMemberMessage;
 import com.yunjing.mommon.constant.StatusCode;
 import com.yunjing.mommon.global.exception.BaseRuntimeException;
 import com.yunjing.mommon.wrapper.PageWrapper;
@@ -25,6 +25,7 @@ import retrofit2.converter.gson.GsonConverterFactory;
 
 import java.io.IOException;
 import java.util.List;
+import java.util.Map;
 
 /**
  * <p>
@@ -82,6 +83,7 @@ public class AppCenterServiceImpl implements AppCenterService {
         // 构建请求对象
         apiService = retrofit.create(ApiService.class);
     }
+
     /**
      * 设置管理员验证回调
      *
@@ -99,6 +101,7 @@ public class AppCenterServiceImpl implements AppCenterService {
     public void setOrgMemberCallback(OrgMemberCallback orgMemberCallback) {
         this.orgMemberCallback = orgMemberCallback;
     }
+
     public void setTaskCallback(TaskCallback taskCallback) {
         this.taskCallback = taskCallback;
     }
@@ -125,7 +128,7 @@ public class AppCenterServiceImpl implements AppCenterService {
                 // 服务器响应数据
                 ResponseEntityWrapper body = response.body();
 
-                if(body.getStatusCode() != StatusCode.SUCCESS.getStatusCode()){
+                if (body.getStatusCode() != StatusCode.SUCCESS.getStatusCode()) {
                     log.info("调用推送结果，code:{},message:{}", body.getStatusCode(), body.getStatusMessage());
                     throw new BaseRuntimeException(body.getStatusCode(), body.getStatusMessage());
                 } else {
@@ -356,6 +359,29 @@ public class AppCenterServiceImpl implements AppCenterService {
             ResponseEntityWrapper<List<Member>> body = response.body();
             if (body != null) {
                 log.info("获取管理范围：code:{}，message:{}，data:{}", body.getStatusCode(), body.getStatusMessage(), JSON.toJSON(body.getData()));
+                if (response.isSuccessful() && body.getStatusCode() == StatusCode.SUCCESS.getStatusCode()) {
+                    return body.getData();
+                }
+            } else {
+                log.error("body is null");
+            }
+            return null;
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        return null;
+    }
+
+    @Override
+    public Map<String, List<OrgMemberMessage>> findDeptManager(String companyId, String memberId) {
+        if (apiService == null) {
+            init();
+        }
+        try {
+            Response<ResponseEntityWrapper<Map<String, List<OrgMemberMessage>>>> response = apiService.findDeptManager(companyId, memberId).execute();
+            ResponseEntityWrapper<Map<String, List<OrgMemberMessage>>> body = response.body();
+            if (body != null) {
+                log.info("获取部门主管：code:{}，message:{}，data:{}", body.getStatusCode(), body.getStatusMessage(), JSON.toJSON(body.getData()));
                 if (response.isSuccessful() && body.getStatusCode() == StatusCode.SUCCESS.getStatusCode()) {
                     return body.getData();
                 }

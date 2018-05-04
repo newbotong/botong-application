@@ -3,6 +3,7 @@ package com.yunjing.approval.service;
 
 import com.common.mybatis.service.IBaseService;
 import com.yunjing.approval.model.entity.SetsCondition;
+import com.yunjing.approval.model.vo.ConditionVO;
 import com.yunjing.approval.model.vo.ModelItemVO;
 import com.yunjing.approval.model.vo.SetConditionVO;
 
@@ -26,18 +27,18 @@ public interface IConditionService extends IBaseService<SetsCondition> {
     /**
      * 保存审批条件
      *
-     * @param modelId 模型编号
-     * @param judge   选择的审批条件
+     * @param modelId   模型编号
+     * @param judge     选择的审批条件
      * @param memberIds 审批人
      * @return
      * @throws Exception
      */
-    List<SetConditionVO> save(String modelId, String judge,String memberIds) throws Exception;
+    List<SetConditionVO> save(String modelId, String judge, String memberIds) throws Exception;
 
     /**
      * 删除审批条件
      *
-     * @param modelId    模型编号
+     * @param modelId 模型编号
      * @return
      * @throws Exception
      */
@@ -55,11 +56,11 @@ public interface IConditionService extends IBaseService<SetsCondition> {
     /**
      * 获取审批条件
      *
-     * @param modelId 模型主键
-     * @param value   条件的值
+     * @param modelId     模型主键
+     * @param conditionVO 条件
      * @return
      */
-    String getCondition(String modelId, String value);
+    String getCondition(String modelId, ConditionVO conditionVO);
 
     /**
      * 获取条件

@@ -35,7 +35,6 @@
     </select>
 
     <resultMap id="ModelListMap" type="com.yunjing.approval.model.entity.ModelL">
-        <id column="id" property="id"/>
         <result column="model_name" property="modelName" />
         <result column="logo" property="logo" />
         <result column="introduce" property="introduce" />
@@ -51,7 +50,7 @@
         m.is_disabled, m.is_def, m.provider, m.model_type, m.model_version
         FROM model m
         LEFT JOIN org_model o ON (m.id = o.model_id)
-        WHERE o.org_id = #{ orgId }AND m.is_def = 0 ORDER BY m.sort ASC
+        WHERE o.org_id = #{ orgId }AND m.is_def = 0 AND m.is_disabled = 0 ORDER BY m.sort ASC
     </select>
     <select id="getMaxSort" resultType="java.lang.Integer">
         select MAX(m.sort) AS max from model m, org_model o WHERE m.id = o.model_id and m.model_type = 2 and o.data_type = 2 and o.org_id = #{ orgId }

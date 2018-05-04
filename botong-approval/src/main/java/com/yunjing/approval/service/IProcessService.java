@@ -61,12 +61,11 @@ public interface IProcessService extends IBaseService<SetsProcess> {
      * @param memberId    成员主键
      * @param modelId     模型主键
      * @param deptId      部门主键
-     * @param conditionId 条件
      * @param judge       条件的值
      * @return ApproverVO
      * @throws Exception
      */
-    ApproverVO getApprover(String companyId, String memberId, String modelId, String deptId, String conditionId, String judge);
+    ApproverVO getApprover(String companyId, String memberId, String modelId, String deptId, String judge);
 
     /**
      * 管理端--保存默认审批人和抄送人
