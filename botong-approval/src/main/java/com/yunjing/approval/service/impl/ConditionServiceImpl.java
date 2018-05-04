@@ -241,20 +241,22 @@ public class ConditionServiceImpl extends BaseServiceImpl<ConditionMapper, SetsC
             return new ArrayList<>(0);
         }
         List<SetsCondition> conditionList = conditionMapper.selectList(Condition.create().where("model_id={0}", modelId).and("enabled=1"));
-        String value = "wd";
+        String value = "danxuankuang";
+        String dayNum = "tianshu";
         for (SetsCondition setsCondition : conditionList) {
             int type = setsCondition.getType();
             String condition = setsCondition.getCdn();
             if (ApproConstants.RADIO_TYPE_3 == type) {
                 value = condition.substring(condition.lastIndexOf(" "), condition.length()).trim();
             } else if (ApproConstants.NUMBER_TYPE_2 == type) {
-                value = condition;
+                dayNum = condition;
             }
         }
         List<ModelItemVO> voList = new ArrayList<>(list.size());
         for (ModelItem item : list) {
             ModelItemVO vo = new ModelItemVO(item);
             vo.setValue(value);
+            vo.setDayNum(dayNum);
             voList.add(vo);
         }
         return voList;
