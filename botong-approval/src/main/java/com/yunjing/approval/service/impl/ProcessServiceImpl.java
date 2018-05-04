@@ -17,6 +17,7 @@ import com.yunjing.approval.util.ApproConstants;
 import com.yunjing.message.share.org.OrgMemberMessage;
 import com.yunjing.mommon.global.exception.InsertMessageFailureException;
 import com.yunjing.mommon.utils.IDUtils;
+import org.apache.commons.collections.CollectionUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -182,10 +183,8 @@ public class ProcessServiceImpl extends BaseServiceImpl<ProcessMapper, SetsProce
                         int num = Integer.parseInt(temp[2]);
                         // 根据部门主键和级数查询出该主管
                         List<UserVO> admins = getAdmins(companyId, memberId, deptId, num);
-                        if (admins != null && admins.size() > 0) {
-                            for (UserVO admin : admins) {
-                                list.add(admin);
-                            }
+                        if (admins != null && CollectionUtils.isNotEmpty(admins)) {
+                            list.addAll(admins);
                         }
                     } else {
                         list.add(user);
@@ -207,7 +206,6 @@ public class ProcessServiceImpl extends BaseServiceImpl<ProcessMapper, SetsProce
      */
     public List<UserVO> getAdmins(String companyId, String memberId, String deptId, int num) {
         Map<String, List<OrgMemberMessage>> deptManager = appCenterService.findDeptManager(companyId, memberId);
-        List<ApprovalUser> userList = new ArrayList<>();
         List<UserVO> userVOList = new ArrayList<>();
         deptManager.forEach((s, orgMemberMessages) -> {
             if (s.equals(deptId)) {
@@ -215,71 +213,25 @@ public class ProcessServiceImpl extends BaseServiceImpl<ProcessMapper, SetsProce
                 if (nums == 0) {
                     for (OrgMemberMessage admin : orgMemberMessages) {
                         if (admin != null) {
-                            ApprovalUser user = covertObj(admin);
-                            if (admin.getMemberId() != null) {
-                                if (selectList(userList, user.getId())) {
-                                    userList.add(user);
-                                }
-                            }
+                            UserVO vo = new UserVO();
+                            vo.setName(admin.getMemberName());
+                            vo.setMemberId(admin.getMemberId());
+                            vo.setProfile(admin.getProfile());
+                            vo.setPassportId(admin.getPassportId());
+                            userVOList.add(vo);
                         }
                     }
                 } else {
                     if (deptId != null) {
-                        getAdmins(companyId, memberId, deptId, num);
+                        List<UserVO> admin = getAdmins(companyId, memberId, deptId, num);
+                        if (admin != null && CollectionUtils.isNotEmpty(admin)) {
+                            userVOList.addAll(admin);
+                        }
                     }
                 }
             }
         });
-        for (ApprovalUser user : userList) {
-            UserVO userVO = new UserVO();
-            userVO.setPassportId(user.getPassportId());
-            userVO.setProfile(user.getAvatar());
-            userVO.setName(user.getName());
-            userVO.setMemberId(user.getId());
-            userVO.setColor(user.getColor());
-            userVOList.add(userVO);
-        }
         return userVOList;
-    }
-
-    private ApprovalUser covertObj(OrgMemberMessage memberMessage) {
-        ApprovalUser approvalUser = new ApprovalUser();
-        approvalUser.setPassportId(memberMessage.getPassportId());
-        approvalUser.setColor(memberMessage.getColor());
-        approvalUser.setOrgId(memberMessage.getCompanyId());
-        approvalUser.setAvatar(memberMessage.getProfile());
-        approvalUser.setName(memberMessage.getMemberName());
-        approvalUser.setMobile(memberMessage.getMobile());
-        approvalUser.setPosition(memberMessage.getPosition());
-        approvalUser.setId(memberMessage.getMemberId());
-        List<String> deptIds = memberMessage.getDeptIds();
-        String dIds = "";
-        if (deptIds != null && !deptIds.isEmpty()) {
-            for (String deptId : deptIds) {
-                dIds = deptId + ",";
-            }
-        }
-        approvalUser.setDeptId(dIds);
-        List<String> deptNames = memberMessage.getDeptNames();
-        String dNames = "";
-        if (deptNames != null && !deptNames.isEmpty()) {
-            for (String deptName : deptNames) {
-                dNames = deptName + ",";
-            }
-        }
-        approvalUser.setDeptName(dNames);
-
-        return approvalUser;
-    }
-
-    // 判断list是否存在ID
-    public boolean selectList(List<ApprovalUser> list, String id) {
-        for (ApprovalUser user : list) {
-            if (user.getId().equals(id)) {
-                return false;
-            }
-        }
-        return true;
     }
 
     @Override
