@@ -23,6 +23,7 @@ import com.yunjing.approval.util.ApproConstants;
 import com.yunjing.mommon.global.exception.DeleteMessageFailureException;
 import com.yunjing.mommon.global.exception.InsertMessageFailureException;
 import com.yunjing.mommon.global.exception.MessageNotExitException;
+import com.yunjing.mommon.global.exception.ParameterErrorException;
 import com.yunjing.mommon.utils.IDUtils;
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.lang.StringUtils;
@@ -34,7 +35,7 @@ import org.springframework.transaction.annotation.Transactional;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
-import java.util.Set;
+import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
 /**
@@ -114,12 +115,107 @@ public class ConditionServiceImpl extends BaseServiceImpl<ConditionMapper, SetsC
                         return condition.getId();
                     }
                 } else if (ApproConstants.NUMBER_TYPE_2 == condition.getType()) {
-                    for (int i = 0; i < temp.length; i++) {
+                    boolean b = judgeDay(temp, conditionVO);
+                    if (b) {
+                        return condition.getId();
                     }
                 }
             }
         }
         return null;
+    }
+
+    private boolean judgeDay(String[] temp, ConditionVO conditionVO) {
+        boolean result1 = false;
+        boolean result2 = false;
+        final String f1 = "＜", f2 = "≤", f3 = "＞", f4 = "≥", f5 = "=";
+        if (temp.length == 5) {
+            int a = Integer.valueOf(temp[0]);
+            int b = Integer.valueOf(temp[4]);
+            String a1 = temp[1];
+            String b1 = temp[3];
+            switch (a1) {
+                case f1:
+                    if (a < Integer.parseInt(conditionVO.getValue())) {
+                        result1 = true;
+                    }
+                    break;
+                case f2:
+                    if (a <= Integer.parseInt(conditionVO.getValue())) {
+                        result1 = true;
+                    }
+                    break;
+                default:
+                    throw new ParameterErrorException("解析天数出现异常");
+            }
+            switch (b1) {
+                case f3:
+                    if (b > Integer.parseInt(conditionVO.getValue())) {
+                        result2 = true;
+                    }
+                    break;
+                case f4:
+                    if (b >= Integer.parseInt(conditionVO.getValue())) {
+                        result2 = true;
+                    }
+                    break;
+                default:
+                    throw new ParameterErrorException("解析天数出现异常");
+            }
+            if (result1 && result2) {
+                return true;
+            } else {
+                return false;
+            }
+        } else if (temp.length == 3) {
+            int a = Integer.valueOf(temp[2]);
+            String a1 = temp[1];
+            switch (a1) {
+                case f1:
+                    if (Integer.parseInt(conditionVO.getValue()) < a) {
+                        result1 = true;
+                    }
+                    break;
+                case f2:
+                    if (Integer.parseInt(conditionVO.getValue()) <= a) {
+                        result1 = true;
+                    }
+                    break;
+                case f3:
+                    if (Integer.parseInt(conditionVO.getValue()) > a) {
+                        result1 = true;
+                    }
+                    break;
+                case f4:
+                    if (Integer.parseInt(conditionVO.getValue()) >= a) {
+                        result1 = true;
+                    }
+                    break;
+                case f5:
+                    if (Integer.parseInt(conditionVO.getValue()) == a) {
+                        result1 = true;
+                    }
+                    break;
+                default:
+                    throw new ParameterErrorException("解析天数出现异常");
+            }
+            return result1;
+        } else {
+            return false;
+        }
+    }
+
+    /**
+     * 方法二：推荐，速度最快
+     * 判断是否为整数
+     *
+     * @param str 传入的字符串
+     * @return 是整数返回true, 否则返回false
+     */
+
+    public static boolean isInteger(String str) {
+        Pattern pattern = Pattern.compile("^[-\\+]?[\\d]*$");
+        return pattern.matcher(str).matches();
     }
 
     @Override
@@ -137,17 +233,23 @@ public class ConditionServiceImpl extends BaseServiceImpl<ConditionMapper, SetsC
             throw new MessageNotExitException("模型版本异常");
         }
         Wrapper<ModelItem> wrapper = new EntityWrapper<>();
-        wrapper.eq("model_id", modelId).in("data_type", "2,3").eq("item_version", version);
+        String dataType = ApproConstants.RADIO_TYPE_3 + "," + ApproConstants.NUMBER_TYPE_2;
+        wrapper.eq("model_id", modelId).in("data_type", dataType).eq("item_version", version);
         wrapper.orderBy(true, "priority", true);
         List<ModelItem> list = modelItemService.selectList(wrapper);
         if (CollectionUtils.isEmpty(list)) {
             return new ArrayList<>(0);
         }
         List<SetsCondition> conditionList = conditionMapper.selectList(Condition.create().where("model_id={0}", modelId).and("enabled=1"));
-        Set<String> conditions = conditionList.stream().map(SetsCondition::getCdn).collect(Collectors.toSet());
         String value = "wd";
-        for (String condition : conditions) {
-            value = condition.substring(condition.lastIndexOf(" "), condition.length()).trim();
+        for (SetsCondition setsCondition : conditionList) {
+            int type = setsCondition.getType();
+            String condition = setsCondition.getCdn();
+            if (ApproConstants.RADIO_TYPE_3 == type) {
+                value = condition.substring(condition.lastIndexOf(" "), condition.length()).trim();
+            } else if (ApproConstants.NUMBER_TYPE_2 == type) {
+                value = condition;
+            }
         }
         List<ModelItemVO> voList = new ArrayList<>(list.size());
         for (ModelItem item : list) {
