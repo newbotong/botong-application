@@ -20,6 +20,7 @@ import com.yunjing.mommon.global.exception.InsertMessageFailureException;
 import com.yunjing.mommon.utils.IDUtils;
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.collections.MapUtils;
+import org.apache.commons.lang.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -54,7 +55,7 @@ public class ProcessServiceImpl extends BaseServiceImpl<ProcessMapper, SetsProce
     @Override
     public boolean delete(String modelId, String conditions) {
         Wrapper<SetsProcess> wrapper;
-        if (null == conditions) {
+        if (StringUtils.isBlank(conditions)) {
             wrapper = Condition.create().where("model_id={0}", modelId).and("condition_id=''").or("condition_id is null");
         } else {
             wrapper = Condition.create().where("model_id={0}", modelId).and("condition_id={0}", conditions);
