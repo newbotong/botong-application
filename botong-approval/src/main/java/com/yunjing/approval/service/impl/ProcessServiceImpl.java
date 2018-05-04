@@ -149,7 +149,7 @@ public class ProcessServiceImpl extends BaseServiceImpl<ProcessMapper, SetsProce
             if (sets.getSetting() == 1) {
                 List<String> conditionIds = new ArrayList<>();
                 for (ConditionVO conditionVO : conditionVOList) {
-                    if(ApproConstants.RADIO_TYPE_3==conditionVO.getType()){
+                    if (ApproConstants.RADIO_TYPE_3 == conditionVO.getType()) {
                         String id = conditionService.getCondition(modelId, conditionVO);
                         conditionIds.add(id);
                     }
@@ -182,7 +182,6 @@ public class ProcessServiceImpl extends BaseServiceImpl<ProcessMapper, SetsProce
                         int num = Integer.parseInt(temp[2]);
                         // 根据部门主键和级数查询出该主管
                         List<UserVO> admins = getAdmins(companyId, memberId, deptId, num);
-
                         if (admins != null && admins.size() > 0) {
                             for (UserVO admin : admins) {
                                 list.add(admin);
@@ -209,15 +208,18 @@ public class ProcessServiceImpl extends BaseServiceImpl<ProcessMapper, SetsProce
     public List<UserVO> getAdmins(String companyId, String memberId, String deptId, int num) {
         Map<String, List<OrgMemberMessage>> deptManager = appCenterService.findDeptManager(companyId, memberId);
         List<ApprovalUser> userList = new ArrayList<>();
+        List<UserVO> userVOList = new ArrayList<>();
         deptManager.forEach((s, orgMemberMessages) -> {
             if (s.equals(deptId)) {
                 int nums = num - 1;
                 if (nums == 0) {
                     for (OrgMemberMessage admin : orgMemberMessages) {
-                        ApprovalUser user = covertObj(admin);
-                        if (admin.getMemberId() != null) {
-                            if (selectList(userList, user.getId())) {
-                                userList.add(user);
+                        if (admin != null) {
+                            ApprovalUser user = covertObj(admin);
+                            if (admin.getMemberId() != null) {
+                                if (selectList(userList, user.getId())) {
+                                    userList.add(user);
+                                }
                             }
                         }
                     }
@@ -228,8 +230,18 @@ public class ProcessServiceImpl extends BaseServiceImpl<ProcessMapper, SetsProce
                 }
             }
         });
-        return null;
+        for (ApprovalUser user : userList) {
+            UserVO userVO = new UserVO();
+            userVO.setPassportId(user.getPassportId());
+            userVO.setProfile(user.getAvatar());
+            userVO.setName(user.getName());
+            userVO.setMemberId(user.getId());
+            userVO.setColor(user.getColor());
+            userVOList.add(userVO);
+        }
+        return userVOList;
     }
+
     private ApprovalUser covertObj(OrgMemberMessage memberMessage) {
         ApprovalUser approvalUser = new ApprovalUser();
         approvalUser.setPassportId(memberMessage.getPassportId());
@@ -259,15 +271,17 @@ public class ProcessServiceImpl extends BaseServiceImpl<ProcessMapper, SetsProce
 
         return approvalUser;
     }
+
     // 判断list是否存在ID
-    public boolean selectList(List<ApprovalUser> list,String id){
-        for(ApprovalUser user:list){
-            if(user.getId().equals(id)){
+    public boolean selectList(List<ApprovalUser> list, String id) {
+        for (ApprovalUser user : list) {
+            if (user.getId().equals(id)) {
                 return false;
             }
         }
         return true;
     }
+
     @Override
     public boolean saveDefaultApprover(String modelId, String approverIds, String copyIds) {
         boolean isInserted = false;

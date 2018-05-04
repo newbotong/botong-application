@@ -41,7 +41,15 @@ public class ModelItemVO {
      */
     private String field;
 
-    private String value = "事假";
+    /**
+     * 单选框选中的值
+     */
+    private String value;
+
+    /**
+     * 数字类型设置的值
+     */
+    private String dayNum;
     /**
      * 显示名称
      */
