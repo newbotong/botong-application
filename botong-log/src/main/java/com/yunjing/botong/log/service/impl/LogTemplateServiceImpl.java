@@ -128,7 +128,7 @@ public class LogTemplateServiceImpl implements LogTemplateService {
         // 查询日志模板字段
         LogTemplateFieldEntity logTemplateFieldEntity = new LogTemplateFieldEntity();
         List<LogTemplateFieldEntity> fieldEntities = logTemplateFieldEntity.selectList(
-                new EntityWrapper().eq("template_id",id).eq("deleted",false).orderBy("sort"));
+                new EntityWrapper().eq("template_id",id).eq("version", entity.getVersion()).eq("deleted",false).orderBy("sort"));
 
         //组织字段列表返回值
         if(CollectionUtils.isNotEmpty(fieldEntities)){

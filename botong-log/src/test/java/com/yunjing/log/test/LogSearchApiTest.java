@@ -12,6 +12,7 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.http.MediaType;
 import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.test.web.servlet.MockMvc;
+import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
 
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
@@ -126,4 +127,21 @@ public class LogSearchApiTest extends BaseTest{
         body.setLogId("a1889cb2e4c646e38a9533e411e02dd0");
         postTest(url, mediaType, JSONObject.toJSONString(body), null);
     }
+
+    /**
+     *
+     * Method: get(@RequestBody ReceviedParam receviedParam)
+     *
+     */
+    @Test
+    public void testQuery() throws Exception {
+        String url = "/log/template/query";
+
+        MultiValueMap param = new LinkedMultiValueMap();
+        param.add("id", "ff80808156683550015668c92b510059");
+
+
+        getTest(url, mediaType, null, param);
+    }
+
 }
