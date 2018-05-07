@@ -229,6 +229,10 @@ public class SignDetailServiceImpl extends ServiceImpl<SignDetailMapper, SignDet
             }
             Page<SignUserInfoVO> pageM = new Page<>(userAndDeptParam.getPageNo(), userAndDeptParam.getPageSize());
             pageM.setTotal(memberList!= null ? memberList.size() : SignConstant.BOTONG_ZERO_VALUE);
+            //如果当前索引大于长度，则返回null
+            if (pageM.getOffset() > (memberList.size() - 1)) {
+                return null;
+            }
             int endIndex = pageM.getOffset() + pageM.getSize();
             if (endIndex > memberList.size()) {
                 endIndex = memberList.size() - 1;
