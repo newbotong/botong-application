@@ -42,8 +42,9 @@ public class ConditionController extends BaseController {
      * @throws Exception
      */
     @PostMapping("/save")
-    public ResponseEntityWrapper save(@RequestParam String modelId, @RequestParam String judge, @RequestParam("memberIds") String memberIds) throws Exception {
-        return success(cdnService.save(modelId, judge, memberIds));
+    public ResponseEntityWrapper save(@RequestParam String modelId, @RequestParam String judge, @RequestParam("memberIds") String memberIds,
+                                      @RequestParam(value = "conditionIds",required = false) String conditionIds) throws Exception {
+        return success(cdnService.save(modelId, judge, memberIds,conditionIds));
     }
 
     /**
