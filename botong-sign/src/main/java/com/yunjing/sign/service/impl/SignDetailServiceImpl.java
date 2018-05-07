@@ -229,6 +229,10 @@ public class SignDetailServiceImpl extends ServiceImpl<SignDetailMapper, SignDet
             }
             Page<SignUserInfoVO> pageM = new Page<>(userAndDeptParam.getPageNo(), userAndDeptParam.getPageSize());
             pageM.setTotal(memberList!= null ? memberList.size() : SignConstant.BOTONG_ZERO_VALUE);
+            //如果当前索引大于长度，则返回null
+            if (pageM.getOffset() > (memberList.size() - 1)) {
+                return null;
+            }
             int endIndex = pageM.getOffset() + pageM.getSize();
             if (endIndex > memberList.size()) {
                 endIndex = memberList.size() - 1;
@@ -398,8 +402,8 @@ public class SignDetailServiceImpl extends ServiceImpl<SignDetailMapper, SignDet
             //图片地址
             if(StringUtils.isNotBlank(excelVO.getImgUrls())) {
                 int index = 1;
+                imgUrls = new ArrayList<AttrValueVO>();
                 for (String img : StringUtils.split(excelVO.getImgUrls(), SignConstant.SEPARATE_STR)) {
-                    imgUrls = new ArrayList<AttrValueVO>();
                     attrValueVO = new AttrValueVO();
                     attrValueVO.setAttrVal(img);
                     attrValueVO.setCkey("图" + (index++));
