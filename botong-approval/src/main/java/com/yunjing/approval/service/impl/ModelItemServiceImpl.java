@@ -407,8 +407,12 @@ public class ModelItemServiceImpl extends BaseServiceImpl<ModelItemMapper, Model
             if (itemVO.getType() == ApproConstants.EXPLAIN_TYPE_8) {
                 label = "说明";
             } else if(itemVO.getType() == ApproConstants.TIME_INTERVAL_TYPE_5){
-                label = "开始时间";
-                item.setItemLabels("结束时间");
+                String option = itemVO.getOption();
+                if(StringUtils.isNotBlank(option)){
+                    String[] split = option.split(",");
+                    label = split[0];
+                    item.setItemLabels(split[1]);
+                }
             }else {
                 if (StringUtils.isBlank(label)) {
                     throw new MissingRequireFieldException("模型数据格式不正确 - 标题为空");
