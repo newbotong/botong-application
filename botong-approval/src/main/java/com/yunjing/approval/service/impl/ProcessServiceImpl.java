@@ -7,17 +7,21 @@ import com.baomidou.mybatisplus.mapper.Condition;
 import com.baomidou.mybatisplus.mapper.Wrapper;
 import com.common.mybatis.service.impl.BaseServiceImpl;
 import com.yunjing.approval.dao.mapper.ProcessMapper;
-import com.yunjing.approval.model.entity.*;
+import com.yunjing.approval.model.entity.ApprovalUser;
+import com.yunjing.approval.model.entity.Copy;
+import com.yunjing.approval.model.entity.SetsProcess;
 import com.yunjing.approval.model.vo.ApproverVO;
 import com.yunjing.approval.model.vo.ConditionVO;
 import com.yunjing.approval.model.vo.UserVO;
 import com.yunjing.approval.processor.okhttp.AppCenterService;
 import com.yunjing.approval.service.*;
-import com.yunjing.approval.util.ApproConstants;
 import com.yunjing.message.share.org.OrgMemberMessage;
+import com.yunjing.mommon.global.exception.DeleteMessageFailureException;
 import com.yunjing.mommon.global.exception.InsertMessageFailureException;
 import com.yunjing.mommon.utils.IDUtils;
 import org.apache.commons.collections.CollectionUtils;
+import org.apache.commons.collections.MapUtils;
+import org.apache.commons.lang.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -30,10 +34,6 @@ import java.util.stream.Collectors;
  */
 @Service
 public class ProcessServiceImpl extends BaseServiceImpl<ProcessMapper, SetsProcess> implements IProcessService {
-
-
-    @Autowired
-    private IApprovalSetsService approvalSetsService;
 
     @Autowired
     private IConditionService conditionService;
@@ -50,16 +50,18 @@ public class ProcessServiceImpl extends BaseServiceImpl<ProcessMapper, SetsProce
     private AppCenterService appCenterService;
 
     @Override
-    public boolean delete(String modelId, String conditions) {
+    public boolean delete(String modelId, String conditionId) {
         Wrapper<SetsProcess> wrapper;
-        if (null == conditions) {
+        if (StringUtils.isBlank(conditionId)) {
             wrapper = Condition.create().where("model_id={0}", modelId).and("condition_id=''").or("condition_id is null");
         } else {
-            wrapper = Condition.create().where("model_id={0}", modelId).and("condition_id={0}", conditions);
+            wrapper = Condition.create().where("model_id={0}", modelId).and("condition_id={0}", conditionId);
         }
-        this.delete(wrapper);
-
-        return true;
+        boolean delete = this.delete(wrapper);
+        if(!delete){
+            throw new DeleteMessageFailureException("清除审批流程人失败");
+        }
+        return delete;
     }
 
     @Override
@@ -142,140 +144,126 @@ public class ProcessServiceImpl extends BaseServiceImpl<ProcessMapper, SetsProce
             conditionVOList.add(conditionVO);
         }
         ApproverVO result = new ApproverVO();
-        // 获取审批流程设置类型，set=0:不分条件设置审批人 set=1:分条件设置审批人
-        ApprovalSets sets = approvalSetsService.selectOne(Condition.create().where("model_id={0}", modelId));
-        if (sets != null) {
-            List<String> cdnIds = new ArrayList<>();
-            // 分条件审批
-            if (sets.getSetting() == 1) {
-                List<String> conditionIds = new ArrayList<>();
-                for (ConditionVO conditionVO : conditionVOList) {
-                    if (ApproConstants.RADIO_TYPE_3 == conditionVO.getType()) {
-                        String id = conditionService.getCondition(modelId, conditionVO);
-                        conditionIds.add(id);
-                    }
-                }
-                if (conditionIds.isEmpty()) {
-                    List<SetsCondition> conditionSet = conditionService.getFirstCondition(modelId);
-                    for (SetsCondition sc : conditionSet) {
-                        String field = sc.getCdn().substring(0, sc.getCdn().indexOf(" "));
-                        String value = sc.getCdn().substring(sc.getCdn().lastIndexOf(" "), sc.getCdn().length()).trim();
-                        for (ConditionVO conditionVO : conditionVOList) {
-                            if (sc != null && field.equals(conditionVO.getField()) && conditionVO.getValue().equals(value)) {
-                                cdnIds.add(sc.getId());
-                            }
-                        }
+        List<String> conditionIds = new ArrayList<>();
+        for (ConditionVO conditionVO : conditionVOList) {
+            String id = conditionService.getCondition(modelId, conditionVO);
+            conditionIds.add(id);
+        }
+        result.setConditionId(conditionIds);
+        List<UserVO> users = processService.getProcess(modelId, conditionIds);
+
+        // 从应用中心获取部门主管
+        Map<String, List<OrgMemberMessage>> deptManager = appCenterService.findDeptManager(companyId, memberId);
+        List<UserVO> list = new ArrayList<>();
+        if (users != null && users.size() > 0) {
+            for (UserVO user : users) {
+                if (user.getMemberId().indexOf("admin_") != -1) {
+                    String[] temp = user.getMemberId().split("_");
+                    int num = Integer.parseInt(temp[2]);
+                    // 根据部门主键和级数查询出该主管
+                    List<UserVO> admins = getAdmins(deptId, num, deptManager);
+                    if (admins != null && CollectionUtils.isNotEmpty(admins)) {
+                        list.addAll(admins);
                     }
                 } else {
-                    cdnIds.addAll(conditionIds);
-                }
-                if (cdnIds.isEmpty()) {
-                    return null;
-                }
-                result.setConditionId(cdnIds);
-            }
-            List<UserVO> users = processService.getProcess(modelId, cdnIds);
-            List<UserVO> list = new ArrayList<>();
-            if (users != null && users.size() > 0) {
-                for (UserVO user : users) {
-                    if (user.getMemberId().indexOf("admin_") != -1) {
-                        String[] temp = user.getMemberId().split("_");
-                        int num = Integer.parseInt(temp[2]);
-                        // 根据部门主键和级数查询出该主管
-                        List<UserVO> admins = getAdmins(companyId, memberId, deptId, num);
-                        if (admins != null && CollectionUtils.isNotEmpty(admins)) {
-                            list.addAll(admins);
-                        }
-                    } else {
-                        list.add(user);
-                    }
+                    list.add(user);
                 }
             }
-            // 注入审批人
-            result.setApprovers(list);
-            // 注入抄送人
-            result.setCopys(copyService.getCopy(companyId, memberId, modelId));
-
-            return result;
         }
-        return null;
+        // 注入审批人
+        List<UserVO> distinctUserList = list.stream().distinct().collect(Collectors.toList());
+        result.setApprovers(distinctUserList);
+        // 注入抄送人
+        result.setCopys(copyService.getCopy(companyId, memberId, modelId));
+
+        return result;
     }
 
     /**
      * 获取主管
      */
-    public List<UserVO> getAdmins(String companyId, String memberId, String deptId, int num) {
-        Map<String, List<OrgMemberMessage>> deptManager = appCenterService.findDeptManager(companyId, memberId);
+    public List<UserVO> getAdmins(String deptId, int num, Map<String, List<OrgMemberMessage>> deptManager) {
         List<UserVO> userVOList = new ArrayList<>();
-        deptManager.forEach((s, orgMemberMessages) -> {
-            if (s.equals(deptId)) {
-                int nums = num - 1;
-                if (nums == 0) {
-                    for (OrgMemberMessage admin : orgMemberMessages) {
-                        if (admin != null) {
-                            UserVO vo = new UserVO();
-                            vo.setName(admin.getMemberName());
-                            vo.setMemberId(admin.getMemberId());
-                            vo.setProfile(admin.getProfile());
-                            vo.setPassportId(admin.getPassportId());
-                            userVOList.add(vo);
+        if (deptManager != null && MapUtils.isNotEmpty(deptManager)) {
+            deptManager.forEach((s, orgMemberMessages) -> {
+                if (s.equals(deptId)) {
+                    int nums = num - 1;
+                    if (nums == 0) {
+                        for (OrgMemberMessage admin : orgMemberMessages) {
+                            if (admin != null) {
+                                UserVO vo = new UserVO();
+                                vo.setName(admin.getMemberName());
+                                vo.setMemberId(admin.getMemberId());
+                                vo.setProfile(admin.getProfile());
+                                vo.setPassportId(admin.getPassportId());
+                                userVOList.add(vo);
+                            }
                         }
-                    }
-                } else {
-                    if (deptId != null) {
-                        List<UserVO> admin = getAdmins(companyId, memberId, deptId, num);
-                        if (admin != null && CollectionUtils.isNotEmpty(admin)) {
-                            userVOList.addAll(admin);
+                    } else {
+                        if (deptId != null) {
+                            List<UserVO> admin = getAdmins(deptId, num, deptManager);
+                            if (admin != null && CollectionUtils.isNotEmpty(admin)) {
+                                userVOList.addAll(admin);
+                            }
                         }
                     }
                 }
-            }
-        });
+            });
+        }
         return userVOList;
     }
 
     @Override
     public boolean saveDefaultApprover(String modelId, String approverIds, String copyIds) {
-        boolean isInserted = false;
+        boolean insertedCopy = false;
+        boolean insertApprover = false;
         //先清除之前保存的默认审批人
         this.delete(modelId, null);
         // 清除默认抄送人
         copyService.delete(Condition.create().where("model_id={0}", modelId));
-        String[] aIds = approverIds.split(",");
-        String[] cIds = copyIds.split(",");
-        // 批量保存审批人信息
-        List<SetsProcess> list = new ArrayList<>();
-        for (int i = 0; i < aIds.length; i++) {
-            SetsProcess process = new SetsProcess();
-            process.setId(IDUtils.uuid());
-            process.setModelId(modelId);
-            process.setApprover(aIds[i]);
-            process.setSort(i + 1);
-            list.add(process);
-        }
-        if (!list.isEmpty()) {
-            boolean insertBatch = this.insertBatch(list);
-            if (!insertBatch) {
-                throw new InsertMessageFailureException("批量保存审批人信息失败");
+        if (StringUtils.isNotBlank(approverIds)){
+            String[] aIds = approverIds.split(",");
+            // 批量保存审批人信息
+            List<SetsProcess> list = new ArrayList<>();
+            for (int i = 0; i < aIds.length; i++) {
+                SetsProcess process = new SetsProcess();
+                process.setId(IDUtils.uuid());
+                process.setModelId(modelId);
+                process.setApprover(aIds[i]);
+                process.setSort(i + 1);
+                list.add(process);
+            }
+            if (CollectionUtils.isNotEmpty(list)) {
+                insertApprover = this.insertBatch(list);
+                if (!insertApprover) {
+                    throw new InsertMessageFailureException("批量保存审批人信息失败");
+                }
             }
         }
-        List<Copy> copyList = new ArrayList<>();
-        for (int i = 0; i < cIds.length; i++) {
-            Copy copy = new Copy();
-            copy.setId(IDUtils.uuid());
-            copy.setType(0);
-            copy.setModelId(modelId);
-            copy.setSort(i + 1);
-            copy.setUserId(cIds[i]);
-            copyList.add(copy);
-        }
-        if (!copyList.isEmpty()) {
-            isInserted = copyService.insertBatch(copyList);
-            if (!isInserted) {
-                throw new InsertMessageFailureException("批量保存抄送人信息失败");
+        if(StringUtils.isNotBlank(copyIds)){
+            String[] cIds = copyIds.split(",");
+            List<Copy> copyList = new ArrayList<>();
+            for (int i = 0; i < cIds.length; i++) {
+                Copy copy = new Copy();
+                copy.setId(IDUtils.uuid());
+                copy.setType(0);
+                copy.setModelId(modelId);
+                copy.setSort(i + 1);
+                copy.setUserId(cIds[i]);
+                copyList.add(copy);
+            }
+            if (!copyList.isEmpty()) {
+                insertedCopy = copyService.insertBatch(copyList);
+                if (!insertedCopy) {
+                    throw new InsertMessageFailureException("批量保存抄送人信息失败");
+                }
             }
         }
-        return isInserted;
+        if(insertedCopy || insertedCopy){
+            return true;
+        }else {
+            return false;
+        }
     }
 
     @Override
