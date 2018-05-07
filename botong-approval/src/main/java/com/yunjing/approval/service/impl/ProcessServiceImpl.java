@@ -66,7 +66,6 @@ public class ProcessServiceImpl extends BaseServiceImpl<ProcessMapper, SetsProce
 
     @Override
     public List<UserVO> getProcess(String modelId, List<String> conditionIds) {
-
         List<UserVO> users = new ArrayList<>();
         List<SetsProcess> list;
         if (conditionIds != null && !conditionIds.isEmpty()) {
@@ -75,35 +74,38 @@ public class ProcessServiceImpl extends BaseServiceImpl<ProcessMapper, SetsProce
             list = this.selectList(Condition.create().where("model_id={0}", modelId).and("(condition_id is null or condition_id='')").orderBy(true, "sort", true));
         }
         List<ApprovalUser> userList = approvalUserService.selectList(Condition.create());
+        if (list != null && CollectionUtils.isNotEmpty(list)){
+            for (SetsProcess process : list) {
+                String userId = process.getApprover();
+                String passportId = "";
+                String userNick = "";
+                String userAvatar = null;
+                if (userId.indexOf("admin_") != -1) {
+                    String[] temp = String.valueOf(userId).split("_");
+                    userNick = "第" + temp[2] + "级主管";
 
-        for (SetsProcess process : list) {
-            String userId = process.getApprover();
-            String passportId = "";
-            String userNick = "";
-            String userAvatar = null;
-            if (userId.indexOf("admin_") != -1) {
-                String[] temp = String.valueOf(userId).split("_");
-                userNick = "第" + temp[2] + "级主管";
-
-            } else {
-                Set<ApprovalUser> userSet = userList.stream().filter(user -> user.getId().equals(userId)).collect(Collectors.toSet());
-                for (ApprovalUser user : userSet) {
-                    if (user != null) {
-                        userNick = user.getName();
-                        userAvatar = user.getAvatar();
-                        passportId = user.getPassportId();
+                } else {
+                    Set<ApprovalUser> userSet = userList.stream().filter(user -> user.getId().equals(userId)).collect(Collectors.toSet());
+                    for (ApprovalUser user : userSet) {
+                        if (user != null) {
+                            userNick = user.getName();
+                            userAvatar = user.getAvatar();
+                            passportId = user.getPassportId();
+                        }
                     }
-                }
 
+                }
+                UserVO vo = new UserVO();
+                vo.setMemberId(userId);
+                vo.setName(userNick);
+                vo.setProfile(userAvatar);
+                vo.setPassportId(passportId);
+                users.add(vo);
             }
-            UserVO vo = new UserVO();
-            vo.setMemberId(userId);
-            vo.setName(userNick);
-            vo.setProfile(userAvatar);
-            vo.setPassportId(passportId);
-            users.add(vo);
+            return users;
+        }else {
+            return null;
         }
-        return users;
     }
 
     @Override
