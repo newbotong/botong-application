@@ -218,7 +218,7 @@ public class ConditionServiceImpl extends BaseServiceImpl<ConditionMapper, SetsC
         wrapper.eq("model_id", modelId).in("data_type", dataType).eq("item_version", version);
         wrapper.orderBy(true, "priority", true);
         List<ModelItem> list = modelItemService.selectList(wrapper);
-        List<SetsCondition> conditionList = conditionMapper.selectList(Condition.create().where("model_id={0}", modelId).and("enabled=1"));
+        List<SetsCondition> conditionList = conditionMapper.selectList(Condition.create().where("model_id={0}", modelId).and("enabled=1").orderBy("sort", true));
         String value = "danxuankuang";
         String dayNum = "tianshu";
         List<String> conditionIds = new ArrayList<>();
@@ -234,7 +234,7 @@ public class ConditionServiceImpl extends BaseServiceImpl<ConditionMapper, SetsC
             }
         }
         List<ModelItemVO> voList = new ArrayList<>();
-        if (list != null && CollectionUtils.isNotEmpty(list)){
+        if (list != null && CollectionUtils.isNotEmpty(list)) {
             for (ModelItem item : list) {
                 ModelItemVO vo = new ModelItemVO(item);
                 vo.setValue(value);
@@ -247,12 +247,14 @@ public class ConditionServiceImpl extends BaseServiceImpl<ConditionMapper, SetsC
         // 获取审批人
         List<UserVO> process = processService.getProcess(modelId, conditionIds);
         result.setApproverList(process);
+        String cIds = conditionIds.stream().collect(Collectors.joining(","));
+        result.setConditionIds(cIds);
         return result;
     }
 
     @Override
     @Transactional(propagation = Propagation.REQUIRED, rollbackFor = Exception.class)
-    public List<SetConditionVO> save(String modelId, String judge, String memberIds) throws Exception {
+    public List<SetConditionVO> save(String modelId, String judge, String memberIds, String conditionIds) throws Exception {
         // 解析
         JSONArray jsonArray = JSON.parseArray(judge);
         Iterator<Object> it = jsonArray.iterator();
@@ -264,6 +266,9 @@ public class ConditionServiceImpl extends BaseServiceImpl<ConditionMapper, SetsC
         }
         // 先删除旧的审批条件，再设置新的审批条件
         boolean delete = this.delete(Condition.create().where("model_id={0}", modelId));
+        if (StringUtils.isNotBlank(conditionIds)) {
+            processService.delete(Condition.create().where("model_id={0}", modelId).in("condition_id", conditionIds.split(",")));
+        }
         if (delete) {
             int i = 0;
             for (ConditionVO conditionVO : conditionVOList) {
@@ -271,10 +276,12 @@ public class ConditionServiceImpl extends BaseServiceImpl<ConditionMapper, SetsC
                 condition.setId(IDUtils.uuid());
                 condition.setModelId(modelId);
                 if (ApproConstants.RADIO_TYPE_3 == conditionVO.getType()) {
-                    condition.setCdn(conditionVO.getField() + " = " + conditionVO.getValue());
+                    String cdn = conditionVO.getField() + " = " + conditionVO.getValue();
+                    condition.setCdn(cdn);
                     condition.setType(ApproConstants.RADIO_TYPE_3);
                 } else if (ApproConstants.NUMBER_TYPE_2 == conditionVO.getType()) {
-                    condition.setCdn(conditionVO.getValue());
+                    String cdn = conditionVO.getValue();
+                    condition.setCdn(cdn);
                     condition.setType(ApproConstants.NUMBER_TYPE_2);
                 }
                 condition.setEnabled(1);
@@ -283,11 +290,8 @@ public class ConditionServiceImpl extends BaseServiceImpl<ConditionMapper, SetsC
                 if (!insert) {
                     throw new InsertMessageFailureException("保存审批条件失败");
                 }
-                // 先删除旧的审批人
-                processService.delete(modelId, condition.getId());
-                // 保存审批人
                 boolean b = processService.updateProcess(modelId, condition.getId(), memberIds);
-                if(!b){
+                if (!b) {
                     throw new UpdateMessageFailureException("按条件保存审批人失败");
                 }
             }
