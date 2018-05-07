@@ -245,8 +245,10 @@ public class ConditionServiceImpl extends BaseServiceImpl<ConditionMapper, SetsC
         ConditionAndApproverVO result = new ConditionAndApproverVO();
         result.setModelItemList(voList);
         // 获取审批人
-        List<UserVO> process = processService.getProcess(modelId, conditionIds);
-        result.setApproverList(process);
+        List<UserVO> approverList = processService.getProcess(modelId, conditionIds);
+        // 去重
+        List<UserVO> collect = approverList.stream().distinct().collect(Collectors.toList());
+        result.setApproverList(collect);
         String cIds = conditionIds.stream().collect(Collectors.joining(","));
         result.setConditionIds(cIds);
         return result;
@@ -255,6 +257,7 @@ public class ConditionServiceImpl extends BaseServiceImpl<ConditionMapper, SetsC
     @Override
     @Transactional(propagation = Propagation.REQUIRED, rollbackFor = Exception.class)
     public List<SetConditionVO> save(String modelId, String judge, String memberIds, String conditionIds) throws Exception {
+
         // 解析
         JSONArray jsonArray = JSON.parseArray(judge);
         Iterator<Object> it = jsonArray.iterator();
@@ -267,7 +270,8 @@ public class ConditionServiceImpl extends BaseServiceImpl<ConditionMapper, SetsC
         // 先删除旧的审批条件，再设置新的审批条件
         boolean delete = this.delete(Condition.create().where("model_id={0}", modelId));
         if (StringUtils.isNotBlank(conditionIds)) {
-            processService.delete(Condition.create().where("model_id={0}", modelId).in("condition_id", conditionIds.split(",")));
+            String[] cIds = conditionIds.split(",");
+            boolean isDeleted = processService.delete(Condition.create().where("model_id={0}", modelId).in("condition_id", cIds));
         }
         if (delete) {
             int i = 0;
