@@ -12,6 +12,7 @@ import java.io.Serializable;
  */
 @Data
 public class InfoContentWebDto implements Serializable {
+
     /**
      * 目录id
      */

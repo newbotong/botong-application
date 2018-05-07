@@ -242,6 +242,7 @@ public class InfoContentServiceImpl extends ServiceImpl<InfoContentMapper, InfoC
      * @return
      * @throws BaseException
      */
+
     @Override
     public InfoContentWebDto selectWebDetail(String id) throws BaseException {
         InfoContent infoContent = new InfoContent().selectOne(new EntityWrapper<InfoContent>().eq("is_delete", InfoConstant.LOGIC_DELETE_NORMAL).eq("id", id));

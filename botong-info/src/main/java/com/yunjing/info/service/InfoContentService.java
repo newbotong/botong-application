@@ -69,6 +69,7 @@ public interface InfoContentService extends IService<InfoContent> {
      * @return
      * @throws BaseException
      */
+
     InfoContentWebDto selectWebDetail(String id) throws BaseException;
 
     /**

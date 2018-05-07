@@ -5,7 +5,6 @@ import com.yunjing.info.common.ValidationUtil;
 import com.yunjing.info.dto.CompanyRedisCatalogDto;
 import com.yunjing.info.dto.InfoContentDto;
 import com.yunjing.info.dto.InfoContentWebDto;
-import com.yunjing.info.model.InfoContent;
 import com.yunjing.info.param.InfoCategoryEditParam;
 import com.yunjing.info.param.InfoCategoryParam;
 import com.yunjing.info.service.InfoCatalogService;
