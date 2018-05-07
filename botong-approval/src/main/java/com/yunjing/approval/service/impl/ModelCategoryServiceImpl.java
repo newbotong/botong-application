@@ -57,9 +57,9 @@ public class ModelCategoryServiceImpl extends BaseServiceImpl<ModelCategoryMappe
     }
 
     @Override
-    public boolean deleteCategory(String orgId, String categoryId) {
+    public boolean deleteCategory(String companyId, String categoryId) {
         boolean flag = false;
-        List<ModelVO> modelList = modelService.findModelListByOrgId(orgId);
+        List<ModelVO> modelList = modelService.findModelListByOrgId(companyId);
         List<ModelVO> modelVOList = modelList.stream().filter(modelVO -> categoryId.equals(modelVO.getCategoryId())).collect(Collectors.toList());
         if (modelVOList.isEmpty()) {
             flag = this.delete(Condition.create().where("id={0}", categoryId));
@@ -70,7 +70,7 @@ public class ModelCategoryServiceImpl extends BaseServiceImpl<ModelCategoryMappe
                 modelIds.add(modelVO.getModelId());
             }
             List<ModelL> modelLS = modelService.selectList(Condition.create().in("id", modelIds));
-            ModelCategory modelCategory = this.selectOne(Condition.create().where("category_name={0}", "其他"));
+            ModelCategory modelCategory = this.selectOne(Condition.create().where("category_name={0}", "其他").and("org_id={0}",companyId));
             for (ModelL modelL : modelLS) {
                 modelL.setCategoryId(modelCategory.getId());
             }

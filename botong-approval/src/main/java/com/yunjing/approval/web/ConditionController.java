@@ -21,7 +21,7 @@ public class ConditionController extends BaseController {
     private IConditionService cdnService;
 
     /**
-     * 获取审批条件
+     * 获取审批条件及对应审批人
      *
      * @param modelId 模型主键
      * @return
@@ -31,18 +31,6 @@ public class ConditionController extends BaseController {
     public ResponseEntityWrapper get(@RequestParam String modelId) throws Exception {
         return success(cdnService.getJudgeList(modelId));
     }
-    /**
-     * 获取按条件设置的审批人信息
-     *
-     * @param modelId 模型主键
-     * @return
-     * @throws Exception
-     */
-    @PostMapping("/get-approver")
-    public ResponseEntityWrapper getApprover(@RequestParam String modelId) throws Exception {
-        return success(cdnService.getConditionList(modelId));
-    }
-
 
     /**
      * 保存审批条件及对应的审批人
