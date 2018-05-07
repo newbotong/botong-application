@@ -274,8 +274,6 @@ public class ModelItemServiceImpl extends BaseServiceImpl<ModelItemMapper, Model
         if (StringUtils.isBlank(json)) {
             throw new ParameterErrorException("模型数据不存在");
         }
-        System.out.println(json);
-
         ModelVO vo;
         try {
             vo = JSONObject.parseObject(json, ModelVO.class);
@@ -406,9 +404,12 @@ public class ModelItemServiceImpl extends BaseServiceImpl<ModelItemMapper, Model
 
             // 标题
             String label = itemVO.getLabel();
-            if (itemVO.getType() == 8) {
+            if (itemVO.getType() == ApproConstants.EXPLAIN_TYPE_8) {
                 label = "说明";
-            } else {
+            } else if(itemVO.getType() == ApproConstants.TIME_INTERVAL_TYPE_5){
+                label = "开始时间";
+                item.setItemLabels("结束时间");
+            }else {
                 if (StringUtils.isBlank(label)) {
                     throw new MissingRequireFieldException("模型数据格式不正确 - 标题为空");
                 }
@@ -421,7 +422,7 @@ public class ModelItemServiceImpl extends BaseServiceImpl<ModelItemMapper, Model
             // 可选项
             String option = itemVO.getOption();
 
-            if (type == 3 || type == 5) {
+            if (type == ApproConstants.RADIO_TYPE_3 || type == ApproConstants.TIME_INTERVAL_TYPE_5) {
                 if (StringUtils.isBlank(option)) {
                     throw new MissingRequireFieldException("模型数据格式不正确 - 选项为空");
                 }
@@ -442,7 +443,7 @@ public class ModelItemServiceImpl extends BaseServiceImpl<ModelItemMapper, Model
 
             // 日期格式
             String dateFormat = itemVO.getFormat();
-            if (type == 4 || type == 5) {
+            if (type == ApproConstants.DATE_TYPE_4 || type == ApproConstants.TIME_INTERVAL_TYPE_5) {
                 if (StringUtils.isNotBlank(dateFormat)) {
                     if (!"yyyy-MM-dd".equals(dateFormat) && !"yyyy-MM-dd HH:mm".equals(dateFormat)) {
                         throw new MissingRequireFieldException("模型数据格式不正确 - 日期类型不正确");
@@ -462,7 +463,7 @@ public class ModelItemServiceImpl extends BaseServiceImpl<ModelItemMapper, Model
             if (isDisplay == null) {
                 isDisplay = 1;
             } else {
-                if (type == 8 && isDisplay != 1) {
+                if (type == ApproConstants.EXPLAIN_TYPE_8 && isDisplay != 1) {
                     isDisplay = 0;
                 } else {
                     isDisplay = 1;
@@ -483,7 +484,7 @@ public class ModelItemServiceImpl extends BaseServiceImpl<ModelItemMapper, Model
             Integer minSort = modelItemMapper.getMinSort(modelId, ApproConstants.RADIO_TYPE_3);
             // 是否为判断条件
             if (!flag) {
-                if (type == 2 || type == 3) {
+                if (type == ApproConstants.NUMBER_TYPE_2 || type == ApproConstants.RADIO_TYPE_3) {
                     Integer isJudge = itemVO.getJudge();
                     if (isJudge != null && isJudge == 1) {
                         isJudge = 1;

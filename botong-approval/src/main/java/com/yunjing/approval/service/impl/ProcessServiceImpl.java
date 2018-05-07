@@ -16,6 +16,7 @@ import com.yunjing.approval.model.vo.UserVO;
 import com.yunjing.approval.processor.okhttp.AppCenterService;
 import com.yunjing.approval.service.*;
 import com.yunjing.message.share.org.OrgMemberMessage;
+import com.yunjing.mommon.global.exception.DeleteMessageFailureException;
 import com.yunjing.mommon.global.exception.InsertMessageFailureException;
 import com.yunjing.mommon.utils.IDUtils;
 import org.apache.commons.collections.CollectionUtils;
@@ -34,10 +35,6 @@ import java.util.stream.Collectors;
 @Service
 public class ProcessServiceImpl extends BaseServiceImpl<ProcessMapper, SetsProcess> implements IProcessService {
 
-
-    @Autowired
-    private IApprovalSetsService approvalSetsService;
-
     @Autowired
     private IConditionService conditionService;
     @Autowired
@@ -53,16 +50,18 @@ public class ProcessServiceImpl extends BaseServiceImpl<ProcessMapper, SetsProce
     private AppCenterService appCenterService;
 
     @Override
-    public boolean delete(String modelId, String conditions) {
+    public boolean delete(String modelId, String conditionId) {
         Wrapper<SetsProcess> wrapper;
-        if (StringUtils.isBlank(conditions)) {
+        if (StringUtils.isBlank(conditionId)) {
             wrapper = Condition.create().where("model_id={0}", modelId).and("condition_id=''").or("condition_id is null");
         } else {
-            wrapper = Condition.create().where("model_id={0}", modelId).and("condition_id={0}", conditions);
+            wrapper = Condition.create().where("model_id={0}", modelId).and("condition_id={0}", conditionId);
         }
-        this.delete(wrapper);
-
-        return true;
+        boolean delete = this.delete(wrapper);
+        if(!delete){
+            throw new DeleteMessageFailureException("清除审批流程人失败");
+        }
+        return delete;
     }
 
     @Override
@@ -216,46 +215,55 @@ public class ProcessServiceImpl extends BaseServiceImpl<ProcessMapper, SetsProce
 
     @Override
     public boolean saveDefaultApprover(String modelId, String approverIds, String copyIds) {
-        boolean isInserted = false;
-        //先清除之前保存的默认审批人
-        this.delete(modelId, null);
-        // 清除默认抄送人
-        copyService.delete(Condition.create().where("model_id={0}", modelId));
-        String[] aIds = approverIds.split(",");
-        String[] cIds = copyIds.split(",");
-        // 批量保存审批人信息
-        List<SetsProcess> list = new ArrayList<>();
-        for (int i = 0; i < aIds.length; i++) {
-            SetsProcess process = new SetsProcess();
-            process.setId(IDUtils.uuid());
-            process.setModelId(modelId);
-            process.setApprover(aIds[i]);
-            process.setSort(i + 1);
-            list.add(process);
-        }
-        if (!list.isEmpty()) {
-            boolean insertBatch = this.insertBatch(list);
-            if (!insertBatch) {
-                throw new InsertMessageFailureException("批量保存审批人信息失败");
+        boolean insertedCopy = false;
+        boolean insertApprover = false;
+        if (StringUtils.isNotBlank(approverIds)){
+            //先清除之前保存的默认审批人
+            this.delete(modelId, null);
+            String[] aIds = approverIds.split(",");
+            // 批量保存审批人信息
+            List<SetsProcess> list = new ArrayList<>();
+            for (int i = 0; i < aIds.length; i++) {
+                SetsProcess process = new SetsProcess();
+                process.setId(IDUtils.uuid());
+                process.setModelId(modelId);
+                process.setApprover(aIds[i]);
+                process.setSort(i + 1);
+                list.add(process);
+            }
+            if (CollectionUtils.isNotEmpty(list)) {
+                insertApprover = this.insertBatch(list);
+                if (!insertApprover) {
+                    throw new InsertMessageFailureException("批量保存审批人信息失败");
+                }
             }
         }
-        List<Copy> copyList = new ArrayList<>();
-        for (int i = 0; i < cIds.length; i++) {
-            Copy copy = new Copy();
-            copy.setId(IDUtils.uuid());
-            copy.setType(0);
-            copy.setModelId(modelId);
-            copy.setSort(i + 1);
-            copy.setUserId(cIds[i]);
-            copyList.add(copy);
-        }
-        if (!copyList.isEmpty()) {
-            isInserted = copyService.insertBatch(copyList);
-            if (!isInserted) {
-                throw new InsertMessageFailureException("批量保存抄送人信息失败");
+        if(StringUtils.isNotBlank(copyIds)){
+            // 清除默认抄送人
+            copyService.delete(Condition.create().where("model_id={0}", modelId));
+            String[] cIds = copyIds.split(",");
+            List<Copy> copyList = new ArrayList<>();
+            for (int i = 0; i < cIds.length; i++) {
+                Copy copy = new Copy();
+                copy.setId(IDUtils.uuid());
+                copy.setType(0);
+                copy.setModelId(modelId);
+                copy.setSort(i + 1);
+                copy.setUserId(cIds[i]);
+                copyList.add(copy);
+            }
+            if (!copyList.isEmpty()) {
+                insertedCopy = copyService.insertBatch(copyList);
+                if (!insertedCopy) {
+                    throw new InsertMessageFailureException("批量保存抄送人信息失败");
+                }
             }
         }
-        return isInserted;
+        if(insertedCopy || insertedCopy){
+            return true;
+        }else {
+            return false;
+        }
     }
 
     @Override
