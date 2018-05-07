@@ -381,7 +381,15 @@ public class InfoCatalogServiceImpl extends ServiceImpl<InfoCatalogMapper, InfoC
         wrapper.where("org_id={0}", orgId).and("parent_id={0}", parentId).and("id={0}", id);
         int flag = infoCatalogMapper.update(infoCatalog, wrapper);
         //更新缓存
-        updateInfoCategoryRedis(orgId, parentId, id);
+//        updateInfoCategoryRedis(orgId, parentId, id);
+        if (flag>0) {
+            if (displayType==0) {
+                redisTemplate.opsForHash().delete(InfoConstant.BOTONG_INFO_CATALOG_LIST + orgId + InfoConstant.BOTONG_INFO_FIX + parentId, infoCatalog.getId());
+            }
+            if (displayType==1) {
+                redisTemplate.opsForHash().put(InfoConstant.BOTONG_INFO_CATALOG_LIST + orgId + InfoConstant.BOTONG_INFO_FIX + parentId, infoCatalog.getId(), JSON.toJSONString(infoCatalog));
+            }
+        }
         return flag > 0 ? InfoConstant.StateCode.CODE_200 : InfoConstant.StateCode.CODE_602;
     }
 
