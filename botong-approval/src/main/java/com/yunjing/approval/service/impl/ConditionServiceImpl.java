@@ -245,12 +245,14 @@ public class ConditionServiceImpl extends BaseServiceImpl<ConditionMapper, SetsC
         ConditionAndApproverVO result = new ConditionAndApproverVO();
         result.setModelItemList(voList);
         // 获取审批人
-        List<UserVO> approverList = processService.getProcess(modelId, conditionIds);
-        // 去重
-        List<UserVO> collect = approverList.stream().distinct().collect(Collectors.toList());
-        result.setApproverList(collect);
-        String cIds = conditionIds.stream().collect(Collectors.joining(","));
-        result.setConditionIds(cIds);
+        if(CollectionUtils.isNotEmpty(conditionIds)){
+            List<UserVO> approverList = processService.getProcess(modelId, conditionIds);
+            // 去重
+            List<UserVO> collect = approverList.stream().distinct().collect(Collectors.toList());
+            result.setApproverList(collect);
+            String cIds = conditionIds.stream().collect(Collectors.joining(","));
+            result.setConditionIds(cIds);
+        }
         return result;
     }
 
