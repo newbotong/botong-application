@@ -245,12 +245,14 @@ public class ConditionServiceImpl extends BaseServiceImpl<ConditionMapper, SetsC
         ConditionAndApproverVO result = new ConditionAndApproverVO();
         result.setModelItemList(voList);
         // 获取审批人
-        List<UserVO> approverList = processService.getProcess(modelId, conditionIds);
-        // 去重
-        List<UserVO> collect = approverList.stream().distinct().collect(Collectors.toList());
-        result.setApproverList(collect);
-        String cIds = conditionIds.stream().collect(Collectors.joining(","));
-        result.setConditionIds(cIds);
+        if (CollectionUtils.isNotEmpty(conditionIds)) {
+            List<UserVO> approverList = processService.getProcess(modelId, conditionIds);
+            // 去重
+            List<UserVO> collect = approverList.stream().distinct().collect(Collectors.toList());
+            result.setApproverList(collect);
+            String cIds = conditionIds.stream().collect(Collectors.joining(","));
+            result.setConditionIds(cIds);
+        }
         return result;
     }
 
@@ -271,32 +273,34 @@ public class ConditionServiceImpl extends BaseServiceImpl<ConditionMapper, SetsC
         boolean delete = this.delete(Condition.create().where("model_id={0}", modelId));
         if (StringUtils.isNotBlank(conditionIds)) {
             String[] cIds = conditionIds.split(",");
-            boolean isDeleted = processService.delete(Condition.create().where("model_id={0}", modelId).in("condition_id", cIds));
+            processService.delete(Condition.create().where("model_id={0}", modelId).in("condition_id", cIds));
         }
         if (delete) {
             int i = 0;
             for (ConditionVO conditionVO : conditionVOList) {
-                SetsCondition condition = new SetsCondition();
-                condition.setId(IDUtils.uuid());
-                condition.setModelId(modelId);
-                if (ApproConstants.RADIO_TYPE_3 == conditionVO.getType()) {
-                    String cdn = conditionVO.getField() + " = " + conditionVO.getValue();
-                    condition.setCdn(cdn);
-                    condition.setType(ApproConstants.RADIO_TYPE_3);
-                } else if (ApproConstants.NUMBER_TYPE_2 == conditionVO.getType()) {
-                    String cdn = conditionVO.getValue();
-                    condition.setCdn(cdn);
-                    condition.setType(ApproConstants.NUMBER_TYPE_2);
-                }
-                condition.setEnabled(1);
-                condition.setSort(i + 1);
-                boolean insert = this.insert(condition);
-                if (!insert) {
-                    throw new InsertMessageFailureException("保存审批条件失败");
-                }
-                boolean b = processService.updateProcess(modelId, condition.getId(), memberIds);
-                if (!b) {
-                    throw new UpdateMessageFailureException("按条件保存审批人失败");
+                if (StringUtils.isNotBlank(conditionVO.getValue())) {
+                    SetsCondition condition = new SetsCondition();
+                    condition.setId(IDUtils.uuid());
+                    condition.setModelId(modelId);
+                    if (ApproConstants.RADIO_TYPE_3 == conditionVO.getType()) {
+                        String cdn = conditionVO.getField() + " = " + conditionVO.getValue();
+                        condition.setCdn(cdn);
+                        condition.setType(ApproConstants.RADIO_TYPE_3);
+                    } else if (ApproConstants.NUMBER_TYPE_2 == conditionVO.getType()) {
+                        String cdn = conditionVO.getValue();
+                        condition.setCdn(cdn);
+                        condition.setType(ApproConstants.NUMBER_TYPE_2);
+                    }
+                    condition.setEnabled(1);
+                    condition.setSort(i + 1);
+                    boolean insert = this.insert(condition);
+                    if (!insert) {
+                        throw new InsertMessageFailureException("保存审批条件失败");
+                    }
+                    boolean b = processService.updateProcess(modelId, condition.getId(), memberIds);
+                    if (!b) {
+                        throw new UpdateMessageFailureException("按条件保存审批人失败");
+                    }
                 }
             }
         }

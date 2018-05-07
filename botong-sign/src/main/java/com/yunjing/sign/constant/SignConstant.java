@@ -23,7 +23,7 @@ public class SignConstant implements Serializable {
 
     public final static String  CODE_SCCUESS = "200";
 
-    public final static Integer  BOTONG_SEVEN_VALUE = 7;
+    public final static Integer  BOTONG_SEVEN_VALUE = 6;
 
     public final static Integer  BOTONG_ONE_VALUE = 1;
 
