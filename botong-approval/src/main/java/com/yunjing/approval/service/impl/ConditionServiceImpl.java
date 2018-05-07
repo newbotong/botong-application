@@ -35,7 +35,6 @@ import org.springframework.transaction.annotation.Transactional;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
-import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
 /**
@@ -149,13 +148,13 @@ public class ConditionServiceImpl extends BaseServiceImpl<ConditionMapper, SetsC
                     throw new ParameterErrorException("解析天数出现异常");
             }
             switch (b1) {
-                case f3:
-                    if (b > Integer.parseInt(conditionVO.getValue())) {
+                case f1:
+                    if (Integer.parseInt(conditionVO.getValue()) < b) {
                         result2 = true;
                     }
                     break;
-                case f4:
-                    if (b >= Integer.parseInt(conditionVO.getValue())) {
+                case f2:
+                    if (Integer.parseInt(conditionVO.getValue()) <= b) {
                         result2 = true;
                     }
                     break;
@@ -172,27 +171,27 @@ public class ConditionServiceImpl extends BaseServiceImpl<ConditionMapper, SetsC
             String a1 = temp[1];
             switch (a1) {
                 case f1:
-                    if (Integer.parseInt(conditionVO.getValue()) < a) {
+                    if (conditionVO.getType() == ApproConstants.NUMBER_TYPE_2 && Integer.parseInt(conditionVO.getValue()) < a) {
                         result1 = true;
                     }
                     break;
                 case f2:
-                    if (Integer.parseInt(conditionVO.getValue()) <= a) {
+                    if (conditionVO.getType() == ApproConstants.NUMBER_TYPE_2 && Integer.parseInt(conditionVO.getValue()) <= a) {
                         result1 = true;
                     }
                     break;
                 case f3:
-                    if (Integer.parseInt(conditionVO.getValue()) > a) {
+                    if (conditionVO.getType() == ApproConstants.NUMBER_TYPE_2 && Integer.parseInt(conditionVO.getValue()) > a) {
                         result1 = true;
                     }
                     break;
                 case f4:
-                    if (Integer.parseInt(conditionVO.getValue()) >= a) {
+                    if (conditionVO.getType() == ApproConstants.NUMBER_TYPE_2 && Integer.parseInt(conditionVO.getValue()) >= a) {
                         result1 = true;
                     }
                     break;
                 case f5:
-                    if (Integer.parseInt(conditionVO.getValue()) == a) {
+                    if (conditionVO.getType() == ApproConstants.NUMBER_TYPE_2 && Integer.parseInt(conditionVO.getValue()) == a) {
                         result1 = true;
                     }
                     break;

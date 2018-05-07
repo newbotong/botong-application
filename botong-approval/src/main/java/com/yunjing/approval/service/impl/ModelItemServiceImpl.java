@@ -21,6 +21,7 @@ import com.yunjing.mommon.global.exception.ParameterErrorException;
 import com.yunjing.mommon.global.exception.UpdateMessageFailureException;
 import com.yunjing.mommon.utils.IDUtils;
 import org.apache.commons.collections.CollectionUtils;
+import org.apache.commons.collections.MapUtils;
 import org.apache.commons.lang.ArrayUtils;
 import org.apache.commons.lang.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -131,7 +132,10 @@ public class ModelItemServiceImpl extends BaseServiceImpl<ModelItemMapper, Model
         clientModelItemVO.setField(keys);
         // 获取默认审批人
         List<UserVO> processUser = this.getDefaultProcess(companyId, memberId, modelId, null);
-        clientModelItemVO.setApproverVOS(processUser);
+
+        // 过滤重复的并保持顺序不变
+        List<UserVO> distinctUserList = processUser.stream().distinct().collect(Collectors.toList());
+        clientModelItemVO.setApproverVOS(distinctUserList);
 
         // 获取默认抄送人
         List<UserVO> userVOList = copyService.get(modelId);
@@ -165,7 +169,7 @@ public class ModelItemServiceImpl extends BaseServiceImpl<ModelItemMapper, Model
 
     }
 
-    public List<UserVO> getDefaultProcess(String companyId, String memberId, String modelId, List<String> conditionIds) {
+    private List<UserVO> getDefaultProcess(String companyId, String memberId, String modelId, List<String> conditionIds) {
 
         List<UserVO> users = new ArrayList<>();
         List<SetsProcess> list;
@@ -175,15 +179,14 @@ public class ModelItemServiceImpl extends BaseServiceImpl<ModelItemMapper, Model
             list = processService.selectList(Condition.create().where("model_id={0}", modelId).and("(condition_id is null or condition_id='')").orderBy(true, "sort", true));
         }
         List<ApprovalUser> userList = approvalUserService.selectList(Condition.create());
-
+        Map<String, List<OrgMemberMessage>> deptManager = appCenterService.findDeptManager(companyId, memberId);
         for (SetsProcess process : list) {
             String userId = process.getApprover();
             if (userId.indexOf("admin_") != -1) {
                 String[] temp = String.valueOf(userId).split("_");
                 int num = Integer.parseInt(temp[2]);
-                Map<String, List<OrgMemberMessage>> deptManager = appCenterService.findDeptManager(companyId, memberId);
                 List<ApprovalUser> uid = userList.stream().filter(approvalUser -> approvalUser.getId().equals(memberId)).collect(Collectors.toList());
-                if (uid != null && CollectionUtils.isNotEmpty(uid)) {
+                if (uid != null && CollectionUtils.isNotEmpty(uid) && deptManager != null && MapUtils.isNotEmpty(deptManager)) {
                     String[] deptId = uid.get(0).getDeptId().split(",");
                     deptManager.forEach((s, orgMemberMessages) -> {
                         if (deptId[0].equals(s)) {
@@ -271,8 +274,6 @@ public class ModelItemServiceImpl extends BaseServiceImpl<ModelItemMapper, Model
         if (StringUtils.isBlank(json)) {
             throw new ParameterErrorException("模型数据不存在");
         }
-        System.out.println(json);
-
         ModelVO vo;
         try {
             vo = JSONObject.parseObject(json, ModelVO.class);
@@ -403,9 +404,12 @@ public class ModelItemServiceImpl extends BaseServiceImpl<ModelItemMapper, Model
 
             // 标题
             String label = itemVO.getLabel();
-            if (itemVO.getType() == 8) {
+            if (itemVO.getType() == ApproConstants.EXPLAIN_TYPE_8) {
                 label = "说明";
-            } else {
+            } else if(itemVO.getType() == ApproConstants.TIME_INTERVAL_TYPE_5){
+                label = "开始时间";
+                item.setItemLabels("结束时间");
+            }else {
                 if (StringUtils.isBlank(label)) {
                     throw new MissingRequireFieldException("模型数据格式不正确 - 标题为空");
                 }
@@ -418,7 +422,7 @@ public class ModelItemServiceImpl extends BaseServiceImpl<ModelItemMapper, Model
             // 可选项
             String option = itemVO.getOption();
 
-            if (type == 3 || type == 5) {
+            if (type == ApproConstants.RADIO_TYPE_3 || type == ApproConstants.TIME_INTERVAL_TYPE_5) {
                 if (StringUtils.isBlank(option)) {
                     throw new MissingRequireFieldException("模型数据格式不正确 - 选项为空");
                 }
@@ -439,7 +443,7 @@ public class ModelItemServiceImpl extends BaseServiceImpl<ModelItemMapper, Model
 
             // 日期格式
             String dateFormat = itemVO.getFormat();
-            if (type == 4 || type == 5) {
+            if (type == ApproConstants.DATE_TYPE_4 || type == ApproConstants.TIME_INTERVAL_TYPE_5) {
                 if (StringUtils.isNotBlank(dateFormat)) {
                     if (!"yyyy-MM-dd".equals(dateFormat) && !"yyyy-MM-dd HH:mm".equals(dateFormat)) {
                         throw new MissingRequireFieldException("模型数据格式不正确 - 日期类型不正确");
@@ -459,7 +463,7 @@ public class ModelItemServiceImpl extends BaseServiceImpl<ModelItemMapper, Model
             if (isDisplay == null) {
                 isDisplay = 1;
             } else {
-                if (type == 8 && isDisplay != 1) {
+                if (type == ApproConstants.EXPLAIN_TYPE_8 && isDisplay != 1) {
                     isDisplay = 0;
                 } else {
                     isDisplay = 1;
@@ -480,7 +484,7 @@ public class ModelItemServiceImpl extends BaseServiceImpl<ModelItemMapper, Model
             Integer minSort = modelItemMapper.getMinSort(modelId, ApproConstants.RADIO_TYPE_3);
             // 是否为判断条件
             if (!flag) {
-                if (type == 2 || type == 3) {
+                if (type == ApproConstants.NUMBER_TYPE_2 || type == ApproConstants.RADIO_TYPE_3) {
                     Integer isJudge = itemVO.getJudge();
                     if (isJudge != null && isJudge == 1) {
                         isJudge = 1;

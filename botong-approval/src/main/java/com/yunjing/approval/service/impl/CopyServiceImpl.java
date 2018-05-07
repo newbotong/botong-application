@@ -15,6 +15,7 @@ import com.yunjing.message.share.org.OrgMemberMessage;
 import com.yunjing.mommon.global.exception.ParameterErrorException;
 import com.yunjing.mommon.utils.IDUtils;
 import org.apache.commons.collections.CollectionUtils;
+import org.apache.commons.collections.MapUtils;
 import org.apache.commons.lang.ArrayUtils;
 import org.apache.commons.lang.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -82,6 +83,7 @@ public class CopyServiceImpl extends BaseServiceImpl<CopyMapper, Copy> implement
     public List<UserVO> getCopy(String companyId, String memberId, String modelId) {
         List<Copy> copyList = this.selectList(Condition.create().where("model_id={0}", modelId).orderBy("sort", true));
         String[] deptIds = approvalUserService.selectById(memberId).getDeptId().split(",");
+        Map<String, List<OrgMemberMessage>> deptManager = appCenterService.findDeptManager(companyId, memberId);
         List<ApprovalUser> userList = new ArrayList<>();
         List<UserVO> userVOList = new ArrayList<>();
         if (copyList != null && !copyList.isEmpty()) {
@@ -95,7 +97,7 @@ public class CopyServiceImpl extends BaseServiceImpl<CopyMapper, Copy> implement
                     // 查询成员所在部门
                     for (String deptId : deptIds) {
                         String[] erids = copy.getUserId().split("_");
-                        List<UserVO> admin = getAdmin(companyId, memberId, deptId, Integer.parseInt(erids[2]));
+                        List<UserVO> admin = getAdmin(deptId, Integer.parseInt(erids[2]), deptManager);
                         if (admin != null && CollectionUtils.isNotEmpty(admin)) {
                             userVOList.addAll(admin);
                         }
@@ -115,7 +117,9 @@ public class CopyServiceImpl extends BaseServiceImpl<CopyMapper, Copy> implement
             }
             userVOList.add(uservo);
         }
-        return userVOList;
+        // 去重
+        List<UserVO> distinctUserList = userVOList.stream().distinct().collect(Collectors.toList());
+        return distinctUserList;
     }
 
     /**
@@ -133,33 +137,34 @@ public class CopyServiceImpl extends BaseServiceImpl<CopyMapper, Copy> implement
     /**
      * 递归查找部门主管
      **/
-    public List<UserVO> getAdmin(String companyId, String memberId, String deptId, int num) {
-        Map<String, List<OrgMemberMessage>> deptManager = appCenterService.findDeptManager(companyId, memberId);
+    public List<UserVO> getAdmin(String deptId, int num, Map<String, List<OrgMemberMessage>> deptManager) {
         List<UserVO> userVOList = new ArrayList<>();
-        deptManager.forEach((s, orgMemberMessages) -> {
-            if (s.equals(deptId)) {
-                int nums = num - 1;
-                if (nums == 0) {
-                    for (OrgMemberMessage admin : orgMemberMessages) {
-                        if (admin != null) {
-                            UserVO vo = new UserVO();
-                            vo.setName(admin.getMemberName());
-                            vo.setProfile(admin.getProfile());
-                            vo.setMemberId(admin.getMemberId());
-                            vo.setPassportId(admin.getPassportId());
-                            userVOList.add(vo);
+        if (deptManager != null && MapUtils.isNotEmpty(deptManager)) {
+            deptManager.forEach((s, orgMemberMessages) -> {
+                if (s.equals(deptId)) {
+                    int nums = num - 1;
+                    if (nums == 0) {
+                        for (OrgMemberMessage admin : orgMemberMessages) {
+                            if (admin != null) {
+                                UserVO vo = new UserVO();
+                                vo.setName(admin.getMemberName());
+                                vo.setProfile(admin.getProfile());
+                                vo.setMemberId(admin.getMemberId());
+                                vo.setPassportId(admin.getPassportId());
+                                userVOList.add(vo);
+                            }
                         }
-                    }
-                } else {
-                    if (deptId != null) {
-                        List<UserVO> admin = getAdmin(companyId, memberId, deptId, num);
-                        if (admin != null && CollectionUtils.isNotEmpty(admin)) {
-                            userVOList.addAll(admin);
+                    } else {
+                        if (deptId != null) {
+                            List<UserVO> admin = getAdmin(deptId, num, deptManager);
+                            if (admin != null && CollectionUtils.isNotEmpty(admin)) {
+                                userVOList.addAll(admin);
+                            }
                         }
                     }
                 }
-            }
-        });
+            });
+        }
         return userVOList;
     }
 
