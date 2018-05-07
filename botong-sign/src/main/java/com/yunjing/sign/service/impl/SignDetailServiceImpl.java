@@ -402,8 +402,8 @@ public class SignDetailServiceImpl extends ServiceImpl<SignDetailMapper, SignDet
             //图片地址
             if(StringUtils.isNotBlank(excelVO.getImgUrls())) {
                 int index = 1;
+                imgUrls = new ArrayList<AttrValueVO>();
                 for (String img : StringUtils.split(excelVO.getImgUrls(), SignConstant.SEPARATE_STR)) {
-                    imgUrls = new ArrayList<AttrValueVO>();
                     attrValueVO = new AttrValueVO();
                     attrValueVO.setAttrVal(img);
                     attrValueVO.setCkey("图" + (index++));
