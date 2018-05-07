@@ -218,9 +218,9 @@ public class ConditionServiceImpl extends BaseServiceImpl<ConditionMapper, SetsC
         wrapper.eq("model_id", modelId).in("data_type", dataType).eq("item_version", version);
         wrapper.orderBy(true, "priority", true);
         List<ModelItem> list = modelItemService.selectList(wrapper);
-        List<SetsCondition> conditionList = conditionMapper.selectList(Condition.create().where("model_id={0}", modelId).and("enabled=1").orderBy("sort", true));
-        String value = "danxuankuang";
-        String dayNum = "tianshu";
+        List<SetsCondition> conditionList = conditionMapper.selectConditionList(modelId);
+        String value = "值为空";
+        String dayNum = "天数为空";
         List<String> conditionIds = new ArrayList<>();
         for (SetsCondition setsCondition : conditionList) {
             int type = setsCondition.getType();
@@ -238,8 +238,11 @@ public class ConditionServiceImpl extends BaseServiceImpl<ConditionMapper, SetsC
             for (ModelItem item : list) {
                 ModelItemVO vo = new ModelItemVO(item);
                 vo.setModelItemId(item.getId());
-                vo.setValue(value);
-                vo.setDayNum(dayNum);
+                if(item.getDataType() == ApproConstants.RADIO_TYPE_3){
+                    vo.setValue(value);
+                }else if(item.getDataType() == ApproConstants.NUMBER_TYPE_2){
+                    vo.setDayNum(dayNum);
+                }
                 voList.add(vo);
             }
         }
@@ -247,11 +250,12 @@ public class ConditionServiceImpl extends BaseServiceImpl<ConditionMapper, SetsC
         result.setModelItemList(voList);
         // 获取审批人
         if (CollectionUtils.isNotEmpty(conditionIds)) {
-            List<UserVO> approverList = processService.getProcess(modelId, conditionIds);
+            List<String> ids = conditionIds.stream().distinct().collect(Collectors.toList());
+            List<UserVO> approverList = processService.getProcess(modelId, ids);
             // 去重
             List<UserVO> collect = approverList.stream().distinct().collect(Collectors.toList());
             result.setApproverList(collect);
-            String cIds = conditionIds.stream().collect(Collectors.joining(","));
+            String cIds = ids.stream().collect(Collectors.joining(","));
             result.setConditionIds(cIds);
         }
         return result;
