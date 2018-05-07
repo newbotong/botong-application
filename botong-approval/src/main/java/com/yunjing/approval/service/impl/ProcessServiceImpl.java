@@ -217,9 +217,11 @@ public class ProcessServiceImpl extends BaseServiceImpl<ProcessMapper, SetsProce
     public boolean saveDefaultApprover(String modelId, String approverIds, String copyIds) {
         boolean insertedCopy = false;
         boolean insertApprover = false;
+        //先清除之前保存的默认审批人
+        this.delete(modelId, null);
+        // 清除默认抄送人
+        copyService.delete(Condition.create().where("model_id={0}", modelId));
         if (StringUtils.isNotBlank(approverIds)){
-            //先清除之前保存的默认审批人
-            this.delete(modelId, null);
             String[] aIds = approverIds.split(",");
             // 批量保存审批人信息
             List<SetsProcess> list = new ArrayList<>();
@@ -239,8 +241,6 @@ public class ProcessServiceImpl extends BaseServiceImpl<ProcessMapper, SetsProce
             }
         }
         if(StringUtils.isNotBlank(copyIds)){
-            // 清除默认抄送人
-            copyService.delete(Condition.create().where("model_id={0}", modelId));
             String[] cIds = copyIds.split(",");
             List<Copy> copyList = new ArrayList<>();
             for (int i = 0; i < cIds.length; i++) {
