@@ -11,19 +11,13 @@ import com.yunjing.approval.dao.mapper.ConditionMapper;
 import com.yunjing.approval.model.entity.ModelItem;
 import com.yunjing.approval.model.entity.ModelL;
 import com.yunjing.approval.model.entity.SetsCondition;
-import com.yunjing.approval.model.vo.ConditionVO;
-import com.yunjing.approval.model.vo.ModelItemVO;
-import com.yunjing.approval.model.vo.SetConditionVO;
-import com.yunjing.approval.model.vo.UserVO;
+import com.yunjing.approval.model.vo.*;
 import com.yunjing.approval.service.IConditionService;
 import com.yunjing.approval.service.IModelItemService;
 import com.yunjing.approval.service.IModelService;
 import com.yunjing.approval.service.IProcessService;
 import com.yunjing.approval.util.ApproConstants;
-import com.yunjing.mommon.global.exception.DeleteMessageFailureException;
-import com.yunjing.mommon.global.exception.InsertMessageFailureException;
-import com.yunjing.mommon.global.exception.MessageNotExitException;
-import com.yunjing.mommon.global.exception.ParameterErrorException;
+import com.yunjing.mommon.global.exception.*;
 import com.yunjing.mommon.utils.IDUtils;
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.lang.StringUtils;
@@ -55,6 +49,8 @@ public class ConditionServiceImpl extends BaseServiceImpl<ConditionMapper, SetsC
 
     @Autowired
     private ConditionMapper conditionMapper;
+    @Autowired
+    private IConditionService cdnService;
 
     @Override
     public boolean delete(String modelId) throws Exception {
@@ -211,9 +207,8 @@ public class ConditionServiceImpl extends BaseServiceImpl<ConditionMapper, SetsC
     }
 
     @Override
-    public List<ModelItemVO> getJudgeList(String modelId) throws Exception {
+    public ConditionAndApproverVO getJudgeList(String modelId) throws Exception {
         ModelL model = modelService.selectById(modelId);
-
         Integer version = model.getModelVersion();
         if (version == null || version < 1) {
             throw new MessageNotExitException("模型版本异常");
@@ -223,29 +218,36 @@ public class ConditionServiceImpl extends BaseServiceImpl<ConditionMapper, SetsC
         wrapper.eq("model_id", modelId).in("data_type", dataType).eq("item_version", version);
         wrapper.orderBy(true, "priority", true);
         List<ModelItem> list = modelItemService.selectList(wrapper);
-        if (CollectionUtils.isEmpty(list)) {
-            return new ArrayList<>(0);
-        }
         List<SetsCondition> conditionList = conditionMapper.selectList(Condition.create().where("model_id={0}", modelId).and("enabled=1"));
         String value = "danxuankuang";
         String dayNum = "tianshu";
+        List<String> conditionIds = new ArrayList<>();
         for (SetsCondition setsCondition : conditionList) {
             int type = setsCondition.getType();
             String condition = setsCondition.getCdn();
             if (ApproConstants.RADIO_TYPE_3 == type) {
+                conditionIds.add(setsCondition.getId());
                 value = condition.substring(condition.lastIndexOf(" "), condition.length()).trim();
             } else if (ApproConstants.NUMBER_TYPE_2 == type) {
+                conditionIds.add(setsCondition.getId());
                 dayNum = condition;
             }
         }
-        List<ModelItemVO> voList = new ArrayList<>(list.size());
-        for (ModelItem item : list) {
-            ModelItemVO vo = new ModelItemVO(item);
-            vo.setValue(value);
-            vo.setDayNum(dayNum);
-            voList.add(vo);
+        List<ModelItemVO> voList = new ArrayList<>();
+        if (list != null && CollectionUtils.isNotEmpty(list)){
+            for (ModelItem item : list) {
+                ModelItemVO vo = new ModelItemVO(item);
+                vo.setValue(value);
+                vo.setDayNum(dayNum);
+                voList.add(vo);
+            }
         }
-        return voList;
+        ConditionAndApproverVO result = new ConditionAndApproverVO();
+        result.setModelItemList(voList);
+        // 获取审批人
+        List<UserVO> process = processService.getProcess(modelId, conditionIds);
+        result.setApproverList(process);
+        return result;
     }
 
     @Override
@@ -281,8 +283,13 @@ public class ConditionServiceImpl extends BaseServiceImpl<ConditionMapper, SetsC
                 if (!insert) {
                     throw new InsertMessageFailureException("保存审批条件失败");
                 }
+                // 先删除旧的审批人
+                processService.delete(modelId, condition.getId());
                 // 保存审批人
                 boolean b = processService.updateProcess(modelId, condition.getId(), memberIds);
+                if(!b){
+                    throw new UpdateMessageFailureException("按条件保存审批人失败");
+                }
             }
         }
         return this.getConditionList(modelId);
