@@ -14,6 +14,8 @@ import java.util.List;
 @Data
 public class ConditionAndApproverVO {
 
+    private String conditionIds;
+
     private List<ModelItemVO> modelItemList;
 
     private List<UserVO> approverList;

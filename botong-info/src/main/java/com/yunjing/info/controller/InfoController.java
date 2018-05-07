@@ -4,6 +4,7 @@ import com.yunjing.info.common.InfoConstant;
 import com.yunjing.info.common.ValidationUtil;
 import com.yunjing.info.dto.CompanyRedisCatalogDto;
 import com.yunjing.info.dto.InfoContentDto;
+import com.yunjing.info.dto.InfoContentWebDto;
 import com.yunjing.info.model.InfoContent;
 import com.yunjing.info.param.InfoCategoryEditParam;
 import com.yunjing.info.param.InfoCategoryParam;
@@ -235,7 +236,7 @@ public class InfoController extends BaseController {
      */
     @PostMapping("/detail")
     public ResponseEntityWrapper selectWebDetail(@RequestParam String id) throws BaseException {
-        InfoContent infoContent = infoContentService.selectWebDetail(id);
+        InfoContentWebDto infoContent = infoContentService.selectWebDetail(id);
         return success(infoContent);
     }
 
