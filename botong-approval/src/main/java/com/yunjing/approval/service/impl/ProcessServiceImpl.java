@@ -14,7 +14,10 @@ import com.yunjing.approval.model.vo.ApproverVO;
 import com.yunjing.approval.model.vo.ConditionVO;
 import com.yunjing.approval.model.vo.UserVO;
 import com.yunjing.approval.processor.okhttp.AppCenterService;
-import com.yunjing.approval.service.*;
+import com.yunjing.approval.service.IApprovalUserService;
+import com.yunjing.approval.service.IConditionService;
+import com.yunjing.approval.service.ICopyService;
+import com.yunjing.approval.service.IProcessService;
 import com.yunjing.message.share.org.OrgMemberMessage;
 import com.yunjing.mommon.global.exception.DeleteMessageFailureException;
 import com.yunjing.mommon.global.exception.InsertMessageFailureException;
@@ -58,7 +61,7 @@ public class ProcessServiceImpl extends BaseServiceImpl<ProcessMapper, SetsProce
             wrapper = Condition.create().where("model_id={0}", modelId).and("condition_id={0}", conditionId);
         }
         boolean delete = this.delete(wrapper);
-        if(!delete){
+        if (!delete) {
             throw new DeleteMessageFailureException("清除审批流程人失败");
         }
         return delete;
@@ -74,7 +77,7 @@ public class ProcessServiceImpl extends BaseServiceImpl<ProcessMapper, SetsProce
             list = this.selectList(Condition.create().where("model_id={0}", modelId).and("(condition_id is null or condition_id='')").orderBy(true, "sort", true));
         }
         List<ApprovalUser> userList = approvalUserService.selectList(Condition.create());
-        if (list != null && CollectionUtils.isNotEmpty(list)){
+        if (list != null && CollectionUtils.isNotEmpty(list)) {
             for (SetsProcess process : list) {
                 String userId = process.getApprover();
                 String passportId = "";
@@ -103,30 +106,35 @@ public class ProcessServiceImpl extends BaseServiceImpl<ProcessMapper, SetsProce
                 users.add(vo);
             }
             return users;
-        }else {
+        } else {
             return null;
         }
     }
 
     @Override
     public boolean updateProcess(String modelId, String conditionId, String userArray) {
-        String[] userIds = userArray.split(",");
-        // 批量保存审批人信息
-        List<SetsProcess> list = new ArrayList<>();
-        for (int i = 0; i < userIds.length; i++) {
-            SetsProcess process = new SetsProcess();
-            process.setId(IDUtils.uuid());
-            process.setModelId(modelId);
-            process.setConditionId(conditionId);
-            process.setApprover(userIds[i]);
-            process.setSort(i + 1);
-            list.add(process);
+        if (StringUtils.isNotBlank(userArray)) {
+            String[] userIds = userArray.split(",");
+            // 批量保存审批人信息
+            List<SetsProcess> list = new ArrayList<>();
+            for (int i = 0; i < userIds.length; i++) {
+                SetsProcess process = new SetsProcess();
+                process.setId(IDUtils.uuid());
+                process.setModelId(modelId);
+                process.setConditionId(conditionId);
+                process.setApprover(userIds[i]);
+                process.setSort(i + 1);
+                list.add(process);
+            }
+            boolean insertBatch = this.insertBatch(list);
+            if (!insertBatch) {
+                throw new InsertMessageFailureException("批量保存审批人信息失败");
+            }
+            return true;
+        } else {
+            logger.info("审批Id为空");
+            return false;
         }
-        boolean insertBatch = this.insertBatch(list);
-        if (!insertBatch) {
-            throw new InsertMessageFailureException("批量保存审批人信息失败");
-        }
-        return true;
     }
 
     @Override
@@ -223,7 +231,7 @@ public class ProcessServiceImpl extends BaseServiceImpl<ProcessMapper, SetsProce
         this.delete(modelId, null);
         // 清除默认抄送人
         copyService.delete(Condition.create().where("model_id={0}", modelId));
-        if (StringUtils.isNotBlank(approverIds)){
+        if (StringUtils.isNotBlank(approverIds)) {
             String[] aIds = approverIds.split(",");
             // 批量保存审批人信息
             List<SetsProcess> list = new ArrayList<>();
@@ -242,7 +250,7 @@ public class ProcessServiceImpl extends BaseServiceImpl<ProcessMapper, SetsProce
                 }
             }
         }
-        if(StringUtils.isNotBlank(copyIds)){
+        if (StringUtils.isNotBlank(copyIds)) {
             String[] cIds = copyIds.split(",");
             List<Copy> copyList = new ArrayList<>();
             for (int i = 0; i < cIds.length; i++) {
@@ -261,9 +269,9 @@ public class ProcessServiceImpl extends BaseServiceImpl<ProcessMapper, SetsProce
                 }
             }
         }
-        if(insertedCopy || insertedCopy){
+        if (insertedCopy || insertedCopy) {
             return true;
-        }else {
+        } else {
             return false;
         }
     }

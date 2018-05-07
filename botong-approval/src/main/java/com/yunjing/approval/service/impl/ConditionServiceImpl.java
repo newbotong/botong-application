@@ -237,6 +237,7 @@ public class ConditionServiceImpl extends BaseServiceImpl<ConditionMapper, SetsC
         if (list != null && CollectionUtils.isNotEmpty(list)) {
             for (ModelItem item : list) {
                 ModelItemVO vo = new ModelItemVO(item);
+                vo.setModelItemId(item.getId());
                 vo.setValue(value);
                 vo.setDayNum(dayNum);
                 voList.add(vo);
@@ -300,6 +301,15 @@ public class ConditionServiceImpl extends BaseServiceImpl<ConditionMapper, SetsC
                     boolean b = processService.updateProcess(modelId, condition.getId(), memberIds);
                     if (!b) {
                         throw new UpdateMessageFailureException("按条件保存审批人失败");
+                    }
+                    // 修改判断条件
+                    ModelItem modelItem = modelItemService.selectById(conditionVO.getModelItemId());
+                    if (modelItem != null) {
+                        modelItem.setIsJudge(conditionVO.getJudge());
+                        boolean isUpdated = modelItemService.updateById(modelItem);
+                        if (!isUpdated){
+                            throw new UpdateMessageFailureException("修改判断条件失败");
+                        }
                     }
                 }
             }
