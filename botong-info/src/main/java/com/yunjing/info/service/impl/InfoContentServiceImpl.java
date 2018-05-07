@@ -7,10 +7,7 @@ import com.baomidou.mybatisplus.plugins.Page;
 import com.baomidou.mybatisplus.service.impl.ServiceImpl;
 import com.yunjing.info.common.EncryptionUtil;
 import com.yunjing.info.common.InfoConstant;
-import com.yunjing.info.dto.InfoContentDetailDto;
-import com.yunjing.info.dto.InfoDto;
-import com.yunjing.info.dto.Member;
-import com.yunjing.info.dto.ParentInfoDetailDto;
+import com.yunjing.info.dto.*;
 import com.yunjing.info.mapper.InfoContentMapper;
 import com.yunjing.info.model.InfoCatalog;
 import com.yunjing.info.model.InfoContent;
@@ -246,12 +243,22 @@ public class InfoContentServiceImpl extends ServiceImpl<InfoContentMapper, InfoC
      * @throws BaseException
      */
     @Override
-    public InfoContent selectWebDetail(String id) throws BaseException {
+    public InfoContentWebDto selectWebDetail(String id) throws BaseException {
         InfoContent infoContent = new InfoContent().selectOne(new EntityWrapper<InfoContent>().eq("is_delete", InfoConstant.LOGIC_DELETE_NORMAL).eq("id", id));
         if (null == infoContent) {
             throw new BaseRuntimeException(StatusCode.RESOURCE_NOT_MESSAGE_EXIT.getStatusCode(), "该资讯已被删除");
         }
-        return infoContent;
+        InfoContentWebDto infoContentWebDto = new InfoContentWebDto();
+        if (StringUtils.isNotEmpty(infoContent.getCatalogId())){
+            InfoCatalog infoCatalog = new InfoCatalog().selectOne(new EntityWrapper<InfoCatalog>().eq("id",infoContent.getCatalogId()).eq("is_delete",InfoConstant.LOGIC_DELETE_NORMAL));
+            if (null != infoCatalog){
+                infoContentWebDto.setCatalogName(infoCatalog.getName());
+            }
+        }
+        BeanUtils.copyProperties(infoContent,infoContentWebDto);
+
+
+        return infoContentWebDto;
     }
 
 
