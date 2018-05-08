@@ -98,6 +98,14 @@ public class InfoCatalogServiceImpl extends ServiceImpl<InfoCatalogMapper, InfoC
         Collections.sort(detailDTOList);
         map.put("info", detailDTOList);
         List<CompanyRedisCatalogDto> companyRedisCatalogDtos = this.selectParentCatalog(orgId);
+        if (CollectionUtils.isNotEmpty(companyRedisCatalogDtos)) {
+            for (int i = companyRedisCatalogDtos.size() - 1; i >= 0; i--) {
+                CompanyRedisCatalogDto item = companyRedisCatalogDtos.get(i);
+                if (item.getWhetherShow()==0) {
+                    companyRedisCatalogDtos.remove(item);
+                }
+            }
+        }
         map.put("parent", companyRedisCatalogDtos);
         return map;
     }
@@ -131,14 +139,6 @@ public class InfoCatalogServiceImpl extends ServiceImpl<InfoCatalogMapper, InfoC
             }
             //针对一级结构排序
             Collections.sort(companyRedisCatalogDtos);
-        }
-        if (CollectionUtils.isNotEmpty(companyRedisCatalogDtos)) {
-            for (int i = companyRedisCatalogDtos.size() - 1; i >= 0; i--) {
-                CompanyRedisCatalogDto item = companyRedisCatalogDtos.get(i);
-                if (item.getWhetherShow()==0) {
-                    companyRedisCatalogDtos.remove(item);
-                }
-            }
         }
         return companyRedisCatalogDtos;
     }
@@ -389,15 +389,7 @@ public class InfoCatalogServiceImpl extends ServiceImpl<InfoCatalogMapper, InfoC
         wrapper.where("org_id={0}", orgId).and("parent_id={0}", parentId).and("id={0}", id);
         int flag = infoCatalogMapper.update(infoCatalog, wrapper);
         //更新缓存
-//        updateInfoCategoryRedis(orgId, parentId, id);
-        if (flag > 0) {
-            if (displayType == 0) {
-                redisTemplate.opsForHash().delete(InfoConstant.BOTONG_INFO_CATALOG_LIST + orgId + InfoConstant.BOTONG_INFO_FIX + parentId, infoCatalog.getId());
-            }
-            if (displayType == 1) {
-                redisTemplate.opsForHash().put(InfoConstant.BOTONG_INFO_CATALOG_LIST + orgId + InfoConstant.BOTONG_INFO_FIX + parentId, infoCatalog.getId(), JSON.toJSONString(infoCatalog));
-            }
-        }
+        updateInfoCategoryRedis(orgId, parentId, id);
         return flag > 0 ? InfoConstant.StateCode.CODE_200 : InfoConstant.StateCode.CODE_602;
     }
 
