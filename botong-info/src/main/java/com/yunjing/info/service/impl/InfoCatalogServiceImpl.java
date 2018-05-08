@@ -58,9 +58,6 @@ public class InfoCatalogServiceImpl extends ServiceImpl<InfoCatalogMapper, InfoC
     private InfoCatalogMapper infoCatalogMapper;
 
     @Autowired
-    private AuthorityService authorityService;
-
-    @Autowired
     InfoContentMapper infoContentMapper;
 
     @Value("${info.appId}")
