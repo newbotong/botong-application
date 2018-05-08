@@ -90,3 +90,7 @@ botong:
     appId: ${botong.log.appId}
 
 
+#关闭验证
+management:
+  security:
+    enabled: false
