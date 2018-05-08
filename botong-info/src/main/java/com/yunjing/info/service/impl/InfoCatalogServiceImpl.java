@@ -254,6 +254,7 @@ public class InfoCatalogServiceImpl extends ServiceImpl<InfoCatalogMapper, InfoC
         InfoCatalog infoCatalog = new InfoCatalog();
         infoCatalog.setOrgId(orgId);
         infoCatalog.setParentId(parentId);
+        infoCatalog.setLevel(2);
         infoCatalog.setName(name);
         //默认显示
         infoCatalog.setWhetherShow(InfoConstant.INFO_TYPE_DISPLAY);
