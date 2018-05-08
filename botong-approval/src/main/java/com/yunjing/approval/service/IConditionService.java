@@ -5,7 +5,6 @@ import com.common.mybatis.service.IBaseService;
 import com.yunjing.approval.model.entity.SetsCondition;
 import com.yunjing.approval.model.vo.ConditionAndApproverVO;
 import com.yunjing.approval.model.vo.ConditionVO;
-import com.yunjing.approval.model.vo.ModelItemVO;
 import com.yunjing.approval.model.vo.SetConditionVO;
 
 import java.util.List;
@@ -28,9 +27,9 @@ public interface IConditionService extends IBaseService<SetsCondition> {
     /**
      * 保存审批条件
      *
-     * @param modelId   模型编号
-     * @param judge     选择的审批条件
-     * @param memberIds 审批人
+     * @param modelId      模型编号
+     * @param judge        选择的审批条件
+     * @param memberIds    审批人
      * @param conditionIds 条件ids
      * @return
      * @throws Exception
@@ -40,16 +39,17 @@ public interface IConditionService extends IBaseService<SetsCondition> {
     /**
      * 删除审批条件
      *
-     * @param modelId 模型编号
+     * @param modelId      模型主键
+     * @param conditionIds 审批条件，以英文逗号隔开
      * @return
      * @throws Exception
      */
-    boolean delete(String modelId) throws Exception;
+    boolean deleteProcess(String modelId, String conditionIds) throws Exception;
 
     /**
      * 获取审批条件
      *
-     * @param modelId 模型编号
+     * @param modelId 模型主键
      * @return
      * @throws Exception
      */

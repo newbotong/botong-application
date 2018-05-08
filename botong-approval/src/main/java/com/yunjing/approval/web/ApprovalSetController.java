@@ -17,9 +17,9 @@ import org.springframework.web.bind.annotation.RestController;
 @RequestMapping("/web/approval/set")
 public class ApprovalSetController extends BaseController {
 
-
     @Autowired
     private IProcessService processService;
+
     /**
      * 获取设置的默认审批人及抄送人
      *
@@ -49,25 +49,14 @@ public class ApprovalSetController extends BaseController {
     }
 
     /**
-     * 清除审批流程
+     * 清除默认审批流程人
      *
-     * @param modelId     模型主键
-     * @param conditionId 条件主键
+     * @param modelId 模型主键
      * @return ResponseEntityWrapper
      */
-    @PostMapping("/delete-process")
-    public ResponseEntityWrapper deleteProcess(@RequestParam("modelId") String modelId, @RequestParam(value = "conditionId", required = false) String conditionId) throws Exception {
-        return success(processService.delete(modelId, conditionId));
+    @PostMapping("/delete-default-process")
+    public ResponseEntityWrapper deleteProcess(@RequestParam("modelId") String modelId) throws Exception {
+        return success(processService.delete(modelId, null));
     }
 
-    /**
-     * 删除审批流程人
-     *
-     * @param companyId 公司id
-     * @param memberId  成员id
-     */
-    @PostMapping("/delete-processUser")
-    public void deleteProcessUser(@RequestParam("companyId") String companyId, @RequestParam("memberId") String memberId) {
-        processService.deleteProcessUser(companyId, memberId);
-    }
 }
