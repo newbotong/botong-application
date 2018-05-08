@@ -98,6 +98,14 @@ public class InfoCatalogServiceImpl extends ServiceImpl<InfoCatalogMapper, InfoC
         Collections.sort(detailDTOList);
         map.put("info", detailDTOList);
         List<CompanyRedisCatalogDto> companyRedisCatalogDtos = this.selectParentCatalog(orgId);
+        if (CollectionUtils.isNotEmpty(companyRedisCatalogDtos)) {
+            for (int i = companyRedisCatalogDtos.size() - 1; i >= 0; i--) {
+                CompanyRedisCatalogDto item = companyRedisCatalogDtos.get(i);
+                if (item.getWhetherShow()==0) {
+                    companyRedisCatalogDtos.remove(item);
+                }
+            }
+        }
         map.put("parent", companyRedisCatalogDtos);
         return map;
     }
@@ -381,15 +389,7 @@ public class InfoCatalogServiceImpl extends ServiceImpl<InfoCatalogMapper, InfoC
         wrapper.where("org_id={0}", orgId).and("parent_id={0}", parentId).and("id={0}", id);
         int flag = infoCatalogMapper.update(infoCatalog, wrapper);
         //更新缓存
-//        updateInfoCategoryRedis(orgId, parentId, id);
-        if (flag>0) {
-            if (displayType==0) {
-                redisTemplate.opsForHash().delete(InfoConstant.BOTONG_INFO_CATALOG_LIST + orgId + InfoConstant.BOTONG_INFO_FIX + parentId, infoCatalog.getId());
-            }
-            if (displayType==1) {
-                redisTemplate.opsForHash().put(InfoConstant.BOTONG_INFO_CATALOG_LIST + orgId + InfoConstant.BOTONG_INFO_FIX + parentId, infoCatalog.getId(), JSON.toJSONString(infoCatalog));
-            }
-        }
+        updateInfoCategoryRedis(orgId, parentId, id);
         return flag > 0 ? InfoConstant.StateCode.CODE_200 : InfoConstant.StateCode.CODE_602;
     }
 
@@ -693,26 +693,26 @@ public class InfoCatalogServiceImpl extends ServiceImpl<InfoCatalogMapper, InfoC
 
                         //判断  contentList.get(i).getColumnId() 是否是一级的 公司制度
                         //如果是，则拿出它下级的 企业制度的ID 赋给内容
-                            for (InfoCatalog infoCatalog1 : infoCatalogList) {
-                                if (ValidationUtil.equals(infoCatalog1.getName(), "公司制度") || ValidationUtil.equals(infoCatalog1.getName(), "培训资料")) {
-                                    if (ValidationUtil.equals(infoCatalog1.getName(), "公司制度")) {
-                                        //然后在遍历 list 拿出他二级的 企业制度的ID
-                                        for (InfoCatalog infoCatalog2 : infoCatalogList) {
-                                            //2级目录 ，并且2级的父ID == 一级目录id
-                                            if (ValidationUtil.equals(infoCatalog2.getParentId(), infoCatalog1.getId()) && ValidationUtil.equals(infoCatalog2.getLevel(), 2)) {
-                                                infoContent.setCatalogId(infoCatalog2.getId());
-                                                break;
-                                            } else {
-                                                infoContent.setCatalogId(infoCatalog2.getId());
-                                                break;
-                                            }
+                        for (InfoCatalog infoCatalog1 : infoCatalogList) {
+                            if (ValidationUtil.equals(infoCatalog1.getName(), "公司制度") || ValidationUtil.equals(infoCatalog1.getName(), "培训资料")) {
+                                if (ValidationUtil.equals(infoCatalog1.getName(), "公司制度")) {
+                                    //然后在遍历 list 拿出他二级的 企业制度的ID
+                                    for (InfoCatalog infoCatalog2 : infoCatalogList) {
+                                        //2级目录 ，并且2级的父ID == 一级目录id
+                                        if (ValidationUtil.equals(infoCatalog2.getParentId(), infoCatalog1.getId()) && ValidationUtil.equals(infoCatalog2.getLevel(), 2)) {
+                                            infoContent.setCatalogId(infoCatalog2.getId());
+                                            break;
+                                        } else {
+                                            infoContent.setCatalogId(infoCatalog2.getId());
+                                            break;
                                         }
                                     }
-                                } else {
-                                    infoContent.setCatalogId(contentList.get(i).getColumnId());
-
                                 }
+                            } else {
+                                infoContent.setCatalogId(contentList.get(i).getColumnId());
+
                             }
+                        }
 
 
                         infoContent.setOrgId(infoCatalog.getOrgId());
@@ -772,22 +772,18 @@ public class InfoCatalogServiceImpl extends ServiceImpl<InfoCatalogMapper, InfoC
     public void initOrg1() {
         List<String> ordIds = infoCatalogMapper.selectOrgId();
         for (String orgId : ordIds) {
-            InfoCatalog infoCatalog = new InfoCatalog().selectOne(new EntityWrapper<InfoCatalog>().eq("org_id",orgId).eq("level",1).eq("sort",2));
-            List<InfoContent> infoContentList = new InfoContent().selectList(new EntityWrapper<InfoContent>().eq("org_id",orgId).eq("catalog_id",infoCatalog.getId()));
-            InfoCatalog infoCatalogs = new InfoCatalog().selectOne(new EntityWrapper<InfoCatalog>().eq("org_id",orgId).eq("level",2).eq("parent_id",infoCatalog.getId()).eq("name","企业制度"));
+            InfoCatalog infoCatalog = new InfoCatalog().selectOne(new EntityWrapper<InfoCatalog>().eq("org_id", orgId).eq("level", 1).eq("sort", 2));
+            List<InfoContent> infoContentList = new InfoContent().selectList(new EntityWrapper<InfoContent>().eq("org_id", orgId).eq("catalog_id", infoCatalog.getId()));
+            InfoCatalog infoCatalogs = new InfoCatalog().selectOne(new EntityWrapper<InfoCatalog>().eq("org_id", orgId).eq("level", 2).eq("parent_id", infoCatalog.getId()).eq("name", "企业制度"));
 
-            if (CollectionUtils.isNotEmpty(infoContentList)){
-                for (InfoContent infoContent : infoContentList){
+            if (CollectionUtils.isNotEmpty(infoContentList)) {
+                for (InfoContent infoContent : infoContentList) {
                     infoContent.setCatalogId(infoCatalogs.getId());
                 }
                 infoContentService.updateBatchById(infoContentList);
             }
         }
     }
-
-
-
-
 
 
     /**
@@ -799,9 +795,9 @@ public class InfoCatalogServiceImpl extends ServiceImpl<InfoCatalogMapper, InfoC
     public void initOrg() {
         List<String> ordIds = infoCatalogMapper.selectOrgId();
         for (String orgId : ordIds) {
-            InfoCatalog infoCatalog = new InfoCatalog().selectOne(new EntityWrapper<InfoCatalog>().eq("is_delete", 0).eq("org_id",orgId).eq("level",1).eq("sort",1));
-            InfoContent infoContent = new InfoContent().selectOne(new EntityWrapper<InfoContent>().eq("is_delete",0).eq("catalog_id",infoCatalog.getId()).eq("org_id",orgId).orderBy("sort",false));
-            if (null != infoContent){
+            InfoCatalog infoCatalog = new InfoCatalog().selectOne(new EntityWrapper<InfoCatalog>().eq("is_delete", 0).eq("org_id", orgId).eq("level", 1).eq("sort", 1));
+            InfoContent infoContent = new InfoContent().selectOne(new EntityWrapper<InfoContent>().eq("is_delete", 0).eq("catalog_id", infoCatalog.getId()).eq("org_id", orgId).orderBy("sort", false));
+            if (null != infoContent) {
                 ParentInfoDetailDto parentInfoDetailDto = new ParentInfoDetailDto();
                 parentInfoDetailDto.setId(infoContent.getId());
                 parentInfoDetailDto.setName(infoCatalog.getName());
@@ -817,11 +813,11 @@ public class InfoCatalogServiceImpl extends ServiceImpl<InfoCatalogMapper, InfoC
         }
 
         for (String orgId : ordIds) {
-            InfoCatalog infoCatalog = new InfoCatalog().selectOne(new EntityWrapper<InfoCatalog>().eq("is_delete", 0).eq("org_id",orgId).eq("level",1).eq("sort",2));
-            List<InfoCatalog> infoCatalogList = new InfoCatalog().selectList(new EntityWrapper<InfoCatalog>().eq("is_delete",0).eq("org_id",orgId).eq("level",2).eq("parent_id",infoCatalog.getId()));
+            InfoCatalog infoCatalog = new InfoCatalog().selectOne(new EntityWrapper<InfoCatalog>().eq("is_delete", 0).eq("org_id", orgId).eq("level", 1).eq("sort", 2));
+            List<InfoCatalog> infoCatalogList = new InfoCatalog().selectList(new EntityWrapper<InfoCatalog>().eq("is_delete", 0).eq("org_id", orgId).eq("level", 2).eq("parent_id", infoCatalog.getId()));
             String[] aa = infoCatalogList.stream().map(InfoCatalog::getId).toArray(String[]::new);
-            InfoContent infoContent = new InfoContent().selectOne(new EntityWrapper<InfoContent>().eq("is_delete",0).in("catalog_id",aa).eq("org_id",orgId).orderBy("sort",false));
-            if (null != infoContent){
+            InfoContent infoContent = new InfoContent().selectOne(new EntityWrapper<InfoContent>().eq("is_delete", 0).in("catalog_id", aa).eq("org_id", orgId).orderBy("sort", false));
+            if (null != infoContent) {
                 ParentInfoDetailDto parentInfoDetailDto = new ParentInfoDetailDto();
                 parentInfoDetailDto.setId(infoContent.getId());
                 parentInfoDetailDto.setName(infoCatalog.getName());
@@ -837,11 +833,11 @@ public class InfoCatalogServiceImpl extends ServiceImpl<InfoCatalogMapper, InfoC
         }
 
         for (String orgId : ordIds) {
-            InfoCatalog infoCatalog = new InfoCatalog().selectOne(new EntityWrapper<InfoCatalog>().eq("is_delete", 0).eq("org_id",orgId).eq("level",1).eq("sort",3));
-            List<InfoCatalog> infoCatalogList = new InfoCatalog().selectList(new EntityWrapper<InfoCatalog>().eq("is_delete",0).eq("org_id",orgId).eq("level",2).eq("parent_id",infoCatalog.getId()));
+            InfoCatalog infoCatalog = new InfoCatalog().selectOne(new EntityWrapper<InfoCatalog>().eq("is_delete", 0).eq("org_id", orgId).eq("level", 1).eq("sort", 3));
+            List<InfoCatalog> infoCatalogList = new InfoCatalog().selectList(new EntityWrapper<InfoCatalog>().eq("is_delete", 0).eq("org_id", orgId).eq("level", 2).eq("parent_id", infoCatalog.getId()));
             String[] aa = infoCatalogList.stream().map(InfoCatalog::getId).toArray(String[]::new);
-            InfoContent infoContent = new InfoContent().selectOne(new EntityWrapper<InfoContent>().eq("is_delete",0).in("catalog_id",aa).eq("org_id",orgId).orderBy("sort",false));
-            if (null != infoContent){
+            InfoContent infoContent = new InfoContent().selectOne(new EntityWrapper<InfoContent>().eq("is_delete", 0).in("catalog_id", aa).eq("org_id", orgId).orderBy("sort", false));
+            if (null != infoContent) {
                 ParentInfoDetailDto parentInfoDetailDto = new ParentInfoDetailDto();
                 parentInfoDetailDto.setId(infoContent.getId());
                 parentInfoDetailDto.setName(infoCatalog.getName());

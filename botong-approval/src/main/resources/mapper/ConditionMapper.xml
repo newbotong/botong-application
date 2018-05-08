@@ -4,4 +4,8 @@
     <update id="disableByModelId">
         UPDATE approval_sets_condition SET enabled = 0 WHERE model_id = #{ modelId } and enabled = 1
     </update>
+    <select id="selectConditionList" resultType="com.yunjing.approval.model.entity.SetsCondition">
+        SELECT a.id,a.model_id AS modelId,a.content,a.cdn,a.enabled,a.sort,a.create_time,a.update_time,a.is_delete,a.type FROM approval_sets_condition a
+        JOIN approval_sets_process b ON a.id=b.condition_id WHERE a.model_id=#{modelId} AND enabled=1 AND a.is_delete=0 AND b.is_delete=0 ORDER BY a.sort ASC
+    </select>
 </mapper>
