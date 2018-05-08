@@ -17,6 +17,8 @@ import com.yunjing.approval.service.IApprovalUserService;
 import com.yunjing.approval.service.IModelService;
 import com.yunjing.approval.util.ApproConstants;
 import com.yunjing.mommon.Enum.DateStyle;
+import com.yunjing.mommon.global.exception.MessageNotExitException;
+import com.yunjing.mommon.global.exception.ParameterErrorException;
 import com.yunjing.mommon.utils.DateUtil;
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.lang.StringUtils;
@@ -131,22 +133,23 @@ public class ApprovalPushTask extends BaseTask {
         Approval approval = approvalService.selectById(approvalId);
         ApprovalUser approvalUser = approvalUserService.selectById(memberId);
         // 推送审批消息发送人账号id
-        String passportId = approvalUser.getPassportId();
+        String passportId = "";
+        if (approvalUser != null){
+            passportId = approvalUser.getPassportId();
+        }else {
+            throw new MessageNotExitException("成员信息不存在");
+        }
         List<ApprovalUser> users = approvalUserService.selectList(Condition.create());
         if (companyId != null && memberId != null) {
-            String message = "您收到一条审批消息";
             List<ApprovalUserVO> approvalUserList = approvalProcessMapper.getApprovalUserList(approvalId);
             List<ApprovalUserVO> approvalUserVOS = approvalUserList.stream().collect(Collectors.toSet()).stream().collect(Collectors.toList());
-            Collections.sort(approvalUserVOS, new Comparator<ApprovalUserVO>() {
-                @Override
-                public int compare(ApprovalUserVO o1, ApprovalUserVO o2) {
-                    if (o1.getSort() > o2.getSort()) {
-                        return 1;
-                    } else if (o1.getSort() < o2.getSort()) {
-                        return -1;
-                    } else {
-                        return 0;
-                    }
+            Collections.sort(approvalUserVOS, (o1, o2) -> {
+                if (o1.getSort() > o2.getSort()) {
+                    return 1;
+                } else if (o1.getSort() < o2.getSort()) {
+                    return -1;
+                } else {
+                    return 0;
                 }
             });
             if (approvalUserVOS != null && !approvalUserVOS.isEmpty()) {

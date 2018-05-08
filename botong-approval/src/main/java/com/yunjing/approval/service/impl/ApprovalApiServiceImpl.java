@@ -10,7 +10,6 @@ import com.yunjing.approval.model.dto.ApprovalDetailDTO;
 import com.yunjing.approval.model.entity.*;
 import com.yunjing.approval.model.vo.*;
 import com.yunjing.approval.param.FilterParam;
-import com.yunjing.approval.processor.okhttp.AppCenterService;
 import com.yunjing.approval.processor.task.async.ApprovalPushTask;
 import com.yunjing.approval.service.*;
 import com.yunjing.approval.util.ApproConstants;
@@ -59,8 +58,6 @@ public class ApprovalApiServiceImpl implements IApprovalApiService {
     private ApprovalPushTask approvalPushTask;
     @Autowired
     private ApprovalAttrMapper approvalAttrMapper;
-    @Autowired
-    private AppCenterService appCenterService;
 
     private final Log logger = LogFactory.getLog(ApprovalApiServiceImpl.class);
 
@@ -90,8 +87,7 @@ public class ApprovalApiServiceImpl implements IApprovalApiService {
         Page<ClientApprovalVO> clientApprovalVOPage = new Page<>(current, size);
         List<ClientApprovalVO> clientApprovalVOS = new ArrayList<>();
         List<ApprovalContentDTO> waitedMeApprovalList = approvalProcessMapper.getWaitedMeApprovalList(index, size, companyId, memberId, filterParam);
-        List<ApprovalContentDTO> result = new ArrayList<>();
-        waitedMeApprovalListToResult(memberId, waitedMeApprovalList, result);
+        List<ApprovalContentDTO> result = waitedMeApprovalListToResult(memberId, waitedMeApprovalList);
         convertList(clientApprovalVOS, result);
         clientApprovalVOPage.build(clientApprovalVOS != null ? clientApprovalVOS : new ArrayList<>());
         Integer waitedTotalCount = getWaitedTotalCount(companyId, memberId, filterParam);
@@ -109,28 +105,32 @@ public class ApprovalApiServiceImpl implements IApprovalApiService {
      */
     private Integer getWaitedTotalCount(String companyId, String memberId, FilterParam filterParam) {
         List<ApprovalContentDTO> waitedMeApprovalList = approvalProcessMapper.getAllWaitedMeApprovalList(companyId, memberId, filterParam);
-        List<ApprovalContentDTO> result = new ArrayList<>();
-        waitedMeApprovalListToResult(memberId, waitedMeApprovalList, result);
+        List<ApprovalContentDTO> result = waitedMeApprovalListToResult(memberId, waitedMeApprovalList);
         return result.size();
     }
 
-    private void waitedMeApprovalListToResult(String memberId, List<ApprovalContentDTO> waitedMeApprovalList, List<ApprovalContentDTO> result) {
+    private List<ApprovalContentDTO> waitedMeApprovalListToResult(String memberId, List<ApprovalContentDTO> waitedMeApprovalList) {
+        List<ApprovalContentDTO> result = new ArrayList<>();
         for (ApprovalContentDTO contentDTO : waitedMeApprovalList) {
             List<ApprovalProcess> processList = approvalProcessService.selectList(Condition.create().where("approval_id={0}", contentDTO.getApprovalId()).and("user_id={0}", memberId));
             for (ApprovalProcess process : processList) {
                 if (process.getSeq() == 1) {
                     result.add(contentDTO);
                 } else {
-                    List<ApprovalProcess> processList1 = approvalProcessService.selectList(Condition.create().where("approval_id={0}", contentDTO.getApprovalId()));
+                    List<ApprovalProcess> processList1 = approvalProcessService.selectList(Condition.create().where("approval_id={0}", contentDTO.getApprovalId()).orderBy("seq", true));
                     for (ApprovalProcess aProcess : processList1) {
                         //判断上一个审批人的审批状态，如果是1（同意）或者是3（转让）显示当前审批人
-                        if (aProcess.getSeq() + 1 == process.getSeq() && aProcess.getProcessState() == 1 || aProcess.getProcessState() == 3) {
+                        if (aProcess.getSeq() + 1 == process.getSeq() && aProcess.getProcessState() == 1) {
+                            result.add(contentDTO);
+                        } else if (aProcess.getSeq() + 1 == process.getSeq() && aProcess.getProcessState() == 3) {
                             result.add(contentDTO);
                         }
                     }
                 }
             }
         }
+        List<ApprovalContentDTO> distinctResult = result.stream().distinct().collect(Collectors.toList());
+        return distinctResult;
     }
 
     @Override
@@ -297,47 +297,55 @@ public class ApprovalApiServiceImpl implements IApprovalApiService {
             if (StringUtils.isBlank(approvalUserVO.getAvatar())) {
                 approvalUserVO.setColor(approvalUserVO.getColor() != null ? approvalUserVO.getColor() : ApproConstants.DEFAULT_COLOR);
             }
-            if (approvalUserVO.getProcessState() != null && approvalUserVO.getProcessState() == 0) {
-                approvalUserVO.setApprovalTime(null);
-                int i = index++;
-                if (approvalUserVO.getUserId().equals(memberId)) {
-                    //描述提醒用户信息
-                    clientApprovalDetailVO.setProcessState(approvalUserVO.getProcessState());
-                    clientApprovalDetailVO.setMessage("等待我审批");
-                    if (i == 1) {
-                        approvalUserVO.setMessage("审批中");
-                    } else {
-                        approvalUserVO.setMessage("等待审批");
-                    }
-                } else {
-                    //描述提醒用户信息
-                    if (i == 1) {
-                        clientApprovalDetailVO.setMessage("等待" + approvalUserVO.getName() + "审批");
-                        approvalUserVO.setMessage("审批中");
-                    } else {
-                        approvalUserVO.setMessage("等待审批");
-                    }
+            if (approvalUserVO.getProcessState() != null) {
+                Integer processState = approvalUserVO.getProcessState();
+                switch (processState) {
+                    case 0:
+                        approvalUserVO.setApprovalTime(null);
+                        int i = index++;
+                        if (approvalUserVO.getUserId().equals(memberId)) {
+                            //描述提醒用户信息
+                            clientApprovalDetailVO.setProcessState(approvalUserVO.getProcessState());
+                            clientApprovalDetailVO.setMessage("等待我审批");
+                            if (i == 1) {
+                                approvalUserVO.setMessage("审批中");
+                            } else {
+                                approvalUserVO.setMessage("等待审批");
+                            }
+                        } else {
+                            //描述提醒用户信息
+                            if (i == 1) {
+                                clientApprovalDetailVO.setMessage("等待" + approvalUserVO.getName() + "审批");
+                                approvalUserVO.setMessage("审批中");
+                            } else {
+                                approvalUserVO.setMessage("等待审批");
+                            }
+                        }
+                        break;
+                    case 1:
+                        approvalUserVO.setMessage("已同意");
+                        break;
+                    case 2:
+                        approvalUserVO.setMessage("已拒绝");
+                        break;
+                    case 3:
+                        approvalUserVO.setMessage("已转交");
+                        break;
+                    case 4:
+                        approvalUserVO.setMessage("已撤销");
+                        break;
+                    default:
+                        approvalUserVO.setMessage(approvalUserVO.getMessage());
                 }
-            } else if (approvalUserVO.getProcessState() != null && approvalUserVO.getProcessState() == 1) {
-                approvalUserVO.setMessage("已同意");
-            } else if (approvalUserVO.getProcessState() != null && approvalUserVO.getProcessState() == 2) {
-                approvalUserVO.setMessage("已拒绝");
-            } else if (approvalUserVO.getProcessState() != null && approvalUserVO.getProcessState() == 3) {
-                approvalUserVO.setMessage("已转交");
-            } else if (approvalUserVO.getProcessState() != null && approvalUserVO.getProcessState() == 4) {
-                approvalUserVO.setMessage("已撤销");
             }
         }
-        Collections.sort(approvalUserList, new Comparator<ApprovalUserVO>() {
-            @Override
-            public int compare(ApprovalUserVO o1, ApprovalUserVO o2) {
-                if (o1.getSort() > o2.getSort()) {
-                    return 1;
-                } else if (o1.getSort() < (o2.getSort())) {
-                    return -1;
-                } else {
-                    return 0;
-                }
+        Collections.sort(approvalUserList, (o1, o2) -> {
+            if (o1.getSort() > o2.getSort()) {
+                return 1;
+            } else if (o1.getSort() < (o2.getSort())) {
+                return -1;
+            } else {
+                return 0;
             }
         });
         // 当发起人做撤销操作后审批详情中审批人情况集合
@@ -427,9 +435,7 @@ public class ApprovalApiServiceImpl implements IApprovalApiService {
                             approval.setResult(4);
                             break;
                         default:
-                            // 2:已撤回
                             approval.setState(approval.getState());
-                            // 4:已撤销
                             approval.setResult(approval.getResult());
                     }
                 } else if (state == revoke) {
@@ -613,19 +619,16 @@ public class ApprovalApiServiceImpl implements IApprovalApiService {
                 }
                 attrs.add(attrVo);
                 if (CollectionUtils.isNotEmpty(attrs)) {
-                    Collections.sort(attrs, new Comparator<ApproveAttrVO>() {
-                        @Override
-                        public int compare(ApproveAttrVO o1, ApproveAttrVO o2) {
-                            if (o1.getNum() == null || o2.getNum() == null) {
-                                return 0;
-                            }
-                            if (o1.getNum() > o2.getNum()) {
-                                return 1;
-                            } else if (o1.getNum() < o2.getNum()) {
-                                return -1;
-                            } else {
-                                return 0;
-                            }
+                    Collections.sort(attrs, (o1, o2) -> {
+                        if (o1.getNum() == null || o2.getNum() == null) {
+                            return 0;
+                        }
+                        if (o1.getNum() > o2.getNum()) {
+                            return 1;
+                        } else if (o1.getNum() < o2.getNum()) {
+                            return -1;
+                        } else {
+                            return 0;
                         }
                     });
                 }
