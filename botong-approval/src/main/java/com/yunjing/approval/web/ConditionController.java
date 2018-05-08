@@ -43,19 +43,20 @@ public class ConditionController extends BaseController {
      */
     @PostMapping("/save")
     public ResponseEntityWrapper save(@RequestParam String modelId, @RequestParam String judge, @RequestParam("memberIds") String memberIds,
-                                      @RequestParam(value = "conditionIds",required = false) String conditionIds) throws Exception {
-        return success(cdnService.save(modelId, judge, memberIds,conditionIds));
+                                      @RequestParam(value = "conditionIds", required = false) String conditionIds) throws Exception {
+        return success(cdnService.save(modelId, judge, memberIds, conditionIds));
     }
 
     /**
-     * 删除审批条件
+     * 清除审批条件值及对应审批流程人
      *
-     * @param modelId 模型主键
-     * @return
-     * @throws Exception
+     * @param modelId      模型主键
+     * @param conditionIds 条件主键，以逗号隔开
+     * @return ResponseEntityWrapper
      */
-    @PostMapping("/delete")
-    public ResponseEntityWrapper delete(@RequestParam String modelId) throws Exception {
-        return success(cdnService.delete(modelId));
+    @PostMapping("/delete-process")
+    public ResponseEntityWrapper deleteProcess(@RequestParam("modelId") String modelId, @RequestParam("conditionIds") String conditionIds) throws Exception {
+        return success(cdnService.deleteProcess(modelId, conditionIds));
     }
+
 }

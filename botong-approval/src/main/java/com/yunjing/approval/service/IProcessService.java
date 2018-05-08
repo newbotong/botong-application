@@ -47,14 +47,6 @@ public interface IProcessService extends IBaseService<SetsProcess> {
     boolean updateProcess(String modelId, String conditionId, String userArray);
 
     /**
-     * 删除审批流程人
-     *
-     * @param companyId 公司id
-     * @param memberId  成员id
-     */
-    void deleteProcessUser(String companyId, String memberId);
-
-    /**
      * 获取审批人
      *
      * @param companyId   公司主键

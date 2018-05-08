@@ -27,6 +27,7 @@ import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Iterator;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -40,33 +41,22 @@ public class ConditionServiceImpl extends BaseServiceImpl<ConditionMapper, SetsC
 
     @Autowired
     private IProcessService processService;
-
     @Autowired
     private IModelService modelService;
-
     @Autowired
     private IModelItemService modelItemService;
-
     @Autowired
     private ConditionMapper conditionMapper;
-    @Autowired
-    private IConditionService cdnService;
 
     @Override
-    public boolean delete(String modelId) throws Exception {
+    public boolean deleteProcess(String modelId, String conditionIds) throws Exception {
         boolean isDelete = false;
-        List<SetsCondition> conditionList = this.selectList(Condition.create().where("model_id={0}", modelId));
-        List<String> conditionIds = conditionList.stream().map(SetsCondition::getId).collect(Collectors.toList());
-        if (!conditionIds.isEmpty()) {
-            for (String conditionId : conditionIds) {
-                boolean delete = processService.delete(modelId, conditionId);
-                if (!delete) {
-                    throw new DeleteMessageFailureException("删除审批流程失败");
-                }
-            }
-            isDelete = this.deleteBatchIds(conditionIds);
-            if (!isDelete) {
-                throw new DeleteMessageFailureException("删除审批条件失败");
+        if(StringUtils.isNotBlank(conditionIds)){
+            String[] cIds = conditionIds.split(",");
+            boolean isDeleted = processService.delete(Condition.create().where("model_id={0}", modelId).in("condition_id", cIds));
+            if (isDeleted){
+                List<String> ids = Arrays.asList(cIds);
+                isDelete =  this.deleteBatchIds(ids);
             }
         }
         return isDelete;
