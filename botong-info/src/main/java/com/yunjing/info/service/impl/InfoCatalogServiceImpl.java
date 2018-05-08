@@ -138,7 +138,18 @@ public class InfoCatalogServiceImpl extends ServiceImpl<InfoCatalogMapper, InfoC
                         InfoCatalog infoCatalog = JSONObject.parseObject(en.getValue().toString(), InfoCatalog.class);
                         infoCatalogList.add(infoCatalog);
                     }
-                    Collections.sort(infoCatalogList);
+                    Collections.sort(infoCatalogList, new Comparator<InfoCatalog>() {
+                        @Override
+                        public int compare(InfoCatalog o1, InfoCatalog o2) {
+                            if (o1.getSort() > o2.getSort() ){
+                                return 1;
+                            }
+                            if (o1.getSort().equals(o2.getSort())){
+                                return 0;
+                            }
+                            return -1;
+                        }
+                    });
                     companyRedisCatalogDto.setLower(infoCatalogList);
                 }
                 //针对二级结构排序
