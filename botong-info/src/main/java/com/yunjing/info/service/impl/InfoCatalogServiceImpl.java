@@ -24,6 +24,7 @@ import com.yunjing.mommon.global.exception.BaseRuntimeException;
 import com.yunjing.mommon.utils.IDUtils;
 import com.yunjing.mommon.wrapper.PageWrapper;
 import com.yunjing.mommon.wrapper.ResponseEntityWrapper;
+import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.collections.MapUtils;
 import org.apache.commons.lang3.StringUtils;
@@ -48,6 +49,7 @@ import java.util.*;
  * @date 2018/3/30 15:38
  */
 @Service
+@Slf4j
 public class InfoCatalogServiceImpl extends ServiceImpl<InfoCatalogMapper, InfoCatalog> implements InfoCatalogService {
     @Autowired
     private StringRedisTemplate redisTemplate;
@@ -99,13 +101,18 @@ public class InfoCatalogServiceImpl extends ServiceImpl<InfoCatalogMapper, InfoC
         map.put("info", detailDTOList);
         List<CompanyRedisCatalogDto> companyRedisCatalogDtos = this.selectParentCatalog(orgId);
         if (CollectionUtils.isNotEmpty(companyRedisCatalogDtos)) {
-            for (int i = companyRedisCatalogDtos.size() - 1; i >= 0; i--) {
-                CompanyRedisCatalogDto item = companyRedisCatalogDtos.get(i);
-                if (item.getWhetherShow()==0) {
-                    companyRedisCatalogDtos.remove(item);
+            for (CompanyRedisCatalogDto companyRedisCatalogDto : companyRedisCatalogDtos) {
+                if (CollectionUtils.isNotEmpty(companyRedisCatalogDto.getLower())) {
+                    for (int i = companyRedisCatalogDto.getLower().size() - 1; i >= 0; i--) {
+                        InfoCatalog item = companyRedisCatalogDto.getLower().get(i);
+                        if (item.getWhetherShow() == 0) {
+                            companyRedisCatalogDto.getLower().remove(item);
+                        }
+                    }
                 }
             }
         }
+        log.info(companyRedisCatalogDtos.toString());
         map.put("parent", companyRedisCatalogDtos);
         return map;
     }
