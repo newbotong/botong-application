@@ -401,7 +401,7 @@ public class ApprovalApiServiceImpl implements IApprovalApiService {
                     if (process.getUserId().equals(memberId)) {
                         process.setProcessState(state);
                         process.setProcessTime(System.currentTimeMillis());
-                        boolean update = approvalProcessService.update(process, Condition.create().where("approval_id={0}", approvalId).and("user_id={0}", memberId));
+                        boolean update = approvalProcessService.update(process, Condition.create().where("approval_id={0}", approvalId).and("user_id={0}", memberId).and("process_state=0"));
                         if (!update) {
                             throw new UpdateMessageFailureException("同意审批--更新审批流程信息失败");
                         }
