@@ -96,7 +96,6 @@ public class ProcessServiceImpl extends BaseServiceImpl<ProcessMapper, SetsProce
                             passportId = user.getPassportId();
                         }
                     }
-
                 }
                 UserVO vo = new UserVO();
                 vo.setMemberId(userId);
@@ -135,11 +134,6 @@ public class ProcessServiceImpl extends BaseServiceImpl<ProcessMapper, SetsProce
             logger.info("审批Id为空");
             return false;
         }
-    }
-
-    @Override
-    public void deleteProcessUser(String companyId, String memberId) {
-        processMapper.deleteProcessUser(companyId, memberId);
     }
 
     @Override
