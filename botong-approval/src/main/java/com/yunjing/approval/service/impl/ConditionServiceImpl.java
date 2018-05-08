@@ -56,7 +56,7 @@ public class ConditionServiceImpl extends BaseServiceImpl<ConditionMapper, SetsC
             boolean isDeleted = processService.delete(Condition.create().where("model_id={0}", modelId).in("condition_id", cIds));
             if (isDeleted){
                 List<String> ids = Arrays.asList(cIds);
-                isDelete =  this.deleteBatchIds(ids);
+                isDelete = this.delete(Condition.create().in("id", ids));
             }
         }
         return isDelete;
