@@ -18,8 +18,6 @@ import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Map;
-import java.util.Set;
 import java.util.stream.Collectors;
 
 /**
@@ -150,7 +148,7 @@ public class OrgModelServiceImpl extends BaseServiceImpl<OrgModelMapper, OrgMode
             this.createModelItem(newModel.getId(), defaultModelItemList);
         }
         boolean insertBatch1 = modelLService.insertBatch(newModelList);
-        if (!insertBatch1){
+        if (!insertBatch1) {
             logger.error("批量插入model数据失败");
         }
         if (insertBatch1 && CollectionUtils.isNotEmpty(newOrgModelList)) {
@@ -179,29 +177,29 @@ public class OrgModelServiceImpl extends BaseServiceImpl<OrgModelMapper, OrgMode
         // 财务
         String modelName4 = "报销，备用金申请";
         newModelList.forEach(modelL -> {
-            if (modelName1.contains(modelL.getModelName())){
+            if (modelName1.contains(modelL.getModelName())) {
                 List<String> ids = newCategoryList.stream().filter(modelCategory -> modelCategory.getCategoryName().equals("出勤休假")).map(ModelCategory::getId).collect(Collectors.toList());
-                if(CollectionUtils.isNotEmpty(ids)){
+                if (CollectionUtils.isNotEmpty(ids)) {
                     modelL.setCategoryId(ids.get(0));
                 }
-            }else if(modelName2.contains(modelL.getModelName())){
+            } else if (modelName2.contains(modelL.getModelName())) {
                 List<String> ids = newCategoryList.stream().filter(modelCategory -> modelCategory.getCategoryName().equals("人事")).map(ModelCategory::getId).collect(Collectors.toList());
-                if(CollectionUtils.isNotEmpty(ids)){
+                if (CollectionUtils.isNotEmpty(ids)) {
                     modelL.setCategoryId(ids.get(0));
                 }
-            }else if(modelName3.contains(modelL.getModelName())){
+            } else if (modelName3.contains(modelL.getModelName())) {
                 List<String> ids = newCategoryList.stream().filter(modelCategory -> modelCategory.getCategoryName().equals("行政")).map(ModelCategory::getId).collect(Collectors.toList());
-                if(CollectionUtils.isNotEmpty(ids)){
+                if (CollectionUtils.isNotEmpty(ids)) {
                     modelL.setCategoryId(ids.get(0));
                 }
-            }else if(modelName4.contains(modelL.getModelName())){
+            } else if (modelName4.contains(modelL.getModelName())) {
                 List<String> ids = newCategoryList.stream().filter(modelCategory -> modelCategory.getCategoryName().equals("财务")).map(ModelCategory::getId).collect(Collectors.toList());
-                if(CollectionUtils.isNotEmpty(ids)){
+                if (CollectionUtils.isNotEmpty(ids)) {
                     modelL.setCategoryId(ids.get(0));
                 }
-            }else {
+            } else {
                 List<String> ids = newCategoryList.stream().filter(modelCategory -> modelCategory.getCategoryName().equals("其他")).map(ModelCategory::getId).collect(Collectors.toList());
-                if(CollectionUtils.isNotEmpty(ids)){
+                if (CollectionUtils.isNotEmpty(ids)) {
                     modelL.setCategoryId(ids.get(0));
                 }
             }
