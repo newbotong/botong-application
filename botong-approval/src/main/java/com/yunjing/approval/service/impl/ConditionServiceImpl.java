@@ -17,7 +17,10 @@ import com.yunjing.approval.service.IModelItemService;
 import com.yunjing.approval.service.IModelService;
 import com.yunjing.approval.service.IProcessService;
 import com.yunjing.approval.util.ApproConstants;
-import com.yunjing.mommon.global.exception.*;
+import com.yunjing.mommon.global.exception.InsertMessageFailureException;
+import com.yunjing.mommon.global.exception.MessageNotExitException;
+import com.yunjing.mommon.global.exception.ParameterErrorException;
+import com.yunjing.mommon.global.exception.UpdateMessageFailureException;
 import com.yunjing.mommon.utils.IDUtils;
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.lang.StringUtils;
@@ -51,10 +54,10 @@ public class ConditionServiceImpl extends BaseServiceImpl<ConditionMapper, SetsC
     @Override
     public boolean deleteProcess(String modelId, String conditionIds) throws Exception {
         boolean isDelete = false;
-        if(StringUtils.isNotBlank(conditionIds)){
+        if (StringUtils.isNotBlank(conditionIds)) {
             String[] cIds = conditionIds.split(",");
             boolean isDeleted = processService.delete(Condition.create().where("model_id={0}", modelId).in("condition_id", cIds));
-            if (isDeleted){
+            if (isDeleted) {
                 List<String> ids = Arrays.asList(cIds);
                 isDelete = this.delete(Condition.create().in("id", ids));
             }
@@ -157,17 +160,17 @@ public class ConditionServiceImpl extends BaseServiceImpl<ConditionMapper, SetsC
             String a1 = temp[1];
             switch (a1) {
                 case f1:
-                    if ( Integer.parseInt(conditionVO.getValue()) < a) {
+                    if (Integer.parseInt(conditionVO.getValue()) < a) {
                         result1 = true;
                     }
                     break;
                 case f2:
-                    if ( Integer.parseInt(conditionVO.getValue()) <= a) {
+                    if (Integer.parseInt(conditionVO.getValue()) <= a) {
                         result1 = true;
                     }
                     break;
                 case f3:
-                    if ( Integer.parseInt(conditionVO.getValue()) > a) {
+                    if (Integer.parseInt(conditionVO.getValue()) > a) {
                         result1 = true;
                     }
                     break;
@@ -228,9 +231,9 @@ public class ConditionServiceImpl extends BaseServiceImpl<ConditionMapper, SetsC
             for (ModelItem item : list) {
                 ModelItemVO vo = new ModelItemVO(item);
                 vo.setModelItemId(item.getId());
-                if(item.getDataType() == ApproConstants.RADIO_TYPE_3){
+                if (item.getDataType() == ApproConstants.RADIO_TYPE_3) {
                     vo.setValue(value);
-                }else if(item.getDataType() == ApproConstants.NUMBER_TYPE_2){
+                } else if (item.getDataType() == ApproConstants.NUMBER_TYPE_2) {
                     vo.setDayNum(dayNum);
                 }
                 voList.add(vo);
@@ -301,7 +304,7 @@ public class ConditionServiceImpl extends BaseServiceImpl<ConditionMapper, SetsC
                     if (modelItem != null) {
                         modelItem.setIsJudge(conditionVO.getJudge());
                         boolean isUpdated = modelItemService.updateById(modelItem);
-                        if (!isUpdated){
+                        if (!isUpdated) {
                             throw new UpdateMessageFailureException("修改判断条件失败");
                         }
                     }

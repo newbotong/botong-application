@@ -13,13 +13,10 @@ import com.yunjing.approval.service.IConditionService;
 import com.yunjing.approval.service.IModelService;
 import com.yunjing.approval.service.IProcessService;
 import com.yunjing.approval.util.ApproConstants;
-import com.yunjing.mommon.global.exception.BaseException;
 import com.yunjing.mommon.global.exception.InsertMessageFailureException;
 import com.yunjing.mommon.utils.IDUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Propagation;
-import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 

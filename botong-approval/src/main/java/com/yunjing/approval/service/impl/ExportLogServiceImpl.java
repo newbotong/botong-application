@@ -46,7 +46,7 @@ public class ExportLogServiceImpl extends BaseServiceImpl<ExportLogMapper, Expor
             ExportLogVO exportLogVO = new ExportLogVO();
             exportLogVO.setFileName(exportLog.getFileName());
             exportLogVO.setCreateTime(exportLog.getCreateTime());
-            ApprovalUser user = approvalUserService.selectOne(Condition.create().where("id={0}",exportLog.getUserId()));
+            ApprovalUser user = approvalUserService.selectOne(Condition.create().where("id={0}", exportLog.getUserId()));
             exportLogVO.setName(user.getName());
             if (exportLog.getModelId().contains(",")) {
                 mName = "";
