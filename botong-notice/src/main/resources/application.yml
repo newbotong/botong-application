@@ -111,3 +111,8 @@ logging:
 
 #H5分享地址
 h5Address: ${H5Address-notice}
+
+#关闭验证
+management:
+  security:
+    enabled: false

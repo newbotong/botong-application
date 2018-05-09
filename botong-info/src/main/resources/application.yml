@@ -96,3 +96,8 @@ info:
 okhttp:
   botong:
     zuul: ${okhttp.botong.zuul}
+
+#关闭验证
+management:
+  security:
+    enabled: false

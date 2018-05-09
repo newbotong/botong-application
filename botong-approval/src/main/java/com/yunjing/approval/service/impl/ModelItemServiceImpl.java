@@ -83,12 +83,12 @@ public class ModelItemServiceImpl extends BaseServiceImpl<ModelItemMapper, Model
         logger.info("modelId: " + modelId + " memberId: " + memberId);
         ModelL modelL = modelService.selectById(modelId);
         List<ModelItem> itemList = new ArrayList<>();
+        ModelVO modelVO = new ModelVO();
         if (modelL != null) {
             itemList = this.selectList(Condition.create().where("model_id={0}", modelId).and("item_version={0}", modelL.getModelVersion()).orderBy("priority"));
+            modelVO.setModelId(modelId);
+            modelVO.setModelName(modelL.getModelName());
         }
-        ModelVO modelVO = new ModelVO();
-        modelVO.setModelId(modelId);
-        modelVO.setModelName(modelL.getModelName());
         List<ModelItemVO> modelItemVOS = new ArrayList<>();
         for (ModelItem modelItem : itemList) {
             if (null != modelItem.getIsChild()) {
