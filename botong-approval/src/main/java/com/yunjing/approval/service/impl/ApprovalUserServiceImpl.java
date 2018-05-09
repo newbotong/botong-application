@@ -13,7 +13,6 @@ import com.yunjing.approval.model.dto.MemberListDTO;
 import com.yunjing.approval.model.entity.ApprovalUser;
 import com.yunjing.approval.service.IApprovalUserService;
 import com.yunjing.mommon.utils.BeanUtils;
-import org.apache.commons.collections.CollectionUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.stereotype.Service;
@@ -66,9 +65,9 @@ public class ApprovalUserServiceImpl extends BaseServiceImpl<ApprovalUserMapper,
                 newUser.setDeptId(approvalUser.getDeptId());
                 newUser.setDeptName(approvalUser.getDeptName());
                 approvalUsers.add(approvalUser);
-            }else {
+            } else {
                 // 如果成员信息已存在就更新
-                memberIdSet.forEach(memberId->{
+                memberIdSet.forEach(memberId -> {
                     ApprovalUser approvalUser1 = this.selectById(memberId);
                     approvalUser1.setName(approvalUser.getName());
                     approvalUser1.setPosition(approvalUser.getPosition());

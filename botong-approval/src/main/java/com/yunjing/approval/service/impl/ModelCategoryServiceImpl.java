@@ -70,7 +70,7 @@ public class ModelCategoryServiceImpl extends BaseServiceImpl<ModelCategoryMappe
                 modelIds.add(modelVO.getModelId());
             }
             List<ModelL> modelLS = modelService.selectList(Condition.create().in("id", modelIds));
-            ModelCategory modelCategory = this.selectOne(Condition.create().where("category_name={0}", "其他").and("org_id={0}",companyId));
+            ModelCategory modelCategory = this.selectOne(Condition.create().where("category_name={0}", "其他").and("org_id={0}", companyId));
             for (ModelL modelL : modelLS) {
                 modelL.setCategoryId(modelCategory.getId());
             }
