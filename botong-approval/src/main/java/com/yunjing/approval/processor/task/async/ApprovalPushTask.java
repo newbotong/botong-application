@@ -8,7 +8,10 @@ import com.yunjing.approval.dao.mapper.CopysMapper;
 import com.yunjing.approval.model.entity.Approval;
 import com.yunjing.approval.model.entity.ApprovalUser;
 import com.yunjing.approval.model.entity.ModelL;
-import com.yunjing.approval.model.vo.*;
+import com.yunjing.approval.model.vo.ApprovalUserVO;
+import com.yunjing.approval.model.vo.ApproveAttrVO;
+import com.yunjing.approval.model.vo.ClientApprovalDetailVO;
+import com.yunjing.approval.model.vo.CopyUserVO;
 import com.yunjing.approval.param.PushParam;
 import com.yunjing.approval.processor.okhttp.AppCenterService;
 import com.yunjing.approval.service.IApprovalApiService;
@@ -16,9 +19,8 @@ import com.yunjing.approval.service.IApprovalService;
 import com.yunjing.approval.service.IApprovalUserService;
 import com.yunjing.approval.service.IModelService;
 import com.yunjing.approval.util.ApproConstants;
-import com.yunjing.mommon.Enum.DateStyle;
+import com.yunjing.mommon.enums.DateStyle;
 import com.yunjing.mommon.global.exception.MessageNotExitException;
-import com.yunjing.mommon.global.exception.ParameterErrorException;
 import com.yunjing.mommon.utils.DateUtil;
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.lang.StringUtils;
@@ -134,9 +136,9 @@ public class ApprovalPushTask extends BaseTask {
         ApprovalUser approvalUser = approvalUserService.selectById(memberId);
         // 推送审批消息发送人账号id
         String passportId = "";
-        if (approvalUser != null){
+        if (approvalUser != null) {
             passportId = approvalUser.getPassportId();
-        }else {
+        } else {
             throw new MessageNotExitException("成员信息不存在");
         }
         List<ApprovalUser> users = approvalUserService.selectList(Condition.create());
@@ -158,7 +160,7 @@ public class ApprovalPushTask extends BaseTask {
                     for (ApprovalUserVO approvalUserVO : approvalUserVOS) {
                         if (approvalUserVO.getProcessState() == 0) {
                             List<ApprovalUser> collect = users.stream().filter(approvalUser1 -> approvalUser1.getId().equals(approvalUserVO.getUserId())).collect(Collectors.toList());
-                            if(CollectionUtils.isNotEmpty(collect)){
+                            if (CollectionUtils.isNotEmpty(collect)) {
                                 passportIds[0] = collect.get(0).getPassportId();
                             }
                             // 审批推送入参
@@ -170,7 +172,7 @@ public class ApprovalPushTask extends BaseTask {
                     }
                 } else {
                     List<ApprovalUser> collect = users.stream().filter(approvalUser1 -> approvalUser1.getId().equals(approval.getUserId())).collect(Collectors.toList());
-                    if(CollectionUtils.isNotEmpty(collect)){
+                    if (CollectionUtils.isNotEmpty(collect)) {
                         passportIds[0] = collect.get(0).getPassportId();
                     }
                     // 审批推送入参
@@ -238,7 +240,7 @@ public class ApprovalPushTask extends BaseTask {
         Map<String, String> maps = new HashMap<>(5);
         maps.put("appName", "审批");
         maps.put("subModuleName", modelL.getModelName());
-        maps.put("url", domainName+"approvalId=" + approval.getId());
+        maps.put("url", domainName + "approvalId=" + approval.getId());
         // 审批提醒
         JSONArray array = new JSONArray();
         JSONObject json1 = new JSONObject();
