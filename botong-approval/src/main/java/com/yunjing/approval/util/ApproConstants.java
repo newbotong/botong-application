@@ -6,9 +6,9 @@ package com.yunjing.approval.util;
  */
 public class ApproConstants {
 
-    public final static String  BOTONG_ORG_MEMBER = "botong:org:dept:member";
-    public final static String  BOTONG_ORG = "botong:org:company";
-    public final static String  BOTONG_APPROVAL = "botong:approval:info";
+    public final static String BOTONG_ORG_MEMBER = "botong:org:dept:member";
+    public final static String BOTONG_ORG = "botong:org:company";
+    public final static String BOTONG_APPROVAL = "botong:approval:info";
 
     public final static String DEFAULT_COLOR = "#1E90FF";
     /**
@@ -93,7 +93,8 @@ public class ApproConstants {
      */
     public static final int ENCLOSURE_TYPE_11 = 11;
 
-    public final static Integer  BOTONG_ONE_NUM = 1;
+    public final static Integer BOTONG_ONE_NUM = 1;
 
-    public final static Integer  BOTONG_ZERO_NUM = 0;
+    public final static Integer BOTONG_ZERO_NUM = 0;
+
 }

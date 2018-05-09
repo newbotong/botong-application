@@ -27,13 +27,6 @@ public class ClientApprovalOperationController extends BaseController {
     @Autowired
     private IApprovalService approvalService;
 
-    @PostMapping("/get-member-list")
-    public ResponseEntityWrapper getMember(@RequestParam("companyId") String companyId) throws Exception {
-
-        return success();
-    }
-
-
     /**
      * 提交审批信息
      *
