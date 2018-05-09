@@ -123,6 +123,11 @@ botong:
     appId: ${botong.approval.appId}
     h5domainName: ${botong.approval.h5domainName}
 
+#关闭验证
+management:
+  security:
+    enabled: false
+
 
 
 

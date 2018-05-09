@@ -95,11 +95,11 @@ public class ConditionServiceImpl extends BaseServiceImpl<ConditionMapper, SetsC
             for (SetsCondition condition : list) {
                 String cdn = condition.getCdn();
                 String[] temp = cdn.split(" ");
-                if (ApproConstants.RADIO_TYPE_3 == condition.getType()) {
+                if (ApproConstants.RADIO_TYPE_3 == condition.getType() && ApproConstants.RADIO_TYPE_3 == conditionVO.getType()) {
                     if (StringUtils.isNotBlank(temp[2]) && temp[2].contains(conditionVO.getValue())) {
                         return condition.getId();
                     }
-                } else if (ApproConstants.NUMBER_TYPE_2 == condition.getType()) {
+                } else if (ApproConstants.NUMBER_TYPE_2 == condition.getType() && ApproConstants.NUMBER_TYPE_2 == conditionVO.getType()) {
                     boolean b = judgeDay(temp, conditionVO);
                     if (b) {
                         return condition.getId();
@@ -157,27 +157,27 @@ public class ConditionServiceImpl extends BaseServiceImpl<ConditionMapper, SetsC
             String a1 = temp[1];
             switch (a1) {
                 case f1:
-                    if (conditionVO.getType() == ApproConstants.NUMBER_TYPE_2 && Integer.parseInt(conditionVO.getValue()) < a) {
+                    if ( Integer.parseInt(conditionVO.getValue()) < a) {
                         result1 = true;
                     }
                     break;
                 case f2:
-                    if (conditionVO.getType() == ApproConstants.NUMBER_TYPE_2 && Integer.parseInt(conditionVO.getValue()) <= a) {
+                    if ( Integer.parseInt(conditionVO.getValue()) <= a) {
                         result1 = true;
                     }
                     break;
                 case f3:
-                    if (conditionVO.getType() == ApproConstants.NUMBER_TYPE_2 && Integer.parseInt(conditionVO.getValue()) > a) {
+                    if ( Integer.parseInt(conditionVO.getValue()) > a) {
                         result1 = true;
                     }
                     break;
                 case f4:
-                    if (conditionVO.getType() == ApproConstants.NUMBER_TYPE_2 && Integer.parseInt(conditionVO.getValue()) >= a) {
+                    if (Integer.parseInt(conditionVO.getValue()) >= a) {
                         result1 = true;
                     }
                     break;
                 case f5:
-                    if (conditionVO.getType() == ApproConstants.NUMBER_TYPE_2 && Integer.parseInt(conditionVO.getValue()) == a) {
+                    if (Integer.parseInt(conditionVO.getValue()) == a) {
                         result1 = true;
                     }
                     break;
