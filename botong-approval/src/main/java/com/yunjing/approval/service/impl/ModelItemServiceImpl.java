@@ -305,8 +305,6 @@ public class ModelItemServiceImpl extends BaseServiceImpl<ModelItemMapper, Model
             isNew = true;
             modelId = IDUtils.uuid();
             entity.setId(modelId);
-            entity.setLogo(vo.getLogo());
-
             Integer max = modelMapper.getMaxSort(companyId);
             if (max == null) {
                 max = 0;
@@ -320,6 +318,7 @@ public class ModelItemServiceImpl extends BaseServiceImpl<ModelItemMapper, Model
             entity.setVisibleRange("全部可见");
             vo.setModelId(modelId);
         }
+        entity.setLogo(vo.getLogo());
         entity.setModelName(vo.getModelName());
         entity.setModelVersion(version);
         String introduce = vo.getIntroduce();
