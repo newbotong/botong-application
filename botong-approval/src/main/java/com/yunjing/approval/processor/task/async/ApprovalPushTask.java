@@ -282,6 +282,7 @@ public class ApprovalPushTask extends BaseTask {
                     json3.put("status", "已拒绝");
                     json3.put("color", "#EA6262");
                     break;
+                default:
             }
         } else {
             json3.put("status", "待审批");

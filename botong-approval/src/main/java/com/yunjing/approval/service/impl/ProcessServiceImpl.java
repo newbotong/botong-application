@@ -14,10 +14,7 @@ import com.yunjing.approval.model.vo.ApproverVO;
 import com.yunjing.approval.model.vo.ConditionVO;
 import com.yunjing.approval.model.vo.UserVO;
 import com.yunjing.approval.processor.okhttp.AppCenterService;
-import com.yunjing.approval.service.IApprovalUserService;
-import com.yunjing.approval.service.IConditionService;
-import com.yunjing.approval.service.ICopyService;
-import com.yunjing.approval.service.IProcessService;
+import com.yunjing.approval.service.*;
 import com.yunjing.message.share.org.OrgMemberMessage;
 import com.yunjing.mommon.global.exception.DeleteMessageFailureException;
 import com.yunjing.mommon.global.exception.InsertMessageFailureException;
@@ -42,9 +39,8 @@ public class ProcessServiceImpl extends BaseServiceImpl<ProcessMapper, SetsProce
     private IConditionService conditionService;
     @Autowired
     private IProcessService processService;
-
     @Autowired
-    private ProcessMapper processMapper;
+    private IModelItemService modelItemService;
     @Autowired
     private IApprovalUserService approvalUserService;
     @Autowired
@@ -151,7 +147,15 @@ public class ProcessServiceImpl extends BaseServiceImpl<ProcessMapper, SetsProce
         List<String> conditionIds = new ArrayList<>();
         for (ConditionVO conditionVO : conditionVOList) {
             String id = conditionService.getCondition(modelId, conditionVO);
-            conditionIds.add(id);
+            if (StringUtils.isNotBlank(id)){
+                conditionIds.add(id);
+            }
+        }
+        if (conditionIds.isEmpty()) {
+            // 如果没有按条件设置审批人，则显示默认审批人和抄送人
+            ApproverVO approverVO = modelItemService.getDefaultApproverAndCopy(companyId, memberId, modelId);
+            result.setApprovers(approverVO.getApprovers());
+            result.setCopys(approverVO.getCopys());
         }
         result.setConditionId(conditionIds);
         List<UserVO> users = processService.getProcess(modelId, conditionIds);
