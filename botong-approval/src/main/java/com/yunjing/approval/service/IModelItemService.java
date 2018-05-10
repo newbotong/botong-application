@@ -3,6 +3,7 @@ package com.yunjing.approval.service;
 
 import com.common.mybatis.service.IBaseService;
 import com.yunjing.approval.model.entity.ModelItem;
+import com.yunjing.approval.model.vo.ApproverVO;
 import com.yunjing.approval.model.vo.ClientModelItemVO;
 import com.yunjing.approval.model.vo.ModelVO;
 
@@ -51,4 +52,13 @@ public interface IModelItemService extends IBaseService<ModelItem> {
      * @return
      */
     boolean deleteModelItemListByOrgId(String orgId);
+
+    /**
+     * 客户端-获取默认审批人和抄送人
+     * @param companyId
+     * @param modelId
+     * @param memberId
+     * @return
+     */
+    ApproverVO getDefaultApproverAndCopy(String companyId, String modelId, String memberId);
 }
