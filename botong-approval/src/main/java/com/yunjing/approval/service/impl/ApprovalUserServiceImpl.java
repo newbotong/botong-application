@@ -93,7 +93,7 @@ public class ApprovalUserServiceImpl extends BaseServiceImpl<ApprovalUserMapper,
         boolean isDeleted = false;
         List<String> ids = approvalUserList.stream().map(ApprovalUser::getId).collect(Collectors.toList());
         if (!ids.isEmpty()) {
-            isDeleted = this.deleteBatchIds(ids);
+            isDeleted = this.delete(Condition.create().in("id", ids));
         }
         return isDeleted;
     }

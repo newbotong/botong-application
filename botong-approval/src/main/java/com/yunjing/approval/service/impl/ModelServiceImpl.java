@@ -35,10 +35,6 @@ public class ModelServiceImpl extends BaseServiceImpl<ModelMapper, ModelL> imple
 
     @Autowired
     private ModelMapper modelMapper;
-
-    @Autowired
-    private ICopyService copyService;
-
     @Autowired
     private IModelCategoryService modelCategoryService;
     @Autowired
@@ -51,15 +47,16 @@ public class ModelServiceImpl extends BaseServiceImpl<ModelMapper, ModelL> imple
         for (ModelVO modelVO : modelVOList) {
             // 过滤属于某个审批模板的所有详情项
             List<ModelItem> items = modelItems.stream().filter(modelItem -> modelItem.getModelId().equals(modelVO.getModelId())).collect(Collectors.toList());
-            // 过滤出类型是单选框的modelItem
-            Set<ModelItem> itemSet = items.stream().filter(modelItem -> modelItem.getDataType().equals(ApproConstants.RADIO_TYPE_3)).collect(Collectors.toSet());
-            // 过滤出所有需要必填的单选框
+            // 过滤出类型是单选框或数字框的modelItem
+            Set<ModelItem> itemSet = items.stream().filter(modelItem -> modelItem.getDataType().equals(ApproConstants.RADIO_TYPE_3) || modelItem.getDataType().equals(ApproConstants.NUMBER_TYPE_2))
+                    .collect(Collectors.toSet());
+            // 过滤出所有需要必填的单选框或数字框
             Set<ModelItem> set = itemSet.stream().filter(modelItem -> modelItem.getIsRequired().equals(1)).collect(Collectors.toSet());
             if (!set.isEmpty()) {
-                // 有必填的单选框则标识true
+                // 有必填的单选框或数字框则标识true
                 modelVO.setHaveRequired(true);
             } else {
-                // 没有必填的单选框标识为false
+                // 没有必填的单选框或数字框标识为false
                 modelVO.setHaveRequired(false);
             }
         }
@@ -75,16 +72,13 @@ public class ModelServiceImpl extends BaseServiceImpl<ModelMapper, ModelL> imple
                 modelListVO.setUpdateTime(modelCategory.getUpdateTime());
                 if (modelCategory.getId() != null) {
                     List<ModelVO> modelVOS = modelVOList.stream().filter(modelVO1 -> modelCategory.getId().equals(modelVO1.getCategoryId())).collect(Collectors.toSet()).stream().collect(Collectors.toList());
-                    Collections.sort(modelVOS, new Comparator<ModelVO>() {
-                        @Override
-                        public int compare(ModelVO o1, ModelVO o2) {
-                            if (o1.getSort() > o2.getSort()) {
-                                return 1;
-                            } else if (o1.getSort() < (o2.getSort())) {
-                                return -1;
-                            } else {
-                                return 0;
-                            }
+                    Collections.sort(modelVOS, (o1, o2) -> {
+                        if (o1.getSort() > o2.getSort()) {
+                            return 1;
+                        } else if (o1.getSort() < (o2.getSort())) {
+                            return -1;
+                        } else {
+                            return 0;
                         }
                     });
                     modelListVO.setModelVOList(modelVOS);
@@ -93,18 +87,15 @@ public class ModelServiceImpl extends BaseServiceImpl<ModelMapper, ModelL> imple
                 modelListVOList.add(modelListVO);
             }
         }
-        Collections.sort(modelListVOList, new Comparator<ModelListVO>() {
-            @Override
-            public int compare(ModelListVO o1, ModelListVO o2) {
-                if (o1.getSort() > o2.getSort()) {
-                    return 1;
-                } else if (o1.getSort().equals(o2.getSort()) && o1.getUpdateTime() < o2.getUpdateTime()) {
-                    return 1;
-                } else if (o1.getSort().equals(o2.getSort())) {
-                    return 0;
-                } else {
-                    return -1;
-                }
+        Collections.sort(modelListVOList, (o1, o2) -> {
+            if (o1.getSort() > o2.getSort()) {
+                return 1;
+            } else if (o1.getSort().equals(o2.getSort()) && o1.getUpdateTime() < o2.getUpdateTime()) {
+                return 1;
+            } else if (o1.getSort().equals(o2.getSort())) {
+                return 0;
+            } else {
+                return -1;
             }
         });
         return modelListVOList;
