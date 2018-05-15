@@ -4,23 +4,13 @@ import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 import com.baomidou.mybatisplus.mapper.Condition;
-import com.baomidou.mybatisplus.mapper.EntityWrapper;
-import com.baomidou.mybatisplus.mapper.Wrapper;
 import com.common.mybatis.service.impl.BaseServiceImpl;
 import com.yunjing.approval.dao.mapper.ConditionMapper;
-import com.yunjing.approval.model.entity.ModelItem;
-import com.yunjing.approval.model.entity.ModelL;
-import com.yunjing.approval.model.entity.SetsCondition;
+import com.yunjing.approval.model.entity.*;
 import com.yunjing.approval.model.vo.*;
-import com.yunjing.approval.service.IConditionService;
-import com.yunjing.approval.service.IModelItemService;
-import com.yunjing.approval.service.IModelService;
-import com.yunjing.approval.service.IProcessService;
+import com.yunjing.approval.service.*;
 import com.yunjing.approval.util.ApproConstants;
-import com.yunjing.mommon.global.exception.InsertMessageFailureException;
-import com.yunjing.mommon.global.exception.MessageNotExitException;
-import com.yunjing.mommon.global.exception.ParameterErrorException;
-import com.yunjing.mommon.global.exception.UpdateMessageFailureException;
+import com.yunjing.mommon.global.exception.*;
 import com.yunjing.mommon.utils.IDUtils;
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.lang.StringUtils;
@@ -29,10 +19,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Iterator;
-import java.util.List;
+import java.util.*;
 import java.util.stream.Collectors;
 
 /**
@@ -49,24 +36,22 @@ public class ConditionServiceImpl extends BaseServiceImpl<ConditionMapper, SetsC
     @Autowired
     private IModelItemService modelItemService;
     @Autowired
-    private ConditionMapper conditionMapper;
+    private IApprovalUserService approvalUserService;
 
     @Override
-    public boolean deleteProcess(String modelId, String conditionIds) throws Exception {
+    public boolean deleteProcess(String modelId, String conditionId) {
         boolean isDelete = false;
-        if (StringUtils.isNotBlank(conditionIds)) {
-            String[] cIds = conditionIds.split(",");
-            boolean isDeleted = processService.delete(Condition.create().where("model_id={0}", modelId).in("condition_id", cIds));
+        if (StringUtils.isNotBlank(conditionId)) {
+            boolean isDeleted = processService.delete(Condition.create().where("model_id={0}", modelId).and("condition_id={0}", conditionId));
             if (isDeleted) {
-                List<String> ids = Arrays.asList(cIds);
-                isDelete = this.delete(Condition.create().in("id", ids));
+                isDelete = this.deleteById(conditionId);
             }
         }
         return isDelete;
     }
 
     @Override
-    public List<SetConditionVO> getConditionList(String modelId) throws Exception {
+    public List<SetConditionVO> getConditionList(String modelId) {
 
         List<SetsCondition> listCondition = this.selectList(Condition.create().eq("model_id", modelId).orderBy(true, "enabled", false).orderBy(true, "sort", true));
         List<SetConditionVO> list = new ArrayList<>();
@@ -97,15 +82,36 @@ public class ConditionServiceImpl extends BaseServiceImpl<ConditionMapper, SetsC
         if (list != null && CollectionUtils.isNotEmpty(list)) {
             for (SetsCondition condition : list) {
                 String cdn = condition.getCdn();
-                String[] temp = cdn.split(" ");
-                if (ApproConstants.RADIO_TYPE_3 == condition.getType() && ApproConstants.RADIO_TYPE_3 == conditionVO.getType()) {
-                    if (StringUtils.isNotBlank(temp[2]) && temp[2].contains(conditionVO.getValue())) {
+                if (cdn.contains("|")) {
+                    String[] t = cdn.split("\\|");
+                    boolean flag1 = false;
+                    boolean flag2 = false;
+                    for (int i = 0; i < t.length; i++) {
+                        if (ApproConstants.RADIO_AND_NUMBER_TYPE_23 == condition.getType() && ApproConstants.RADIO_TYPE_3 == conditionVO.getType()) {
+                            flag1 = false;
+                            String[] temp = t[0].split(" ");
+                            if (StringUtils.isNotBlank(temp[2]) && temp[2].contains(conditionVO.getValue())) {
+                                flag1 = true;
+                            }
+                        } else if (ApproConstants.RADIO_AND_NUMBER_TYPE_23 == condition.getType() && ApproConstants.NUMBER_TYPE_2 == conditionVO.getType()) {
+                            String[] temp = t[1].split(" ");
+                            flag2 = judgeDay(temp, conditionVO);
+                        }
+                    }
+                    if (flag1 && flag2) {
                         return condition.getId();
                     }
-                } else if (ApproConstants.NUMBER_TYPE_2 == condition.getType() && ApproConstants.NUMBER_TYPE_2 == conditionVO.getType()) {
-                    boolean b = judgeDay(temp, conditionVO);
-                    if (b) {
-                        return condition.getId();
+                } else {
+                    String[] temp = cdn.split(" ");
+                    if (ApproConstants.RADIO_TYPE_3 == condition.getType() && ApproConstants.RADIO_TYPE_3 == conditionVO.getType()) {
+                        if (StringUtils.isNotBlank(temp[2]) && temp[2].contains(conditionVO.getValue())) {
+                            return condition.getId();
+                        }
+                    } else if (ApproConstants.NUMBER_TYPE_2 == condition.getType() && ApproConstants.NUMBER_TYPE_2 == conditionVO.getType()) {
+                        boolean b = judgeDay(temp, conditionVO);
+                        if (b) {
+                            return condition.getId();
+                        }
                     }
                 }
             }
@@ -200,31 +206,41 @@ public class ConditionServiceImpl extends BaseServiceImpl<ConditionMapper, SetsC
     }
 
     @Override
-    public ConditionAndApproverVO getJudgeList(String modelId) throws Exception {
+    public List<ModelItemVO> getJudgeList(String modelId) {
         ModelL model = modelService.selectById(modelId);
         Integer version = model.getModelVersion();
-        if (version == null || version < 1) {
-            throw new MessageNotExitException("模型版本异常");
-        }
-        Wrapper<ModelItem> wrapper = new EntityWrapper<>();
         String dataType = ApproConstants.RADIO_TYPE_3 + "," + ApproConstants.NUMBER_TYPE_2;
-        wrapper.eq("model_id", modelId).in("data_type", dataType).eq("item_version", version);
-        wrapper.orderBy(true, "priority", true);
-        List<ModelItem> list = modelItemService.selectList(wrapper);
-        List<SetsCondition> conditionList = conditionMapper.selectConditionList(modelId);
+        List<ModelItem> list = modelItemService.selectList(Condition.create().where("model_id={0}", modelId)
+                .and("item_version={0}", version).in("data_type", dataType).orderBy("priority", true));
+        List<ModelItemVO> voList = new ArrayList<>();
+        if (list != null && CollectionUtils.isNotEmpty(list)) {
+            for (ModelItem item : list) {
+                voList.add(new ModelItemVO(item));
+            }
+        }
+        return voList;
+    }
+
+    @Override
+    public ConditionAndApproverVO getConditionAndApprover(String modelId, String conditionId) {
+        ModelL model = modelService.selectById(modelId);
+        Integer version = model.getModelVersion();
+        String dataType = ApproConstants.RADIO_TYPE_3 + "," + ApproConstants.NUMBER_TYPE_2;
+        List<ModelItem> list = modelItemService.selectList(Condition.create().where("model_id={0}", modelId)
+                .and("item_version={0}", version).in("data_type", dataType).orderBy("priority", true));
+        SetsCondition setsCondition = this.selectById(conditionId);
         String value = "值为空";
         String dayNum = "天数为空";
-        List<String> conditionIds = new ArrayList<>();
-        for (SetsCondition setsCondition : conditionList) {
-            int type = setsCondition.getType();
-            String condition = setsCondition.getCdn();
-            if (ApproConstants.RADIO_TYPE_3 == type) {
-                conditionIds.add(setsCondition.getId());
-                value = condition.substring(condition.lastIndexOf(" "), condition.length()).trim();
-            } else if (ApproConstants.NUMBER_TYPE_2 == type) {
-                conditionIds.add(setsCondition.getId());
-                dayNum = condition;
-            }
+        int type = OptionalInt.of(setsCondition.getType()).orElse(0);
+        String condition = Optional.ofNullable(setsCondition.getCdn()).orElse("");
+        if (ApproConstants.RADIO_TYPE_3 == type) {
+            value = condition.substring(condition.lastIndexOf(" "), condition.length()).trim();
+        } else if (ApproConstants.NUMBER_TYPE_2 == type) {
+            dayNum = condition;
+        } else if (type == ApproConstants.RADIO_AND_NUMBER_TYPE_23) {
+            String[] split = condition.split("\\|");
+            value = split[0];
+            dayNum = split[1];
         }
         List<ModelItemVO> voList = new ArrayList<>();
         if (list != null && CollectionUtils.isNotEmpty(list)) {
@@ -242,22 +258,93 @@ public class ConditionServiceImpl extends BaseServiceImpl<ConditionMapper, SetsC
         ConditionAndApproverVO result = new ConditionAndApproverVO();
         result.setModelItemList(voList);
         // 获取审批人
-        if (CollectionUtils.isNotEmpty(conditionIds)) {
-            List<String> ids = conditionIds.stream().distinct().collect(Collectors.toList());
-            List<UserVO> approverList = processService.getProcess(modelId, ids);
-            // 去重
-            List<UserVO> collect = approverList.stream().distinct().collect(Collectors.toList());
-            result.setApproverList(collect);
-            String cIds = ids.stream().collect(Collectors.joining(","));
-            result.setConditionIds(cIds);
-        }
+        List<String> ids = new ArrayList<>();
+        ids.add(Optional.ofNullable(setsCondition.getId()).orElse(""));
+        List<UserVO> approverList = processService.getProcess(modelId, ids);
+        // 去重
+        List<UserVO> collect = approverList.stream().distinct().collect(Collectors.toList());
+        result.setApproverList(collect);
+        result.setConditionId(conditionId);
         return result;
     }
 
     @Override
-    @Transactional(propagation = Propagation.REQUIRED, rollbackFor = Exception.class)
-    public List<SetConditionVO> save(String modelId, String judge, String memberIds, String conditionIds) throws Exception {
+    public List<ConditionAndApproverVO> getConditionAndApproverList(String modelId) {
+        List<ApprovalUser> userList = approvalUserService.selectList(Condition.create());
+        List<SetsCondition> conditionList = this.selectList(Condition.create().where("model_id={0}", modelId));
+        List<SetsProcess> setsProcessList = processService.selectList(Condition.create().where("model_id={0}", modelId));
+        List<ConditionAndApproverVO> conditionAndApproverVOS = new ArrayList<>();
+        for (SetsCondition setsCondition : conditionList) {
+            ConditionAndApproverVO conditionAndApproverVO = new ConditionAndApproverVO();
+            conditionAndApproverVO.setConditionDesc("如果" + setsCondition.getContent());
+            conditionAndApproverVO.setSort(setsCondition.getSort());
+            conditionAndApproverVO.setConditionId(setsCondition.getId());
+            List<UserVO> userVOList = new ArrayList<>();
+            setsProcessList.parallelStream()
+                    .filter(setsProcess -> setsProcess.getConditionId().equals(setsCondition.getId()))
+                    .map(setsProcess -> {
+                        UserVO vo = new UserVO();
+                        String userNick = "";
+                        String userAvatar = null;
+                        String passportId = "";
+                        String userId = setsProcess.getApprover();
+                        if (userId.indexOf("admin_") != -1) {
+                            String[] temp = String.valueOf(userId).split("_");
+                            userNick = "第" + temp[2] + "级主管";
+                        } else {
+                            ApprovalUser user = userList.stream().filter(u -> u.getId().equals(userId)).distinct().findFirst().orElseGet(ApprovalUser::new);
+                            userNick = user.getName();
+                            passportId = user.getPassportId();
+                            userAvatar = user.getAvatar();
+                        }
+                        vo.setMemberId(userId);
+                        vo.setName(userNick);
+                        vo.setPassportId(passportId);
+                        vo.setProfile(userAvatar);
+                        return userVOList.add(vo);
+                    }).collect(Collectors.toList());
 
+            conditionAndApproverVO.setApproverList(userVOList);
+            conditionAndApproverVOS.add(conditionAndApproverVO);
+        }
+        return conditionAndApproverVOS.stream().sorted(Comparator.comparingInt(ConditionAndApproverVO::getSort).reversed()).distinct().collect(Collectors.toList());
+    }
+
+    @Override
+    public boolean sortedCondition(String modelId, String sortArray) {
+        boolean isUpdated = false;
+        try {
+            // 解析排序数据
+            JSONArray sortJSONArray = JSONArray.parseArray(sortArray);
+            // 封装排序集合为KEY-VALUE以部门编号为KEY，位置为VALUE
+            Map<String, Integer> condtionSortMap = new HashMap<>(sortJSONArray.size());
+            for (int i = 0; i < sortJSONArray.size(); i++) {
+                JSONObject sortJSON = sortJSONArray.getJSONObject(i);
+                condtionSortMap.put(sortJSON.getString("conditionId"), sortJSON.getInteger("sort"));
+            }
+            // 查询当前模板审批流程所有设置的条件
+            List<SetsCondition> setsConditionList = this.selectList(Condition.create().where("model_id = {0}", modelId));
+            if (setsConditionList != null && !setsConditionList.isEmpty()) {
+                for (SetsCondition setsCondition : setsConditionList) {
+                    Integer sort = condtionSortMap.get(setsCondition.getId());
+                    setsCondition.setSort(sort != null ? sort : setsCondition.getSort());
+                }
+                isUpdated = this.updateBatchById(setsConditionList);
+                if (isUpdated == false) {
+                    throw new UpdateMessageFailureException("更新排序信息失败");
+                }
+            } else {
+                throw new MessageNotExitException("当前审批模板下不存在设置的审批条件");
+            }
+        } catch (Exception e) {
+            throw new MissingRequireFieldException("解析分组排序数据错误");
+        }
+        return isUpdated;
+    }
+
+    @Override
+    @Transactional(propagation = Propagation.REQUIRED, rollbackFor = Exception.class)
+    public List<SetConditionVO> saveSetsCondition(String modelId, String judge, String memberIds, String conditionId) {
         // 解析
         JSONArray jsonArray = JSON.parseArray(judge);
         Iterator<Object> it = jsonArray.iterator();
@@ -267,49 +354,78 @@ public class ConditionServiceImpl extends BaseServiceImpl<ConditionMapper, SetsC
             ConditionVO conditionVO = JSONObject.parseObject(obj.toJSONString(), ConditionVO.class);
             conditionVOList.add(conditionVO);
         }
-        // 先删除旧的审批条件，再设置新的审批条件
-        boolean delete = this.delete(Condition.create().where("model_id={0}", modelId));
-        if (StringUtils.isNotBlank(conditionIds)) {
-            String[] cIds = conditionIds.split(",");
-            processService.delete(Condition.create().where("model_id={0}", modelId).in("condition_id", cIds));
-        }
-        if (delete) {
-            int i = 0;
-            for (ConditionVO conditionVO : conditionVOList) {
-                if (StringUtils.isNotBlank(conditionVO.getValue())) {
-                    SetsCondition condition = new SetsCondition();
-                    condition.setId(IDUtils.uuid());
-                    condition.setModelId(modelId);
-                    if (ApproConstants.RADIO_TYPE_3 == conditionVO.getType()) {
-                        String cdn = conditionVO.getField() + " = " + conditionVO.getValue();
-                        condition.setCdn(cdn);
-                        condition.setType(ApproConstants.RADIO_TYPE_3);
-                    } else if (ApproConstants.NUMBER_TYPE_2 == conditionVO.getType()) {
-                        String cdn = conditionVO.getValue();
-                        condition.setCdn(cdn);
-                        condition.setType(ApproConstants.NUMBER_TYPE_2);
+        String condition = "";
+        String content = "";
+        String cdn1 = "";
+        String cdn2 = "";
+        String content1 = "";
+        String content2 = "";
+        int type = 0;
+        for (ConditionVO conditionVO : conditionVOList) {
+            if (StringUtils.isNotBlank(conditionVO.getValue())) {
+                if (ApproConstants.RADIO_TYPE_3 == conditionVO.getType()) {
+                    cdn1 = conditionVO.getField() + " = " + conditionVO.getValue();
+                    content1 = conditionVO.getLabel() + "属于：" + conditionVO.getValue().replaceAll(",", "或");
+                } else if (ApproConstants.NUMBER_TYPE_2 == conditionVO.getType()) {
+                    cdn2 = conditionVO.getValue();
+                    String[] split = cdn2.split(" ");
+                    if (split.length > 3) {
+                        Arrays.fill(split, 2, 3, conditionVO.getLabel());
+                    } else {
+                        Arrays.fill(split, 0, 1, conditionVO.getLabel());
                     }
-                    condition.setEnabled(1);
-                    condition.setSort(i + 1);
-                    boolean insert = this.insert(condition);
-                    if (!insert) {
-                        throw new InsertMessageFailureException("保存审批条件失败");
-                    }
-                    boolean b = processService.updateProcess(modelId, condition.getId(), memberIds);
-                    if (!b) {
-                        throw new UpdateMessageFailureException("按条件保存审批人失败");
-                    }
-                    // 修改判断条件
-                    ModelItem modelItem = modelItemService.selectById(conditionVO.getModelItemId());
-                    if (modelItem != null) {
-                        modelItem.setIsJudge(conditionVO.getJudge());
-                        boolean isUpdated = modelItemService.updateById(modelItem);
-                        if (!isUpdated) {
-                            throw new UpdateMessageFailureException("修改判断条件失败");
-                        }
+                    content2 = StringUtils.join(Arrays.asList(split), " ");
+                }
+                if (StringUtils.isBlank(cdn1) && StringUtils.isNotBlank(cdn2)) {
+                    condition = cdn2;
+                    content = content2;
+                    type = ApproConstants.NUMBER_TYPE_2;
+                } else if (StringUtils.isNotBlank(cdn1) && StringUtils.isBlank(cdn2)) {
+                    condition = cdn1;
+                    content = content1;
+                    type = ApproConstants.RADIO_TYPE_3;
+                } else if (StringUtils.isNotBlank(cdn1) && StringUtils.isNotBlank(cdn2)) {
+                    condition = cdn1 + " | " + cdn2;
+                    content = content1 + " 并且 " + content2;
+                    type = ApproConstants.RADIO_AND_NUMBER_TYPE_23;
+                }
+                // 修改判断条件
+                ModelItem modelItem = modelItemService.selectById(conditionVO.getModelItemId());
+                if (modelItem != null) {
+                    modelItem.setIsJudge(conditionVO.getJudge());
+                    boolean isUpdated = modelItemService.updateById(modelItem);
+                    if (!isUpdated) {
+                        throw new UpdateMessageFailureException("修改判断条件失败");
                     }
                 }
             }
+        }
+        List<SetsCondition> list = this.selectList(Condition.create().where("model_id={0}", modelId));
+        Integer maxSort = list.stream().map(SetsCondition::getSort).max(Integer::compareTo).orElse(0);
+        SetsCondition setsCondition = null;
+        if (StringUtils.isNotBlank(conditionId)){
+            // 先删除旧的审批人
+            processService.delete(modelId, conditionId);
+            setsCondition = this.selectById(conditionId);
+            setsCondition.setCdn(condition);
+            setsCondition.setContent(content);
+        }else {
+            setsCondition = new SetsCondition();
+            setsCondition.setId(IDUtils.uuid());
+            setsCondition.setModelId(modelId);
+            setsCondition.setEnabled(1);
+            setsCondition.setCdn(condition);
+            setsCondition.setType(type);
+            setsCondition.setContent(content);
+            setsCondition.setSort(maxSort + 1);
+        }
+        boolean insert = this.insertOrUpdate(setsCondition);
+        if (!insert) {
+            throw new InsertMessageFailureException("保存审批条件失败");
+        }
+        boolean b = processService.updateProcess(modelId, setsCondition.getId(), memberIds);
+        if (!b) {
+            throw new UpdateMessageFailureException("按条件保存审批人失败");
         }
         return this.getConditionList(modelId);
     }

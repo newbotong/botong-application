@@ -21,15 +21,48 @@ public class ConditionController extends BaseController {
     private IConditionService cdnService;
 
     /**
-     * 获取审批条件及对应审批人
+     * 获取审批条件
      *
      * @param modelId 模型主键
-     * @return
-     * @throws Exception
+     * @return ResponseEntityWrapper
      */
     @PostMapping("/get")
-    public ResponseEntityWrapper get(@RequestParam String modelId) throws Exception {
+    public ResponseEntityWrapper get(@RequestParam String modelId) {
         return success(cdnService.getJudgeList(modelId));
+    }
+
+    /**
+     * 编辑某一条时--获取审批条件及对应审批人
+     *
+     * @param modelId 模型主键
+     * @return ResponseEntityWrapper
+     */
+    @PostMapping("/get-approver")
+    public ResponseEntityWrapper getConditionAndApprover(@RequestParam("modelId") String modelId, @RequestParam("conditionId") String conditionId) {
+        return success(cdnService.getConditionAndApprover(modelId, conditionId));
+    }
+
+    /**
+     * 获取审批条件及对应审批人的列表
+     *
+     * @param modelId 模型主键
+     * @return ResponseEntityWrapper
+     */
+    @PostMapping("/get-approver-list")
+    public ResponseEntityWrapper getConditionAndApproverList(@RequestParam String modelId) {
+        return success(cdnService.getConditionAndApproverList(modelId));
+    }
+
+    /**
+     * 审批条件列表优先级排序
+     *
+     * @param modelId   模型主键
+     * @param sortArray 序号数组([{"conditionId":"sort"},])
+     * @return ResponseEntityWrapper
+     */
+    @PostMapping("/sort")
+    public ResponseEntityWrapper sort(@RequestParam("modelId") String modelId, @RequestParam("sortArray") String sortArray) {
+        return success(cdnService.sortedCondition(modelId, sortArray));
     }
 
     /**
@@ -38,25 +71,25 @@ public class ConditionController extends BaseController {
      * @param modelId   模型主键
      * @param judge     选择的审批条件选项
      * @param memberIds 审批人集合
-     * @return
-     * @throws Exception
+     * @param conditionId 条件id
+     * @return ResponseEntityWrapper
      */
     @PostMapping("/save")
     public ResponseEntityWrapper save(@RequestParam String modelId, @RequestParam String judge, @RequestParam("memberIds") String memberIds,
-                                      @RequestParam(value = "conditionIds", required = false) String conditionIds) throws Exception {
-        return success(cdnService.save(modelId, judge, memberIds, conditionIds));
+                                      @RequestParam(value = "conditionId", required = false) String conditionId) {
+        return success(cdnService.saveSetsCondition(modelId, judge, memberIds, conditionId));
     }
 
     /**
      * 清除审批条件值及对应审批流程人
      *
-     * @param modelId      模型主键
-     * @param conditionIds 条件主键，以逗号隔开
+     * @param modelId     模型主键
+     * @param conditionId 条件主键
      * @return ResponseEntityWrapper
      */
     @PostMapping("/delete-process")
-    public ResponseEntityWrapper deleteProcess(@RequestParam("modelId") String modelId, @RequestParam("conditionIds") String conditionIds) throws Exception {
-        return success(cdnService.deleteProcess(modelId, conditionIds));
+    public ResponseEntityWrapper deleteProcess(@RequestParam("modelId") String modelId, @RequestParam("conditionId") String conditionId) {
+        return success(cdnService.deleteProcess(modelId, conditionId));
     }
 
 }

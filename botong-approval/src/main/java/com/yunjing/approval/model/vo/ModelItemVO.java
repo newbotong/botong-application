@@ -28,6 +28,7 @@ public class ModelItemVO {
         this.display = item.getIsDisplay();
         this.required = item.getIsRequired();
         this.judge = item.getIsJudge();
+        this.itemVersion = item.getItemVersion();
     }
 
     private String modelId;
@@ -103,6 +104,11 @@ public class ModelItemVO {
      * 模型项主键
      */
     private String modelItemId;
+
+    /**
+     * 模型项版本
+     */
+    private Integer itemVersion;
 
     /**
      * 子项
