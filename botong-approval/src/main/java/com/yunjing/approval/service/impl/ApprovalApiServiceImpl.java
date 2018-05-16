@@ -66,10 +66,7 @@ public class ApprovalApiServiceImpl implements IApprovalApiService {
         logger.info("companyId: " + companyId);
         List<ModelL> modelLList = modelMapper.selectModelListByOrgId(companyId);
         List<ClientModelVO> list = new ArrayList<>();
-        for (ModelL model : modelLList) {
-            ClientModelVO modelVO1 = new ClientModelVO(model);
-            list.add(modelVO1);
-        }
+        modelLList.stream().forEach(modelL -> list.add(new ClientModelVO(modelL)));
         return list;
     }
 

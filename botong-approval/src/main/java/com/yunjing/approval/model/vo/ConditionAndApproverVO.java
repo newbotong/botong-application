@@ -14,7 +14,11 @@ import java.util.List;
 @Data
 public class ConditionAndApproverVO {
 
-    private String conditionIds;
+    private String conditionId;
+
+    private String conditionDesc;
+
+    private Integer sort;
 
     private List<ModelItemVO> modelItemList;
 

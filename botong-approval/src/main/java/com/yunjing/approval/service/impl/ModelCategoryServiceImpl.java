@@ -14,6 +14,7 @@ import com.yunjing.approval.service.IModelCategoryService;
 import com.yunjing.approval.service.IModelService;
 import com.yunjing.mommon.global.exception.MessageNotExitException;
 import com.yunjing.mommon.global.exception.MissingRequireFieldException;
+import com.yunjing.mommon.global.exception.ParameterErrorException;
 import com.yunjing.mommon.global.exception.UpdateMessageFailureException;
 import com.yunjing.mommon.utils.IDUtils;
 import org.apache.commons.collections.CollectionUtils;
@@ -36,6 +37,9 @@ public class ModelCategoryServiceImpl extends BaseServiceImpl<ModelCategoryMappe
 
     @Override
     public boolean createOrEditCategory(String orgId, String categoryId, String categoryName) {
+        if (StringUtils.isBlank(categoryName)){
+            throw new ParameterErrorException("分组名称不能为空");
+        }
         ModelCategory modelCategory = new ModelCategory();
         if (categoryId == null) {
             modelCategory.setId(IDUtils.uuid());
