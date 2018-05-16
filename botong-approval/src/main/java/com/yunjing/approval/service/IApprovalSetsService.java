@@ -10,24 +10,4 @@ import com.yunjing.approval.model.vo.ApprovalSetVO;
  * @date 2017/11/30
  */
 public interface IApprovalSetsService extends IBaseService<ApprovalSets> {
-
-    /**
-     * 获取审批设置信息
-     *
-     * @param modelId 模型主键
-     * @return
-     * @throws Exception
-     */
-    ApprovalSetVO getApprovalSet(String modelId) throws Exception;
-
-    /**
-     * 保存审批设置信息
-     *
-     * @param modelId 模型主键
-     * @param setting 设置类型 0:不分条件设置审批人 1:分条件设置审批人
-     * @return
-     * @throws Exception
-     */
-    boolean saveApprovalSets(String modelId, Integer setting) throws Exception;
-
 }

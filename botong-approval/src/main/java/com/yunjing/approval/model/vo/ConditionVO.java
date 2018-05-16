@@ -11,6 +11,8 @@ public class ConditionVO {
 
     private String field;
 
+    private String label;
+
     private String value;
 
     private Integer type;

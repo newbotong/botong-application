@@ -1,5 +1,14 @@
 package com.yunjing.approval.util;
 
+import com.yunjing.approval.service.IApprovalService;
+import org.springframework.beans.factory.annotation.Autowired;
+
+import java.util.ArrayList;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Set;
+import java.util.stream.Collectors;
+
 /**
  * @author 刘小鹏
  * @date 2017/12/22
@@ -97,4 +106,8 @@ public class ApproConstants {
 
     public final static Integer BOTONG_ZERO_NUM = 0;
 
+    /**
+     * 23-同时有单选框和数字
+     */
+    public static final int RADIO_AND_NUMBER_TYPE_23 = 23;
 }
