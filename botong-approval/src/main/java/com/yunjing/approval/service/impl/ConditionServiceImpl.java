@@ -244,7 +244,7 @@ public class ConditionServiceImpl extends BaseServiceImpl<ConditionMapper, SetsC
             dayNum = condition;
         } else if (type == ApproConstants.RADIO_AND_NUMBER_TYPE_23) {
             String[] split = condition.split("\\|");
-            value = split[0].substring(condition.lastIndexOf(" "), condition.length()).trim();
+            value = split[0].substring(split[0].lastIndexOf(" "), split[0].length()).trim();
             dayNum = split[1];
         }
         List<ModelItemVO> voList = new ArrayList<>();
