@@ -78,7 +78,7 @@ public class ConditionServiceImpl extends BaseServiceImpl<ConditionMapper, SetsC
         if (conditionVO == null) {
             return null;
         }
-        List<SetsCondition> list = this.selectList(Condition.create().where("model_id={0}", modelId));
+        List<SetsCondition> list = this.selectList(Condition.create().where("model_id={0}", modelId).and("enabled=1").orderBy("sort",false));
         if (list != null && CollectionUtils.isNotEmpty(list)) {
             for (SetsCondition condition : list) {
                 String cdn = condition.getCdn();
@@ -87,13 +87,13 @@ public class ConditionServiceImpl extends BaseServiceImpl<ConditionMapper, SetsC
                     boolean flag1 = false;
                     boolean flag2 = false;
                     for (int i = 0; i < t.length; i++) {
-                        if (ApproConstants.RADIO_AND_NUMBER_TYPE_23 == condition.getType() && ApproConstants.RADIO_TYPE_3 == conditionVO.getType()) {
+                        if (ApproConstants.RADIO_AND_NUMBER_TYPE_23 == condition.getType() && i == 0 && ApproConstants.RADIO_TYPE_3 == conditionVO.getType()) {
                             flag1 = false;
                             String[] temp = t[0].split(" ");
                             if (StringUtils.isNotBlank(temp[2]) && temp[2].contains(conditionVO.getValue())) {
                                 flag1 = true;
                             }
-                        } else if (ApproConstants.RADIO_AND_NUMBER_TYPE_23 == condition.getType() && ApproConstants.NUMBER_TYPE_2 == conditionVO.getType()) {
+                        } else if (ApproConstants.RADIO_AND_NUMBER_TYPE_23 == condition.getType() && i == 1 && ApproConstants.NUMBER_TYPE_2 == conditionVO.getType()) {
                             String[] temp = t[1].split(" ");
                             flag2 = judgeDay(temp, conditionVO);
                         }
@@ -271,7 +271,7 @@ public class ConditionServiceImpl extends BaseServiceImpl<ConditionMapper, SetsC
     @Override
     public List<ConditionAndApproverVO> getConditionAndApproverList(String modelId) {
         List<ApprovalUser> userList = approvalUserService.selectList(Condition.create());
-        List<SetsCondition> conditionList = this.selectList(Condition.create().where("model_id={0}", modelId));
+        List<SetsCondition> conditionList = this.selectList(Condition.create().where("model_id={0}", modelId).and("enabled=1"));
         List<SetsProcess> setsProcessList = processService.selectList(Condition.create().where("model_id={0}", modelId));
         List<ConditionAndApproverVO> conditionAndApproverVOS = new ArrayList<>();
         for (SetsCondition setsCondition : conditionList) {
@@ -307,7 +307,7 @@ public class ConditionServiceImpl extends BaseServiceImpl<ConditionMapper, SetsC
             conditionAndApproverVO.setApproverList(userVOList);
             conditionAndApproverVOS.add(conditionAndApproverVO);
         }
-        return conditionAndApproverVOS.stream().sorted(Comparator.comparingInt(ConditionAndApproverVO::getSort)).distinct().collect(Collectors.toList());
+        return conditionAndApproverVOS.stream().sorted(Comparator.comparingInt(ConditionAndApproverVO::getSort).reversed()).distinct().collect(Collectors.toList());
     }
 
     @Override
