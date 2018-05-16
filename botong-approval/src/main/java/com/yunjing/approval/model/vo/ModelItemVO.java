@@ -29,6 +29,7 @@ public class ModelItemVO {
         this.required = item.getIsRequired();
         this.judge = item.getIsJudge();
         this.itemVersion = item.getItemVersion();
+        this.modelItemId = item.getId();
     }
 
     private String modelId;

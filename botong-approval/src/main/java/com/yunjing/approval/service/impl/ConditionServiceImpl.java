@@ -389,14 +389,14 @@ public class ConditionServiceImpl extends BaseServiceImpl<ConditionMapper, SetsC
                     content = content1 + " 并且 " + content2;
                     type = ApproConstants.RADIO_AND_NUMBER_TYPE_23;
                 }
-                // 修改判断条件
-                ModelItem modelItem = modelItemService.selectById(conditionVO.getModelItemId());
-                if (modelItem != null) {
-                    modelItem.setIsJudge(conditionVO.getJudge());
-                    boolean isUpdated = modelItemService.updateById(modelItem);
-                    if (!isUpdated) {
-                        throw new UpdateMessageFailureException("修改判断条件失败");
-                    }
+            }
+            // 修改判断条件
+            ModelItem modelItem = modelItemService.selectById(conditionVO.getModelItemId());
+            if (modelItem != null) {
+                modelItem.setIsJudge(conditionVO.getJudge());
+                boolean isUpdated = modelItemService.updateById(modelItem);
+                if (!isUpdated) {
+                    throw new UpdateMessageFailureException("修改判断条件失败");
                 }
             }
         }
