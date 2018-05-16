@@ -307,7 +307,7 @@ public class ConditionServiceImpl extends BaseServiceImpl<ConditionMapper, SetsC
             conditionAndApproverVO.setApproverList(userVOList);
             conditionAndApproverVOS.add(conditionAndApproverVO);
         }
-        return conditionAndApproverVOS.stream().sorted(Comparator.comparingInt(ConditionAndApproverVO::getSort).reversed()).distinct().collect(Collectors.toList());
+        return conditionAndApproverVOS.stream().sorted(Comparator.comparingInt(ConditionAndApproverVO::getSort)).distinct().collect(Collectors.toList());
     }
 
     @Override
