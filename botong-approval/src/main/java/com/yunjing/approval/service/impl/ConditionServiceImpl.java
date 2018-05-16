@@ -78,6 +78,7 @@ public class ConditionServiceImpl extends BaseServiceImpl<ConditionMapper, SetsC
         if (conditionVOS == null) {
             return null;
         }
+        String conditionId = "";
         List<SetsCondition> list = this.selectList(Condition.create().where("model_id={0}", modelId).and("enabled=1").orderBy("sort", false));
         if (list != null && CollectionUtils.isNotEmpty(list)) {
             for (SetsCondition condition : list) {
@@ -118,7 +119,13 @@ public class ConditionServiceImpl extends BaseServiceImpl<ConditionMapper, SetsC
                         }
                     }
                 }
-                break;
+                // 通过优先级匹配，优先级跟sort排序成正比，如果匹配上了就跳出，如果没有匹配上就进行下一次循序继续匹配
+                if(StringUtils.isBlank(conditionId)){
+                    continue;
+                }else {
+                    break;
+                }
+
             }
         }
         return null;
