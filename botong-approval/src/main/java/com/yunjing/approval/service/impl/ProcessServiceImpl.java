@@ -145,11 +145,9 @@ public class ProcessServiceImpl extends BaseServiceImpl<ProcessMapper, SetsProce
         }
         ApproverVO result = new ApproverVO();
         List<String> conditionIds = new ArrayList<>();
-        for (ConditionVO conditionVO : conditionVOList) {
-            String id = conditionService.getCondition(modelId, conditionVO);
-            if (StringUtils.isNotBlank(id)){
-                conditionIds.add(id);
-            }
+        String id = conditionService.getCondition(modelId, conditionVOList);
+        if (StringUtils.isNotBlank(id)){
+            conditionIds.add(id);
         }
         if (conditionIds.isEmpty()) {
             // 如果没有按条件设置审批人，则显示默认审批人和抄送人
@@ -205,13 +203,6 @@ public class ProcessServiceImpl extends BaseServiceImpl<ProcessMapper, SetsProce
                                 vo.setProfile(admin.getProfile());
                                 vo.setPassportId(admin.getPassportId());
                                 userVOList.add(vo);
-                            }
-                        }
-                    } else {
-                        if (deptId != null) {
-                            List<UserVO> admin = getAdmins(deptId, num, deptManager);
-                            if (admin != null && CollectionUtils.isNotEmpty(admin)) {
-                                userVOList.addAll(admin);
                             }
                         }
                     }

@@ -82,10 +82,10 @@ public interface IConditionService extends IBaseService<SetsCondition> {
      * 获取审批条件
      *
      * @param modelId     模型主键
-     * @param conditionVO 条件
+     * @param conditionVOS 条件
      * @return String
      */
-    String getCondition(String modelId, ConditionVO conditionVO);
+    String getCondition(String modelId, List<ConditionVO> conditionVOS);
 
     /**
      * 获取条件

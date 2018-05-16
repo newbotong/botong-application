@@ -74,11 +74,11 @@ public class ConditionServiceImpl extends BaseServiceImpl<ConditionMapper, SetsC
     }
 
     @Override
-    public String getCondition(String modelId, ConditionVO conditionVO) {
-        if (conditionVO == null) {
+    public String getCondition(String modelId, List<ConditionVO> conditionVOS) {
+        if (conditionVOS == null) {
             return null;
         }
-        List<SetsCondition> list = this.selectList(Condition.create().where("model_id={0}", modelId).and("enabled=1").orderBy("sort",false));
+        List<SetsCondition> list = this.selectList(Condition.create().where("model_id={0}", modelId).and("enabled=1").orderBy("sort", false));
         if (list != null && CollectionUtils.isNotEmpty(list)) {
             for (SetsCondition condition : list) {
                 String cdn = condition.getCdn();
@@ -87,15 +87,17 @@ public class ConditionServiceImpl extends BaseServiceImpl<ConditionMapper, SetsC
                     boolean flag1 = false;
                     boolean flag2 = false;
                     for (int i = 0; i < t.length; i++) {
-                        if (ApproConstants.RADIO_AND_NUMBER_TYPE_23 == condition.getType() && i == 0 && ApproConstants.RADIO_TYPE_3 == conditionVO.getType()) {
-                            flag1 = false;
-                            String[] temp = t[0].split(" ");
-                            if (StringUtils.isNotBlank(temp[2]) && temp[2].contains(conditionVO.getValue())) {
-                                flag1 = true;
+                        for (ConditionVO conditionVO : conditionVOS) {
+                            if (ApproConstants.RADIO_AND_NUMBER_TYPE_23 == condition.getType() && i == 0 && ApproConstants.RADIO_TYPE_3 == conditionVO.getType()) {
+                                flag1 = false;
+                                String[] temp = t[0].split(" ");
+                                if (StringUtils.isNotBlank(temp[2]) && temp[2].contains(conditionVO.getValue())) {
+                                    flag1 = true;
+                                }
+                            } else if (ApproConstants.RADIO_AND_NUMBER_TYPE_23 == condition.getType() && i == 1 && ApproConstants.NUMBER_TYPE_2 == conditionVO.getType()) {
+                                String[] temp = t[1].split(" ");
+                                flag2 = judgeDay(temp, conditionVO);
                             }
-                        } else if (ApproConstants.RADIO_AND_NUMBER_TYPE_23 == condition.getType() && i == 1 && ApproConstants.NUMBER_TYPE_2 == conditionVO.getType()) {
-                            String[] temp = t[1].split(" ");
-                            flag2 = judgeDay(temp, conditionVO);
                         }
                     }
                     if (flag1 && flag2) {
@@ -103,17 +105,20 @@ public class ConditionServiceImpl extends BaseServiceImpl<ConditionMapper, SetsC
                     }
                 } else {
                     String[] temp = cdn.split(" ");
-                    if (ApproConstants.RADIO_TYPE_3 == condition.getType() && ApproConstants.RADIO_TYPE_3 == conditionVO.getType()) {
-                        if (StringUtils.isNotBlank(temp[2]) && temp[2].contains(conditionVO.getValue())) {
-                            return condition.getId();
-                        }
-                    } else if (ApproConstants.NUMBER_TYPE_2 == condition.getType() && ApproConstants.NUMBER_TYPE_2 == conditionVO.getType()) {
-                        boolean b = judgeDay(temp, conditionVO);
-                        if (b) {
-                            return condition.getId();
+                    for (ConditionVO conditionVO : conditionVOS) {
+                        if (ApproConstants.RADIO_TYPE_3 == condition.getType() && ApproConstants.RADIO_TYPE_3 == conditionVO.getType()) {
+                            if (StringUtils.isNotBlank(temp[2]) && temp[2].contains(conditionVO.getValue())) {
+                                return condition.getId();
+                            }
+                        } else if (ApproConstants.NUMBER_TYPE_2 == condition.getType() && ApproConstants.NUMBER_TYPE_2 == conditionVO.getType()) {
+                            boolean b = judgeDay(temp, conditionVO);
+                            if (b) {
+                                return condition.getId();
+                            }
                         }
                     }
                 }
+                break;
             }
         }
         return null;
@@ -239,7 +244,7 @@ public class ConditionServiceImpl extends BaseServiceImpl<ConditionMapper, SetsC
             dayNum = condition;
         } else if (type == ApproConstants.RADIO_AND_NUMBER_TYPE_23) {
             String[] split = condition.split("\\|");
-            value = split[0];
+            value = split[0].substring(condition.lastIndexOf(" "), condition.length()).trim();
             dayNum = split[1];
         }
         List<ModelItemVO> voList = new ArrayList<>();
@@ -385,7 +390,7 @@ public class ConditionServiceImpl extends BaseServiceImpl<ConditionMapper, SetsC
                     content = content1;
                     type = ApproConstants.RADIO_TYPE_3;
                 } else if (StringUtils.isNotBlank(cdn1) && StringUtils.isNotBlank(cdn2)) {
-                    condition = cdn1 + " | " + cdn2;
+                    condition = cdn1 + "|" + cdn2;
                     content = content1 + " 并且 " + content2;
                     type = ApproConstants.RADIO_AND_NUMBER_TYPE_23;
                 }
@@ -403,13 +408,13 @@ public class ConditionServiceImpl extends BaseServiceImpl<ConditionMapper, SetsC
         List<SetsCondition> list = this.selectList(Condition.create().where("model_id={0}", modelId));
         Integer maxSort = list.stream().map(SetsCondition::getSort).max(Integer::compareTo).orElse(0);
         SetsCondition setsCondition = null;
-        if (StringUtils.isNotBlank(conditionId)){
+        if (StringUtils.isNotBlank(conditionId)) {
             // 先删除旧的审批人
             processService.delete(modelId, conditionId);
             setsCondition = this.selectById(conditionId);
             setsCondition.setCdn(condition);
             setsCondition.setContent(content);
-        }else {
+        } else {
             setsCondition = new SetsCondition();
             setsCondition.setId(IDUtils.uuid());
             setsCondition.setModelId(modelId);
