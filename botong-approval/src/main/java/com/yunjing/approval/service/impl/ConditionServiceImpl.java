@@ -272,7 +272,7 @@ public class ConditionServiceImpl extends BaseServiceImpl<ConditionMapper, SetsC
     public List<ConditionAndApproverVO> getConditionAndApproverList(String modelId) {
         List<ApprovalUser> userList = approvalUserService.selectList(Condition.create());
         List<SetsCondition> conditionList = this.selectList(Condition.create().where("model_id={0}", modelId).and("enabled=1"));
-        List<SetsProcess> setsProcessList = processService.selectList(Condition.create().where("model_id={0}", modelId));
+        List<SetsProcess> setsProcessList = processService.selectList(Condition.create().where("model_id={0}", modelId).isNotNull("condition_id"));
         List<ConditionAndApproverVO> conditionAndApproverVOS = new ArrayList<>();
         for (SetsCondition setsCondition : conditionList) {
             ConditionAndApproverVO conditionAndApproverVO = new ConditionAndApproverVO();
