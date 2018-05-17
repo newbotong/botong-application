@@ -20,6 +20,7 @@ import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.*;
+import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
 /**
@@ -86,14 +87,13 @@ public class ConditionServiceImpl extends BaseServiceImpl<ConditionMapper, SetsC
                     boolean flag2 = false;
                     for (int i = 0; i < t.length; i++) {
                         for (ConditionVO conditionVO : conditionVOS) {
-                            if (ApproConstants.RADIO_AND_NUMBER_TYPE_23 == condition.getType() && ApproConstants.RADIO_TYPE_3 == conditionVO.getType()) {
+                            String[] temp = t[i].split(" ");
+                            if (ApproConstants.RADIO_AND_NUMBER_TYPE_23 == condition.getType() && ApproConstants.RADIO_TYPE_3 == conditionVO.getType() && temp[0].equals(conditionVO.getField())) {
                                 flag1 = false;
-                                String[] temp = t[i].split(" ");
                                 if (StringUtils.isNotBlank(temp[2]) && temp[2].contains(conditionVO.getValue())) {
                                     flag1 = true;
                                 }
                             } else if (ApproConstants.RADIO_AND_NUMBER_TYPE_23 == condition.getType() && ApproConstants.NUMBER_TYPE_2 == conditionVO.getType()) {
-                                String[] temp = t[i].split(" ");
                                 flag2 = judgeDay(temp, conditionVO);
                             }
                         }
@@ -132,7 +132,7 @@ public class ConditionServiceImpl extends BaseServiceImpl<ConditionMapper, SetsC
         boolean result1 = false;
         boolean result2 = false;
         final String f1 = "<", f2 = "≤", f3 = ">", f4 = "≥", f5 = "=";
-        if (temp.length == 5) {
+        if (temp.length == 5 && temp[2].equals(conditionVO.getField())) {
             int a = Integer.valueOf(temp[0]);
             int b = Integer.valueOf(temp[4]);
             String a1 = temp[1];
@@ -170,7 +170,7 @@ public class ConditionServiceImpl extends BaseServiceImpl<ConditionMapper, SetsC
             } else {
                 return false;
             }
-        } else if (temp.length == 3) {
+        } else if (temp.length == 3 && temp[0].equals(conditionVO.getField())) {
             int a = Integer.valueOf(temp[2]);
             String a1 = temp[1];
             switch (a1) {
@@ -206,6 +206,18 @@ public class ConditionServiceImpl extends BaseServiceImpl<ConditionMapper, SetsC
         } else {
             return false;
         }
+    }
+
+    /**
+     * 方法二：推荐，速度最快
+     * 判断是否为整数
+     *
+     * @param str 传入的字符串
+     * @return 是整数返回true, 否则返回false
+     */
+    public static boolean isInteger(String str) {
+        Pattern pattern = Pattern.compile("^[-\\+]?[\\d]*$");
+        return pattern.matcher(str).matches();
     }
 
     @Override
@@ -279,7 +291,7 @@ public class ConditionServiceImpl extends BaseServiceImpl<ConditionMapper, SetsC
     public List<ConditionAndApproverVO> getConditionAndApproverList(String modelId) {
         List<ApprovalUser> userList = approvalUserService.selectList(Condition.create());
         List<SetsCondition> conditionList = this.selectList(Condition.create().where("model_id={0}", modelId).and("enabled=1"));
-        List<SetsProcess> setsProcessList = processService.selectList(Condition.create().where("model_id={0}", modelId).isNotNull("condition_id").orderBy("sort",true));
+        List<SetsProcess> setsProcessList = processService.selectList(Condition.create().where("model_id={0}", modelId).isNotNull("condition_id").orderBy("sort", true));
         List<ConditionAndApproverVO> conditionAndApproverVOS = new ArrayList<>();
         for (SetsCondition setsCondition : conditionList) {
             ConditionAndApproverVO conditionAndApproverVO = new ConditionAndApproverVO();

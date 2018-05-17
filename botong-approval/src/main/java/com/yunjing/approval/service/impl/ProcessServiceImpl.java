@@ -52,7 +52,7 @@ public class ProcessServiceImpl extends BaseServiceImpl<ProcessMapper, SetsProce
     public boolean delete(String modelId, String conditionId) {
         Wrapper<SetsProcess> wrapper;
         if (StringUtils.isBlank(conditionId)) {
-            wrapper = Condition.create().where("model_id={0}", modelId).and("condition_id=''").or("condition_id is null");
+            wrapper = Condition.create().where("model_id={0}", modelId).isNull("condition_id");
         } else {
             wrapper = Condition.create().where("model_id={0}", modelId).and("condition_id={0}", conditionId);
         }
