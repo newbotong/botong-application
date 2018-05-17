@@ -166,12 +166,12 @@ public class ProcessServiceImpl extends BaseServiceImpl<ProcessMapper, SetsProce
             }
         }
         List<UserVO> distinctUserList = list.stream().distinct().collect(Collectors.toList());
-        if (CollectionUtils.isNotEmpty(distinctUserList)){
+        if (CollectionUtils.isNotEmpty(distinctUserList)) {
             // 注入审批人
             result.setApprovers(distinctUserList);
             // 注入抄送人
             result.setCopys(copyService.getCopy(companyId, memberId, modelId));
-        }else {
+        } else {
             // 如果没有按条件设置的审批人，则显示默认审批人和抄送人
             ApproverVO approverVO = modelItemService.getDefaultApproverAndCopy(companyId, memberId, modelId);
             result.setApprovers(approverVO.getApprovers());
@@ -186,23 +186,22 @@ public class ProcessServiceImpl extends BaseServiceImpl<ProcessMapper, SetsProce
     public List<UserVO> getAdmins(String deptId, int num, Map<String, List<OrgMemberMessage>> deptManager) {
         List<UserVO> userVOList = new ArrayList<>();
         if (deptManager != null && MapUtils.isNotEmpty(deptManager)) {
-            deptManager.forEach((s, orgMemberMessages) -> {
-                if (s.equals(deptId)) {
-                    int nums = num - 1;
-                    if (nums == 0) {
-                        for (OrgMemberMessage admin : orgMemberMessages) {
-                            if (admin != null) {
-                                UserVO vo = new UserVO();
-                                vo.setName(admin.getMemberName());
-                                vo.setMemberId(admin.getMemberId());
-                                vo.setProfile(admin.getProfile());
-                                vo.setPassportId(admin.getPassportId());
-                                userVOList.add(vo);
-                            }
+            for (Map.Entry<String,List<OrgMemberMessage>> adminMember: deptManager.entrySet()){
+                if(adminMember.getKey().equals(deptId)){
+                    for (OrgMemberMessage admin: adminMember.getValue()){
+                        int n = num - 1;
+                        num--;
+                        if (admin != null && n == 0) {
+                            UserVO vo = new UserVO();
+                            vo.setMemberId(admin.getMemberId());
+                            vo.setName(admin.getMemberName());
+                            vo.setProfile(admin.getProfile());
+                            vo.setPassportId(admin.getPassportId());
+                            userVOList.add(vo);
                         }
                     }
                 }
-            });
+            }
         }
         return userVOList;
     }

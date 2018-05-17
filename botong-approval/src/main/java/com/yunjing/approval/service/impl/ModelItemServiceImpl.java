@@ -184,23 +184,22 @@ public class ModelItemServiceImpl extends BaseServiceImpl<ModelItemMapper, Model
                 List<ApprovalUser> uid = userList.stream().filter(approvalUser -> approvalUser.getId().equals(memberId)).collect(Collectors.toList());
                 if (uid != null && CollectionUtils.isNotEmpty(uid) && deptManager != null && MapUtils.isNotEmpty(deptManager)) {
                     String[] deptId = uid.get(0).getDeptId().split(",");
-                    deptManager.forEach((s, orgMemberMessages) -> {
-                        if (deptId[0].equals(s)) {
-                            int nums = num - 1;
-                            if (nums == 0) {
-                                for (OrgMemberMessage admin : orgMemberMessages) {
-                                    if (admin != null) {
-                                        UserVO vo = new UserVO();
-                                        vo.setMemberId(admin.getMemberId());
-                                        vo.setName(admin.getMemberName());
-                                        vo.setProfile(admin.getProfile());
-                                        vo.setPassportId(admin.getPassportId());
-                                        users.add(vo);
-                                    }
-                                }
-                            }
+                    for (Map.Entry<String,List<OrgMemberMessage>> adminMember: deptManager.entrySet()){
+                        if(adminMember.getKey().equals(deptId[0])){
+                           for (OrgMemberMessage admin: adminMember.getValue()){
+                               int n = num - 1;
+                               num--;
+                               if (admin != null && n == 0) {
+                                   UserVO vo = new UserVO();
+                                   vo.setMemberId(admin.getMemberId());
+                                   vo.setName(admin.getMemberName());
+                                   vo.setProfile(admin.getProfile());
+                                   vo.setPassportId(admin.getPassportId());
+                                   users.add(vo);
+                               }
+                           }
                         }
-                    });
+                    }
                 }
             } else {
                 String passportId = "";
