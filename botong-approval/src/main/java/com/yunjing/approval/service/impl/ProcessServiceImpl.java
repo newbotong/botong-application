@@ -145,15 +145,8 @@ public class ProcessServiceImpl extends BaseServiceImpl<ProcessMapper, SetsProce
         }
         ApproverVO result = new ApproverVO();
         String conditionId = conditionService.getCondition(modelId, conditionVOList);
-        if (StringUtils.isBlank(conditionId)) {
-            // 如果没有按条件设置审批人，则显示默认审批人和抄送人
-            ApproverVO approverVO = modelItemService.getDefaultApproverAndCopy(companyId, memberId, modelId);
-            result.setApprovers(approverVO.getApprovers());
-            result.setCopys(approverVO.getCopys());
-        }
         result.setConditionId(conditionId);
         List<UserVO> users = processService.getProcess(modelId, conditionId);
-
         // 从应用中心获取部门主管
         Map<String, List<OrgMemberMessage>> deptManager = appCenterService.findDeptManager(companyId, memberId);
         List<UserVO> list = new ArrayList<>();
@@ -172,12 +165,18 @@ public class ProcessServiceImpl extends BaseServiceImpl<ProcessMapper, SetsProce
                 }
             }
         }
-        // 注入审批人
         List<UserVO> distinctUserList = list.stream().distinct().collect(Collectors.toList());
-        result.setApprovers(distinctUserList);
-        // 注入抄送人
-        result.setCopys(copyService.getCopy(companyId, memberId, modelId));
-
+        if (CollectionUtils.isNotEmpty(distinctUserList)){
+            // 注入审批人
+            result.setApprovers(distinctUserList);
+            // 注入抄送人
+            result.setCopys(copyService.getCopy(companyId, memberId, modelId));
+        }else {
+            // 如果没有按条件设置的审批人，则显示默认审批人和抄送人
+            ApproverVO approverVO = modelItemService.getDefaultApproverAndCopy(companyId, memberId, modelId);
+            result.setApprovers(approverVO.getApprovers());
+            result.setCopys(approverVO.getCopys());
+        }
         return result;
     }
 
