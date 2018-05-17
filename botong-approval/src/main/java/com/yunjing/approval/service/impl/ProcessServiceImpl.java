@@ -156,7 +156,7 @@ public class ProcessServiceImpl extends BaseServiceImpl<ProcessMapper, SetsProce
                     String[] temp = user.getMemberId().split("_");
                     int num = Integer.parseInt(temp[2]);
                     // 根据部门主键和级数查询出该主管
-                    List<UserVO> admins = getAdmins(deptId, num, deptManager);
+                    List<UserVO> admins = getAdmins(memberId, deptId, num, deptManager);
                     if (admins != null && CollectionUtils.isNotEmpty(admins)) {
                         list.addAll(admins);
                     }
@@ -183,12 +183,16 @@ public class ProcessServiceImpl extends BaseServiceImpl<ProcessMapper, SetsProce
     /**
      * 获取主管
      */
-    public List<UserVO> getAdmins(String deptId, int num, Map<String, List<OrgMemberMessage>> deptManager) {
+    public List<UserVO> getAdmins(String memberId, String deptId, int num, Map<String, List<OrgMemberMessage>> deptManager) {
         List<UserVO> userVOList = new ArrayList<>();
         if (deptManager != null && MapUtils.isNotEmpty(deptManager)) {
-            for (Map.Entry<String,List<OrgMemberMessage>> adminMember: deptManager.entrySet()){
-                if(adminMember.getKey().equals(deptId)){
-                    for (OrgMemberMessage admin: adminMember.getValue()){
+            for (Map.Entry<String, List<OrgMemberMessage>> adminMember : deptManager.entrySet()) {
+                if (adminMember.getKey().equals(deptId)) {
+                    for (OrgMemberMessage admin : adminMember.getValue()) {
+                        // 如果部门主管自己提交审批就略过
+                        if (admin != null && memberId.equals(admin.getMemberId())) {
+                            continue;
+                        }
                         int n = num - 1;
                         num--;
                         if (admin != null && n == 0) {

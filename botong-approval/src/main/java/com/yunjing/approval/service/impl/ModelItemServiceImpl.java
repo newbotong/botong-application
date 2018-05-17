@@ -115,22 +115,6 @@ public class ModelItemServiceImpl extends BaseServiceImpl<ModelItemMapper, Model
         modelVO.setItems(modelItemVOS);
         ClientModelItemVO clientModelItemVO = new ClientModelItemVO(modelVO);
 
-        // 获取预设人员筛选字段
-        Set<String> keys = new HashSet<>();
-        if (StringUtils.isNotBlank(modelId)) {
-            List<SetsCondition> first = conditionService.getFirstCondition(modelId);
-            for (SetsCondition setsCondition : first) {
-                if (setsCondition != null) {
-                    String cdn = setsCondition.getCdn();
-                    if (StringUtils.isNotBlank(cdn)) {
-                        String key = cdn.substring(0, cdn.indexOf(" "));
-                        keys.add(key);
-                    }
-                }
-            }
-        }
-        clientModelItemVO.setField(keys);
-
         // 获取默认审批人和默认抄送人
         ApproverVO approverVO = this.getDefaultApproverAndCopy(companyId, memberId, modelId);
         clientModelItemVO.setApproverVOS(approverVO.getApprovers());
@@ -184,20 +168,24 @@ public class ModelItemServiceImpl extends BaseServiceImpl<ModelItemMapper, Model
                 List<ApprovalUser> uid = userList.stream().filter(approvalUser -> approvalUser.getId().equals(memberId)).collect(Collectors.toList());
                 if (uid != null && CollectionUtils.isNotEmpty(uid) && deptManager != null && MapUtils.isNotEmpty(deptManager)) {
                     String[] deptId = uid.get(0).getDeptId().split(",");
-                    for (Map.Entry<String,List<OrgMemberMessage>> adminMember: deptManager.entrySet()){
-                        if(adminMember.getKey().equals(deptId[0])){
-                           for (OrgMemberMessage admin: adminMember.getValue()){
-                               int n = num - 1;
-                               num--;
-                               if (admin != null && n == 0) {
-                                   UserVO vo = new UserVO();
-                                   vo.setMemberId(admin.getMemberId());
-                                   vo.setName(admin.getMemberName());
-                                   vo.setProfile(admin.getProfile());
-                                   vo.setPassportId(admin.getPassportId());
-                                   users.add(vo);
-                               }
-                           }
+                    for (Map.Entry<String, List<OrgMemberMessage>> adminMember : deptManager.entrySet()) {
+                        if (adminMember.getKey().equals(deptId[0])) {
+                            for (OrgMemberMessage admin : adminMember.getValue()) {
+                                // 如果部门主管自己提交审批就略过
+                                if (admin != null && memberId.equals(admin.getMemberId())){
+                                    continue;
+                                }
+                                int n = num - 1;
+                                num--;
+                                if (admin != null && n == 0) {
+                                    UserVO vo = new UserVO();
+                                    vo.setMemberId(admin.getMemberId());
+                                    vo.setName(admin.getMemberName());
+                                    vo.setPassportId(admin.getPassportId());
+                                    vo.setProfile(admin.getProfile());
+                                    users.add(vo);
+                                }
+                            }
                         }
                     }
                 }

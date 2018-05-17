@@ -45,11 +45,6 @@ public class ClientModelItemVO {
     private List<DeptVO> deptList;
 
     /**
-     * 审批流程设置  0:不分条件设置审批人 1:分条件设置审批人
-     */
-    private Integer set;
-
-    /**
      * 审批人列表
      */
     private List<UserVO> approverVOS;
@@ -59,5 +54,4 @@ public class ClientModelItemVO {
      */
     private List<UserVO> copyerVOS;
 
-    private Set<String> field;
 }
