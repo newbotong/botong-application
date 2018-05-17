@@ -64,11 +64,11 @@ public class ProcessServiceImpl extends BaseServiceImpl<ProcessMapper, SetsProce
     }
 
     @Override
-    public List<UserVO> getProcess(String modelId, List<String> conditionIds) {
+    public List<UserVO> getProcess(String modelId, String conditionId) {
         List<UserVO> users = new ArrayList<>();
         List<SetsProcess> list;
-        if (conditionIds != null && !conditionIds.isEmpty()) {
-            list = this.selectList(Condition.create().where("model_id={0}", modelId).in("condition_id", conditionIds).orderBy(true, "sort", true));
+        if (StringUtils.isNotBlank(conditionId)) {
+            list = this.selectList(Condition.create().where("model_id={0}", modelId).in("condition_id", conditionId).orderBy(true, "sort", true));
         } else {
             list = this.selectList(Condition.create().where("model_id={0}", modelId).and("(condition_id is null or condition_id='')").orderBy(true, "sort", true));
         }
@@ -144,19 +144,15 @@ public class ProcessServiceImpl extends BaseServiceImpl<ProcessMapper, SetsProce
             conditionVOList.add(conditionVO);
         }
         ApproverVO result = new ApproverVO();
-        List<String> conditionIds = new ArrayList<>();
-        String id = conditionService.getCondition(modelId, conditionVOList);
-        if (StringUtils.isNotBlank(id)){
-            conditionIds.add(id);
-        }
-        if (conditionIds.isEmpty()) {
+        String conditionId = conditionService.getCondition(modelId, conditionVOList);
+        if (StringUtils.isBlank(conditionId)) {
             // 如果没有按条件设置审批人，则显示默认审批人和抄送人
             ApproverVO approverVO = modelItemService.getDefaultApproverAndCopy(companyId, memberId, modelId);
             result.setApprovers(approverVO.getApprovers());
             result.setCopys(approverVO.getCopys());
         }
-        result.setConditionId(conditionIds);
-        List<UserVO> users = processService.getProcess(modelId, conditionIds);
+        result.setConditionId(conditionId);
+        List<UserVO> users = processService.getProcess(modelId, conditionId);
 
         // 从应用中心获取部门主管
         Map<String, List<OrgMemberMessage>> deptManager = appCenterService.findDeptManager(companyId, memberId);

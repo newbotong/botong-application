@@ -55,12 +55,9 @@ public class ConditionServiceImpl extends BaseServiceImpl<ConditionMapper, SetsC
 
         List<SetsCondition> listCondition = this.selectList(Condition.create().eq("model_id", modelId).orderBy(true, "enabled", false).orderBy(true, "sort", true));
         List<SetConditionVO> list = new ArrayList<>();
-        List<String> conditionIds = new ArrayList<>();
         for (SetsCondition setsCondition : listCondition) {
             SetConditionVO setConditionVO = new SetConditionVO();
-            conditionIds.add(setsCondition.getId());
-            List<UserVO> userVoList = processService.getProcess(modelId, conditionIds);
-            conditionIds.clear();
+            List<UserVO> userVoList = processService.getProcess(modelId, setsCondition.getId());
             setConditionVO.setConditionId(setsCondition.getId());
             setConditionVO.setCdn(setsCondition.getCdn());
             setConditionVO.setContent(setsCondition.getContent());
@@ -75,7 +72,7 @@ public class ConditionServiceImpl extends BaseServiceImpl<ConditionMapper, SetsC
 
     @Override
     public String getCondition(String modelId, List<ConditionVO> conditionVOS) {
-        if (conditionVOS == null) {
+        if (conditionVOS == null || CollectionUtils.isEmpty(conditionVOS)) {
             return null;
         }
         String conditionId = "";
@@ -89,14 +86,14 @@ public class ConditionServiceImpl extends BaseServiceImpl<ConditionMapper, SetsC
                     boolean flag2 = false;
                     for (int i = 0; i < t.length; i++) {
                         for (ConditionVO conditionVO : conditionVOS) {
-                            if (ApproConstants.RADIO_AND_NUMBER_TYPE_23 == condition.getType() && i == 0 && ApproConstants.RADIO_TYPE_3 == conditionVO.getType()) {
+                            if (ApproConstants.RADIO_AND_NUMBER_TYPE_23 == condition.getType() && ApproConstants.RADIO_TYPE_3 == conditionVO.getType()) {
                                 flag1 = false;
-                                String[] temp = t[0].split(" ");
+                                String[] temp = t[i].split(" ");
                                 if (StringUtils.isNotBlank(temp[2]) && temp[2].contains(conditionVO.getValue())) {
                                     flag1 = true;
                                 }
-                            } else if (ApproConstants.RADIO_AND_NUMBER_TYPE_23 == condition.getType() && i == 1 && ApproConstants.NUMBER_TYPE_2 == conditionVO.getType()) {
-                                String[] temp = t[1].split(" ");
+                            } else if (ApproConstants.RADIO_AND_NUMBER_TYPE_23 == condition.getType() && ApproConstants.NUMBER_TYPE_2 == conditionVO.getType()) {
+                                String[] temp = t[i].split(" ");
                                 flag2 = judgeDay(temp, conditionVO);
                             }
                         }
@@ -120,9 +117,9 @@ public class ConditionServiceImpl extends BaseServiceImpl<ConditionMapper, SetsC
                     }
                 }
                 // 通过优先级匹配，优先级跟sort排序成正比，如果匹配上了就跳出，如果没有匹配上就进行下一次循序继续匹配
-                if(StringUtils.isBlank(conditionId)){
+                if (StringUtils.isBlank(conditionId)) {
                     continue;
-                }else {
+                } else {
                     break;
                 }
 
@@ -270,9 +267,7 @@ public class ConditionServiceImpl extends BaseServiceImpl<ConditionMapper, SetsC
         ConditionAndApproverVO result = new ConditionAndApproverVO();
         result.setModelItemList(voList);
         // 获取审批人
-        List<String> ids = new ArrayList<>();
-        ids.add(Optional.ofNullable(setsCondition.getId()).orElse(""));
-        List<UserVO> approverList = processService.getProcess(modelId, ids);
+        List<UserVO> approverList = processService.getProcess(modelId, setsCondition.getId());
         // 去重
         List<UserVO> collect = approverList.stream().distinct().collect(Collectors.toList());
         result.setApproverList(collect);
@@ -284,7 +279,7 @@ public class ConditionServiceImpl extends BaseServiceImpl<ConditionMapper, SetsC
     public List<ConditionAndApproverVO> getConditionAndApproverList(String modelId) {
         List<ApprovalUser> userList = approvalUserService.selectList(Condition.create());
         List<SetsCondition> conditionList = this.selectList(Condition.create().where("model_id={0}", modelId).and("enabled=1"));
-        List<SetsProcess> setsProcessList = processService.selectList(Condition.create().where("model_id={0}", modelId).isNotNull("condition_id"));
+        List<SetsProcess> setsProcessList = processService.selectList(Condition.create().where("model_id={0}", modelId).isNotNull("condition_id").orderBy("sort",true));
         List<ConditionAndApproverVO> conditionAndApproverVOS = new ArrayList<>();
         for (SetsCondition setsCondition : conditionList) {
             ConditionAndApproverVO conditionAndApproverVO = new ConditionAndApproverVO();
@@ -376,8 +371,8 @@ public class ConditionServiceImpl extends BaseServiceImpl<ConditionMapper, SetsC
         for (ConditionVO conditionVO : conditionVOList) {
             if (StringUtils.isNotBlank(conditionVO.getValue())) {
                 if (ApproConstants.RADIO_TYPE_3 == conditionVO.getType()) {
-                    cdn1 = conditionVO.getField() + " = " + conditionVO.getValue();
-                    content1 = conditionVO.getLabel() + "属于：" + conditionVO.getValue().replaceAll(",", "或");
+                    cdn1 = new StringBuilder(cdn1) + (conditionVO.getField() + " = " + conditionVO.getValue()) + "|";
+                    content1 = new StringBuilder(content1) + (conditionVO.getLabel() + "属于：" + conditionVO.getValue().replaceAll(",", "或")) + " 并且 ";
                 } else if (ApproConstants.NUMBER_TYPE_2 == conditionVO.getType()) {
                     cdn2 = conditionVO.getValue();
                     String[] split = cdn2.split(" ");
@@ -388,19 +383,7 @@ public class ConditionServiceImpl extends BaseServiceImpl<ConditionMapper, SetsC
                     }
                     content2 = StringUtils.join(Arrays.asList(split), " ");
                 }
-                if (StringUtils.isBlank(cdn1) && StringUtils.isNotBlank(cdn2)) {
-                    condition = cdn2;
-                    content = content2;
-                    type = ApproConstants.NUMBER_TYPE_2;
-                } else if (StringUtils.isNotBlank(cdn1) && StringUtils.isBlank(cdn2)) {
-                    condition = cdn1;
-                    content = content1;
-                    type = ApproConstants.RADIO_TYPE_3;
-                } else if (StringUtils.isNotBlank(cdn1) && StringUtils.isNotBlank(cdn2)) {
-                    condition = cdn1 + "|" + cdn2;
-                    content = content1 + " 并且 " + content2;
-                    type = ApproConstants.RADIO_AND_NUMBER_TYPE_23;
-                }
+
             }
             // 修改判断条件
             ModelItem modelItem = modelItemService.selectById(conditionVO.getModelItemId());
@@ -411,6 +394,20 @@ public class ConditionServiceImpl extends BaseServiceImpl<ConditionMapper, SetsC
                     throw new UpdateMessageFailureException("修改判断条件失败");
                 }
             }
+        }
+
+        if (StringUtils.isBlank(cdn1) && StringUtils.isNotBlank(cdn2)) {
+            condition = cdn2;
+            content = content2;
+            type = ApproConstants.NUMBER_TYPE_2;
+        } else if (StringUtils.isNotBlank(cdn1) && StringUtils.isBlank(cdn2)) {
+            condition = cdn1.substring(0, cdn1.length() - 1);
+            content = content1.substring(0, content1.length() - 4);
+            type = ApproConstants.RADIO_TYPE_3;
+        } else if (StringUtils.isNotBlank(cdn1) && StringUtils.isNotBlank(cdn2)) {
+            condition = cdn1.substring(0, cdn1.length() - 1) + "|" + cdn2;
+            content = content1.substring(0, content1.length() - 4) + " 并且 " + content2;
+            type = ApproConstants.RADIO_AND_NUMBER_TYPE_23;
         }
         List<SetsCondition> list = this.selectList(Condition.create().where("model_id={0}", modelId));
         Integer maxSort = list.stream().map(SetsCondition::getSort).max(Integer::compareTo).orElse(0);
