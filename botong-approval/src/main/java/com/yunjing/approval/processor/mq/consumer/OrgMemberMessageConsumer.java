@@ -15,6 +15,8 @@ import org.springframework.stereotype.Component;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
+import java.util.stream.Collectors;
 
 /**
  * 企业成员数据信息消息接受者
@@ -70,22 +72,11 @@ public class OrgMemberMessageConsumer extends AbstractMessageConsumer<Message> {
         approvalUser.setPosition(memberMessage.getPosition());
         approvalUser.setId(memberMessage.getMemberId());
         List<String> deptIds = memberMessage.getDeptIds();
-        String dIds = "";
-        if (deptIds != null && !deptIds.isEmpty()) {
-            for (String deptId : deptIds) {
-                dIds = deptId + ",";
-            }
-        }
+        String dIds = Optional.ofNullable(deptIds).orElseGet(ArrayList::new).stream().collect(Collectors.joining(","));
         approvalUser.setDeptId(dIds);
         List<String> deptNames = memberMessage.getDeptNames();
-        String dNames = "";
-        if (deptNames != null && !deptNames.isEmpty()) {
-            for (String deptName : deptNames) {
-                dNames = deptName + ",";
-            }
-        }
+        String dNames = Optional.ofNullable(deptNames).orElseGet(ArrayList::new).stream().collect(Collectors.joining(","));
         approvalUser.setDeptName(dNames);
-
         return approvalUser;
     }
 
