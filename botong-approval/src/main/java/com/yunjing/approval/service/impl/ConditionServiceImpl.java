@@ -299,7 +299,7 @@ public class ConditionServiceImpl extends BaseServiceImpl<ConditionMapper, SetsC
             conditionAndApproverVO.setSort(setsCondition.getSort());
             conditionAndApproverVO.setConditionId(setsCondition.getId());
             List<UserVO> userVOList = new ArrayList<>();
-            setsProcessList.parallelStream()
+            setsProcessList.stream()
                     .filter(setsProcess -> setsProcess.getConditionId().equals(setsCondition.getId()))
                     .map(setsProcess -> {
                         UserVO vo = new UserVO();
