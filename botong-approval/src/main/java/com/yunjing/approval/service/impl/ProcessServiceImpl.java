@@ -157,7 +157,7 @@ public class ProcessServiceImpl extends BaseServiceImpl<ProcessMapper, SetsProce
                     String[] temp = user.getMemberId().split("_");
                     int num = Integer.parseInt(temp[2]);
                     // 根据部门主键和级数查询出该主管
-                    List<UserVO> admins = getAdmins(memberId, deptId, num, deptManager);
+                    List<UserVO> admins = this.getAdmins(memberId, deptId, num, deptManager);
                     if (admins != null && CollectionUtils.isNotEmpty(admins)) {
                         list.addAll(admins);
                     }
@@ -171,20 +171,20 @@ public class ProcessServiceImpl extends BaseServiceImpl<ProcessMapper, SetsProce
         if (CollectionUtils.isNotEmpty(distinctUserList)) {
             // 注入审批人
             result.setApprovers(distinctUserList);
-            // 注入抄送人
-            result.setCopys(copyService.getCopy(companyId, memberId, modelId));
         } else {
-            // 如果没有按条件设置的审批人，则显示默认审批人和抄送人
-            ApproverVO approverVO = modelItemService.getDefaultApproverAndCopy(companyId, memberId, modelId);
-            result.setApprovers(approverVO.getApprovers());
-            result.setCopys(approverVO.getCopys());
+            // 如果没有按条件设置的审批人，则显示默认审批人
+            List<UserVO> defaultApprover = modelItemService.getDefaultProcess(companyId, memberId, modelId, deptId);
+            result.setApprovers(defaultApprover);
         }
+        // 注入抄送人
+        result.setCopys(copyService.getCopy(companyId, memberId, modelId,deptId));
         return result;
     }
 
     /**
      * 获取主管
      */
+    @Override
     public List<UserVO> getAdmins(String memberId, String deptId, int num, Map<String, List<OrgMemberMessage>> deptManager) {
         List<UserVO> userVOList = new ArrayList<>();
         if (deptManager != null && MapUtils.isNotEmpty(deptManager)) {

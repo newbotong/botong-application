@@ -22,7 +22,6 @@ import com.yunjing.mommon.global.exception.ParameterErrorException;
 import com.yunjing.mommon.global.exception.UpdateMessageFailureException;
 import com.yunjing.mommon.utils.IDUtils;
 import org.apache.commons.collections.CollectionUtils;
-import org.apache.commons.collections.MapUtils;
 import org.apache.commons.lang.ArrayUtils;
 import org.apache.commons.lang.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -47,32 +46,24 @@ public class ModelItemServiceImpl extends BaseServiceImpl<ModelItemMapper, Model
 
     @Autowired
     private IModelService modelService;
-
     @Autowired
     private IOrgModelService orgModelService;
-
     @Autowired
     private ConditionMapper conditionMapper;
-    @Autowired
-    private IConditionService conditionService;
-
     @Autowired
     private ModelMapper modelMapper;
     @Autowired
     private IApprovalSetsService approvalSetsService;
-
     @Autowired
     private IProcessService processService;
     @Autowired
     private AppCenterService appCenterService;
-
     @Autowired
     private ICopyService copyService;
     @Autowired
     private ModelItemMapper modelItemMapper;
     @Autowired
     private IApprovalUserService approvalUserService;
-
     @Autowired
     RedisApproval redisApproval;
 
@@ -152,16 +143,10 @@ public class ModelItemServiceImpl extends BaseServiceImpl<ModelItemMapper, Model
 
     }
 
-
-    private List<UserVO> getDefaultProcess(String companyId, String memberId, String modelId, List<String> conditionIds) {
-
+    @Override
+    public List<UserVO> getDefaultProcess(String companyId, String memberId, String modelId, String deptId) {
         List<UserVO> users = new ArrayList<>();
-        List<SetsProcess> list;
-        if (conditionIds != null && !conditionIds.isEmpty()) {
-            list = processService.selectList(Condition.create().where("model_id={0}", modelId).in("condition_id", conditionIds).orderBy(true, "sort", true));
-        } else {
-            list = processService.selectList(Condition.create().where("model_id={0}", modelId).and("(condition_id is null or condition_id='')").orderBy(true, "sort", true));
-        }
+        List<SetsProcess> list = processService.selectList(Condition.create().where("model_id={0}", modelId).and("(condition_id is null or condition_id='')").orderBy(true, "sort", true));
         List<ApprovalUser> userList = approvalUserService.selectList(Condition.create());
         Map<String, List<OrgMemberMessage>> deptManager = appCenterService.findDeptManager(companyId, memberId);
         for (SetsProcess process : list) {
@@ -169,30 +154,14 @@ public class ModelItemServiceImpl extends BaseServiceImpl<ModelItemMapper, Model
             if (userId.indexOf("admin_") != -1) {
                 String[] temp = String.valueOf(userId).split("_");
                 int num = Integer.parseInt(temp[2]);
-                List<ApprovalUser> uid = userList.stream().filter(approvalUser -> approvalUser.getId().equals(memberId)).collect(Collectors.toList());
-                if (uid != null && CollectionUtils.isNotEmpty(uid) && deptManager != null && MapUtils.isNotEmpty(deptManager)) {
-                    String[] deptId = uid.get(0).getDeptId().split(",");
-                    for (Map.Entry<String, List<OrgMemberMessage>> adminMember : deptManager.entrySet()) {
-                        if (adminMember.getKey().equals(deptId[0])) {
-                            for (OrgMemberMessage admin : adminMember.getValue()) {
-                                // 如果部门主管自己提交审批就略过
-                                if (admin != null && memberId.equals(admin.getMemberId())) {
-                                    continue;
-                                }
-                                int n = num - 1;
-                                num--;
-                                if (admin != null && n == 0) {
-                                    UserVO vo = new UserVO();
-                                    vo.setMemberId(admin.getMemberId());
-                                    vo.setName(admin.getMemberName());
-                                    vo.setPassportId(admin.getPassportId());
-                                    vo.setProfile(admin.getProfile());
-                                    users.add(vo);
-                                }
-                            }
-                        }
-                    }
+                ApprovalUser uid = userList.stream().filter(approvalUser -> approvalUser.getId().equals(memberId)).findFirst().orElseGet(ApprovalUser::new);
+                String[] deptIds = uid.getDeptId().split(",");
+                if (StringUtils.isBlank(deptId)) {
+                    deptId = deptIds[0];
                 }
+                // 根据部门主键和级数查询出该主管
+                List<UserVO> admins = processService.getAdmins(memberId, deptId, num, deptManager);
+                users.addAll(admins);
             } else {
                 String passportId = "";
                 String userNick = "";

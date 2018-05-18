@@ -367,14 +367,8 @@ public class ConditionServiceImpl extends BaseServiceImpl<ConditionMapper, SetsC
                     cdn1 = new StringBuilder(cdn1) + (conditionVO.getField() + " = " + conditionVO.getValue()) + "|";
                     content1 = new StringBuilder(content1) + (conditionVO.getLabel() + "属于：" + conditionVO.getValue().replaceAll(",", "或")) + " 并且 ";
                 } else if (ApproConstants.NUMBER_TYPE_2 == conditionVO.getType()) {
-                    cdn2 = conditionVO.getValue();
-                    String[] split = cdn2.split(" ");
-                    if (split.length > 3) {
-                        Arrays.fill(split, 2, 3, conditionVO.getLabel());
-                    } else {
-                        Arrays.fill(split, 0, 1, conditionVO.getLabel());
-                    }
-                    content2 = StringUtils.join(Arrays.asList(split), " ");
+                    cdn2 = new StringBuilder(cdn2) + conditionVO.getValue() + "|";
+                    content2 = new StringBuilder(content2) + conditionVO.getValue().replaceAll(conditionVO.getField(), conditionVO.getLabel()) + " 并且 ";
                 }
 
             }
@@ -390,16 +384,16 @@ public class ConditionServiceImpl extends BaseServiceImpl<ConditionMapper, SetsC
         }
 
         if (StringUtils.isBlank(cdn1) && StringUtils.isNotBlank(cdn2)) {
-            condition = cdn2;
-            content = content2;
+            condition = cdn2.substring(0, cdn1.length() - 1);
+            content = content2.substring(0, content1.length() - 4);
             type = ApproConstants.NUMBER_TYPE_2;
         } else if (StringUtils.isNotBlank(cdn1) && StringUtils.isBlank(cdn2)) {
             condition = cdn1.substring(0, cdn1.length() - 1);
             content = content1.substring(0, content1.length() - 4);
             type = ApproConstants.RADIO_TYPE_3;
         } else if (StringUtils.isNotBlank(cdn1) && StringUtils.isNotBlank(cdn2)) {
-            condition = cdn1.substring(0, cdn1.length() - 1) + "|" + cdn2;
-            content = content1.substring(0, content1.length() - 4) + " 并且 " + content2;
+            condition = cdn1.substring(0, cdn1.length() - 1) + "|" + cdn2.substring(0, cdn2.length() - 1);
+            content = content1.substring(0, content1.length() - 4) + " 并且 " + content2.substring(0, content2.length() - 4);
             type = ApproConstants.RADIO_AND_NUMBER_TYPE_23;
         }
         List<SetsCondition> list = this.selectList(Condition.create().where("model_id={0}", modelId));
