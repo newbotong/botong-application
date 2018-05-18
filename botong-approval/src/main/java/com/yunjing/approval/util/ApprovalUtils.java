@@ -47,7 +47,7 @@ public class ApprovalUtils {
      * @return List<T>
      */
     public static <T> List<T> distinctElements(List<T> sourceList) {
-        if (sourceList != null || CollectionUtils.isEmpty(sourceList)) {
+        if (sourceList == null || CollectionUtils.isEmpty(sourceList)) {
             return new ArrayList<>();
         }
         List<T> resultList = new ArrayList<>();
