@@ -145,8 +145,12 @@ public class ProcessServiceImpl extends BaseServiceImpl<ProcessMapper, SetsProce
             conditionVOList.add(conditionVO);
         }
         ApproverVO result = new ApproverVO();
-        String conditionId = conditionService.getCondition(modelId, conditionVOList);
+
+        // 匹配管理端设置的审批条件
+        List<ConditionVO> collect = conditionVOList.stream().distinct().collect(Collectors.toList());
+        String conditionId = conditionService.getCondition(modelId, collect);
         result.setConditionId(conditionId);
+
         List<UserVO> users = processService.getProcess(modelId, conditionId);
         // 从应用中心获取部门主管
         Map<String, List<OrgMemberMessage>> deptManager = appCenterService.findDeptManager(companyId, memberId);

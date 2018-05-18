@@ -10,6 +10,7 @@ import com.yunjing.approval.model.entity.*;
 import com.yunjing.approval.model.vo.*;
 import com.yunjing.approval.service.*;
 import com.yunjing.approval.util.ApproConstants;
+import com.yunjing.approval.util.ApprovalUtils;
 import com.yunjing.mommon.global.exception.*;
 import com.yunjing.mommon.utils.IDUtils;
 import org.apache.commons.collections.CollectionUtils;
@@ -31,7 +32,6 @@ import java.util.stream.Collectors;
 @Service
 public class ConditionServiceImpl extends BaseServiceImpl<ConditionMapper, SetsCondition> implements IConditionService {
 
-    private static final Pattern P = Pattern.compile("[\u4e00-\u9fa5]");
     @Autowired
     private IProcessService processService;
     @Autowired
@@ -75,6 +75,7 @@ public class ConditionServiceImpl extends BaseServiceImpl<ConditionMapper, SetsC
 
     @Override
     public String getCondition(String modelId, List<ConditionVO> conditionVOS) {
+
         if (conditionVOS == null || CollectionUtils.isEmpty(conditionVOS)) {
             return null;
         }
@@ -86,21 +87,20 @@ public class ConditionServiceImpl extends BaseServiceImpl<ConditionMapper, SetsC
                 if (cdn.contains("|")) {
                     String[] t = cdn.split("\\|");
                     boolean flag1 = false;
-                    boolean flag2 = false;
                     for (int i = 0; i < t.length; i++) {
                         for (ConditionVO conditionVO : conditionVOS) {
                             String[] temp = t[i].split(" ");
-                            if (ApproConstants.RADIO_AND_NUMBER_TYPE_23 == condition.getType() && ApproConstants.RADIO_TYPE_3 == conditionVO.getType() && temp[0].equals(conditionVO.getField())) {
+                            if (ApprovalUtils.isContainChinese(t[i]) && ApproConstants.RADIO_TYPE_3 == conditionVO.getType() && temp[0].equals(conditionVO.getField())) {
                                 flag1 = false;
                                 if (StringUtils.isNotBlank(temp[2]) && temp[2].contains(conditionVO.getValue())) {
                                     flag1 = true;
                                 }
-                            } else if (ApproConstants.RADIO_AND_NUMBER_TYPE_23 == condition.getType() && ApproConstants.NUMBER_TYPE_2 == conditionVO.getType()) {
-                                flag2 = judgeDay(temp, conditionVO);
+                            } else if (!ApprovalUtils.isContainChinese(t[i]) && ApproConstants.NUMBER_TYPE_2 == conditionVO.getType()) {
+                                flag1 = judgeDay(temp, conditionVO);
                             }
                         }
                     }
-                    if (flag1 && flag2) {
+                    if (flag1) {
                         return condition.getId();
                     }
                 } else {
@@ -241,10 +241,10 @@ public class ConditionServiceImpl extends BaseServiceImpl<ConditionMapper, SetsC
             String value = "";
             String field = "";
             ConditionVO conditionVO = new ConditionVO();
-            if (isContainChinese(conditions[i])) {
+            if (ApprovalUtils.isContainChinese(conditions[i])) {
                 value = conditions[i].substring(conditions[i].lastIndexOf(" "), conditions[i].length()).trim();
                 field = conditions[i].substring(0, conditions[i].indexOf(" "));
-            } else if (!isContainChinese(conditions[i])) {
+            } else if (!ApprovalUtils.isContainChinese(conditions[i])) {
                 value = conditions[i];
                 String[] split = value.split(" ");
                 if (split.length > 3) {
@@ -278,21 +278,6 @@ public class ConditionServiceImpl extends BaseServiceImpl<ConditionMapper, SetsC
         result.setApproverList(collect);
         result.setConditionId(conditionId);
         return result;
-    }
-
-    /**
-     * 判断字符串中是否包含中文
-     *
-     * @param str 待校验字符串
-     * @return 是否为中文
-     * @warn 不能校验是否为中文标点符号
-     */
-    public static boolean isContainChinese(String str) {
-        Matcher m = P.matcher(str);
-        if (m.find()) {
-            return true;
-        }
-        return false;
     }
 
     @Override

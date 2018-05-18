@@ -19,6 +19,7 @@ public class ApprovalUtils {
     private static final Pattern EMOJI = Pattern.compile("[\ud83c\udc00-\ud83c\udfff]|[\ud83d\udc00-\ud83d\udfff]|[\u2600-\u27ff]",
             Pattern.UNICODE_CASE | Pattern.CASE_INSENSITIVE);
 
+    private static final Pattern P = Pattern.compile("[\u4e00-\u9fa5]");
     /**
      * 将emoji表情替换成*
      *
@@ -60,6 +61,21 @@ public class ApprovalUtils {
             }
         }
         return resultList;
+    }
+
+    /**
+     * 判断字符串中是否包含中文
+     *
+     * @param str 待校验字符串
+     * @return 是否为中文
+     * @warn 不能校验是否为中文标点符号
+     */
+    public static boolean isContainChinese(String str) {
+        Matcher m = P.matcher(str);
+        if (m.find()) {
+            return true;
+        }
+        return false;
     }
 
     public static void main(String[] arg) {
