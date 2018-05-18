@@ -20,6 +20,8 @@ import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.*;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
 /**
@@ -29,6 +31,7 @@ import java.util.stream.Collectors;
 @Service
 public class ConditionServiceImpl extends BaseServiceImpl<ConditionMapper, SetsCondition> implements IConditionService {
 
+    private static final Pattern P = Pattern.compile("[\u4e00-\u9fa5]");
     @Autowired
     private IProcessService processService;
     @Autowired
@@ -231,29 +234,38 @@ public class ConditionServiceImpl extends BaseServiceImpl<ConditionMapper, SetsC
         List<ModelItem> list = modelItemService.selectList(Condition.create().where("model_id={0}", modelId)
                 .and("item_version={0}", version).in("data_type", dataType).orderBy("priority", true));
         SetsCondition setsCondition = this.selectById(conditionId);
-        String value = "值为空";
-        String dayNum = "天数为空";
-        int type = OptionalInt.of(setsCondition.getType()).orElse(0);
         String condition = Optional.ofNullable(setsCondition.getCdn()).orElse("");
-        if (ApproConstants.RADIO_TYPE_3 == type) {
-            value = condition.substring(condition.lastIndexOf(" "), condition.length()).trim();
-        } else if (ApproConstants.NUMBER_TYPE_2 == type) {
-            dayNum = condition;
-        } else if (type == ApproConstants.RADIO_AND_NUMBER_TYPE_23) {
-            String[] split = condition.split("\\|");
-            value = split[0].substring(split[0].lastIndexOf(" "), split[0].length()).trim();
-            dayNum = split[1];
+        String[] conditions = condition.split("\\|");
+        List<ConditionVO> conditionVOList = new ArrayList<>();
+        for (int i = 0; i < conditions.length; i++) {
+            String value = "";
+            String field = "";
+            ConditionVO conditionVO = new ConditionVO();
+            if (isContainChinese(conditions[i])) {
+                value = conditions[i].substring(conditions[i].lastIndexOf(" "), conditions[i].length()).trim();
+                field = conditions[i].substring(0, conditions[i].indexOf(" "));
+            } else if (!isContainChinese(conditions[i])) {
+                value = conditions[i];
+                String[] split = value.split(" ");
+                if (split.length > 3) {
+                    field = split[2];
+                } else {
+                    field = split[0];
+                }
+            }
+            conditionVO.setField(field);
+            conditionVO.setValue(value);
+            conditionVOList.add(conditionVO);
         }
+
         List<ModelItemVO> voList = new ArrayList<>();
         if (list != null && CollectionUtils.isNotEmpty(list)) {
             for (ModelItem item : list) {
                 ModelItemVO vo = new ModelItemVO(item);
-                vo.setModelItemId(item.getId());
-                if (item.getDataType() == ApproConstants.RADIO_TYPE_3) {
-                    vo.setValue(value);
-                } else if (item.getDataType() == ApproConstants.NUMBER_TYPE_2) {
-                    vo.setDayNum(dayNum);
-                }
+                ConditionVO conditionVO1 = conditionVOList.stream()
+                        .filter(conditionVO -> conditionVO.getField().equals(item.getField()))
+                        .findFirst().orElseGet(ConditionVO::new);
+                vo.setValue(conditionVO1.getValue());
                 voList.add(vo);
             }
         }
@@ -266,6 +278,21 @@ public class ConditionServiceImpl extends BaseServiceImpl<ConditionMapper, SetsC
         result.setApproverList(collect);
         result.setConditionId(conditionId);
         return result;
+    }
+
+    /**
+     * 判断字符串中是否包含中文
+     *
+     * @param str 待校验字符串
+     * @return 是否为中文
+     * @warn 不能校验是否为中文标点符号
+     */
+    public static boolean isContainChinese(String str) {
+        Matcher m = P.matcher(str);
+        if (m.find()) {
+            return true;
+        }
+        return false;
     }
 
     @Override
