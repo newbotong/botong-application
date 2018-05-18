@@ -177,7 +177,7 @@ public class ProcessServiceImpl extends BaseServiceImpl<ProcessMapper, SetsProce
             result.setApprovers(defaultApprover);
         }
         // 注入抄送人
-        result.setCopys(copyService.getCopy(companyId, memberId, modelId,deptId));
+        result.setCopys(copyService.get(modelId));
         return result;
     }
 
