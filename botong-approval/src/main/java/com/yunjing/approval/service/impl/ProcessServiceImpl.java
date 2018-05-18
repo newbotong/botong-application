@@ -15,6 +15,7 @@ import com.yunjing.approval.model.vo.ConditionVO;
 import com.yunjing.approval.model.vo.UserVO;
 import com.yunjing.approval.processor.okhttp.AppCenterService;
 import com.yunjing.approval.service.*;
+import com.yunjing.approval.util.ApprovalUtils;
 import com.yunjing.message.share.org.OrgMemberMessage;
 import com.yunjing.mommon.global.exception.DeleteMessageFailureException;
 import com.yunjing.mommon.global.exception.InsertMessageFailureException;
@@ -165,7 +166,8 @@ public class ProcessServiceImpl extends BaseServiceImpl<ProcessMapper, SetsProce
                 }
             }
         }
-        List<UserVO> distinctUserList = list.stream().distinct().collect(Collectors.toList());
+        // 过滤重复的审批人（只过滤相邻的重复元素）
+        List<UserVO> distinctUserList = ApprovalUtils.distinctElements(list);
         if (CollectionUtils.isNotEmpty(distinctUserList)) {
             // 注入审批人
             result.setApprovers(distinctUserList);

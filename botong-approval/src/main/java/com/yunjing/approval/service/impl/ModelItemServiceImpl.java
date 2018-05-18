@@ -14,6 +14,7 @@ import com.yunjing.approval.model.vo.*;
 import com.yunjing.approval.processor.okhttp.AppCenterService;
 import com.yunjing.approval.service.*;
 import com.yunjing.approval.util.ApproConstants;
+import com.yunjing.approval.util.ApprovalUtils;
 import com.yunjing.message.share.org.OrgMemberMessage;
 import com.yunjing.mommon.global.exception.InsertMessageFailureException;
 import com.yunjing.mommon.global.exception.MissingRequireFieldException;
@@ -28,7 +29,10 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.sql.Timestamp;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 import static java.util.Comparator.comparing;
@@ -172,7 +176,7 @@ public class ModelItemServiceImpl extends BaseServiceImpl<ModelItemMapper, Model
                         if (adminMember.getKey().equals(deptId[0])) {
                             for (OrgMemberMessage admin : adminMember.getValue()) {
                                 // 如果部门主管自己提交审批就略过
-                                if (admin != null && memberId.equals(admin.getMemberId())){
+                                if (admin != null && memberId.equals(admin.getMemberId())) {
                                     continue;
                                 }
                                 int n = num - 1;
@@ -209,7 +213,9 @@ public class ModelItemServiceImpl extends BaseServiceImpl<ModelItemMapper, Model
                 users.add(vo);
             }
         }
-        return users;
+        // 过滤重复的审批人（只过滤相邻的重复元素）
+        List<UserVO> distinctUserList = ApprovalUtils.distinctElements(users);
+        return distinctUserList;
     }
 
     private ModelVO getModelVO(ModelL modelL, List<ModelItem> itemList) {
@@ -355,10 +361,7 @@ public class ModelItemServiceImpl extends BaseServiceImpl<ModelItemMapper, Model
         ApproverVO approverVO = new ApproverVO();
         // 获取默认审批人
         List<UserVO> processUser = this.getDefaultProcess(companyId, memberId, modelId, null);
-
-        // 过滤重复的并保持顺序不变
-        List<UserVO> distinctUserList = processUser.stream().distinct().collect(Collectors.toList());
-        approverVO.setApprovers(distinctUserList);
+        approverVO.setApprovers(processUser);
 
         // 获取默认抄送人
         List<UserVO> userVOList = copyService.get(modelId);
