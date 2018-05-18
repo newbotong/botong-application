@@ -254,7 +254,7 @@ public class ConditionServiceImpl extends BaseServiceImpl<ConditionMapper, SetsC
                 }
             }
             conditionVO.setField(field);
-            conditionVO.setValue(value);
+            conditionVO.setValue(value.replaceAll(" ",","));
             conditionVOList.add(conditionVO);
         }
 
