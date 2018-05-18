@@ -53,9 +53,9 @@ public interface IConditionService extends IBaseService<SetsCondition> {
     /**
      * 保存审批条件
      *
-     * @param modelId      模型编号
-     * @param judge        选择的审批条件
-     * @param memberIds    审批人
+     * @param modelId     模型编号
+     * @param judge       选择的审批条件
+     * @param memberIds   审批人
      * @param conditionId 条件ids
      * @return List<SetConditionVO>
      */
@@ -76,22 +76,15 @@ public interface IConditionService extends IBaseService<SetsCondition> {
      * @param modelId 模型主键
      * @return List<SetConditionVO>
      */
-    List<SetConditionVO> getConditionList(String modelId) throws Exception;
+    List<SetConditionVO> getConditionList(String modelId);
 
     /**
      * 获取审批条件
      *
-     * @param modelId     模型主键
+     * @param modelId      模型主键
      * @param conditionVOS 条件
      * @return String
      */
     String getCondition(String modelId, List<ConditionVO> conditionVOS);
 
-    /**
-     * 获取条件
-     *
-     * @param modelId 模型主键
-     * @return List<SetsCondition>
-     */
-    List<SetsCondition> getFirstCondition(String modelId);
 }

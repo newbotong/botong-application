@@ -241,9 +241,8 @@ public class LogReportServiceImpl implements LogReportService {
             members = new ArrayList<>();
         }
         // 根据memberId获取member信息
-        Member member = redisOperator.getMember(memberId);
-        members.add(member);
-
+//        Member member = redisOperator.getMember(memberId);
+//        members.add(member);
 
         List<String> memberIdList = new ArrayList<>();
         for (Member m : members) {

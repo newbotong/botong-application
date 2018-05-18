@@ -29,11 +29,11 @@ public interface IProcessService extends IBaseService<SetsProcess> {
      * 获取审批流程
      *
      * @param modelId      模型主键
-     * @param conditionIds 条件主键
+     * @param conditionId 条件主键
      * @return
      * @throws Exception
      */
-    List<UserVO> getProcess(String modelId, List<String> conditionIds);
+    List<UserVO> getProcess(String modelId, String conditionId);
 
     /**
      * 设置审批流程信息
