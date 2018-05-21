@@ -397,8 +397,8 @@ public class ConditionServiceImpl extends BaseServiceImpl<ConditionMapper, SetsC
         }
 
         if (StringUtils.isBlank(cdn1) && StringUtils.isNotBlank(cdn2)) {
-            condition = cdn2.substring(0, cdn1.length() - 1);
-            content = content2.substring(0, content1.length() - 4);
+            condition = cdn2.substring(0, cdn2.length() - 1);
+            content = content2.substring(0, content2.length() - 4);
         } else if (StringUtils.isNotBlank(cdn1) && StringUtils.isBlank(cdn2)) {
             condition = cdn1.substring(0, cdn1.length() - 1);
             content = content1.substring(0, content1.length() - 4);
