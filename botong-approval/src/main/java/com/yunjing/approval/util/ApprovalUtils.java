@@ -3,10 +3,7 @@ package com.yunjing.approval.util;
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.lang.StringEscapeUtils;
 
-import java.util.ArrayList;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
+import java.util.*;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -62,6 +59,20 @@ public class ApprovalUtils {
         }
         return resultList;
     }
+    public   static   <T> List<T>  removeDuplicate(List<T> sourceList)  {
+        if (sourceList == null || CollectionUtils.isEmpty(sourceList)) {
+            return new ArrayList<>();
+        }
+        Collections.reverse(sourceList);
+        for  ( int  i  =   0 ; i  <  sourceList.size()  -   1 ; i ++ )  {
+            for  ( int  j  =  sourceList.size()  -   1 ; j  >  i; j -- )  {
+                if  (sourceList.get(j).equals(sourceList.get(i)))  {
+                    sourceList.remove(j);
+                }
+            }
+        }
+        return sourceList;
+    }
 
     /**
      * 判断字符串中是否包含中文
@@ -113,6 +124,9 @@ public class ApprovalUtils {
         list.add("BBBB");
         list.add("BBBB");
         List<String> strings = distinctElements(list);
-        System.out.println(strings);
+        Collections.reverse(list);
+        System.out.println(list);
+        List<String> list1 = removeDuplicate(list);
+        System.out.println(list1);
     }
 }

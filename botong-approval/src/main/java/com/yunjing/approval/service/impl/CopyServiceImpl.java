@@ -4,7 +4,6 @@ import com.baomidou.mybatisplus.mapper.Condition;
 import com.baomidou.mybatisplus.mapper.EntityWrapper;
 import com.common.mybatis.service.impl.BaseServiceImpl;
 import com.yunjing.approval.dao.mapper.CopyMapper;
-import com.yunjing.approval.model.entity.Approval;
 import com.yunjing.approval.model.entity.ApprovalUser;
 import com.yunjing.approval.model.entity.Copy;
 import com.yunjing.approval.model.vo.UserVO;
@@ -12,7 +11,6 @@ import com.yunjing.approval.processor.okhttp.AppCenterService;
 import com.yunjing.approval.service.IApprovalUserService;
 import com.yunjing.approval.service.ICopyService;
 import com.yunjing.approval.service.IProcessService;
-import com.yunjing.approval.util.ApproConstants;
 import com.yunjing.approval.util.ApprovalUtils;
 import com.yunjing.message.share.org.OrgMemberMessage;
 import com.yunjing.mommon.global.exception.ParameterErrorException;
@@ -26,7 +24,6 @@ import org.springframework.stereotype.Service;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
-import java.util.stream.Collectors;
 
 /**
  * @author
@@ -98,7 +95,7 @@ public class CopyServiceImpl extends BaseServiceImpl<CopyMapper, Copy> implement
                     userVO.setProfile(user.getAvatar());
                     userVO.setName(user.getName());
                     userVO.setPassportId(user.getPassportId());
-                    if (StringUtils.isNotBlank(userVO.getName())){
+                    if (StringUtils.isNotBlank(userVO.getName())) {
                         userVOList.add(userVO);
                     }
                 } else {
@@ -114,8 +111,8 @@ public class CopyServiceImpl extends BaseServiceImpl<CopyMapper, Copy> implement
                 }
             }
         }
-        // 去重
-        return ApprovalUtils.distinctElements(userVOList);
+        // 同一个审批人在流程中出现多次时，仅保留最后一个
+        return ApprovalUtils.removeDuplicate(userVOList);
     }
 
     /**

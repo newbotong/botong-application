@@ -28,6 +28,11 @@ public class ApproverVO {
      */
     private String deptId;
 
+    /**
+     * 是否为管理端设置的审批人
+     */
+    private Boolean approverShow;
+
     private List<UserVO> approvers;
 
     private List<UserVO> copys;
