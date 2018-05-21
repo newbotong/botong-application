@@ -66,15 +66,12 @@ public class CopyServiceImpl extends BaseServiceImpl<CopyMapper, Copy> implement
         if (users != null && !users.isEmpty()) {
             for (Copy copy : copyList) {
                 UserVO userVO = new UserVO();
-                List<ApprovalUser> userList = users.stream().filter(user -> String.valueOf(user.getId()).equals(copy.getUserId())).collect(Collectors.toList());
-                if (userList != null && !userList.isEmpty() && copy.getType() == 0) {
-                    ApprovalUser user = userList.get(0);
+                ApprovalUser user = users.stream().filter(approvalUser -> String.valueOf(approvalUser.getId()).equals(copy.getUserId())).findFirst().orElse(null);
+                if (user != null && copy.getType() == 0) {
                     userVO.setMemberId(user.getId());
                     userVO.setProfile(user.getAvatar());
                     userVO.setName(user.getName());
                     userVO.setPassportId(user.getPassportId());
-                } else {
-                    userVO.setMemberId(copy.getUserId());
                 }
                 userVOList.add(userVO);
             }
@@ -101,7 +98,9 @@ public class CopyServiceImpl extends BaseServiceImpl<CopyMapper, Copy> implement
                     userVO.setProfile(user.getAvatar());
                     userVO.setName(user.getName());
                     userVO.setPassportId(user.getPassportId());
-                    userVOList.add(userVO);
+                    if (StringUtils.isNotBlank(userVO.getName())){
+                        userVOList.add(userVO);
+                    }
                 } else {
                     String[] temp = copy.getUserId().split("_");
                     int num = Integer.parseInt(temp[2]);

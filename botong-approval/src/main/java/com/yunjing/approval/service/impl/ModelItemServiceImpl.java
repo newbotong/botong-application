@@ -279,10 +279,7 @@ public class ModelItemServiceImpl extends BaseServiceImpl<ModelItemMapper, Model
         entity.setLogo(vo.getLogo());
         entity.setModelName(vo.getModelName());
         entity.setModelVersion(version);
-        String introduce = vo.getIntroduce();
-        if (StringUtils.isNotBlank(introduce)) {
-            entity.setIntroduce(vo.getIntroduce());
-        }
+        entity.setIntroduce(vo.getIntroduce());
 
         List<ModelItem> entityList = this.getModelItemList(itemVOS, modelId, version, false, null);
         if (CollectionUtils.isEmpty(entityList)) {
@@ -400,7 +397,7 @@ public class ModelItemServiceImpl extends BaseServiceImpl<ModelItemMapper, Model
                 if (StringUtils.isBlank(option)) {
                     throw new MissingRequireFieldException("模型数据格式不正确 - 选项为空");
                 }
-                if (!ApprovalUtils.isContainChinese(option)){
+                if (!ApprovalUtils.isContainChinese(option)) {
                     throw new MissingRequireFieldException("单选框类型必须为中文字符");
                 }
                 item.setOptValue(option);

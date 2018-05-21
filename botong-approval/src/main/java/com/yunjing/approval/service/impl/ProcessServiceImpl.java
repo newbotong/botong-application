@@ -9,6 +9,7 @@ import com.common.mybatis.service.impl.BaseServiceImpl;
 import com.yunjing.approval.dao.mapper.ProcessMapper;
 import com.yunjing.approval.model.entity.ApprovalUser;
 import com.yunjing.approval.model.entity.Copy;
+import com.yunjing.approval.model.entity.ModelItem;
 import com.yunjing.approval.model.entity.SetsProcess;
 import com.yunjing.approval.model.vo.ApproverVO;
 import com.yunjing.approval.model.vo.ConditionVO;
@@ -26,7 +27,10 @@ import org.apache.commons.lang.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Iterator;
+import java.util.List;
+import java.util.Map;
 import java.util.stream.Collectors;
 
 /**
@@ -85,21 +89,19 @@ public class ProcessServiceImpl extends BaseServiceImpl<ProcessMapper, SetsProce
                     userNick = "第" + temp[2] + "级主管";
 
                 } else {
-                    Set<ApprovalUser> userSet = userList.stream().filter(user -> user.getId().equals(userId)).collect(Collectors.toSet());
-                    for (ApprovalUser user : userSet) {
-                        if (user != null) {
-                            userNick = user.getName();
-                            userAvatar = user.getAvatar();
-                            passportId = user.getPassportId();
-                        }
-                    }
+                    ApprovalUser user = userList.stream().filter(approvalUser -> approvalUser.getId().equals(userId)).findFirst().orElseGet(ApprovalUser::new);
+                    userNick = user.getName();
+                    userAvatar = user.getAvatar();
+                    passportId = user.getPassportId();
                 }
                 UserVO vo = new UserVO();
                 vo.setMemberId(userId);
                 vo.setName(userNick);
                 vo.setProfile(userAvatar);
                 vo.setPassportId(passportId);
-                users.add(vo);
+                if (StringUtils.isNotBlank(vo.getName())) {
+                    users.add(vo);
+                }
             }
             return users;
         } else {
@@ -170,7 +172,7 @@ public class ProcessServiceImpl extends BaseServiceImpl<ProcessMapper, SetsProce
                 }
             }
         }
-        // 过滤重复的审批人（只过滤相邻的重复元素）
+        // 过滤重复的审批人（只过滤连续的重复元素）
         List<UserVO> distinctUserList = ApprovalUtils.distinctElements(list);
         if (CollectionUtils.isNotEmpty(distinctUserList)) {
             // 注入审批人
@@ -207,7 +209,9 @@ public class ProcessServiceImpl extends BaseServiceImpl<ProcessMapper, SetsProce
                             vo.setName(admin.getMemberName());
                             vo.setProfile(admin.getProfile());
                             vo.setPassportId(admin.getPassportId());
-                            userVOList.add(vo);
+                            if (StringUtils.isNotBlank(vo.getName())){
+                                userVOList.add(vo);
+                            }
                         }
                     }
                 }

@@ -317,7 +317,10 @@ public class ConditionServiceImpl extends BaseServiceImpl<ConditionMapper, SetsC
                         vo.setName(userNick);
                         vo.setPassportId(passportId);
                         vo.setProfile(userAvatar);
-                        return userVOList.add(vo);
+                        if (StringUtils.isNotBlank(vo.getName())){
+                            userVOList.add(vo);
+                        }
+                        return userVOList;
                     }).collect(Collectors.toList());
 
             conditionAndApproverVO.setApproverList(userVOList);
