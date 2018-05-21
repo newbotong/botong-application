@@ -400,6 +400,9 @@ public class ModelItemServiceImpl extends BaseServiceImpl<ModelItemMapper, Model
                 if (StringUtils.isBlank(option)) {
                     throw new MissingRequireFieldException("模型数据格式不正确 - 选项为空");
                 }
+                if (!ApprovalUtils.isContainChinese(option)){
+                    throw new MissingRequireFieldException("单选框类型必须为中文字符");
+                }
                 item.setOptValue(option);
             }
 

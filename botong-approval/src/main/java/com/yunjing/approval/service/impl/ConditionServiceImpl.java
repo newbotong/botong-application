@@ -79,7 +79,6 @@ public class ConditionServiceImpl extends BaseServiceImpl<ConditionMapper, SetsC
         if (conditionVOS == null || CollectionUtils.isEmpty(conditionVOS)) {
             return null;
         }
-        String conditionId = "";
         List<SetsCondition> list = this.selectList(Condition.create().where("model_id={0}", modelId).and("enabled=1").orderBy("sort", false));
         if (list != null && CollectionUtils.isNotEmpty(list)) {
             for (SetsCondition condition : list) {
@@ -87,6 +86,7 @@ public class ConditionServiceImpl extends BaseServiceImpl<ConditionMapper, SetsC
                 if (cdn.contains("|")) {
                     String[] t = cdn.split("\\|");
                     boolean flag1 = false;
+                    boolean flag2 = false;
                     for (int i = 0; i < t.length; i++) {
                         for (ConditionVO conditionVO : conditionVOS) {
                             String[] temp = t[i].split(" ");
@@ -96,21 +96,21 @@ public class ConditionServiceImpl extends BaseServiceImpl<ConditionMapper, SetsC
                                     flag1 = true;
                                 }
                             } else if (!ApprovalUtils.isContainChinese(t[i]) && ApproConstants.NUMBER_TYPE_2 == conditionVO.getType()) {
-                                flag1 = judgeDay(temp, conditionVO);
+                                flag2 = judgeDay(temp, conditionVO);
                             }
                         }
                     }
-                    if (flag1) {
+                    if (flag1 && flag2) {
                         return condition.getId();
                     }
                 } else {
                     String[] temp = cdn.split(" ");
                     for (ConditionVO conditionVO : conditionVOS) {
-                        if (ApproConstants.RADIO_TYPE_3 == condition.getType() && ApproConstants.RADIO_TYPE_3 == conditionVO.getType()) {
+                        if (ApprovalUtils.isContainChinese(cdn) && ApproConstants.RADIO_TYPE_3 == conditionVO.getType()) {
                             if (StringUtils.isNotBlank(temp[2]) && temp[2].contains(conditionVO.getValue())) {
                                 return condition.getId();
                             }
-                        } else if (ApproConstants.NUMBER_TYPE_2 == condition.getType() && ApproConstants.NUMBER_TYPE_2 == conditionVO.getType()) {
+                        } else if (!ApprovalUtils.isContainChinese(cdn) && ApproConstants.NUMBER_TYPE_2 == conditionVO.getType()) {
                             boolean b = judgeDay(temp, conditionVO);
                             if (b) {
                                 return condition.getId();
@@ -118,13 +118,6 @@ public class ConditionServiceImpl extends BaseServiceImpl<ConditionMapper, SetsC
                         }
                     }
                 }
-                // 通过优先级匹配，优先级跟sort排序成正比，如果匹配上了就跳出，如果没有匹配上就进行下一次循序继续匹配
-                if (StringUtils.isBlank(conditionId)) {
-                    continue;
-                } else {
-                    break;
-                }
-
             }
         }
         return null;
@@ -141,12 +134,12 @@ public class ConditionServiceImpl extends BaseServiceImpl<ConditionMapper, SetsC
             String b1 = temp[3];
             switch (a1) {
                 case f1:
-                    if (a < Integer.parseInt(conditionVO.getValue())) {
+                    if (a < Float.parseFloat(conditionVO.getValue())) {
                         result1 = true;
                     }
                     break;
                 case f2:
-                    if (a <= Integer.parseInt(conditionVO.getValue())) {
+                    if (a <= Float.parseFloat(conditionVO.getValue())) {
                         result1 = true;
                     }
                     break;
@@ -155,12 +148,12 @@ public class ConditionServiceImpl extends BaseServiceImpl<ConditionMapper, SetsC
             }
             switch (b1) {
                 case f1:
-                    if (Integer.parseInt(conditionVO.getValue()) < b) {
+                    if (Float.parseFloat(conditionVO.getValue()) < b) {
                         result2 = true;
                     }
                     break;
                 case f2:
-                    if (Integer.parseInt(conditionVO.getValue()) <= b) {
+                    if (Float.parseFloat(conditionVO.getValue()) <= b) {
                         result2 = true;
                     }
                     break;
@@ -177,27 +170,27 @@ public class ConditionServiceImpl extends BaseServiceImpl<ConditionMapper, SetsC
             String a1 = temp[1];
             switch (a1) {
                 case f1:
-                    if (Integer.parseInt(conditionVO.getValue()) < a) {
+                    if (Float.parseFloat(conditionVO.getValue()) < a) {
                         result1 = true;
                     }
                     break;
                 case f2:
-                    if (Integer.parseInt(conditionVO.getValue()) <= a) {
+                    if (Float.parseFloat(conditionVO.getValue()) <= a) {
                         result1 = true;
                     }
                     break;
                 case f3:
-                    if (Integer.parseInt(conditionVO.getValue()) > a) {
+                    if (Float.parseFloat(conditionVO.getValue()) > a) {
                         result1 = true;
                     }
                     break;
                 case f4:
-                    if (Integer.parseInt(conditionVO.getValue()) >= a) {
+                    if (Float.parseFloat(conditionVO.getValue()) >= a) {
                         result1 = true;
                     }
                     break;
                 case f5:
-                    if (Integer.parseInt(conditionVO.getValue()) == a) {
+                    if (Float.parseFloat(conditionVO.getValue()) == a) {
                         result1 = true;
                     }
                     break;
