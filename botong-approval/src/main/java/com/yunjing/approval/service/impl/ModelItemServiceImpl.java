@@ -167,8 +167,6 @@ public class ModelItemServiceImpl extends BaseServiceImpl<ModelItemMapper, Model
                 if (CollectionUtils.isNotEmpty(admins)){
                     isExistApprover = true;
                     users.addAll(admins);
-                }else {
-                    isExistApprover = false;
                 }
             } else {
                 String passportId = "";

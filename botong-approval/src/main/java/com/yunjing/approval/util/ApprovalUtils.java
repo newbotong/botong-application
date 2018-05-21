@@ -59,19 +59,20 @@ public class ApprovalUtils {
         }
         return resultList;
     }
-    public   static   <T> List<T>  removeDuplicate(List<T> sourceList)  {
-        if (sourceList == null || CollectionUtils.isEmpty(sourceList)) {
+    public   static   <T> List<T>  removeDuplicate(List<T> list)  {
+        if (list == null || CollectionUtils.isEmpty(list)) {
             return new ArrayList<>();
         }
-        Collections.reverse(sourceList);
-        for  ( int  i  =   0 ; i  <  sourceList.size()  -   1 ; i ++ )  {
-            for  ( int  j  =  sourceList.size()  -   1 ; j  >  i; j -- )  {
-                if  (sourceList.get(j).equals(sourceList.get(i)))  {
-                    sourceList.remove(j);
+        Collections.reverse(list);
+        for  ( int  i  =   0 ; i  <  list.size()  -   1 ; i ++ )  {
+            for  ( int  j  =  list.size()  -   1 ; j  >  i; j -- )  {
+                if  (list.get(j).equals(list.get(i)))  {
+                    list.remove(j);
                 }
             }
         }
-        return sourceList;
+        Collections.reverse(list);
+        return list;
     }
 
     /**

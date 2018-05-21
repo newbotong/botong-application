@@ -169,8 +169,6 @@ public class ProcessServiceImpl extends BaseServiceImpl<ProcessMapper, SetsProce
                     if (admins != null && CollectionUtils.isNotEmpty(admins)) {
                         list.addAll(admins);
                         isExistApprover = true;
-                    }else {
-                        isExistApprover = false;
                     }
                 } else {
                     list.add(user);
@@ -178,7 +176,7 @@ public class ProcessServiceImpl extends BaseServiceImpl<ProcessMapper, SetsProce
             }
         }
         // 同一个审批人在流程中出现多次时，仅保留最后一个
-        List<UserVO> distinctUserList = ApprovalUtils.removeDuplicate(users);
+        List<UserVO> distinctUserList = ApprovalUtils.removeDuplicate(list);
         if (CollectionUtils.isNotEmpty(distinctUserList)) {
             // 注入审批人
             result.setApprovers(distinctUserList);
