@@ -21,8 +21,6 @@ import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.*;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
 /**
@@ -87,28 +85,31 @@ public class ConditionServiceImpl extends BaseServiceImpl<ConditionMapper, SetsC
                     String[] t = cdn.split("\\|");
                     boolean flag1 = false;
                     boolean flag2 = false;
-                    boolean containChinese = false;
-                    boolean unContainChinese = false;
+                    int a = 0;
+                    int b = 0;
                     for (int i = 0; i < t.length; i++) {
                         for (ConditionVO conditionVO : conditionVOS) {
-                            containChinese = ApprovalUtils.isContainChinese(t[i]);
-                            unContainChinese = !ApprovalUtils.isContainChinese(t[i]);
                             String[] temp = t[i].split(" ");
                             if (ApprovalUtils.isContainChinese(t[i]) && ApproConstants.RADIO_TYPE_3 == conditionVO.getType() && temp[0].equals(conditionVO.getField())) {
                                 flag1 = false;
                                 if (StringUtils.isNotBlank(temp[2]) && temp[2].contains(conditionVO.getValue())) {
                                     flag1 = true;
+                                    a++;
                                 }
                             } else if (!ApprovalUtils.isContainChinese(t[i]) && ApproConstants.NUMBER_TYPE_2 == conditionVO.getType()) {
                                 flag2 = judgeDay(temp, conditionVO);
+                                b++;
                             }
                         }
                     }
+                     // 如果多个审批条件中既有单选框类型又有数字框类型
                     if (flag1 && flag2) {
                         return condition.getId();
-                    }else if (containChinese && flag1){
+                    } else if (a == t.length && flag1) {
+                        // 如果多个审批条件都是单选框类型
                         return condition.getId();
-                    }else if (unContainChinese && flag2){
+                    } else if (b == t.length && flag2) {
+                        // 如果多个审批条件都是数字框类型
                         return condition.getId();
                     }
                 } else {
@@ -255,7 +256,7 @@ public class ConditionServiceImpl extends BaseServiceImpl<ConditionMapper, SetsC
                 }
             }
             conditionVO.setField(field);
-            conditionVO.setValue(value.replaceAll(" ",","));
+            conditionVO.setValue(value.replaceAll(" ", ","));
             conditionVOList.add(conditionVO);
         }
 
