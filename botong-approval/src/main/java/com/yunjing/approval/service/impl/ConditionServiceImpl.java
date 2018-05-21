@@ -87,8 +87,12 @@ public class ConditionServiceImpl extends BaseServiceImpl<ConditionMapper, SetsC
                     String[] t = cdn.split("\\|");
                     boolean flag1 = false;
                     boolean flag2 = false;
+                    boolean containChinese = false;
+                    boolean unContainChinese = false;
                     for (int i = 0; i < t.length; i++) {
                         for (ConditionVO conditionVO : conditionVOS) {
+                            containChinese = ApprovalUtils.isContainChinese(t[i]);
+                            unContainChinese = !ApprovalUtils.isContainChinese(t[i]);
                             String[] temp = t[i].split(" ");
                             if (ApprovalUtils.isContainChinese(t[i]) && ApproConstants.RADIO_TYPE_3 == conditionVO.getType() && temp[0].equals(conditionVO.getField())) {
                                 flag1 = false;
@@ -101,6 +105,10 @@ public class ConditionServiceImpl extends BaseServiceImpl<ConditionMapper, SetsC
                         }
                     }
                     if (flag1 && flag2) {
+                        return condition.getId();
+                    }else if (containChinese && flag1){
+                        return condition.getId();
+                    }else if (unContainChinese && flag2){
                         return condition.getId();
                     }
                 } else {
