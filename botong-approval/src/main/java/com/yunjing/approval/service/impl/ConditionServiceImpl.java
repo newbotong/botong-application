@@ -98,7 +98,9 @@ public class ConditionServiceImpl extends BaseServiceImpl<ConditionMapper, SetsC
                                 }
                             } else if (!ApprovalUtils.isContainChinese(t[i]) && ApproConstants.NUMBER_TYPE_2 == conditionVO.getType()) {
                                 flag2 = judgeDay(temp, conditionVO);
-                                b++;
+                                if (flag2){
+                                    b++;
+                                }
                             }
                         }
                     }
