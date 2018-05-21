@@ -75,5 +75,5 @@ public interface IModelItemService extends IBaseService<ModelItem> {
      * @param deptId       部门id
      * @return List<UserVO>
      */
-    List<UserVO> getDefaultProcess(String companyId, String memberId, String modelId, String deptId);
+    ApproverVO getDefaultProcess(String companyId, String memberId, String modelId, String deptId);
 }
