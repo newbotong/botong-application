@@ -4,6 +4,7 @@ import com.yunjing.botong.log.entity.LogTemplateEntity;
 import lombok.Data;
 
 import java.util.List;
+import java.util.Set;
 
 /**
  * @author 王开亮
@@ -56,6 +57,15 @@ public class LogTemplateVo {
      * 是否是用户
      */
     private Boolean userDefined;
+
+    /**
+     * 接收人ID列表
+     */
+    private List<MemberVO> sendToUser;
+    /**
+     * 接收群组ID列表
+     */
+    private List<MemberVO> sendToGroup;
 
     /**
      * 字段列表
