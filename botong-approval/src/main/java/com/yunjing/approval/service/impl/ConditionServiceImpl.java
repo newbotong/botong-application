@@ -365,7 +365,6 @@ public class ConditionServiceImpl extends BaseServiceImpl<ConditionMapper, SetsC
         String cdn2 = "";
         String content1 = "";
         String content2 = "";
-        int type = 0;
         for (ConditionVO conditionVO : conditionVOList) {
             if (StringUtils.isNotBlank(conditionVO.getValue())) {
                 if (ApproConstants.RADIO_TYPE_3 == conditionVO.getType()) {
@@ -391,15 +390,12 @@ public class ConditionServiceImpl extends BaseServiceImpl<ConditionMapper, SetsC
         if (StringUtils.isBlank(cdn1) && StringUtils.isNotBlank(cdn2)) {
             condition = cdn2.substring(0, cdn1.length() - 1);
             content = content2.substring(0, content1.length() - 4);
-            type = ApproConstants.NUMBER_TYPE_2;
         } else if (StringUtils.isNotBlank(cdn1) && StringUtils.isBlank(cdn2)) {
             condition = cdn1.substring(0, cdn1.length() - 1);
             content = content1.substring(0, content1.length() - 4);
-            type = ApproConstants.RADIO_TYPE_3;
         } else if (StringUtils.isNotBlank(cdn1) && StringUtils.isNotBlank(cdn2)) {
             condition = cdn1.substring(0, cdn1.length() - 1) + "|" + cdn2.substring(0, cdn2.length() - 1);
             content = content1.substring(0, content1.length() - 4) + " 并且 " + content2.substring(0, content2.length() - 4);
-            type = ApproConstants.RADIO_AND_NUMBER_TYPE_23;
         }
         List<SetsCondition> list = this.selectList(Condition.create().where("model_id={0}", modelId));
         Integer maxSort = list.stream().map(SetsCondition::getSort).max(Integer::compareTo).orElse(0);
@@ -416,7 +412,6 @@ public class ConditionServiceImpl extends BaseServiceImpl<ConditionMapper, SetsC
             setsCondition.setModelId(modelId);
             setsCondition.setEnabled(1);
             setsCondition.setCdn(condition);
-            setsCondition.setType(type);
             setsCondition.setContent(content);
             setsCondition.setSort(maxSort + 1);
         }

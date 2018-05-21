@@ -47,12 +47,6 @@ public class SetsCondition extends BaseModel<SetsCondition> {
     private int sort;
 
     /**
-     * 模板子项的数据类型
-     */
-    @TableField("type")
-    private int type;
-
-    /**
      * 是否删除 0：未删除；1：已删除
      */
     @TableLogic
