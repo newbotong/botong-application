@@ -10,12 +10,12 @@ import com.yunjing.approval.model.vo.UserVO;
 import com.yunjing.approval.processor.okhttp.AppCenterService;
 import com.yunjing.approval.service.IApprovalUserService;
 import com.yunjing.approval.service.ICopyService;
-import com.yunjing.approval.util.ApproConstants;
+import com.yunjing.approval.service.IProcessService;
+import com.yunjing.approval.util.ApprovalUtils;
 import com.yunjing.message.share.org.OrgMemberMessage;
 import com.yunjing.mommon.global.exception.ParameterErrorException;
 import com.yunjing.mommon.utils.IDUtils;
 import org.apache.commons.collections.CollectionUtils;
-import org.apache.commons.collections.MapUtils;
 import org.apache.commons.lang.ArrayUtils;
 import org.apache.commons.lang.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -24,7 +24,6 @@ import org.springframework.stereotype.Service;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
-import java.util.stream.Collectors;
 
 /**
  * @author
@@ -35,11 +34,12 @@ public class CopyServiceImpl extends BaseServiceImpl<CopyMapper, Copy> implement
 
     @Autowired
     private CopyMapper copyMapper;
-
     @Autowired
     private IApprovalUserService approvalUserService;
     @Autowired
     private AppCenterService appCenterService;
+    @Autowired
+    private IProcessService processService;
 
     /**
      * 获取抄送人
@@ -63,15 +63,12 @@ public class CopyServiceImpl extends BaseServiceImpl<CopyMapper, Copy> implement
         if (users != null && !users.isEmpty()) {
             for (Copy copy : copyList) {
                 UserVO userVO = new UserVO();
-                List<ApprovalUser> userList = users.stream().filter(user -> String.valueOf(user.getId()).equals(copy.getUserId())).collect(Collectors.toList());
-                if (userList != null && !userList.isEmpty() && copy.getType() == 0) {
-                    ApprovalUser user = userList.get(0);
+                ApprovalUser user = users.stream().filter(approvalUser -> String.valueOf(approvalUser.getId()).equals(copy.getUserId())).findFirst().orElse(null);
+                if (user != null && copy.getType() == 0) {
                     userVO.setMemberId(user.getId());
                     userVO.setProfile(user.getAvatar());
                     userVO.setName(user.getName());
                     userVO.setPassportId(user.getPassportId());
-                } else {
-                    userVO.setMemberId(copy.getUserId());
                 }
                 userVOList.add(userVO);
             }
@@ -80,94 +77,43 @@ public class CopyServiceImpl extends BaseServiceImpl<CopyMapper, Copy> implement
     }
 
     @Override
-    public List<UserVO> getCopy(String companyId, String memberId, String modelId) {
+    public List<UserVO> getCopy(String companyId, String memberId, String modelId, String deptId) {
         List<Copy> copyList = this.selectList(Condition.create().where("model_id={0}", modelId).orderBy("sort", true));
         String[] deptIds = approvalUserService.selectById(memberId).getDeptId().split(",");
         Map<String, List<OrgMemberMessage>> deptManager = appCenterService.findDeptManager(companyId, memberId);
-        List<ApprovalUser> userList = new ArrayList<>();
+        List<ApprovalUser> userList = approvalUserService.selectList(Condition.EMPTY);
         List<UserVO> userVOList = new ArrayList<>();
         if (copyList != null && !copyList.isEmpty()) {
             for (Copy copy : copyList) {
+                // 抄送人为个人时 0：个人，1：主管
                 if (copy.getType() == 0) {
-                    ApprovalUser user = approvalUserService.selectById(copy.getUserId());
-                    if (user != null && selectList(userList, user.getId())) {
-                        userList.add(user);
+                    ApprovalUser user = userList.stream()
+                            .filter(approvalUser -> approvalUser.getId().equals(copy.getUserId()))
+                            .findFirst().orElseGet(ApprovalUser::new);
+                    UserVO userVO = new UserVO();
+                    userVO.setMemberId(user.getId());
+                    userVO.setProfile(user.getAvatar());
+                    userVO.setName(user.getName());
+                    userVO.setPassportId(user.getPassportId());
+                    if (StringUtils.isNotBlank(userVO.getName())) {
+                        userVOList.add(userVO);
                     }
                 } else {
-                    // 查询成员所在部门
-                    for (String deptId : deptIds) {
-                        String[] erids = copy.getUserId().split("_");
-                        List<UserVO> admin = getAdmin(deptId, Integer.parseInt(erids[2]), deptManager);
-                        if (admin != null && CollectionUtils.isNotEmpty(admin)) {
-                            userVOList.addAll(admin);
-                        }
+                    String[] temp = copy.getUserId().split("_");
+                    int num = Integer.parseInt(temp[2]);
+                    if (StringUtils.isBlank(deptId)) {
+                        deptId = deptIds[0];
+                    }
+                    List<UserVO> admin = processService.getAdmins(companyId, deptId, num, deptManager);
+                    if (admin != null && CollectionUtils.isNotEmpty(admin)) {
+                        userVOList.addAll(admin);
                     }
                 }
             }
         }
-        //处理用户头像
-        for (ApprovalUser user : userList) {
-            UserVO uservo = new UserVO();
-            uservo.setMemberId(user.getId());
-            uservo.setName(user.getName());
-            if (user.getAvatar() != null && !"".equals(user.getAvatar())) {
-                uservo.setProfile(user.getAvatar());
-            } else {
-                uservo.setColor(user.getColor() != null ? user.getColor() : ApproConstants.DEFAULT_COLOR);
-            }
-            userVOList.add(uservo);
-        }
-        // 去重
-        List<UserVO> distinctUserList = userVOList.stream().distinct().collect(Collectors.toList());
-        return distinctUserList;
+        // 同一个审批人在流程中出现多次时，仅保留最后一个
+        return ApprovalUtils.removeDuplicate(userVOList);
     }
-
-    /**
-     * 判断list是否存在ID
-     */
-    public boolean selectList(List<ApprovalUser> list, String id) {
-        for (ApprovalUser user : list) {
-            if (user.getId().equals(id)) {
-                return false;
-            }
-        }
-        return true;
-    }
-
-    /**
-     * 递归查找部门主管
-     **/
-    public List<UserVO> getAdmin(String deptId, int num, Map<String, List<OrgMemberMessage>> deptManager) {
-        List<UserVO> userVOList = new ArrayList<>();
-        if (deptManager != null && MapUtils.isNotEmpty(deptManager)) {
-            deptManager.forEach((s, orgMemberMessages) -> {
-                if (s.equals(deptId)) {
-                    int nums = num - 1;
-                    if (nums == 0) {
-                        for (OrgMemberMessage admin : orgMemberMessages) {
-                            if (admin != null) {
-                                UserVO vo = new UserVO();
-                                vo.setName(admin.getMemberName());
-                                vo.setProfile(admin.getProfile());
-                                vo.setMemberId(admin.getMemberId());
-                                vo.setPassportId(admin.getPassportId());
-                                userVOList.add(vo);
-                            }
-                        }
-                    } else {
-                        if (deptId != null) {
-                            List<UserVO> admin = getAdmin(deptId, num, deptManager);
-                            if (admin != null && CollectionUtils.isNotEmpty(admin)) {
-                                userVOList.addAll(admin);
-                            }
-                        }
-                    }
-                }
-            });
-        }
-        return userVOList;
-    }
-
 
     /**
      * 保存抄送人

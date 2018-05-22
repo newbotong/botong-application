@@ -6,6 +6,9 @@ import com.yunjing.approval.model.entity.ModelItem;
 import com.yunjing.approval.model.vo.ApproverVO;
 import com.yunjing.approval.model.vo.ClientModelItemVO;
 import com.yunjing.approval.model.vo.ModelVO;
+import com.yunjing.approval.model.vo.UserVO;
+
+import java.util.List;
 
 /**
  * @author 刘小鹏
@@ -17,12 +20,12 @@ public interface IModelItemService extends IBaseService<ModelItem> {
      * 获取模型
      *
      * @param companyId 公司id
-     * @param modelId 模型主键
-     * @param memberId 成员id
+     * @param modelId   模型主键
+     * @param memberId  成员id
      * @return 模型视图
      * @throws Exception 异常
      */
-    ClientModelItemVO getModelItem(String companyId,String modelId,String memberId) throws Exception;
+    ClientModelItemVO getModelItem(String companyId, String modelId, String memberId) throws Exception;
 
     /**
      * 获取模型
@@ -55,10 +58,22 @@ public interface IModelItemService extends IBaseService<ModelItem> {
 
     /**
      * 客户端-获取默认审批人和抄送人
-     * @param companyId
-     * @param modelId
-     * @param memberId
-     * @return
+     *
+     * @param companyId 公司id
+     * @param modelId   模型id
+     * @param memberId  成员id
+     * @return ApproverVO
      */
     ApproverVO getDefaultApproverAndCopy(String companyId, String modelId, String memberId);
+
+    /**
+     * 客户端-获取默认审批人
+     *
+     * @param companyId    公司id
+     * @param memberId     成员id
+     * @param modelId      模型id
+     * @param deptId       部门id
+     * @return List<UserVO>
+     */
+    ApproverVO getDefaultProcess(String companyId, String memberId, String modelId, String deptId);
 }

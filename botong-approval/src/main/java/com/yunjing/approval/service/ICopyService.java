@@ -25,13 +25,13 @@ public interface ICopyService extends IBaseService<Copy> {
     /**
      * 客户端获取抄送人
      *
-     * @param companyId 公司主键
-     * @param memberId  成员主键
-     * @param modelId   模型编号
+     * @param companyId 公司id
+     * @param memberId  成员id
+     * @param modelId   模型id
+     * @param deptId    部门id
      * @return List<UserVO>
-     * @throws Exception 抛异常
      */
-    List<UserVO> getCopy(String companyId, String memberId, String modelId);
+    List<UserVO> getCopy(String companyId, String memberId, String modelId, String deptId);
 
     /**
      * 保存抄送人

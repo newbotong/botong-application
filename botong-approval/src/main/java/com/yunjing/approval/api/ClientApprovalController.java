@@ -154,7 +154,7 @@ public class ClientApprovalController extends BaseController {
      */
     @PostMapping("/get-approver")
     public ResponseEntityWrapper getApprovalMember(@RequestParam("companyId") String companyId, @RequestParam("memberId") String memberId,
-                                                   @RequestParam("modelId") String modelId, @RequestParam(value = "deptId", required = false) String deptId,
+                                                   @RequestParam("modelId") String modelId, @RequestParam(value = "departId", required = false) String deptId,
                                                    @RequestParam(value = "judge", required = false) String judge) throws Exception {
         return success(processService.getApprover(companyId, memberId, modelId, deptId, judge));
     }

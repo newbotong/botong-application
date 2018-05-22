@@ -27,4 +27,14 @@ public interface LogConstant {
      * 成员信息
      */
     String LOG_MEMBER_INFO = "botong:org:member";
+
+    /**
+     * 成员信息
+     */
+    String LOG_SEND_TO_USER = "botong:log:send-to:user:";
+
+    /**
+     * 成员信息
+     */
+    String LOG_SEND_TO_GROUP = "botong:log:send-to:group:";
 }

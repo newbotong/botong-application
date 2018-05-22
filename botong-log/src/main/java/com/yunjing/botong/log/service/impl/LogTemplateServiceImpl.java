@@ -3,6 +3,7 @@ package com.yunjing.botong.log.service.impl;
 import com.baomidou.mybatisplus.mapper.EntityWrapper;
 import com.baomidou.mybatisplus.toolkit.IdWorker;
 import com.baomidou.mybatisplus.toolkit.StringUtils;
+import com.yunjing.botong.log.cache.LogSendToRedisOperator;
 import com.yunjing.botong.log.constant.LogConstant;
 import com.yunjing.botong.log.entity.LogTemplateEntity;
 import com.yunjing.botong.log.entity.LogTemplateEnumEntity;
@@ -14,12 +15,11 @@ import com.yunjing.botong.log.mapper.LogTemplateFieldMapper;
 import com.yunjing.botong.log.mapper.LogTemplateMapper;
 import com.yunjing.botong.log.params.LogTemplateParam;
 import com.yunjing.botong.log.params.SearchParam;
+import com.yunjing.botong.log.processor.okhttp.AppCenterService;
 import com.yunjing.botong.log.service.LogTemplateService;
-import com.yunjing.botong.log.vo.LogTemplateEnumItemVo;
-import com.yunjing.botong.log.vo.LogTemplateFieldVo;
-import com.yunjing.botong.log.vo.LogTemplateItemVo;
-import com.yunjing.botong.log.vo.LogTemplateVo;
+import com.yunjing.botong.log.vo.*;
 import com.yunjing.mommon.global.exception.BaseRuntimeException;
+import com.yunjing.mommon.utils.BeanUtils;
 import com.yunjing.mommon.utils.DateUtil;
 import com.yunjing.mommon.wrapper.PageWrapper;
 import org.apache.commons.collections.CollectionUtils;
@@ -43,6 +43,12 @@ public class LogTemplateServiceImpl implements LogTemplateService {
 
     @Autowired
     private LogTemplateFieldMapper logTemplateFieldMapper;
+
+    @Autowired
+    AppCenterService appCenterService;
+
+    @Autowired
+    private LogSendToRedisOperator sendToRedisOperator;
 
     @Autowired
     private LogTemplateEnumMapper logTemplateEnumMapper;
@@ -172,6 +178,23 @@ public class LogTemplateServiceImpl implements LogTemplateService {
         }
 
         return result;
+    }
+
+    @Override
+    public LogTemplateVo queryLogTemplate(String id, String memberId) {
+        LogTemplateVo templateVo = queryLogTemplate(id);
+        if(templateVo != null && StringUtils.isNotEmpty(memberId)) {
+            Set<String> sendToUser = sendToRedisOperator.getToUser(memberId, id);
+            Set<String> sendToGroup = sendToRedisOperator.getToGroup(memberId, id);
+            if(CollectionUtils.isNotEmpty(sendToUser)) {
+                List<Member> memList = appCenterService.findSubLists(null, sendToUser.toArray(new String[sendToUser.size()]));
+                templateVo.setSendToUser(BeanUtils.mapList(memList, MemberVO.class));
+            }
+            if(CollectionUtils.isNotEmpty(sendToGroup)) {
+                //TODO 增加日志接收群组后，在此处补充获取群组信息，拼装至VO
+            }
+        }
+        return templateVo;
     }
 
     @Override

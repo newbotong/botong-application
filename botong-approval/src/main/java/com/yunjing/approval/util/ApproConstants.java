@@ -1,13 +1,9 @@
 package com.yunjing.approval.util;
 
-import com.yunjing.approval.service.IApprovalService;
-import org.springframework.beans.factory.annotation.Autowired;
-
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
-import java.util.stream.Collectors;
 
 /**
  * @author 刘小鹏
@@ -32,15 +28,6 @@ public class ApproConstants {
      * 不是系统默认模型
      */
     public static final int IS_SYSTEM_MODEL_0 = 0;
-    /**
-     * 不分条件设置审批
-     */
-    public static final int SET_TYPE_0 = 0;
-
-    /**
-     * 分条件设置审批
-     */
-    public static final int SET_TYPE_1 = 1;
 
     /**
      * 不设置
@@ -106,8 +93,4 @@ public class ApproConstants {
 
     public final static Integer BOTONG_ZERO_NUM = 0;
 
-    /**
-     * 23-同时有单选框和数字
-     */
-    public static final int RADIO_AND_NUMBER_TYPE_23 = 23;
 }

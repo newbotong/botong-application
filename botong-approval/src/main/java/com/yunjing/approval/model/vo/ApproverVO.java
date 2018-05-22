@@ -16,7 +16,7 @@ public class ApproverVO {
     /**
      * 条件主键
      */
-    private List<String> conditionId;
+    private String conditionId;
 
     /**
      * 部门名称
@@ -27,6 +27,11 @@ public class ApproverVO {
      * 部门主键
      */
     private String deptId;
+
+    /**
+     * 是否为管理端设置的审批人
+     */
+    private Boolean approverShow;
 
     private List<UserVO> approvers;
 

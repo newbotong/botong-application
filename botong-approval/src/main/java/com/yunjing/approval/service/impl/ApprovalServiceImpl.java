@@ -19,7 +19,7 @@ import com.yunjing.approval.param.DataParam;
 import com.yunjing.approval.processor.task.async.ApprovalPushTask;
 import com.yunjing.approval.service.*;
 import com.yunjing.approval.util.ApproConstants;
-import com.yunjing.approval.util.EmojiFilterUtils;
+import com.yunjing.approval.util.ApprovalUtils;
 import com.yunjing.mommon.enums.DateStyle;
 import com.yunjing.mommon.global.exception.DeleteMessageFailureException;
 import com.yunjing.mommon.global.exception.InsertMessageFailureException;
@@ -139,7 +139,7 @@ public class ApprovalServiceImpl extends BaseServiceImpl<ApprovalMapper, Approva
                     attr.setAttrName(name);
                     attr.setAttrType(type);
                     val = array.toJSONString();
-                    attr.setAttrValue(EmojiFilterUtils.filterEmoji(val));
+                    attr.setAttrValue(ApprovalUtils.filterEmoji(val));
                     attrSet.add(attr);
                 }
             } else if (type == ApproConstants.DETAILED_TYPE_7) {
@@ -182,7 +182,7 @@ public class ApprovalServiceImpl extends BaseServiceImpl<ApprovalMapper, Approva
                                 if (detailArray != null && !detailArray.isEmpty()) {
                                     detailValue = detailArray.toJSONString();
                                 }
-                                entity.setAttrValue(EmojiFilterUtils.filterEmoji(detailValue));
+                                entity.setAttrValue(ApprovalUtils.filterEmoji(detailValue));
                                 // 明细中类型是时间区间（开始时间，结束时间）的情况 values中存的是结束时间
                             } else if (detailType == ApproConstants.TIME_INTERVAL_TYPE_5) {
                                 detailValues = detail.getString("values");
@@ -199,7 +199,7 @@ public class ApprovalServiceImpl extends BaseServiceImpl<ApprovalMapper, Approva
                                     throw new ParameterErrorException("请输入小于9位的数字");
                                 }
                             } else {
-                                entity.setAttrValue(EmojiFilterUtils.filterEmoji(detailValue));
+                                entity.setAttrValue(ApprovalUtils.filterEmoji(detailValue));
                             }
                             entity.setAttrNum(num);
                             attrs.add(entity);
@@ -233,12 +233,12 @@ public class ApprovalServiceImpl extends BaseServiceImpl<ApprovalMapper, Approva
                         }
                     } else if (type == ApproConstants.NUMBER_TYPE_2) {
                         if (val.length() < 9) {
-                            attr.setAttrValue(EmojiFilterUtils.filterEmoji(val));
+                            attr.setAttrValue(ApprovalUtils.filterEmoji(val));
                         } else {
                             throw new ParameterErrorException("请输入小于9位的数字");
                         }
                     } else {
-                        attr.setAttrValue(EmojiFilterUtils.filterEmoji(val));
+                        attr.setAttrValue(ApprovalUtils.filterEmoji(val));
                     }
                     attrSet.add(attr);
                 }

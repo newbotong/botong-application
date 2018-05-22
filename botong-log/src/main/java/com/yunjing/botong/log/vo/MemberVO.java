@@ -1,6 +1,7 @@
 package com.yunjing.botong.log.vo;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
+import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.Data;
 import org.springframework.data.annotation.Id;
 
@@ -20,6 +21,7 @@ public class MemberVO implements Serializable {
     /**
      * id
      */
+    @JsonProperty(value = "memberId")
     private String id;
 
     /**
