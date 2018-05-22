@@ -138,7 +138,7 @@ public class ProcessServiceImpl extends BaseServiceImpl<ProcessMapper, SetsProce
     public ApproverVO getApprover(String companyId, String memberId, String modelId, String deptId, String judge) {
 
         // 管理端设置的主管审批人是否存在
-        boolean isExistApprover = false;
+        String isExistApprover = "";
         // 解析
         JSONArray jsonArray = JSON.parseArray(judge);
         Iterator<Object> it = jsonArray.iterator();
@@ -169,7 +169,9 @@ public class ProcessServiceImpl extends BaseServiceImpl<ProcessMapper, SetsProce
                     List<UserVO> admins = this.getAdmins(memberId, deptId, num, deptManager);
                     if (admins != null && CollectionUtils.isNotEmpty(admins)) {
                         list.addAll(admins);
-                        isExistApprover = true;
+                        isExistApprover = "true";
+                    }else {
+                        isExistApprover = "false";
                     }
                 } else {
                     if (StringUtils.isNotBlank(user.getName())) {
