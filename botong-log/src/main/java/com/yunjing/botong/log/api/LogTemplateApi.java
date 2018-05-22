@@ -54,8 +54,8 @@ public class LogTemplateApi extends BaseController {
     }
 
     @RequestMapping(value = "/query", method = RequestMethod.GET)
-    public ResponseEntityWrapper<LogTemplateVo> query(@RequestParam("id") String id) {
-        return this.success(this.logTemplateService.queryLogTemplate(id));
+    public ResponseEntityWrapper<LogTemplateVo> query(@RequestParam("id") String id, @RequestParam("memberId") String memberId) {
+        return this.success(this.logTemplateService.queryLogTemplate(id, memberId));
     }
 
     @RequestMapping(value = "/update", method = RequestMethod.POST)

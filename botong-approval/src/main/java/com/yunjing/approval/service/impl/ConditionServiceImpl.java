@@ -10,6 +10,7 @@ import com.yunjing.approval.model.entity.*;
 import com.yunjing.approval.model.vo.*;
 import com.yunjing.approval.service.*;
 import com.yunjing.approval.util.ApproConstants;
+import com.yunjing.approval.util.ApprovalUtils;
 import com.yunjing.mommon.global.exception.*;
 import com.yunjing.mommon.utils.IDUtils;
 import org.apache.commons.collections.CollectionUtils;
@@ -72,10 +73,10 @@ public class ConditionServiceImpl extends BaseServiceImpl<ConditionMapper, SetsC
 
     @Override
     public String getCondition(String modelId, List<ConditionVO> conditionVOS) {
+
         if (conditionVOS == null || CollectionUtils.isEmpty(conditionVOS)) {
             return null;
         }
-        String conditionId = "";
         List<SetsCondition> list = this.selectList(Condition.create().where("model_id={0}", modelId).and("enabled=1").orderBy("sort", false));
         if (list != null && CollectionUtils.isNotEmpty(list)) {
             for (SetsCondition condition : list) {
@@ -84,30 +85,43 @@ public class ConditionServiceImpl extends BaseServiceImpl<ConditionMapper, SetsC
                     String[] t = cdn.split("\\|");
                     boolean flag1 = false;
                     boolean flag2 = false;
+                    int a = 0;
+                    int b = 0;
                     for (int i = 0; i < t.length; i++) {
                         for (ConditionVO conditionVO : conditionVOS) {
                             String[] temp = t[i].split(" ");
-                            if (ApproConstants.RADIO_AND_NUMBER_TYPE_23 == condition.getType() && ApproConstants.RADIO_TYPE_3 == conditionVO.getType() && temp[0].equals(conditionVO.getField())) {
+                            if (ApprovalUtils.isContainChinese(t[i]) && ApproConstants.RADIO_TYPE_3 == conditionVO.getType() && temp[0].equals(conditionVO.getField())) {
                                 flag1 = false;
                                 if (StringUtils.isNotBlank(temp[2]) && temp[2].contains(conditionVO.getValue())) {
                                     flag1 = true;
+                                    a++;
                                 }
-                            } else if (ApproConstants.RADIO_AND_NUMBER_TYPE_23 == condition.getType() && ApproConstants.NUMBER_TYPE_2 == conditionVO.getType()) {
+                            } else if (!ApprovalUtils.isContainChinese(t[i]) && ApproConstants.NUMBER_TYPE_2 == conditionVO.getType()) {
                                 flag2 = judgeDay(temp, conditionVO);
+                                if (flag2){
+                                    b++;
+                                }
                             }
                         }
                     }
+                     // 如果多个审批条件中既有单选框类型又有数字框类型
                     if (flag1 && flag2) {
+                        return condition.getId();
+                    } else if (a == t.length && flag1) {
+                        // 如果多个审批条件都是单选框类型
+                        return condition.getId();
+                    } else if (b == t.length && flag2) {
+                        // 如果多个审批条件都是数字框类型
                         return condition.getId();
                     }
                 } else {
                     String[] temp = cdn.split(" ");
                     for (ConditionVO conditionVO : conditionVOS) {
-                        if (ApproConstants.RADIO_TYPE_3 == condition.getType() && ApproConstants.RADIO_TYPE_3 == conditionVO.getType()) {
+                        if (ApprovalUtils.isContainChinese(cdn) && ApproConstants.RADIO_TYPE_3 == conditionVO.getType()) {
                             if (StringUtils.isNotBlank(temp[2]) && temp[2].contains(conditionVO.getValue())) {
                                 return condition.getId();
                             }
-                        } else if (ApproConstants.NUMBER_TYPE_2 == condition.getType() && ApproConstants.NUMBER_TYPE_2 == conditionVO.getType()) {
+                        } else if (!ApprovalUtils.isContainChinese(cdn) && ApproConstants.NUMBER_TYPE_2 == conditionVO.getType()) {
                             boolean b = judgeDay(temp, conditionVO);
                             if (b) {
                                 return condition.getId();
@@ -115,13 +129,6 @@ public class ConditionServiceImpl extends BaseServiceImpl<ConditionMapper, SetsC
                         }
                     }
                 }
-                // 通过优先级匹配，优先级跟sort排序成正比，如果匹配上了就跳出，如果没有匹配上就进行下一次循序继续匹配
-                if (StringUtils.isBlank(conditionId)) {
-                    continue;
-                } else {
-                    break;
-                }
-
             }
         }
         return null;
@@ -138,12 +145,12 @@ public class ConditionServiceImpl extends BaseServiceImpl<ConditionMapper, SetsC
             String b1 = temp[3];
             switch (a1) {
                 case f1:
-                    if (a < Integer.parseInt(conditionVO.getValue())) {
+                    if (a < Float.parseFloat(conditionVO.getValue())) {
                         result1 = true;
                     }
                     break;
                 case f2:
-                    if (a <= Integer.parseInt(conditionVO.getValue())) {
+                    if (a <= Float.parseFloat(conditionVO.getValue())) {
                         result1 = true;
                     }
                     break;
@@ -152,12 +159,12 @@ public class ConditionServiceImpl extends BaseServiceImpl<ConditionMapper, SetsC
             }
             switch (b1) {
                 case f1:
-                    if (Integer.parseInt(conditionVO.getValue()) < b) {
+                    if (Float.parseFloat(conditionVO.getValue()) < b) {
                         result2 = true;
                     }
                     break;
                 case f2:
-                    if (Integer.parseInt(conditionVO.getValue()) <= b) {
+                    if (Float.parseFloat(conditionVO.getValue()) <= b) {
                         result2 = true;
                     }
                     break;
@@ -174,27 +181,27 @@ public class ConditionServiceImpl extends BaseServiceImpl<ConditionMapper, SetsC
             String a1 = temp[1];
             switch (a1) {
                 case f1:
-                    if (Integer.parseInt(conditionVO.getValue()) < a) {
+                    if (Float.parseFloat(conditionVO.getValue()) < a) {
                         result1 = true;
                     }
                     break;
                 case f2:
-                    if (Integer.parseInt(conditionVO.getValue()) <= a) {
+                    if (Float.parseFloat(conditionVO.getValue()) <= a) {
                         result1 = true;
                     }
                     break;
                 case f3:
-                    if (Integer.parseInt(conditionVO.getValue()) > a) {
+                    if (Float.parseFloat(conditionVO.getValue()) > a) {
                         result1 = true;
                     }
                     break;
                 case f4:
-                    if (Integer.parseInt(conditionVO.getValue()) >= a) {
+                    if (Float.parseFloat(conditionVO.getValue()) >= a) {
                         result1 = true;
                     }
                     break;
                 case f5:
-                    if (Integer.parseInt(conditionVO.getValue()) == a) {
+                    if (Float.parseFloat(conditionVO.getValue()) == a) {
                         result1 = true;
                     }
                     break;
@@ -231,29 +238,38 @@ public class ConditionServiceImpl extends BaseServiceImpl<ConditionMapper, SetsC
         List<ModelItem> list = modelItemService.selectList(Condition.create().where("model_id={0}", modelId)
                 .and("item_version={0}", version).in("data_type", dataType).orderBy("priority", true));
         SetsCondition setsCondition = this.selectById(conditionId);
-        String value = "值为空";
-        String dayNum = "天数为空";
-        int type = OptionalInt.of(setsCondition.getType()).orElse(0);
         String condition = Optional.ofNullable(setsCondition.getCdn()).orElse("");
-        if (ApproConstants.RADIO_TYPE_3 == type) {
-            value = condition.substring(condition.lastIndexOf(" "), condition.length()).trim();
-        } else if (ApproConstants.NUMBER_TYPE_2 == type) {
-            dayNum = condition;
-        } else if (type == ApproConstants.RADIO_AND_NUMBER_TYPE_23) {
-            String[] split = condition.split("\\|");
-            value = split[0].substring(split[0].lastIndexOf(" "), split[0].length()).trim();
-            dayNum = split[1];
+        String[] conditions = condition.split("\\|");
+        List<ConditionVO> conditionVOList = new ArrayList<>();
+        for (int i = 0; i < conditions.length; i++) {
+            String value = "";
+            String field = "";
+            ConditionVO conditionVO = new ConditionVO();
+            if (ApprovalUtils.isContainChinese(conditions[i])) {
+                value = conditions[i].substring(conditions[i].lastIndexOf(" "), conditions[i].length()).trim();
+                field = conditions[i].substring(0, conditions[i].indexOf(" "));
+            } else if (!ApprovalUtils.isContainChinese(conditions[i])) {
+                value = conditions[i];
+                String[] split = value.split(" ");
+                if (split.length > 3) {
+                    field = split[2];
+                } else {
+                    field = split[0];
+                }
+            }
+            conditionVO.setField(field);
+            conditionVO.setValue(value.replaceAll(" ", ","));
+            conditionVOList.add(conditionVO);
         }
+
         List<ModelItemVO> voList = new ArrayList<>();
         if (list != null && CollectionUtils.isNotEmpty(list)) {
             for (ModelItem item : list) {
                 ModelItemVO vo = new ModelItemVO(item);
-                vo.setModelItemId(item.getId());
-                if (item.getDataType() == ApproConstants.RADIO_TYPE_3) {
-                    vo.setValue(value);
-                } else if (item.getDataType() == ApproConstants.NUMBER_TYPE_2) {
-                    vo.setDayNum(dayNum);
-                }
+                ConditionVO conditionVO1 = conditionVOList.stream()
+                        .filter(conditionVO -> conditionVO.getField().equals(item.getField()))
+                        .findFirst().orElseGet(ConditionVO::new);
+                vo.setValue(conditionVO1.getValue());
                 voList.add(vo);
             }
         }
@@ -301,7 +317,10 @@ public class ConditionServiceImpl extends BaseServiceImpl<ConditionMapper, SetsC
                         vo.setName(userNick);
                         vo.setPassportId(passportId);
                         vo.setProfile(userAvatar);
-                        return userVOList.add(vo);
+                        if (StringUtils.isNotBlank(vo.getName())){
+                            userVOList.add(vo);
+                        }
+                        return userVOList;
                     }).collect(Collectors.toList());
 
             conditionAndApproverVO.setApproverList(userVOList);
@@ -360,21 +379,14 @@ public class ConditionServiceImpl extends BaseServiceImpl<ConditionMapper, SetsC
         String cdn2 = "";
         String content1 = "";
         String content2 = "";
-        int type = 0;
         for (ConditionVO conditionVO : conditionVOList) {
             if (StringUtils.isNotBlank(conditionVO.getValue())) {
                 if (ApproConstants.RADIO_TYPE_3 == conditionVO.getType()) {
                     cdn1 = new StringBuilder(cdn1) + (conditionVO.getField() + " = " + conditionVO.getValue()) + "|";
                     content1 = new StringBuilder(content1) + (conditionVO.getLabel() + "属于：" + conditionVO.getValue().replaceAll(",", "或")) + " 并且 ";
                 } else if (ApproConstants.NUMBER_TYPE_2 == conditionVO.getType()) {
-                    cdn2 = conditionVO.getValue();
-                    String[] split = cdn2.split(" ");
-                    if (split.length > 3) {
-                        Arrays.fill(split, 2, 3, conditionVO.getLabel());
-                    } else {
-                        Arrays.fill(split, 0, 1, conditionVO.getLabel());
-                    }
-                    content2 = StringUtils.join(Arrays.asList(split), " ");
+                    cdn2 = new StringBuilder(cdn2) + conditionVO.getValue() + "|";
+                    content2 = new StringBuilder(content2) + conditionVO.getValue().replaceAll(conditionVO.getField(), conditionVO.getLabel()) + " 并且 ";
                 }
 
             }
@@ -390,17 +402,14 @@ public class ConditionServiceImpl extends BaseServiceImpl<ConditionMapper, SetsC
         }
 
         if (StringUtils.isBlank(cdn1) && StringUtils.isNotBlank(cdn2)) {
-            condition = cdn2;
-            content = content2;
-            type = ApproConstants.NUMBER_TYPE_2;
+            condition = cdn2.substring(0, cdn2.length() - 1);
+            content = content2.substring(0, content2.length() - 4);
         } else if (StringUtils.isNotBlank(cdn1) && StringUtils.isBlank(cdn2)) {
             condition = cdn1.substring(0, cdn1.length() - 1);
             content = content1.substring(0, content1.length() - 4);
-            type = ApproConstants.RADIO_TYPE_3;
         } else if (StringUtils.isNotBlank(cdn1) && StringUtils.isNotBlank(cdn2)) {
-            condition = cdn1.substring(0, cdn1.length() - 1) + "|" + cdn2;
-            content = content1.substring(0, content1.length() - 4) + " 并且 " + content2;
-            type = ApproConstants.RADIO_AND_NUMBER_TYPE_23;
+            condition = cdn1.substring(0, cdn1.length() - 1) + "|" + cdn2.substring(0, cdn2.length() - 1);
+            content = content1.substring(0, content1.length() - 4) + " 并且 " + content2.substring(0, content2.length() - 4);
         }
         List<SetsCondition> list = this.selectList(Condition.create().where("model_id={0}", modelId));
         Integer maxSort = list.stream().map(SetsCondition::getSort).max(Integer::compareTo).orElse(0);
@@ -417,7 +426,6 @@ public class ConditionServiceImpl extends BaseServiceImpl<ConditionMapper, SetsC
             setsCondition.setModelId(modelId);
             setsCondition.setEnabled(1);
             setsCondition.setCdn(condition);
-            setsCondition.setType(type);
             setsCondition.setContent(content);
             setsCondition.setSort(maxSort + 1);
         }

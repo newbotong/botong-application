@@ -93,8 +93,4 @@ public class ApproConstants {
 
     public final static Integer BOTONG_ZERO_NUM = 0;
 
-    /**
-     * 23-同时有单选框和数字
-     */
-    public static final int RADIO_AND_NUMBER_TYPE_23 = 23;
 }

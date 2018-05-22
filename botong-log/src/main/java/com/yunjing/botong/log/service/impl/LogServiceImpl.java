@@ -3,6 +3,7 @@ package com.yunjing.botong.log.service.impl;
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
+import com.yunjing.botong.log.cache.LogSendToRedisOperator;
 import com.yunjing.botong.log.cache.MemberRedisOperator;
 import com.yunjing.botong.log.entity.LogDetail;
 import com.yunjing.botong.log.params.LogItemParam;
@@ -49,6 +50,9 @@ public class LogServiceImpl implements LogService {
 
     @Autowired
     private LogTemplateService logTemplateService;
+
+    @Autowired
+    private LogSendToRedisOperator sendToRedisOperator;
 
     @Autowired
     private MongoTemplate mongoTemplate;
@@ -100,7 +104,8 @@ public class LogServiceImpl implements LogService {
             passportIdArray[i] = passportIdList.get(i);
         }
         param.setAlias(passportIdArray);
-
+        sendToRedisOperator.putToUser(logParam.getMemberId(), logParam.getTemplateId(), logParam.getSendToUser());
+        sendToRedisOperator.putToGroup(logParam.getMemberId(), logParam.getTemplateId(), logParam.getSendToGroup());
 
         Map<String, String> map = new HashMap<>(2);
         map.put("subModuleName", "日报提醒");

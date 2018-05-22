@@ -3,10 +3,7 @@ package com.yunjing.approval.util;
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.lang.StringEscapeUtils;
 
-import java.util.ArrayList;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
+import java.util.*;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -19,6 +16,7 @@ public class ApprovalUtils {
     private static final Pattern EMOJI = Pattern.compile("[\ud83c\udc00-\ud83c\udfff]|[\ud83d\udc00-\ud83d\udfff]|[\u2600-\u27ff]",
             Pattern.UNICODE_CASE | Pattern.CASE_INSENSITIVE);
 
+    private static final Pattern P = Pattern.compile("[\u4e00-\u9fa5]");
     /**
      * 将emoji表情替换成*
      *
@@ -47,7 +45,7 @@ public class ApprovalUtils {
      * @return List<T>
      */
     public static <T> List<T> distinctElements(List<T> sourceList) {
-        if (sourceList != null || CollectionUtils.isEmpty(sourceList)) {
+        if (sourceList == null || CollectionUtils.isEmpty(sourceList)) {
             return new ArrayList<>();
         }
         List<T> resultList = new ArrayList<>();
@@ -60,6 +58,36 @@ public class ApprovalUtils {
             }
         }
         return resultList;
+    }
+    public   static   <T> List<T>  removeDuplicate(List<T> list)  {
+        if (list == null || CollectionUtils.isEmpty(list)) {
+            return new ArrayList<>();
+        }
+        Collections.reverse(list);
+        for  ( int  i  =   0 ; i  <  list.size()  -   1 ; i ++ )  {
+            for  ( int  j  =  list.size()  -   1 ; j  >  i; j -- )  {
+                if  (list.get(j).equals(list.get(i)))  {
+                    list.remove(j);
+                }
+            }
+        }
+        Collections.reverse(list);
+        return list;
+    }
+
+    /**
+     * 判断字符串中是否包含中文
+     *
+     * @param str 待校验字符串
+     * @return 是否为中文
+     * @warn 不能校验是否为中文标点符号
+     */
+    public static boolean isContainChinese(String str) {
+        Matcher m = P.matcher(str);
+        if (m.find()) {
+            return true;
+        }
+        return false;
     }
 
     public static void main(String[] arg) {
@@ -97,6 +125,9 @@ public class ApprovalUtils {
         list.add("BBBB");
         list.add("BBBB");
         List<String> strings = distinctElements(list);
-        System.out.println(strings);
+        Collections.reverse(list);
+        System.out.println(list);
+        List<String> list1 = removeDuplicate(list);
+        System.out.println(list1);
     }
 }

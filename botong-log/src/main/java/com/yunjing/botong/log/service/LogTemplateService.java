@@ -50,6 +50,15 @@ public interface LogTemplateService {
      */
     LogTemplateVo queryLogTemplate(String id);
 
+
+    /**
+     * 查询日志模板
+     * @param id
+     * @param memberId 成员编号
+     * @return
+     */
+    LogTemplateVo queryLogTemplate(String id, String memberId);
+
     /**
      * 修改日志模板
      * @param logTemplateParam

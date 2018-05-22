@@ -164,7 +164,13 @@ public class NoticeServiceImpl extends ServiceImpl<NoticeMapper, NoticeEntity> i
 
         //添加公告内容
         json = new JSONObject();
-        json.put("description", deleteAllHTMLTag(noticeEntity.getContent()));
+        final int size = 200;
+        String description = deleteAllHTMLTag(noticeEntity.getContent());
+        if(StringUtils.isNotBlank(description) && description.length() > size){
+            description = description.substring(0, size) + "...";
+        }
+
+        json.put("description", description);
         json.put("type", "2");
         array.add(json);
 

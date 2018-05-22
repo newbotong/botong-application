@@ -26,7 +26,10 @@ import org.apache.commons.lang.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Iterator;
+import java.util.List;
+import java.util.Map;
 import java.util.stream.Collectors;
 
 /**
@@ -85,21 +88,19 @@ public class ProcessServiceImpl extends BaseServiceImpl<ProcessMapper, SetsProce
                     userNick = "第" + temp[2] + "级主管";
 
                 } else {
-                    Set<ApprovalUser> userSet = userList.stream().filter(user -> user.getId().equals(userId)).collect(Collectors.toSet());
-                    for (ApprovalUser user : userSet) {
-                        if (user != null) {
-                            userNick = user.getName();
-                            userAvatar = user.getAvatar();
-                            passportId = user.getPassportId();
-                        }
-                    }
+                    ApprovalUser user = userList.stream().filter(approvalUser -> approvalUser.getId().equals(userId)).findFirst().orElseGet(ApprovalUser::new);
+                    userNick = user.getName();
+                    userAvatar = user.getAvatar();
+                    passportId = user.getPassportId();
                 }
                 UserVO vo = new UserVO();
                 vo.setMemberId(userId);
                 vo.setName(userNick);
                 vo.setProfile(userAvatar);
                 vo.setPassportId(passportId);
-                users.add(vo);
+                if (StringUtils.isNotBlank(vo.getName())) {
+                    users.add(vo);
+                }
             }
             return users;
         } else {
@@ -135,6 +136,8 @@ public class ProcessServiceImpl extends BaseServiceImpl<ProcessMapper, SetsProce
 
     @Override
     public ApproverVO getApprover(String companyId, String memberId, String modelId, String deptId, String judge) {
+        // 管理端设置的主管审批人是否存在
+        boolean isExistApprover = false;
         // 解析
         JSONArray jsonArray = JSON.parseArray(judge);
         Iterator<Object> it = jsonArray.iterator();
@@ -145,46 +148,52 @@ public class ProcessServiceImpl extends BaseServiceImpl<ProcessMapper, SetsProce
             conditionVOList.add(conditionVO);
         }
         ApproverVO result = new ApproverVO();
-        String conditionId = conditionService.getCondition(modelId, conditionVOList);
+
+        // 匹配管理端设置的审批条件
+        List<ConditionVO> collect = conditionVOList.stream().distinct().collect(Collectors.toList());
+        String conditionId = conditionService.getCondition(modelId, collect);
         result.setConditionId(conditionId);
+
         List<UserVO> users = processService.getProcess(modelId, conditionId);
         // 从应用中心获取部门主管
         Map<String, List<OrgMemberMessage>> deptManager = appCenterService.findDeptManager(companyId, memberId);
         List<UserVO> list = new ArrayList<>();
+
         if (users != null && users.size() > 0) {
             for (UserVO user : users) {
                 if (user.getMemberId().indexOf("admin_") != -1) {
                     String[] temp = user.getMemberId().split("_");
                     int num = Integer.parseInt(temp[2]);
                     // 根据部门主键和级数查询出该主管
-                    List<UserVO> admins = getAdmins(memberId, deptId, num, deptManager);
+                    List<UserVO> admins = this.getAdmins(memberId, deptId, num, deptManager);
                     if (admins != null && CollectionUtils.isNotEmpty(admins)) {
                         list.addAll(admins);
+                        isExistApprover = true;
                     }
                 } else {
                     list.add(user);
                 }
             }
         }
-        // 过滤重复的审批人（只过滤相邻的重复元素）
-        List<UserVO> distinctUserList = ApprovalUtils.distinctElements(list);
+        // 同一个审批人在流程中出现多次时，仅保留最后一个
+        List<UserVO> distinctUserList = ApprovalUtils.removeDuplicate(list);
         if (CollectionUtils.isNotEmpty(distinctUserList)) {
             // 注入审批人
             result.setApprovers(distinctUserList);
-            // 注入抄送人
-            result.setCopys(copyService.getCopy(companyId, memberId, modelId));
         } else {
-            // 如果没有按条件设置的审批人，则显示默认审批人和抄送人
-            ApproverVO approverVO = modelItemService.getDefaultApproverAndCopy(companyId, memberId, modelId);
-            result.setApprovers(approverVO.getApprovers());
-            result.setCopys(approverVO.getCopys());
+            // 如果没有按条件设置的审批人，则显示默认审批人
+             result = modelItemService.getDefaultProcess(companyId, memberId, modelId, deptId);
         }
+        // 注入抄送人
+        result.setCopys(copyService.get(modelId));
+        result.setApproverShow(isExistApprover);
         return result;
     }
 
     /**
      * 获取主管
      */
+    @Override
     public List<UserVO> getAdmins(String memberId, String deptId, int num, Map<String, List<OrgMemberMessage>> deptManager) {
         List<UserVO> userVOList = new ArrayList<>();
         if (deptManager != null && MapUtils.isNotEmpty(deptManager)) {
@@ -203,7 +212,9 @@ public class ProcessServiceImpl extends BaseServiceImpl<ProcessMapper, SetsProce
                             vo.setName(admin.getMemberName());
                             vo.setProfile(admin.getProfile());
                             vo.setPassportId(admin.getPassportId());
-                            userVOList.add(vo);
+                            if (StringUtils.isNotBlank(vo.getName())) {
+                                userVOList.add(vo);
+                            }
                         }
                     }
                 }

@@ -5,9 +5,11 @@ import com.common.mybatis.service.IBaseService;
 import com.yunjing.approval.model.entity.SetsProcess;
 import com.yunjing.approval.model.vo.ApproverVO;
 import com.yunjing.approval.model.vo.UserVO;
+import com.yunjing.message.share.org.OrgMemberMessage;
 import com.yunjing.mommon.global.exception.BaseException;
 
 import java.util.List;
+import java.util.Map;
 
 /**
  * @author 刘小鹏
@@ -74,8 +76,18 @@ public interface IProcessService extends IBaseService<SetsProcess> {
      * 管理端--获取默认审批人和抄送人
      *
      * @param modelId     模型Id
-     * @return
-     * @throws BaseException
+     * @return ApproverVO
      */
     ApproverVO getDefaultApprover(String modelId);
+
+    /**
+     * 获取部门主管
+     *
+     * @param memberId    成员id
+     * @param deptId      部门id
+     * @param num         主管级数
+     * @param deptManager 不同部门下的所有主管集合
+     * @return List<UserVO>
+     */
+    List<UserVO> getAdmins(String memberId, String deptId, int num, Map<String, List<OrgMemberMessage>> deptManager);
 }
