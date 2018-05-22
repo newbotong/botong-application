@@ -17,6 +17,8 @@ public class ApprovalUtils {
             Pattern.UNICODE_CASE | Pattern.CASE_INSENSITIVE);
 
     private static final Pattern P = Pattern.compile("[\u4e00-\u9fa5]");
+    private static final Pattern DAY_NUM = Pattern.compile("^[0-9]+(.[0-9]{1})?$");
+
     /**
      * 将emoji表情替换成*
      *
@@ -39,7 +41,7 @@ public class ApprovalUtils {
     }
 
     /**
-     * 仅去重List集合中相邻的元素
+     * 仅去重List集合中连续的元素
      *
      * @param sourceList 需要过滤的集合
      * @return List<T>
@@ -59,14 +61,21 @@ public class ApprovalUtils {
         }
         return resultList;
     }
-    public   static   <T> List<T>  removeDuplicate(List<T> list)  {
+
+    /**
+     * 过滤List集合中重复的且保留靠后的元素
+     *
+     * @param list 需要过滤的集合
+     * @return List<T>
+     */
+    public static <T> List<T> removeDuplicate(List<T> list) {
         if (list == null || CollectionUtils.isEmpty(list)) {
             return new ArrayList<>();
         }
         Collections.reverse(list);
-        for  ( int  i  =   0 ; i  <  list.size()  -   1 ; i ++ )  {
-            for  ( int  j  =  list.size()  -   1 ; j  >  i; j -- )  {
-                if  (list.get(j).equals(list.get(i)))  {
+        for (int i = 0; i < list.size() - 1; i++) {
+            for (int j = list.size() - 1; j > i; j--) {
+                if (list.get(j).equals(list.get(i))) {
                     list.remove(j);
                 }
             }
@@ -89,6 +98,16 @@ public class ApprovalUtils {
         }
         return false;
     }
+
+    public static boolean validateDayNum(String str) {
+        Matcher m = DAY_NUM.matcher(str);
+        if (m.matches()){
+            return true;
+        }else {
+            return false;
+        }
+    }
+
 
     public static void main(String[] arg) {
         try {
@@ -129,5 +148,8 @@ public class ApprovalUtils {
         System.out.println(list);
         List<String> list1 = removeDuplicate(list);
         System.out.println(list1);
+
+        /** 测试校验天数 */
+        System.out.println(validateDayNum("1.3"));
     }
 }

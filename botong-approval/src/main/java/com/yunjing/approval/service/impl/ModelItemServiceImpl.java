@@ -185,7 +185,9 @@ public class ModelItemServiceImpl extends BaseServiceImpl<ModelItemMapper, Model
                 vo.setName(userNick);
                 vo.setProfile(userAvatar);
                 vo.setPassportId(passportId);
-                users.add(vo);
+                if (StringUtils.isNotBlank(vo.getName())){
+                    users.add(vo);
+                }
             }
         }
         // 同一个审批人在流程中出现多次时，仅保留最后一个
