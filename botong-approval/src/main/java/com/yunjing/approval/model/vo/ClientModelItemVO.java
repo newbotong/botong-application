@@ -54,4 +54,9 @@ public class ClientModelItemVO {
      */
     private List<UserVO> copyerVOS;
 
+    /**
+     * 是否为管理端设置的审批人
+     */
+    private String approverShow;
+
 }
