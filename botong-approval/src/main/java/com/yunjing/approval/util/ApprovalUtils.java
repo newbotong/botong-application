@@ -144,10 +144,11 @@ public class ApprovalUtils {
         list.add("BBBB");
         list.add("BBBB");
         List<String> strings = distinctElements(list);
-        Collections.reverse(list);
         System.out.println(list);
+        System.out.println("连续出现时自动去重："+strings);
+
         List<String> list1 = removeDuplicate(list);
-        System.out.println(list1);
+        System.out.println("仅保留最后一个："+list1);
 
         /** 测试校验天数 */
         System.out.println(validateDayNum("1.3"));
