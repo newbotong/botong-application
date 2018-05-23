@@ -113,6 +113,7 @@ public class ModelItemServiceImpl extends BaseServiceImpl<ModelItemMapper, Model
         // 获取默认审批人和默认抄送人
         ApproverVO approverVO = this.getDefaultApproverAndCopy(companyId, memberId, modelId);
         clientModelItemVO.setApproverVOS(approverVO.getApprovers());
+        clientModelItemVO.setApproverShow(approverVO.getApproverShow());
         clientModelItemVO.setCopyerVOS(approverVO.getCopys());
 
         // 获取部门信息
@@ -147,7 +148,7 @@ public class ModelItemServiceImpl extends BaseServiceImpl<ModelItemMapper, Model
     public ApproverVO getDefaultProcess(String companyId, String memberId, String modelId, String deptId) {
         ApproverVO approverVO = new ApproverVO();
         // 管理端设置的主管审批人是否存在
-        boolean isExistApprover = false;
+        String isExistApprover = "";
         List<UserVO> users = new ArrayList<>();
         List<SetsProcess> list = processService.selectList(Condition.create().where("model_id={0}", modelId).and("(condition_id is null or condition_id='')").orderBy(true, "sort", true));
         List<ApprovalUser> userList = approvalUserService.selectList(Condition.create());
@@ -165,8 +166,10 @@ public class ModelItemServiceImpl extends BaseServiceImpl<ModelItemMapper, Model
                 // 根据部门主键和级数查询出该主管
                 List<UserVO> admins = processService.getAdmins(memberId, deptId, num, deptManager);
                 if (CollectionUtils.isNotEmpty(admins)){
-                    isExistApprover = true;
+                    isExistApprover = "true";
                     users.addAll(admins);
+                }else {
+                    isExistApprover = "false";
                 }
             } else {
                 String passportId = "";
@@ -185,7 +188,9 @@ public class ModelItemServiceImpl extends BaseServiceImpl<ModelItemMapper, Model
                 vo.setName(userNick);
                 vo.setProfile(userAvatar);
                 vo.setPassportId(passportId);
-                users.add(vo);
+                if (StringUtils.isNotBlank(vo.getName())){
+                    users.add(vo);
+                }
             }
         }
         // 同一个审批人在流程中出现多次时，仅保留最后一个

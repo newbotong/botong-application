@@ -136,8 +136,9 @@ public class ProcessServiceImpl extends BaseServiceImpl<ProcessMapper, SetsProce
 
     @Override
     public ApproverVO getApprover(String companyId, String memberId, String modelId, String deptId, String judge) {
+
         // 管理端设置的主管审批人是否存在
-        boolean isExistApprover = false;
+        String isExistApprover = "";
         // 解析
         JSONArray jsonArray = JSON.parseArray(judge);
         Iterator<Object> it = jsonArray.iterator();
@@ -168,10 +169,14 @@ public class ProcessServiceImpl extends BaseServiceImpl<ProcessMapper, SetsProce
                     List<UserVO> admins = this.getAdmins(memberId, deptId, num, deptManager);
                     if (admins != null && CollectionUtils.isNotEmpty(admins)) {
                         list.addAll(admins);
-                        isExistApprover = true;
+                        isExistApprover = "true";
+                    }else {
+                        isExistApprover = "false";
                     }
                 } else {
-                    list.add(user);
+                    if (StringUtils.isNotBlank(user.getName())) {
+                        list.add(user);
+                    }
                 }
             }
         }
@@ -182,7 +187,7 @@ public class ProcessServiceImpl extends BaseServiceImpl<ProcessMapper, SetsProce
             result.setApprovers(distinctUserList);
         } else {
             // 如果没有按条件设置的审批人，则显示默认审批人
-             result = modelItemService.getDefaultProcess(companyId, memberId, modelId, deptId);
+            result = modelItemService.getDefaultProcess(companyId, memberId, modelId, deptId);
         }
         // 注入抄送人
         result.setCopys(copyService.get(modelId));
