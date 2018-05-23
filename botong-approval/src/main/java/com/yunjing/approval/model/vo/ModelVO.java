@@ -93,6 +93,13 @@ public class ModelVO {
      */
     private List<ModelItemVO> items;
 
-
+    /**
+     * 需要必填的单选框或数字框模型子项
+     */
     private Set<ModelItem> itemVOSet;
+
+    /**
+     * 是否已设置审批人
+     */
+    private Boolean isSetApprover;
 }
