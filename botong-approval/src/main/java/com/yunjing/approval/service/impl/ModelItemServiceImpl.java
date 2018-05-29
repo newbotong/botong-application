@@ -118,7 +118,7 @@ public class ModelItemServiceImpl extends BaseServiceImpl<ModelItemMapper, Model
         clientModelItemVO.setApproverVOS(approverVO.getApprovers());
         clientModelItemVO.setApproverShow(approverVO.getApproverShow());
         clientModelItemVO.setCopyerVOS(approverVO.getCopys());
-        // 如果管理端为设置审批人 则获取上次提交审批时选择的审批人和抄送人
+        // 如果管理端未设置审批人 则获取上次提交审批时选择的审批人和抄送人
         clientModelItemVO.setLastApprovers(approverVO.getLastApprovers());
         if (CollectionUtils.isEmpty(approverVO.getCopys())) {
             clientModelItemVO.setLastCopys(approverVO.getLastCopys());
@@ -160,6 +160,7 @@ public class ModelItemServiceImpl extends BaseServiceImpl<ModelItemMapper, Model
         List<SetsProcess> list = processService.selectList(Condition.create().where("model_id={0}", modelId).and("(condition_id is null or condition_id='')").orderBy(true, "sort", true));
         List<ApprovalUser> userList = approvalUserService.selectList(Condition.create());
         Map<String, List<OrgMemberMessage>> deptManager = appCenterService.findDeptManager(companyId, memberId);
+        int index = 0;
         for (SetsProcess process : list) {
             String userId = process.getApprover();
             if (userId.indexOf("admin_") != -1) {
@@ -173,10 +174,10 @@ public class ModelItemServiceImpl extends BaseServiceImpl<ModelItemMapper, Model
                 // 根据部门主键和级数查询出该主管
                 List<UserVO> admins = processService.getAdmins(memberId, deptId, num, deptManager);
                 if (CollectionUtils.isNotEmpty(admins)) {
-                    isExistApprover = "true";
                     users.addAll(admins);
+                    index++;
                 } else {
-                    isExistApprover = "false";
+                    index = -1;
                 }
             } else {
                 String passportId = "";
@@ -197,8 +198,16 @@ public class ModelItemServiceImpl extends BaseServiceImpl<ModelItemMapper, Model
                 vo.setPassportId(passportId);
                 if (StringUtils.isNotBlank(vo.getName())) {
                     users.add(vo);
+                    index++;
+                } else {
+                    index = -1;
                 }
             }
+        }
+        if (index > 0) {
+            isExistApprover = "true";
+        } else if (index < 0) {
+            isExistApprover = "false";
         }
         // 同一个审批人在流程中出现多次时，仅保留最后一个
         List<UserVO> distinctUserList = ApprovalUtils.removeDuplicate(users);

@@ -161,6 +161,7 @@ public class ProcessServiceImpl extends BaseServiceImpl<ProcessMapper, SetsProce
         List<UserVO> list = new ArrayList<>();
 
         if (users != null && users.size() > 0) {
+            int index = 0;
             for (UserVO user : users) {
                 if (user.getMemberId().indexOf("admin_") != -1) {
                     String[] temp = user.getMemberId().split("_");
@@ -169,15 +170,23 @@ public class ProcessServiceImpl extends BaseServiceImpl<ProcessMapper, SetsProce
                     List<UserVO> admins = this.getAdmins(memberId, deptId, num, deptManager);
                     if (admins != null && CollectionUtils.isNotEmpty(admins)) {
                         list.addAll(admins);
-                        isExistApprover = "true";
+                        index++;
                     } else {
-                        isExistApprover = "false";
+                        index = -1;
                     }
                 } else {
                     if (StringUtils.isNotBlank(user.getName())) {
                         list.add(user);
+                        index++;
+                    }else {
+                        index = -1;
                     }
                 }
+            }
+            if (index > 0) {
+                isExistApprover = "true";
+            } else if (index < 0) {
+                isExistApprover = "false";
             }
         }
         // 同一个审批人在流程中出现多次时，仅保留最后一个
