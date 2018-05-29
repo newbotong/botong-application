@@ -184,8 +184,10 @@ public class ProcessServiceImpl extends BaseServiceImpl<ProcessMapper, SetsProce
                 }
             }
             if (index > 0) {
+                /* 当且仅当所有主管都解析出了审批人或者选定的成员才为"true" ，否则为"false" */
                 isExistApprover = "true";
             } else if (index < 0) {
+                /* 只要有部门没有解析出主管对应的审批人为"false" */
                 isExistApprover = "false";
             }
         }
