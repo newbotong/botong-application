@@ -120,7 +120,9 @@ public class ModelItemServiceImpl extends BaseServiceImpl<ModelItemMapper, Model
         clientModelItemVO.setCopyerVOS(approverVO.getCopys());
         // 如果管理端为设置审批人 则获取上次提交审批时选择的审批人和抄送人
         clientModelItemVO.setLastApprovers(approverVO.getLastApprovers());
-        clientModelItemVO.setLastCopys(approverVO.getLastCopys());
+        if (CollectionUtils.isEmpty(approverVO.getCopys())) {
+            clientModelItemVO.setLastCopys(approverVO.getLastCopys());
+        }
         // 获取部门信息
         ApprovalUser approvalUser = approvalUserService.selectById(memberId);
         List<DeptVO> deptVOList = new ArrayList<>();
@@ -366,7 +368,7 @@ public class ModelItemServiceImpl extends BaseServiceImpl<ModelItemMapper, Model
         // 记住上次提交审批时选择的审批人和抄送人
         if (StringUtils.isBlank(approverVO.getApproverShow()) && CollectionUtils.isEmpty(approverVO.getApprovers())) {
             approverVO.setLastApprovers(approvers);
-            approverVO.setLastCopys(copys);
+            approverVO.setLastCopys(CollectionUtils.isEmpty(approverVO.getCopys()) ? copys : null);
         }
         return approverVO;
     }
