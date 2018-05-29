@@ -36,4 +36,8 @@ public class ApproverVO {
     private List<UserVO> approvers;
 
     private List<UserVO> copys;
+
+    private List<UserVO> lastApprovers;
+
+    private List<UserVO> lastCopys;
 }
