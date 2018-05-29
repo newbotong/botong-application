@@ -152,5 +152,7 @@ public class ApprovalUtils {
 
         /** 测试校验天数 */
         System.out.println(validateDayNum("1.3"));
+        String s = "48afed8a755b44ed807378006906e783";
+        System.out.println(s.length());
     }
 }

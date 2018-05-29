@@ -28,10 +28,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.sql.Timestamp;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 import java.util.stream.Collectors;
 
 import static java.util.Comparator.comparing;
@@ -64,6 +61,12 @@ public class ModelItemServiceImpl extends BaseServiceImpl<ModelItemMapper, Model
     private ModelItemMapper modelItemMapper;
     @Autowired
     private IApprovalUserService approvalUserService;
+    @Autowired
+    private IApprovalService approvalService;
+    @Autowired
+    private IApprovalProcessService approvalProcessService;
+    @Autowired
+    private ICopysService copysService;
     @Autowired
     RedisApproval redisApproval;
 
@@ -111,7 +114,7 @@ public class ModelItemServiceImpl extends BaseServiceImpl<ModelItemMapper, Model
         ClientModelItemVO clientModelItemVO = new ClientModelItemVO(modelVO);
 
         // 获取默认审批人和默认抄送人
-        ApproverVO approverVO = this.getDefaultApproverAndCopy(companyId, memberId, modelId);
+        ApproverVO approverVO = this.getDefaultApproverAndCopy(companyId, memberId, modelId, null);
         clientModelItemVO.setApproverVOS(approverVO.getApprovers());
         clientModelItemVO.setApproverShow(approverVO.getApproverShow());
         clientModelItemVO.setCopyerVOS(approverVO.getCopys());
@@ -165,10 +168,10 @@ public class ModelItemServiceImpl extends BaseServiceImpl<ModelItemMapper, Model
                 }
                 // 根据部门主键和级数查询出该主管
                 List<UserVO> admins = processService.getAdmins(memberId, deptId, num, deptManager);
-                if (CollectionUtils.isNotEmpty(admins)){
+                if (CollectionUtils.isNotEmpty(admins)) {
                     isExistApprover = "true";
                     users.addAll(admins);
-                }else {
+                } else {
                     isExistApprover = "false";
                 }
             } else {
@@ -188,7 +191,7 @@ public class ModelItemServiceImpl extends BaseServiceImpl<ModelItemMapper, Model
                 vo.setName(userNick);
                 vo.setProfile(userAvatar);
                 vo.setPassportId(passportId);
-                if (StringUtils.isNotBlank(vo.getName())){
+                if (StringUtils.isNotBlank(vo.getName())) {
                     users.add(vo);
                 }
             }
@@ -336,13 +339,49 @@ public class ModelItemServiceImpl extends BaseServiceImpl<ModelItemMapper, Model
     }
 
     @Override
-    public ApproverVO getDefaultApproverAndCopy(String companyId, String memberId, String modelId) {
+    public ApproverVO getDefaultApproverAndCopy(String companyId, String memberId, String modelId, String deptId) {
+
+        List<Approval> approvalList = approvalService.selectList(Condition.create().where("user_id={0}", memberId).and("model_id={0}", modelId).orderBy("update_time", false));
+        // 获取上次提交的审批信息
+        Approval approval = Optional.ofNullable(approvalList).orElseGet(ArrayList::new).stream().findFirst().orElseGet(Approval::new);
+
+        // 获取上次提交审批时选择的审批人
+        List<ApprovalProcess> processList = approvalProcessService.selectList(Condition.create().where("approval_id={0}", approval.getId()).and("process_state != 3").orderBy("seq", true));
+        List<String> approverIds = Optional.ofNullable(processList).orElseGet(ArrayList::new).stream().map(ApprovalProcess::getUserId).collect(Collectors.toList());
+        List<UserVO> approvers = getUserVOS(companyId, approverIds);
+
+        // 获取上次提交审批时选择的抄送人
+        List<Copys> copysList = copysService.selectList(Condition.create().where("approval_id={0}", approval.getId()).orderBy("update_time", true));
+        List<String> copyIds = Optional.ofNullable(copysList).orElseGet(ArrayList::new).stream().map(Copys::getUserId).collect(Collectors.toList());
+        List<UserVO> copys = getUserVOS(companyId, copyIds);
+
         // 获取默认审批人
-        ApproverVO approverVO = this.getDefaultProcess(companyId, memberId, modelId, null);
+        ApproverVO approverVO = this.getDefaultProcess(companyId, memberId, modelId, deptId);
         // 获取默认抄送人
         List<UserVO> userVOList = copyService.get(modelId);
         approverVO.setCopys(userVOList);
+
+        // 记住上次提交审批时选择的审批人和抄送人
+        if (StringUtils.isBlank(approverVO.getApproverShow()) && CollectionUtils.isEmpty(approverVO.getApprovers())) {
+            approverVO.setApprovers(approvers);
+            approverVO.setCopys(copys);
+        }
         return approverVO;
+    }
+
+    private List<UserVO> getUserVOS(String companyId, List<String> userIdList) {
+        List<ApprovalUser> userList = approvalUserService.selectList(Condition.create().where("org_id={0}", companyId));
+        return userIdList.stream().map(userId -> {
+            UserVO userVO = new UserVO();
+            ApprovalUser user = Optional.ofNullable(userList).orElseGet(ArrayList::new).parallelStream()
+                    .filter(approvalUser -> approvalUser.getId().equals(userId))
+                    .findFirst().orElseGet(ApprovalUser::new);
+            userVO.setPassportId(user.getPassportId());
+            userVO.setName(user.getName());
+            userVO.setProfile(user.getAvatar());
+            userVO.setMemberId(user.getId());
+            return userVO;
+        }).distinct().collect(Collectors.toList());
     }
 
     /**

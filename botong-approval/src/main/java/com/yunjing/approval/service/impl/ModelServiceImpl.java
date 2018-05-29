@@ -67,6 +67,7 @@ public class ModelServiceImpl extends BaseServiceImpl<ModelMapper, ModelL> imple
                 // 没有必填的单选框或数字框标识为false
                 modelVO.setHaveRequired(false);
             }
+
         }
         List<ModelListVO> modelListVOList = new ArrayList<>();
         List<ModelCategory> list = modelCategoryService.selectList(Condition.create().where("org_id={0}", orgId));
@@ -92,7 +93,6 @@ public class ModelServiceImpl extends BaseServiceImpl<ModelMapper, ModelL> imple
                 modelListVOList.add(modelListVO);
             }
         }
-
         // 排序
         List<ModelListVO> sortedModelListVOList = modelListVOList.stream()
                 .sorted(comparingInt(ModelListVO::getSort).thenComparing(comparingLong(ModelListVO::getUpdateTime).reversed()))

@@ -170,7 +170,7 @@ public class ProcessServiceImpl extends BaseServiceImpl<ProcessMapper, SetsProce
                     if (admins != null && CollectionUtils.isNotEmpty(admins)) {
                         list.addAll(admins);
                         isExistApprover = "true";
-                    }else {
+                    } else {
                         isExistApprover = "false";
                     }
                 } else {
@@ -185,13 +185,13 @@ public class ProcessServiceImpl extends BaseServiceImpl<ProcessMapper, SetsProce
         if (CollectionUtils.isNotEmpty(distinctUserList)) {
             // 注入审批人
             result.setApprovers(distinctUserList);
+            // 注入抄送人
+            result.setCopys(copyService.get(modelId));
+            result.setApproverShow(isExistApprover);
         } else {
             // 如果没有按条件设置的审批人，则显示默认审批人
-            result = modelItemService.getDefaultProcess(companyId, memberId, modelId, deptId);
+            result = modelItemService.getDefaultApproverAndCopy(companyId, memberId, modelId, deptId);
         }
-        // 注入抄送人
-        result.setCopys(copyService.get(modelId));
-        result.setApproverShow(isExistApprover);
         return result;
     }
 
