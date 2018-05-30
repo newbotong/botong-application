@@ -354,20 +354,6 @@ public class ModelItemServiceImpl extends BaseServiceImpl<ModelItemMapper, Model
     @Override
     public ApproverVO getDefaultApproverAndCopy(String companyId, String memberId, String modelId, String deptId) {
 
-        List<Approval> approvalList = approvalService.selectList(Condition.create().where("user_id={0}", memberId).and("model_id={0}", modelId).orderBy("update_time", false));
-        // 获取上次提交的审批信息
-        Approval approval = Optional.ofNullable(approvalList).orElseGet(ArrayList::new).stream().findFirst().orElseGet(Approval::new);
-
-        // 获取上次提交审批时选择的审批人
-        List<ApprovalProcess> processList = approvalProcessService.selectList(Condition.create().where("approval_id={0}", approval.getId()).and("process_state != 3").orderBy("seq", true));
-        List<String> approverIds = Optional.ofNullable(processList).orElseGet(ArrayList::new).stream().map(ApprovalProcess::getUserId).collect(Collectors.toList());
-        List<UserVO> approvers = getUserVOS(companyId, approverIds);
-
-        // 获取上次提交审批时选择的抄送人
-        List<Copys> copysList = copysService.selectList(Condition.create().where("approval_id={0}", approval.getId()).orderBy("update_time", true));
-        List<String> copyIds = Optional.ofNullable(copysList).orElseGet(ArrayList::new).stream().map(Copys::getUserId).collect(Collectors.toList());
-        List<UserVO> copys = getUserVOS(companyId, copyIds);
-
         // 获取默认审批人
         ApproverVO approverVO = this.getDefaultProcess(companyId, memberId, modelId, deptId);
         // 获取默认抄送人
@@ -376,6 +362,20 @@ public class ModelItemServiceImpl extends BaseServiceImpl<ModelItemMapper, Model
 
         // 记住上次提交审批时选择的审批人和抄送人
         if (StringUtils.isBlank(approverVO.getApproverShow()) && CollectionUtils.isEmpty(approverVO.getApprovers())) {
+            List<Approval> approvalList = approvalService.selectList(Condition.create().where("user_id={0}", memberId).and("model_id={0}", modelId).orderBy("update_time", false));
+            // 获取上次提交的审批信息
+            Approval approval = Optional.ofNullable(approvalList).orElseGet(ArrayList::new).stream().findFirst().orElseGet(Approval::new);
+
+            // 获取上次提交审批时选择的审批人
+            List<ApprovalProcess> processList = approvalProcessService.selectList(Condition.create().where("approval_id={0}", approval.getId()).and("process_state != 3").orderBy("seq", true));
+            List<String> approverIds = Optional.ofNullable(processList).orElseGet(ArrayList::new).stream().map(ApprovalProcess::getUserId).collect(Collectors.toList());
+            List<UserVO> approvers = getUserVOS(companyId, approverIds);
+
+            // 获取上次提交审批时选择的抄送人
+            List<Copys> copysList = copysService.selectList(Condition.create().where("approval_id={0}", approval.getId()).orderBy("update_time", true));
+            List<String> copyIds = Optional.ofNullable(copysList).orElseGet(ArrayList::new).stream().map(Copys::getUserId).collect(Collectors.toList());
+            List<UserVO> copys = getUserVOS(companyId, copyIds);
+            // 注入审批人和抄送人
             approverVO.setLastApprovers(approvers);
             approverVO.setLastCopys(CollectionUtils.isEmpty(approverVO.getCopys()) ? copys : null);
         }
