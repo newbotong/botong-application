@@ -383,7 +383,7 @@ public class ModelItemServiceImpl extends BaseServiceImpl<ModelItemMapper, Model
     }
 
     private List<UserVO> getUserVOS(String companyId, List<String> userIdList) {
-        List<ApprovalUser> userList = approvalUserService.selectList(Condition.create().where("org_id={0}", companyId));
+        List<ApprovalUser> userList = approvalUserService.selectList(Condition.EMPTY);
         return userIdList.stream().map(userId -> {
             UserVO userVO = new UserVO();
             ApprovalUser user = Optional.ofNullable(userList).orElseGet(ArrayList::new).parallelStream()
