@@ -137,7 +137,7 @@ public class NoticeServiceImpl extends ServiceImpl<NoticeMapper, NoticeEntity> i
         noticeUserService.insertBatch(userInfoBodyList);
 
         //推送请求URL
-        String url = h5Address + "?" + "id=" + noticeEntity.getId();
+        String url = h5Address + "?" + "id=" + noticeEntity.getId() + "&userId=" + noticeEntity.getIssueUserId();
 
         //添加公告模块子标题
         Map<String, String> map = new HashMap<>(32);

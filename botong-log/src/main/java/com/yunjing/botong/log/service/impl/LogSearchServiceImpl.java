@@ -1,15 +1,8 @@
 package com.yunjing.botong.log.service.impl;
 
-import com.alibaba.druid.support.json.JSONUtils;
-import com.alibaba.fastjson.JSON;
-import com.alibaba.fastjson.JSONArray;
-import com.alibaba.fastjson.JSONObject;
-import com.alibaba.fastjson.TypeReference;
-import com.common.mongo.dao.Page;
 import com.common.mongo.util.BeanUtils;
 import com.common.mongo.util.PageWrapper;
 import com.common.redis.share.UserInfo;
-import com.netflix.discovery.converters.Auto;
 import com.yunjing.botong.log.cache.MemberRedisOperator;
 import com.yunjing.botong.log.constant.LogConstant;
 import com.yunjing.botong.log.dao.LogDetailDao;
@@ -18,28 +11,22 @@ import com.yunjing.botong.log.excel.BaseExModel;
 import com.yunjing.botong.log.excel.ExcelModel;
 import com.yunjing.botong.log.excel.LogExConsts;
 import com.yunjing.botong.log.excel.LogExModel;
-import com.yunjing.botong.log.mapper.LogTemplateFieldMapper;
 import com.yunjing.botong.log.params.ReceviedParam;
 import com.yunjing.botong.log.params.SearchParam;
 import com.yunjing.botong.log.processor.okhttp.AppCenterService;
 import com.yunjing.botong.log.service.ILogSearchService;
 import com.yunjing.botong.log.service.LogTemplateService;
 import com.yunjing.botong.log.vo.*;
-import com.yunjing.mommon.enums.DateStyle;
 import com.yunjing.mommon.constant.StatusCode;
+import com.yunjing.mommon.enums.DateStyle;
 import com.yunjing.mommon.global.exception.ParameterErrorException;
 import com.yunjing.mommon.utils.DateUtil;
-import com.yunjing.mommon.utils.ListUtils;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections.CollectionUtils;
-import org.apache.commons.lang3.ArrayUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.data.mongodb.core.query.Criteria;
-import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.stereotype.Service;
 
-import java.lang.reflect.Type;
 import java.util.*;
 import java.util.stream.Collectors;
 

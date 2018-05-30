@@ -33,7 +33,23 @@ public class ApproverVO {
      */
     private String approverShow;
 
+    /**
+     * 管理端设置的审批人
+     */
     private List<UserVO> approvers;
 
+    /**
+     * 管理端设置的抄送人
+     */
     private List<UserVO> copys;
+
+    /**
+     * 最后一次提交审批时选择的审批人
+     */
+    private List<UserVO> lastApprovers;
+
+    /**
+     * 最后一次提交审批时选择的抄送人
+     */
+    private List<UserVO> lastCopys;
 }

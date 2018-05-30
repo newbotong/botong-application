@@ -1,5 +1,6 @@
 package com.yunjing.botong.log.service.impl;
 
+import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 import com.aliyuncs.dysmsapi.model.v20170525.SendSmsResponse;
@@ -39,6 +40,9 @@ public class SMSServiceImpl implements ISMSService {
         if (!ValidateUtils.isPhone(phoneNumbers)) {
             throw new ParameterErrorException("电话号码参数集合中，存在非法号码");
         }
+
+        logger.info("发送短信输入参数：phoneNumbers" + JSON.toJSONString(phoneNumbers) +
+                " templateId:" + templateId + " signName:" + signName + " params：" + JSON.toJSONString(params));
 
         SendSmsResponse sendSmsResponse = null;
         try {
