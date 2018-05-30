@@ -202,6 +202,8 @@ public class ProcessServiceImpl extends BaseServiceImpl<ProcessMapper, SetsProce
         } else {
             // 如果没有按条件设置的审批人，则显示默认审批人
             result = modelItemService.getDefaultApproverAndCopy(companyId, memberId, modelId, deptId);
+            result.setLastApprovers(null);
+            result.setLastCopys(null);
         }
         return result;
     }
