@@ -161,6 +161,7 @@ public class ProcessServiceImpl extends BaseServiceImpl<ProcessMapper, SetsProce
         List<UserVO> list = new ArrayList<>();
 
         if (users != null && users.size() > 0) {
+            int index = 0;
             for (UserVO user : users) {
                 if (user.getMemberId().indexOf("admin_") != -1) {
                     String[] temp = user.getMemberId().split("_");
@@ -169,15 +170,25 @@ public class ProcessServiceImpl extends BaseServiceImpl<ProcessMapper, SetsProce
                     List<UserVO> admins = this.getAdmins(memberId, deptId, num, deptManager);
                     if (admins != null && CollectionUtils.isNotEmpty(admins)) {
                         list.addAll(admins);
-                        isExistApprover = "true";
-                    }else {
-                        isExistApprover = "false";
+                        index++;
+                    } else {
+                        index = -1;
                     }
                 } else {
                     if (StringUtils.isNotBlank(user.getName())) {
                         list.add(user);
+                        index++;
+                    }else {
+                        index = -1;
                     }
                 }
+            }
+            if (index > 0) {
+                /* 当且仅当所有主管都解析出了审批人或者选定的成员才为"true" ，否则为"false" */
+                isExistApprover = "true";
+            } else if (index < 0) {
+                /* 只要有部门没有解析出主管对应的审批人为"false" */
+                isExistApprover = "false";
             }
         }
         // 同一个审批人在流程中出现多次时，仅保留最后一个
@@ -185,13 +196,15 @@ public class ProcessServiceImpl extends BaseServiceImpl<ProcessMapper, SetsProce
         if (CollectionUtils.isNotEmpty(distinctUserList)) {
             // 注入审批人
             result.setApprovers(distinctUserList);
+            // 注入抄送人
+            result.setCopys(copyService.get(modelId));
+            result.setApproverShow(isExistApprover);
         } else {
             // 如果没有按条件设置的审批人，则显示默认审批人
-            result = modelItemService.getDefaultProcess(companyId, memberId, modelId, deptId);
+            result = modelItemService.getDefaultApproverAndCopy(companyId, memberId, modelId, deptId);
+            result.setLastApprovers(null);
+            result.setLastCopys(null);
         }
-        // 注入抄送人
-        result.setCopys(copyService.get(modelId));
-        result.setApproverShow(isExistApprover);
         return result;
     }
 

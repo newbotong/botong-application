@@ -1,20 +1,13 @@
 package com.yunjing.sign.service.impl;
 
-import com.alibaba.fastjson.JSONObject;
 import com.baomidou.mybatisplus.mapper.EntityWrapper;
 import com.baomidou.mybatisplus.plugins.Page;
 import com.baomidou.mybatisplus.service.impl.ServiceImpl;
-import com.common.redis.share.UserInfo;
 import com.yunjing.mommon.enums.DateStyle;
-import com.yunjing.mommon.constant.StatusCode;
-import com.yunjing.mommon.global.exception.ParameterErrorException;
-import com.yunjing.mommon.global.exception.UpdateMessageFailureException;
 import com.yunjing.mommon.utils.BeanUtils;
 import com.yunjing.mommon.utils.DateUtil;
 import com.yunjing.mommon.utils.IDUtils;
 import com.yunjing.mommon.wrapper.PageWrapper;
-import com.yunjing.mommon.wrapper.ResponseEntityWrapper;
-import com.yunjing.sign.beans.model.SignConfigModel;
 import com.yunjing.sign.beans.model.SignDetail;
 import com.yunjing.sign.beans.model.SignDetailImg;
 import com.yunjing.sign.beans.param.SignDetailParam;
@@ -29,20 +22,15 @@ import com.yunjing.sign.excel.BaseExModel;
 import com.yunjing.sign.excel.ExcelModel;
 import com.yunjing.sign.excel.SignExConsts;
 import com.yunjing.sign.excel.SignExModel;
-import com.yunjing.sign.processor.feign.UserRemoteService;
 import com.yunjing.sign.processor.okhttp.UserRemoteApiService;
 import com.yunjing.sign.service.ISignDetailImgService;
 import com.yunjing.sign.service.ISignDetailService;
 import lombok.extern.slf4j.Slf4j;
-import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import retrofit2.Call;
-import retrofit2.Response;
 
-import java.io.IOException;
 import java.util.*;
 
 /**

@@ -36,51 +36,6 @@ public class NoticeApi extends BaseController {
 
     @Autowired
     private NoticeService noticeService;
-    @Autowired
-    private DangService dangService;
-    @Autowired
-    private InformService informService;
-
-    @Autowired
-    private AuthorityService authorityService;
-
-//    @GetMapping
-//    public void aaa(){
-//        Call<ResponseEntityWrapper> call = authorityService.authority("be61789d315b11e89a1c0242ac110004",  "1111111");
-//        try {
-//            Response<ResponseEntityWrapper> execute = call.execute();
-//            ResponseEntityWrapper body = execute.body();
-//            log.info("code:{},message:{},data:{}", body.getStatusCode(), body.getStatusMessage(), body.getData());
-//        } catch (IOException e) {
-//            e.printStackTrace();
-//        }
-//    }
-//
-//    @PostMapping("/test-dang")
-//    public void dang(){
-//        DangParam dangParam = new DangParam();
-//        Call<ResponseEntityWrapper> call = dangService.sendDang(dangParam);
-//        try {
-//            Response<ResponseEntityWrapper> execute = call.execute();
-//            ResponseEntityWrapper body = execute.body();
-//            log.info("code:{},message:{},data:{}", body.getStatusCode(), body.getStatusMessage(), body.getData());
-//        } catch (IOException e) {
-//            e.printStackTrace();
-//        }
-//    }
-//
-//    @PostMapping("/test-push")
-//    public void push(){
-//        PushParam dangParam = new PushParam();
-//        Call<ResponseEntityWrapper> call = informService.pushAllTargetByUser(dangParam);
-//        try {
-//            Response<ResponseEntityWrapper> execute = call.execute();
-//            ResponseEntityWrapper body = execute.body();
-//            log.info("code:{},message:{},data:{}", body.getStatusCode(), body.getStatusMessage(), body.getData());
-//        } catch (IOException e) {
-//            e.printStackTrace();
-//        }
-//    }
 
     @Autowired
     private ExportNoticeService exportNoticeService;

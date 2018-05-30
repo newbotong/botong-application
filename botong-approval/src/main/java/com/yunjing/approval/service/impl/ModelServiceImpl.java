@@ -9,11 +9,12 @@ import com.yunjing.approval.dao.mapper.ModelMapper;
 import com.yunjing.approval.model.entity.ModelCategory;
 import com.yunjing.approval.model.entity.ModelItem;
 import com.yunjing.approval.model.entity.ModelL;
+import com.yunjing.approval.model.entity.SetsProcess;
 import com.yunjing.approval.model.vo.ModelListVO;
 import com.yunjing.approval.model.vo.ModelVO;
-import com.yunjing.approval.service.ICopyService;
 import com.yunjing.approval.service.IModelCategoryService;
 import com.yunjing.approval.service.IModelService;
+import com.yunjing.approval.service.IProcessService;
 import com.yunjing.approval.util.ApproConstants;
 import com.yunjing.mommon.global.exception.MessageNotExitException;
 import com.yunjing.mommon.global.exception.MissingRequireFieldException;
@@ -24,6 +25,9 @@ import org.springframework.stereotype.Service;
 
 import java.util.*;
 import java.util.stream.Collectors;
+
+import static java.util.Comparator.comparingInt;
+import static java.util.Comparator.comparingLong;
 
 
 /**
@@ -39,11 +43,15 @@ public class ModelServiceImpl extends BaseServiceImpl<ModelMapper, ModelL> imple
     private IModelCategoryService modelCategoryService;
     @Autowired
     private ModelItemMapper modelItemMapper;
+    @Autowired
+    private IProcessService processService;
 
     @Override
     public List<ModelListVO> findModelList(String orgId) {
         List<ModelItem> modelItems = modelItemMapper.selectAll(orgId);
         List<ModelVO> modelVOList = modelMapper.selectLists(orgId);
+        List<SetsProcess> setsProcessList = processService.selectList(Condition.EMPTY);
+        List<String> modelIds = setsProcessList.parallelStream().map(SetsProcess::getModelId).distinct().collect(Collectors.toList());
         for (ModelVO modelVO : modelVOList) {
             // 过滤属于某个审批模板的所有详情项
             List<ModelItem> items = modelItems.stream().filter(modelItem -> modelItem.getModelId().equals(modelVO.getModelId())).collect(Collectors.toList());
@@ -59,8 +67,8 @@ public class ModelServiceImpl extends BaseServiceImpl<ModelMapper, ModelL> imple
                 // 没有必填的单选框或数字框标识为false
                 modelVO.setHaveRequired(false);
             }
-        }
 
+        }
         List<ModelListVO> modelListVOList = new ArrayList<>();
         List<ModelCategory> list = modelCategoryService.selectList(Condition.create().where("org_id={0}", orgId));
         if (!list.isEmpty()) {
@@ -72,33 +80,24 @@ public class ModelServiceImpl extends BaseServiceImpl<ModelMapper, ModelL> imple
                 modelListVO.setUpdateTime(modelCategory.getUpdateTime());
                 if (modelCategory.getId() != null) {
                     List<ModelVO> modelVOS = modelVOList.stream().filter(modelVO1 -> modelCategory.getId().equals(modelVO1.getCategoryId())).collect(Collectors.toSet()).stream().collect(Collectors.toList());
-                    Collections.sort(modelVOS, (o1, o2) -> {
-                        if (o1.getSort() > o2.getSort()) {
-                            return 1;
-                        } else if (o1.getSort() < (o2.getSort())) {
-                            return -1;
-                        } else {
-                            return 0;
-                        }
-                    });
-                    modelListVO.setModelVOList(modelVOS);
-                    modelListVO.setModelCount(modelVOS.size());
+                    // 判断管理端是否已设置审批人
+                    List<ModelVO> sortedModelVOS = modelVOS.stream().sorted(comparingInt(ModelVO::getSort)).map(modelVO -> {
+                        boolean isMatch = modelIds.parallelStream().anyMatch(modelId -> modelId.equals(modelVO.getModelId()));
+                        modelVO.setIsSetApprover(isMatch);
+                        return modelVO;
+                    }).collect(Collectors.toList());
+                    modelListVO.setModelVOList(sortedModelVOS);
+                    modelListVO.setModelCount(sortedModelVOS.size());
+
                 }
                 modelListVOList.add(modelListVO);
             }
         }
-        Collections.sort(modelListVOList, (o1, o2) -> {
-            if (o1.getSort() > o2.getSort()) {
-                return 1;
-            } else if (o1.getSort().equals(o2.getSort()) && o1.getUpdateTime() < o2.getUpdateTime()) {
-                return 1;
-            } else if (o1.getSort().equals(o2.getSort())) {
-                return 0;
-            } else {
-                return -1;
-            }
-        });
-        return modelListVOList;
+        // 排序
+        List<ModelListVO> sortedModelListVOList = modelListVOList.stream()
+                .sorted(comparingInt(ModelListVO::getSort).thenComparing(comparingLong(ModelListVO::getUpdateTime).reversed()))
+                .collect(Collectors.toList());
+        return sortedModelListVOList;
     }
 
     @Override

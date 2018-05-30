@@ -45,14 +45,24 @@ public class ClientModelItemVO {
     private List<DeptVO> deptList;
 
     /**
-     * 审批人列表
+     * 管理端设置的默认审批人列表
      */
     private List<UserVO> approverVOS;
 
     /**
-     * 抄送人列表
+     * 管理端设置的默认抄送人列表
      */
     private List<UserVO> copyerVOS;
+
+    /**
+     * 最后一次提交审批时选择的审批人
+     */
+    private List<UserVO> lastApprovers;
+
+    /**
+     * 最后一次提交审批时选择的抄送人
+     */
+    private List<UserVO> lastCopys;
 
     /**
      * 是否为管理端设置的审批人

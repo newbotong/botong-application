@@ -5,7 +5,6 @@ import com.common.mongo.dao.impl.BaseMongoDaoImpl;
 import com.common.mongo.util.BeanUtils;
 import com.common.mongo.util.PageWrapper;
 import com.mongodb.BasicDBObject;
-import com.mongodb.DBObject;
 import com.mongodb.WriteResult;
 import com.yunjing.botong.log.constant.LogConstant;
 import com.yunjing.botong.log.entity.LogDetail;
